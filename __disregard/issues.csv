@@ -1,0 +1,36 @@
+title,file,labels,milestone
+Create repo scaffolding + branch protections + CODEOWNERS,issues/001-create-repo-scaffolding-branch-protections-codeowners.md,"ci-cd,docs,priority:P0,size:S",M1 Foundations in place
+Define MVP scope as an executable spec (docs/mvp.md),issues/002-define-mvp-scope-as-an-executable-spec-docs-mvp-md.md,"docs,priority:P0,size:S",M1 Foundations in place
+Set up Flutter CI: lint/format/tests on PR,issues/003-set-up-flutter-ci-lint-format-tests-on-pr.md,"ci-cd,mobile,priority:P0,size:M",M1 Foundations in place
+Set up build pipelines (Android + iOS) on tags,issues/004-set-up-build-pipelines-android-ios-on-tags.md,"ci-cd,release,mobile,priority:P1,size:M",M1 Foundations in place
+Define telemetry taxonomy + baseline events,issues/005-define-telemetry-taxonomy-baseline-events.md,"analytics,docs,priority:P1,size:S",M1 Foundations in place
+Wireframes for core MVP screens,issues/006-wireframes-for-core-mvp-screens.md,"ux,mvp,priority:P0,size:M",M1 Foundations in place
+Clickable prototype walkthrough + capture feedback (5 users),issues/007-clickable-prototype-walkthrough-capture-feedback-5-users.md,"ux,priority:P1,size:M",M1 Foundations in place
+Define notification UX + defaults,issues/008-define-notification-ux-defaults.md,"ux,mvp,priority:P0,size:S",M1 Foundations in place
+Define v1 data model (Item/Category/Location/Events),issues/009-define-v1-data-model-item-category-location-events.md,"backend,mobile,priority:P0,size:M",M1 Foundations in place
+"Flutter app skeleton (routing, theming, DI)",issues/010-flutter-app-skeleton-routing-theming-di.md,"mobile,mvp,priority:P0,size:M",M1 Foundations in place
+Local storage implementation with migrations,issues/011-local-storage-implementation-with-migrations.md,"mobile,mvp,priority:P0,size:L",M1 Foundations in place
+Expiry logic library (grouping + rules),issues/012-expiry-logic-library-grouping-rules.md,"mobile,mvp,priority:P0,size:M",M1 Foundations in place
+Local notifications service (schedule + reschedule),issues/013-local-notifications-service-schedule-reschedule.md,"mobile,mvp,priority:P0,size:L",M1 Foundations in place
+Feature flags framework (prepare for Pro),issues/014-feature-flags-framework-prepare-for-pro.md,"mobile,pro,priority:P1,size:S",M1 Foundations in place
+MVP: Add Item screen (manual entry),issues/015-mvp-add-item-screen-manual-entry.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Inventory list screen (search/filter),issues/016-mvp-inventory-list-screen-search-filter.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Expiring Soon screen (bucketed view),issues/017-mvp-expiring-soon-screen-bucketed-view.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Item detail screen + mark used/wasted,issues/018-mvp-item-detail-screen-mark-used-wasted.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Reminder preferences UI,issues/019-mvp-reminder-preferences-ui.md,"mobile,mvp,priority:P0,size:S",M2 MVP complete
+MVP: Notification scheduling integration,issues/020-mvp-notification-scheduling-integration.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Reminder interaction logging (local),issues/021-mvp-reminder-interaction-logging-local.md,"analytics,mobile,mvp,priority:P1,size:S",M2 MVP complete
+MVP: Shopping list UI (Next Shop),issues/022-mvp-shopping-list-ui-next-shop.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Convert purchased list items → inventory,issues/023-mvp-convert-purchased-list-items-inventory.md,"mobile,mvp,priority:P0,size:M",M2 MVP complete
+MVP: Offline-first verification suite,issues/024-mvp-offline-first-verification-suite.md,"qa,mobile,mvp,priority:P1,size:M",M2 MVP complete
+MVP: Data export + delete (privacy baseline),issues/025-mvp-data-export-delete-privacy-baseline.md,"security,mobile,mvp,priority:P1,size:M",M2 MVP complete
+MVP: Telemetry instrumentation for core funnel,issues/026-mvp-telemetry-instrumentation-for-core-funnel.md,"analytics,mobile,mvp,priority:P1,size:M",M2 MVP complete
+Beta: TestFlight internal setup + release notes flow,issues/027-beta-testflight-internal-setup-release-notes-flow.md,"release,ci-cd,priority:P1,size:M",M3 Beta release
+Beta: Google Play internal testing setup,issues/028-beta-google-play-internal-testing-setup.md,"release,ci-cd,priority:P1,size:M",M3 Beta release
+Beta: In-app feedback entry point (email/link + metadata),issues/029-beta-in-app-feedback-entry-point-email-link-metadata.md,"ux,mobile,priority:P1,size:S",M3 Beta release
+Beta: Crash reporting + basic performance monitoring,issues/030-beta-crash-reporting-basic-performance-monitoring.md,"analytics,mobile,priority:P1,size:M",M3 Beta release
+Beta: Basic metrics dashboard (optional),issues/031-beta-basic-metrics-dashboard-optional.md,"analytics,priority:P2,size:M",M3 Beta release
+"Launch: Brand assets pack (icon, screenshots, feature graphic)",issues/032-launch-brand-assets-pack-icon-screenshots-feature-graphic.md,"release,docs,priority:P1,size:M",M4 Public launch
+Launch: Store listing copy (iOS + Android),issues/033-launch-store-listing-copy-ios-android.md,"release,docs,priority:P1,size:S",M4 Public launch
+Launch: Privacy policy + terms (hosted) and in-app links,issues/034-launch-privacy-policy-terms-hosted-and-in-app-links.md,"security,release,priority:P0,size:M",M4 Public launch
+Launch: End-to-end release checklist,issues/035-launch-end-to-end-release-checklist.md,"release,docs,priority:P1,size:S",M4 Public launch
