@@ -1,5 +1,7 @@
 # ZeroSpoils GitHub Issues Pack
 
+This issue pack is meant only for initial planning and setup on GitHub
+
 This folder contains a Codex/Copilot-friendly backlog:
 - `issues/`   : Markdown issue bodies
 - `issues.csv`: Bulk creation manifest for `gh issue create`
