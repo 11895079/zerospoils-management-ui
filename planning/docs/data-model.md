@@ -168,8 +168,9 @@ ShoppingListItem ──converts to──→ Item
 When `ShoppingListItem.is_purchased = true`:
 1. Create `Item` with same name, category, quantity, unit
 2. Set `Item.purchase_date = ShoppingListItem.purchased_at`
-3. Log `Event` with `event_type = shopping_converted`
-4. Shopping list item remains for historical tracking
+3. If `ShoppingListItem.estimated_cost` is set, initialize `Item.cost = ShoppingListItem.estimated_cost`; otherwise leave `Item.cost = null` until the user confirms the actual purchase cost
+4. Log `Event` with `event_type = shopping_converted`
+5. Shopping list item remains for historical tracking
 
 ---
 
