@@ -270,19 +270,19 @@ GROUP BY category;
 ## Cost Tracking
 
 ### Purpose
-Track financial impact of food waste to motivate behavior change and calculate savings.
+Track financial impact of food waste to motivate behavior change and calculate value recovered from food that is actually used.
 
 ### Implementation Notes
 - **Optional Field:** `cost` is nullable (not all users track prices)
 - **Currency Agnostic:** Store as decimal; UI handles currency formatting based on locale
 - **Privacy:** Cost data stays local-only in MVP; Pro tier aggregates anonymously
 - **Receipt OCR:** Pro feature can extract costs from receipts (M6)
-- **Insights:** Show "Money Saved" vs "Money Wasted" in dashboard (see `planning/issues/490-pro-advanced-insights-dashboard-money-saved-items-saved-trends.md`)
+- **Insights:** Show "Money Utilized" vs "Money Wasted" in dashboard (M6/490)
 
 ### Calculation Examples
-- **Item consumed before expiry:** Cost → "Money Saved"
+- **Item consumed before expiry:** Cost → "Money Utilized"
 - **Item wasted:** Cost → "Money Wasted"
-- **Monthly savings:** Sum of consumed items' costs
+- **Monthly value utilized:** Sum of consumed items' costs
 - **Waste reduction ROI:** Compare month-over-month waste costs
 
 ---
