@@ -301,7 +301,7 @@ Track financial impact of food waste to motivate behavior change and calculate s
 
 - [x] All MVP entities defined (Item, ShoppingListItem, Event)
 - [x] Required fields for item management (name, category, location, quantity, expiry)
-- [x] Enums have ≥3 values (Category: 15, Location: 5, WasteReason: 7)
+- [x] Enums have ≥3 values (Category: 15, Location: 5, WasteReason: 7, Status: 4, EventType: 10)
 - [x] Migration strategy includes versioning approach
 - [x] Relationships documented (Item → Events)
 - [x] Indexes defined for performance
