@@ -277,7 +277,7 @@ Track financial impact of food waste to motivate behavior change and calculate s
 - **Currency Agnostic:** Store as decimal; UI handles currency formatting based on locale
 - **Privacy:** Cost data stays local-only in MVP; Pro tier aggregates anonymously
 - **Receipt OCR:** Pro feature can extract costs from receipts (M6)
-- **Insights:** Show "Money Saved" vs "Money Wasted" in dashboard (M6/490)
+- **Insights:** Show "Money Saved" vs "Money Wasted" in dashboard (see `planning/issues/490-pro-advanced-insights-dashboard-money-saved-items-saved-trends.md`)
 
 ### Calculation Examples
 - **Item consumed before expiry:** Cost → "Money Saved"
