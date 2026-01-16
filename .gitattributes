@@ -1,0 +1,26 @@
+* text=auto
+
+# Dart
+*.dart text eol=lf
+
+# Flutter
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.tar binary
+*.tar.gz binary
+
+# iOS
+*.pbxproj merge=union
+*.podspec text eol=lf

@@ -1,0 +1,20 @@
+# ZeroSpoils CODEOWNERS
+# GitHub automatically requests reviews from these owners for any PR that modifies files in the matching paths.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Planning and documentation
+planning/docs/ @bakintunde
+planning/milestones/ @bakintunde
+planning/issues/ @bakintunde
+
+# App implementation
+app/lib/ @bakintunde
+app/test/ @bakintunde
+
+# Repo root and infrastructure
+.github/ @bakintunde
+README.md @bakintunde
+pubspec.yaml @bakintunde
+
+# Default fallback
+* @bakintunde
