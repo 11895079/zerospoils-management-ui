@@ -1,0 +1,14 @@
+local_queue:
+  max_events: 10000       # Drop oldest events if queue exceeds this
+  retention_days: 30      # Auto-delete events older than 30 days
+
+remote_retention:
+  default_days: 90
+  wasted_events_days: 365  # Keep waste data longer for insights
+
+sync:
+  batch_size: 100         # Events per batch upload
+  max_retries: 5
+  initial_backoff_ms: 1000
+  max_backoff_ms: 300000  # 5 minutes
+  timeout_ms: 30000

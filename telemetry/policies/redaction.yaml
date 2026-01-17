@@ -1,0 +1,24 @@
+# Redaction Rules
+# Specify keys to remove or mask before upload
+
+blocked_keys:
+  # Never upload these
+  - "password"
+  - "auth_token"
+  - "credit_card"
+  - "ssn"
+  - "phone"
+  - "email_address"
+  - "ip_address"
+  - "latitude"
+  - "longitude"
+
+masked_keys:
+  # Redact these (show first 2 chars only)
+  - "user_id"
+  - "household_id"
+
+descriptions: |
+  Blocked keys are removed entirely.
+  Masked keys are truncated (first 2 chars + **masked**).
+  This runs pre-enqueue for defense-in-depth.

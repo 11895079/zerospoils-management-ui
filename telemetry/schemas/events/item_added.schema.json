@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "item_added Event",
+  "description": "User adds item to inventory (manual entry or from shopping list)",
+  "type": "object",
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "enum": ["item_added"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "app_version": {"type": "string"},
+    "platform": {"type": "string", "enum": ["ios", "android"]},
+    "session_id": {"type": "string", "format": "uuid"},
+    "properties": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["manual", "shopping_list", "ocr"],
+          "description": "How item was added"
+        },
+        "category": {
+          "type": "string",
+          "description": "Item category (from enum)"
+        },
+        "has_expiry_date": {
+          "type": "boolean",
+          "description": "Whether expiry date was provided"
+        }
+      }
+    }
+  }
+}

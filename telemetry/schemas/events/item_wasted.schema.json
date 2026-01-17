@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "item_wasted Event",
+  "description": "User marks item as wasted/discarded",
+  "type": "object",
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "enum": ["item_wasted"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "app_version": {"type": "string"},
+    "platform": {"type": "string", "enum": ["ios", "android"]},
+    "session_id": {"type": "string", "format": "uuid"},
+    "properties": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Item category"
+        },
+        "days_until_expiry": {
+          "type": "integer",
+          "description": "Days from expiry (-1 = expired, 0 = today, 5 = 5 days)"
+        },
+        "waste_reason": {
+          "type": "string",
+          "enum": ["expired", "spoiled", "forgotten", "disliked", "overestimated", "other"],
+          "description": "Reason for waste"
+        },
+        "cost": {
+          "type": "number",
+          "description": "Cost in dollars (if tracked)"
+        }
+      }
+    }
+  }
+}

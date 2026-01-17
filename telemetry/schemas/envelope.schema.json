@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Telemetry Event Envelope",
+  "description": "Standard envelope for all telemetry events. Defines required fields that wrap every event.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "timestamp",
+    "app_version",
+    "platform",
+    "session_id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique event ID for deduplication during sync"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z_]+$",
+      "description": "Event name (lowercase_snake_case). Must exist in taxonomy."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 UTC timestamp when event occurred"
+    },
+    "app_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+",
+      "description": "Semantic version of the app (e.g., 1.0.0)"
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["ios", "android"],
+      "description": "Mobile OS platform"
+    },
+    "session_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Session UUID for grouping user events"
+    },
+    "properties": {
+      "type": "object",
+      "description": "Event-specific properties (optional). Must be in allowlist for this event.",
+      "additionalProperties": {
+        "oneOf": [
+          {"type": "string"},
+          {"type": "number"},
+          {"type": "boolean"},
+          {"type": "integer"}
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

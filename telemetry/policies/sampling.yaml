@@ -1,0 +1,15 @@
+events:
+  app_installed:
+    sampling_rate: 1.0  # Always log
+  item_added:
+    sampling_rate: 1.0
+  item_wasted:
+    sampling_rate: 1.0
+  reminder_opened:
+    sampling_rate: 0.95  # 95% for high-frequency events
+  inventory_viewed:
+    sampling_rate: 0.5   # 50% to reduce volume
+
+descriptions: |
+  Sampling applies at enqueue time (probabilistic).
+  Use session_id to correlate events across samples.

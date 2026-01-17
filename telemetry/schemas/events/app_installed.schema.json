@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "app_installed Event",
+  "description": "App first launched (install or upgrade)",
+  "type": "object",
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid"},
+    "name": {"type": "string", "enum": ["app_installed"]},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "app_version": {"type": "string"},
+    "platform": {"type": "string", "enum": ["ios", "android"]},
+    "session_id": {"type": "string", "format": "uuid"},
+    "properties": {
+      "type": "object",
+      "properties": {
+        "is_first_install": {
+          "type": "boolean",
+          "description": "True if first install, false if app was upgraded"
+        }
+      }
+    }
+  }
+}
