@@ -2,7 +2,7 @@
 
 ## M1 — Foundations
 
-### Status: In Progress (1/10 completed)
+### Status: In Progress (2/10 completed)
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|----|
@@ -13,7 +13,7 @@
 | [M1/050](planning/milestones/M1/050-wireframes-for-core-mvp-screens.md) | Wireframes for core screens | ⏳ TODO | — | — |
 | [M1/060](planning/milestones/M1/060-clickable-prototype-walkthrough-capture-feedback-5-users.md) | Clickable prototype & user feedback | ⏳ TODO | — | — |
 | [M1/070](planning/milestones/M1/070-define-notification-ux-defaults.md) | Notification UX defaults | ⏳ TODO | — | — |
-| [M1/080](planning/milestones/M1/080-define-v1-data-model-item-category-location-events.md) | Data model (docs/data-model.md) | ⏳ TODO | — | — |
+| [M1/080](planning/milestones/M1/080-define-v1-data-model-item-category-location-events.md) | Data model (docs/data-model.md) | ✅ DONE | [#23](https://github.com/bakintunde/zerospoils/pull/23) | Jan 17, 2026 |
 | [M1/090](planning/milestones/M1/090-flutter-app-skeleton-routing-theming-di.md) | Flutter app skeleton (routing, DI, theming) | ⏳ TODO | — | — |
 | [M1/390](planning/milestones/M1/390-ops-observability-baseline-crashes-key-events-alerts.md) | Observability baseline (crash reporting) | ⏳ TODO | — | — |
 
