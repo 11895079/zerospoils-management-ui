@@ -3,16 +3,17 @@
   "title": "item_wasted Event",
   "description": "User marks item as wasted/discarded",
   "type": "object",
-  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id", "properties"],
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "name": {"type": "string", "enum": ["item_wasted"]},
+    "id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "name": {"const": "item_wasted"},
     "timestamp": {"type": "string", "format": "date-time"},
     "app_version": {"type": "string"},
     "platform": {"type": "string", "enum": ["ios", "android"]},
-    "session_id": {"type": "string", "format": "uuid"},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
     "properties": {
       "type": "object",
+      "required": ["category", "days_until_expiry", "waste_reason"],
       "properties": {
         "category": {
           "type": "string",
@@ -20,7 +21,7 @@
         },
         "days_until_expiry": {
           "type": "integer",
-          "description": "Days from expiry (-1 = expired, 0 = today, 5 = 5 days)"
+          "description": "Days from expiry (negative = past expiry, 0 = today, positive = future)"
         },
         "waste_reason": {
           "type": "string",
@@ -28,8 +29,8 @@
           "description": "Reason for waste"
         },
         "cost": {
-          "type": "number",
-          "description": "Cost in dollars (if tracked)"
+          "type": ["number", "null"],
+          "description": "Estimated cost in CAD (null if unknown)"
         }
       }
     }

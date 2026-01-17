@@ -3,16 +3,17 @@
   "title": "item_added Event",
   "description": "User adds item to inventory (manual entry or from shopping list)",
   "type": "object",
-  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id", "properties"],
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "name": {"type": "string", "enum": ["item_added"]},
+    "id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "name": {"const": "item_added"},
     "timestamp": {"type": "string", "format": "date-time"},
     "app_version": {"type": "string"},
     "platform": {"type": "string", "enum": ["ios", "android"]},
-    "session_id": {"type": "string", "format": "uuid"},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
     "properties": {
       "type": "object",
+      "required": ["source", "category", "has_expiry_date"],
       "properties": {
         "source": {
           "type": "string",

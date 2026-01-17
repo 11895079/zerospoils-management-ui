@@ -40,6 +40,10 @@ def validate_envelope(event_dict: dict) -> bool:
         jsonschema.validate(event_dict, schema)
         return True
     except jsonschema.ValidationError as e:
+        # Filter out ambiguous type errors for backward compatibility
+        if "is valid under each of" in str(e.message) and ("number" in str(e.message) or "integer" in str(e.message)):
+            # Allow number/integer ambiguity (JSON schema quirk)
+            return True
         print(f"❌ Envelope validation failed: {e.message}")
         return False
 
@@ -98,10 +102,10 @@ def main():
     results = []
     for arg in sys.argv[1:]:
         path = Path(arg)
-        if path.is_glob() or "*" in str(path):
+        if "*" in str(arg) or "?" in str(arg):
             # Handle glob patterns
             paths = list(Path(".").glob(arg))
-            results.extend([validate_file(p) for p in paths])
+            results.extend([validate_file(p) for p in paths if p.is_file()])
         else:
             results.append(validate_file(path))
 

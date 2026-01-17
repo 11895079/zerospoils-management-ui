@@ -3,16 +3,17 @@
   "title": "app_installed Event",
   "description": "App first launched (install or upgrade)",
   "type": "object",
-  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id"],
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id", "properties"],
   "properties": {
-    "id": {"type": "string", "format": "uuid"},
-    "name": {"type": "string", "enum": ["app_installed"]},
+    "id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "name": {"const": "app_installed"},
     "timestamp": {"type": "string", "format": "date-time"},
     "app_version": {"type": "string"},
     "platform": {"type": "string", "enum": ["ios", "android"]},
-    "session_id": {"type": "string", "format": "uuid"},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
     "properties": {
       "type": "object",
+      "required": ["is_first_install"],
       "properties": {
         "is_first_install": {
           "type": "boolean",
