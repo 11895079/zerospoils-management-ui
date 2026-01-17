@@ -9,14 +9,14 @@ Define canonical domain model and event log strategy.
 - Events capture state changes for insights
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Create `docs/data-model.md` with schema
-- [ ] Define enums for category/location
-- [ ] Define waste_reason draft enum
-- [ ] Migration strategy documented
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [x] Create `docs/data-model.md` with schema
+- [x] Define enums for category/location
+- [x] Define waste_reason draft enum
+- [x] Migration strategy documented
+- [x] Unit/widget/integration tests added or updated (N/A - documentation only)
+- [x] Telemetry added/updated (event names + key properties documented in data model)
+- [x] Offline-first behavior verified (where applicable - documented in model)
+- [x] Accessibility basics (labels, contrast, tap targets - N/A for documentation)
 
 ## Out of scope
 - Not defined
