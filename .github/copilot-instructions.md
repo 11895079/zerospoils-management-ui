@@ -3,6 +3,11 @@
 ## Project Context
 This is a **backlog planning repository** for ZeroSpoils, a Flutter mobile app for household food waste reduction. This repo contains structured issue markdown files designed for bulk creation in GitHub, not the actual application code.
 
+**Repository Type**: Documentation/Planning repository  
+**Primary Languages**: Markdown (issue files), Bash (automation scripts), Python (document conversion utilities)  
+**Size**: ~60 issue files + supporting documentation and scripts  
+**Purpose**: Centralized backlog management and issue generation for the ZeroSpoils Flutter app project
+
 ## Repository Architecture
 
 ### Structure
@@ -189,3 +194,113 @@ This backlog was structured to enable AI-assisted development of the ZeroSpoils 
 - Implementation notes and dependencies
 
 When generating new issues or editing existing ones, maintain this structure and ensure test plans are actionable (not generic "write tests" advice).
+
+## Build, Test & Validation Commands
+
+### No Build Required
+This is a planning/documentation repository. There are no compilation steps. All files are plain text (Markdown, Bash, Python).
+
+### Python Environment Setup (for doc_convert.py utility)
+```bash
+# Only needed if running document conversion utilities
+cd planning
+python3 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate    # Windows
+pip install -r requirements.txt
+```
+
+### Validation Steps
+**Always run these before committing changes:**
+
+1. **Check Markdown syntax** (no linter configured, manual review):
+```bash
+# Manually verify all .md files render correctly
+# Check for broken links, proper formatting, code blocks
+```
+
+2. **Verify Script Syntax**:
+```bash
+# Test bash scripts for syntax errors
+bash -n planning/scripts/create_labels.sh
+bash -n planning/scripts/create_milestones.sh
+bash -n planning/scripts/create_labels_addon.sh
+```
+
+3. **Python Script Validation** (if modified):
+```bash
+cd planning
+python3 -m py_compile scripts/doc_convert.py
+python3 -m py_compile scripts/test_generate_docx.py
+```
+
+4. **Test Label/Milestone Scripts** (dry-run, requires `gh` CLI):
+```bash
+# Verify GitHub CLI is authenticated first
+gh auth status
+
+# Scripts will fail gracefully if already exist
+# Review output to ensure no errors
+bash planning/scripts/create_milestones.sh
+bash planning/scripts/create_labels.sh
+```
+
+5. **Issue File Structure Check** (manual):
+- Verify new/modified issue files follow template structure
+- Confirm test plans are concrete (not empty stubs)
+- Check DoD checklist is complete
+- Validate 10-step numbering (000, 010, 020...)
+
+### CI/CD Status
+**No CI/CD pipelines configured.** This is a documentation repository. All validation is manual.
+
+When the actual Flutter app repo is created, it will have:
+- GitHub Actions for linting, testing, building (iOS/Android)
+- Automated test runs on PR
+- Build artifacts generation
+
+### Key Validation Rules
+- **ALWAYS** check bash script syntax before committing (`bash -n <script>`)
+- **ALWAYS** ensure Python scripts compile without errors (`python3 -m py_compile <script>`)
+- **ALWAYS** verify issue files follow the standard template structure
+- **NEVER** commit empty test plan stubs
+- **NEVER** break 10-step numbering convention for issue files
+
+## Working with Scripts
+
+### Label Creation (`planning/scripts/create_labels.sh`)
+**Purpose**: Creates standardized GitHub labels for issue categorization  
+**Prerequisites**: `gh` CLI authenticated (`gh auth login`)  
+**Usage**:
+```bash
+cd /path/to/zerospoils
+bash planning/scripts/create_labels.sh
+```
+**Expected behavior**: Idempotent (safe to run multiple times, skips existing labels)
+
+### Milestone Creation (`planning/scripts/create_milestones.sh`)
+**Purpose**: Creates GitHub milestones M1-M7  
+**Prerequisites**: `gh` CLI authenticated  
+**Usage**:
+```bash
+bash planning/scripts/create_milestones.sh
+```
+**Expected behavior**: Creates milestones if they don't exist
+
+### Document Conversion (`planning/scripts/doc_convert.py`)
+**Purpose**: Converts Word documents to Markdown with image extraction  
+**Prerequisites**: Python 3.x with `mammoth` and `html2text` installed  
+**Usage**:
+```bash
+cd planning
+python scripts/doc_convert.py input.docx output.md
+```
+**Common issues**: Requires Python virtual environment with dependencies installed
+
+## Trust These Instructions
+These instructions have been carefully crafted for this specific repository. **Trust them as accurate and complete.** Only search for additional information if:
+- Instructions are incomplete for a specific task
+- Instructions contradict observed behavior
+- New functionality has been added that isn't documented here
+
+For routine work (creating issues, running scripts, organizing files), rely on these instructions without additional exploration.
