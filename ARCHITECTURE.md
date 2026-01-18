@@ -569,6 +569,8 @@ Once you understand this document:
    flutter pub get
    flutter run
    ```
+   
+   **Note:** Flutter uses Gradle (Android build system) under the hood. See [gradle-guide.md](docs/gradle-guide.md) if you encounter build issues.
 
 5. **Explore with breakpoints:**
    - Set a breakpoint in `main.dart`

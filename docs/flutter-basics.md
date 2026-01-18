@@ -528,3 +528,9 @@ LoginWidget(email: 'user@example.com');  // Clear and required
 - [Flutter Widget Catalog](https://flutter.dev/docs/development/ui/widgets)
 - [Dart Language Tour](https://dart.dev/guides/language/language-tour)
 
+## See Also
+
+- [ARCHITECTURE.md](../ARCHITECTURE.md) - System design overview
+- [code-patterns.md](code-patterns.md) - Practical code examples
+- [gradle-guide.md](gradle-guide.md) - Android build system (for troubleshooting)
+

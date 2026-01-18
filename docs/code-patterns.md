@@ -806,6 +806,7 @@ await Future.delayed(Duration(seconds: 1));
 
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - System design
 - [flutter-basics.md](flutter-basics.md) - Language fundamentals
+- [gradle-guide.md](gradle-guide.md) - Android build system & troubleshooting
 - Actual code in `app/lib/` - Real implementations
 - Test files in `app/test/` - Test examples
 
