@@ -25,19 +25,32 @@ Flutter mobile app for household food waste reduction.
 
 ## Quick Start
 
-### 1. Planning & Backlog
+### 1. Clone & Setup
+```bash
+git clone https://github.com/bakintunde/zerospoils.git
+cd zerospoils
+
+# Install Git hooks (format & lint checks)
+bash scripts/setup-hooks.sh      # Linux/macOS
+# OR
+scripts\setup-hooks.bat           # Windows
+```
+
+### 2. Planning & Backlog
 All backlog grooming, issue definitions, and documentation live in `planning/`. See [planning/README.md](planning/README.md) for:
 - Bulk issue creation workflow
 - Milestone structure (M1-M7)
 - Label/milestone setup scripts
 
-### 2. App Implementation
+### 3. App Implementation
 Implementation happens in `app/` folder. Create feature branches off `main`:
 ```bash
 git checkout -b feature/item-inventory
 # ... implement using planning/issues/* as your spec
 # ... commit with small, focused PRs
 ```
+
+**Pre-commit checks:** Format and analyzer checks run automatically before each commit. See [PRE-COMMIT.md](PRE-COMMIT.md) for details.
 
 ## Workflow for Implementation
 
