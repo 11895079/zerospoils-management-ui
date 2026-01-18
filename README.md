@@ -107,3 +107,4 @@ git checkout -b feature/item-inventory
 - [planning/AGENTS.md](planning/AGENTS.md) – AI coding agent instructions
 - [planning/README.md](planning/README.md) – Backlog details
 - [planning/milestones/M1/README.md](planning/milestones/M1/README.md) – First milestone guide
+- [CONTRIBUTING.md](CONTRIBUTING.md) – Contribution workflow & PR checklist
