@@ -20,6 +20,13 @@ Flutter mobile app for household food waste reduction.
 │   ├── pubspec.yaml   # Flutter dependencies
 │   └── ...
 │
+├── docs/              # Developer guides & walkthroughs
+│   ├── flutter-basics.md       # Dart/Flutter fundamentals for beginners
+│   ├── code-patterns.md        # Practical patterns & code examples
+│   └── gradle-guide.md         # Android build system guide
+│
+├── ARCHITECTURE.md    # System architecture & design overview
+├── PRE-COMMIT.md      # Git hooks & pre-commit checks
 └── README.md          # This file
 ```
 
@@ -36,13 +43,42 @@ bash scripts/setup-hooks.sh      # Linux/macOS
 scripts\setup-hooks.bat           # Windows
 ```
 
-### 2. Planning & Backlog
+### 2. Understanding the Codebase (New Developers)
+
+**Start here if you're new to Flutter or this codebase:**
+
+1. **[ARCHITECTURE.md](ARCHITECTURE.md)** (12 min read)
+   - Overview of clean architecture
+   - Key technologies (GoRouter, Riverpod, Hive)
+   - How data flows through the app
+   - Common patterns explained
+
+2. **[docs/flutter-basics.md](docs/flutter-basics.md)** (8 min read)
+   - Dart syntax fundamentals
+   - Flutter widget concepts
+   - State management basics
+   - Hot reload & development tips
+
+3. **[docs/code-patterns.md](docs/code-patterns.md)** (10 min read)
+   - Practical patterns with code examples
+   - Navigation, state management, UI components
+   - Testing patterns
+   - Error handling
+
+4. **[docs/gradle-guide.md](docs/gradle-guide.md)** (5 min read)
+   - Android build system explanation
+   - Common build errors and fixes
+   - When you encounter Gradle issues
+
+**Total time: ~35 minutes to fully understand the codebase**
+
+### 3. Planning & Backlog
 All backlog grooming, issue definitions, and documentation live in `planning/`. See [planning/README.md](planning/README.md) for:
 - Bulk issue creation workflow
 - Milestone structure (M1-M7)
 - Label/milestone setup scripts
 
-### 3. App Implementation
+### 4. App Implementation
 Implementation happens in `app/` folder. Create feature branches off `main`:
 ```bash
 git checkout -b feature/item-inventory
