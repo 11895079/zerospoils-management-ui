@@ -1,0 +1,13 @@
+{
+  "id": "550e8400-e29b-41d4-a716-446655440002",
+  "name": "item_added",
+  "timestamp": "2025-01-17T12:35:10Z",
+  "app_version": "1.0.0",
+  "platform": "android",
+  "session_id": "550e8400-e29b-41d4-a716-446655440001",
+  "properties": {
+    "source": "manual",
+    "category": "dairy",
+    "has_expiry_date": true
+  }
+}

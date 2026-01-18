@@ -1,0 +1,24 @@
+{
+  "events": {
+    "app_installed": {
+      "allowed_properties": ["is_first_install"],
+      "description": "App first launched"
+    },
+    "item_added": {
+      "allowed_properties": ["source", "category", "has_expiry_date"],
+      "description": "User adds item to inventory"
+    },
+    "item_wasted": {
+      "allowed_properties": ["category", "days_until_expiry", "waste_reason", "cost"],
+      "description": "User marks item as wasted"
+    },
+    "reminder_opened": {
+      "allowed_properties": ["item_category", "days_until_expiry"],
+      "description": "User taps notification reminder"
+    },
+    "inventory_viewed": {
+      "allowed_properties": ["filter_applied", "sort_by"],
+      "description": "User opens inventory screen"
+    }
+  }
+}

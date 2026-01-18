@@ -1,0 +1,14 @@
+{
+  "id": "550e8400-e29b-41d4-a716-446655440003",
+  "name": "item_wasted",
+  "timestamp": "2025-01-17T12:36:00Z",
+  "app_version": "1.0.0",
+  "platform": "ios",
+  "session_id": "550e8400-e29b-41d4-a716-446655440001",
+  "properties": {
+    "category": "dairy",
+    "days_until_expiry": -3,
+    "waste_reason": "expired",
+    "cost": 4.99
+  }
+}
