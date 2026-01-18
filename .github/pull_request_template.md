@@ -20,6 +20,11 @@ Closes planning/milestones/M1/XXX-...
 - [ ] Integration tests added
 - [ ] Coverage ≥80% on modified code
 
+### Pre-Commit Checks
+- [ ] Ran `dart format .` locally
+- [ ] Ran `flutter analyze` locally
+- [ ] `flutter test` passes locally
+
 ## Definition of Done Checklist
 - [ ] Tests added/updated for new code
 - [ ] Telemetry instrumented (event names + properties documented)

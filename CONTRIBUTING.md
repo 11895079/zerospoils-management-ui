@@ -80,17 +80,28 @@ Create PR with:
 - Delete feature branch after merge
 - Update issue status in planning/
 
+## Pre-Commit Hooks
+Install once after cloning to catch issues early:
+- Linux/macOS: `bash scripts/setup-hooks.sh`
+- Windows: `scripts\setup-hooks.bat`
+
+Hooks run automatically on `git commit`:
+- Format: `dart format --set-exit-if-changed .`
+- Analyze: `flutter analyze --no-pub`
+
 ## PR Template Checklist
 
 When creating a PR, ensure:
+- [ ] References planning issue (link to file path)
 - [ ] Tests added/updated for new code
 - [ ] Test coverage ≥80% for modified files
+- [ ] `flutter analyze` passes locally
+- [ ] `dart format .` applied
 - [ ] Telemetry instrumented (event names + properties)
 - [ ] Offline-first behavior verified
 - [ ] Accessibility basics checked (labels, contrast, tap targets ≥44pt)
 - [ ] Documentation updated (planning/docs/ if behavior changed)
 - [ ] No secrets, API keys, or PII committed
-- [ ] Linked to planning issue (e.g., "Closes planning/milestones/M1/000-*")
 
 ## Code Style
 
