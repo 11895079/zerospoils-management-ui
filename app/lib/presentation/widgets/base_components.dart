@@ -11,13 +11,13 @@ class EmptyStateWidget extends StatelessWidget {
   final String? actionLabel;
 
   const EmptyStateWidget({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     this.subtitle,
     this.onAction,
     this.actionLabel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +57,7 @@ class PlaceholderScreen extends StatelessWidget {
   final String title;
   final IconData icon;
 
-  const PlaceholderScreen({Key? key, required this.title, required this.icon})
-    : super(key: key);
+  const PlaceholderScreen({super.key, required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {

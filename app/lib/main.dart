@@ -18,7 +18,7 @@ void main() async {
 }
 
 class ZeroSpoilsApp extends ConsumerWidget {
-  const ZeroSpoilsApp({Key? key}) : super(key: key);
+  const ZeroSpoilsApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/base_components.dart';
 
 class HomeShell extends StatefulWidget {
-  const HomeShell({Key? key}) : super(key: key);
+  const HomeShell({super.key});
 
   @override
   State<HomeShell> createState() => _HomeShellState();
@@ -70,7 +70,7 @@ class _HomeShellState extends State<HomeShell> {
 
 /// Add Item modal (bottom sheet)
 class AddItemModal extends StatefulWidget {
-  const AddItemModal({Key? key}) : super(key: key);
+  const AddItemModal({super.key});
 
   @override
   State<AddItemModal> createState() => _AddItemModalState();
