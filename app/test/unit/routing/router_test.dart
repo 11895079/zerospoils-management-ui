@@ -20,11 +20,11 @@ void main() {
     test('Item ID can be extracted from route', () {
       final testId = 'abc-123-def';
       final routePath = '/item/$testId';
-      
+
       // Extract ID from path (simple string parsing)
       final segments = routePath.split('/');
       final extractedId = segments.last;
-      
+
       expect(extractedId, equals(testId));
     });
 
@@ -43,7 +43,7 @@ void main() {
       // Verify common route patterns
       const homeRoute = '/';
       const itemRouteTemplate = '/item/:id';
-      
+
       expect(homeRoute, startsWith('/'));
       expect(itemRouteTemplate, contains(':id'));
     });
