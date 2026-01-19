@@ -9,10 +9,10 @@ Produce a single source of truth for MVP features and non-goals.
 - Non-goals listed to prevent scope creep
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Create `docs/mvp.md` documenting MVP: manual item entry/edit, inventory + expiring views, reminders, shopping list, offline-first
-- [ ] Add explicit non-goals (meal planning, required IoT hardware, selling data without consent)
-- [ ] Add MVP success metrics (items added/week, reminder actions, retention)
-- [ ] Document reviewed with product lead for completeness and alignment
+- [x] Create `docs/mvp.md` documenting MVP: manual item entry/edit, inventory + expiring views, reminders, shopping list, offline-first
+- [x] Add explicit non-goals (meal planning, required IoT hardware, selling data without consent)
+- [x] Add MVP success metrics (items added/week, reminder actions, retention)
+- [x] Document reviewed with product lead for completeness and alignment
 - [N/A] Unit/widget/integration tests (documentation only)
 - [N/A] Telemetry instrumentation (documented in dedicated telemetry issue)
 - [N/A] Accessibility testing (not applicable to documentation)
