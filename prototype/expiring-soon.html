@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Expiring Soon</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Expiring Soon</h1>
+      <button class="filter-btn">Sort</button>
+    </header>
+
+    <!-- Expiring Items Grouped by Urgency -->
+    <div class="expiring-content">
+      <!-- TODAY Section -->
+      <div class="expiry-section">
+        <div class="section-header today-header">
+          <h2>TODAY (2)</h2>
+          <span class="alert-icon">⚠️</span>
+        </div>
+        <a href="item-detail.html?item=apples" class="item-card urgent">
+          <div class="item-icon">🍎</div>
+          <div class="item-info">
+            <h3>Apples</h3>
+            <p class="expiry-time">Expires today</p>
+          </div>
+        </a>
+        <a href="item-detail.html?item=milk" class="item-card urgent">
+          <div class="item-icon">🥛</div>
+          <div class="item-info">
+            <h3>Milk</h3>
+            <p class="expiry-time">Expires in 8 hours</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- THIS WEEK Section -->
+      <div class="expiry-section">
+        <div class="section-header week-header">
+          <h2>THIS WEEK (3)</h2>
+          <span class="alert-icon">⏰</span>
+        </div>
+        <a href="item-detail.html?item=carrots" class="item-card warning">
+          <div class="item-icon">🥕</div>
+          <div class="item-info">
+            <h3>Carrots</h3>
+            <p class="expiry-time">Expires in 2 days</p>
+          </div>
+        </a>
+        <a href="item-detail.html?item=bread" class="item-card warning">
+          <div class="item-icon">🍞</div>
+          <div class="item-info">
+            <h3>Bread</h3>
+            <p class="expiry-time">Expires in 3 days</p>
+          </div>
+        </a>
+        <a href="item-detail.html?item=cheese" class="item-card warning">
+          <div class="item-icon">🧀</div>
+          <div class="item-info">
+            <h3>Cheese</h3>
+            <p class="expiry-time">Expires in 5 days</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- EXPIRED Section -->
+      <div class="expiry-section">
+        <div class="section-header expired-header">
+          <h2>EXPIRED (1)</h2>
+          <span class="alert-icon">🔴</span>
+        </div>
+        <a href="item-detail.html?item=lettuce" class="item-card expired">
+          <div class="item-icon">🥬</div>
+          <div class="item-info">
+            <h3>Lettuce</h3>
+            <p class="expiry-time">Expired 1 day ago</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html" class="active">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

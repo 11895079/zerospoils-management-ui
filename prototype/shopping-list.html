@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Shopping List</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Shopping List</h1>
+    </header>
+
+    <!-- Shopping List Content -->
+    <div class="shopping-content">
+      <h2 class="list-title">Next Shop</h2>
+
+      <!-- Unchecked Items -->
+      <div class="shopping-items">
+        <label class="shopping-item">
+          <input type="checkbox" onchange="handleCheck(this)" />
+          <span class="item-text">Milk</span>
+          <span class="item-emoji">🥛</span>
+        </label>
+        <label class="shopping-item">
+          <input type="checkbox" onchange="handleCheck(this)" />
+          <span class="item-text">Bread</span>
+          <span class="item-emoji">🍞</span>
+        </label>
+        <label class="shopping-item">
+          <input type="checkbox" onchange="handleCheck(this)" />
+          <span class="item-text">Apples</span>
+          <span class="item-emoji">🍎</span>
+        </label>
+        <label class="shopping-item">
+          <input type="checkbox" onchange="handleCheck(this)" />
+          <span class="item-text">Chicken breast</span>
+          <span class="item-emoji">🍗</span>
+        </label>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Purchased Section -->
+      <div class="purchased-section">
+        <h3 class="section-subtitle">Purchased</h3>
+        <label class="shopping-item checked">
+          <input type="checkbox" checked onchange="handleUncheck(this)" />
+          <span class="item-text">Eggs</span>
+          <span class="item-emoji">🥚</span>
+        </label>
+        <label class="shopping-item checked">
+          <input type="checkbox" checked onchange="handleUncheck(this)" />
+          <span class="item-text">Carrots</span>
+          <span class="item-emoji">🥕</span>
+        </label>
+      </div>
+
+      <!-- Actions -->
+      <button class="btn btn-secondary add-item-btn" onclick="window.location.href='add-item.html'">
+        + Add Item
+      </button>
+
+      <button class="btn btn-primary convert-btn" onclick="showConvertModal()">
+        Convert Purchased (2)
+      </button>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html" class="active">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Convert to Inventory Modal -->
+  <div id="convertModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <header class="modal-header-simple">
+        <h2>Add to Inventory</h2>
+        <button class="close-btn" onclick="hideConvertModal()">Close</button>
+      </header>
+      <div class="modal-body">
+        <div class="item-converting">
+          <span class="item-emoji-large">🥚</span>
+          <h3>Eggs</h3>
+        </div>
+        <p class="help-text">This item will be added to your inventory. When does it expire?</p>
+        
+        <div class="form-group">
+          <label for="convertExpiry">Expiry Date</label>
+          <input type="date" id="convertExpiry" />
+        </div>
+
+        <div class="form-group">
+          <label for="convertLocation">Location (optional)</label>
+          <select id="convertLocation">
+            <option value="">Select location...</option>
+            <option value="fridge" selected>❄️ Fridge</option>
+            <option value="freezer">🧊 Freezer</option>
+            <option value="pantry">🗄️ Pantry</option>
+            <option value="counter">🏠 Counter</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" onclick="confirmConvert()">Add to Inventory</button>
+        <button class="btn btn-text" onclick="skipConvert()">Skip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // Set default expiry to 7 days from now
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    document.getElementById('convertExpiry').value = today.toISOString().split('T')[0];
+
+    function handleCheck(checkbox) {
+      if (checkbox.checked) {
+        const label = checkbox.parentElement;
+        label.classList.add('checked');
+        showToast('✓ Item marked as purchased');
+      }
+    }
+
+    function handleUncheck(checkbox) {
+      if (!checkbox.checked) {
+        const label = checkbox.parentElement;
+        label.classList.remove('checked');
+        showToast('Item moved back to shopping list');
+      }
+    }
+
+    function showConvertModal() {
+      document.getElementById('convertModal').style.display = 'flex';
+    }
+
+    function hideConvertModal() {
+      document.getElementById('convertModal').style.display = 'none';
+    }
+
+    function confirmConvert() {
+      hideConvertModal();
+      showToast('✓ Eggs added to inventory!');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    }
+
+    function skipConvert() {
+      hideConvertModal();
+      showToast('Skipped conversion');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

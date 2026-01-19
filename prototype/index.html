@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Inventory</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Inventory</h1>
+      <button class="filter-btn">Filter</button>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input type="text" placeholder="🔍 Search items..." />
+    </div>
+
+    <!-- Category Chips -->
+    <div class="category-chips">
+      <button class="chip active">All</button>
+      <button class="chip">Dairy</button>
+      <button class="chip">Fruit</button>
+      <button class="chip">Veg</button>
+      <button class="chip">Meat</button>
+    </div>
+
+    <!-- Item Cards -->
+    <div class="item-list">
+      <a href="item-detail.html?item=milk" class="item-card">
+        <div class="item-icon">🥛</div>
+        <div class="item-info">
+          <h3>Milk</h3>
+          <p class="location">Fridge</p>
+          <p class="expiry">Expires in 3 days</p>
+        </div>
+      </a>
+
+      <a href="item-detail.html?item=apples" class="item-card warning">
+        <div class="item-icon">🍎</div>
+        <div class="item-info">
+          <h3>Apples</h3>
+          <p class="location">Counter</p>
+          <p class="expiry">Expires today ⚠️</p>
+        </div>
+      </a>
+
+      <a href="item-detail.html?item=carrots" class="item-card">
+        <div class="item-icon">🥕</div>
+        <div class="item-info">
+          <h3>Carrots</h3>
+          <p class="location">Fridge</p>
+          <p class="expiry">Expires in 5 days</p>
+        </div>
+      </a>
+
+      <a href="item-detail.html?item=bread" class="item-card expired">
+        <div class="item-icon">🍞</div>
+        <div class="item-info">
+          <h3>Bread</h3>
+          <p class="location">Pantry</p>
+          <p class="expiry">Expired 2 days ago 🔴</p>
+        </div>
+      </a>
+
+      <a href="item-detail.html?item=cheese" class="item-card">
+        <div class="item-icon">🧀</div>
+        <div class="item-info">
+          <h3>Cheese</h3>
+          <p class="location">Fridge</p>
+          <p class="expiry">Expires in 7 days</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- FAB -->
+    <a href="add-item.html" class="fab" title="Add item">+</a>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html" class="active">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

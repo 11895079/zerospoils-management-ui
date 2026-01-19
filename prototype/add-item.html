@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Add Item</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header modal-header">
+      <h1>Add Item</h1>
+      <a href="index.html" class="close-btn">Close</a>
+    </header>
+
+    <!-- Form Content -->
+    <div class="form-content">
+      <form class="add-item-form">
+        <div class="form-group">
+          <label for="name">Name *</label>
+          <input type="text" id="name" placeholder="Milk" required />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select id="category" required>
+            <option value="">Select category...</option>
+            <option value="dairy">🥛 Dairy</option>
+            <option value="fruit">🍎 Fruit</option>
+            <option value="veg">🥕 Vegetables</option>
+            <option value="meat">🍗 Meat</option>
+            <option value="bakery">🍞 Bakery</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location *</label>
+          <select id="location" required>
+            <option value="">Select location...</option>
+            <option value="fridge">❄️ Fridge</option>
+            <option value="freezer">🧊 Freezer</option>
+            <option value="pantry">🗄️ Pantry</option>
+            <option value="counter">🏠 Counter</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" id="quantity" value="1" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="unit">Unit</label>
+            <select id="unit">
+              <option value="count">Count</option>
+              <option value="liter">Liter</option>
+              <option value="kg">Kg</option>
+              <option value="g">g</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="expiry">Expiry Date *</label>
+          <div class="date-input-group">
+            <input type="date" id="expiry" required />
+            <button type="button" class="camera-btn" title="Scan expiry date">📷</button>
+          </div>
+          <p class="help-text">Or scan the expiry date with camera</p>
+        </div>
+
+        <a href="index.html" class="btn btn-primary">Save Item</a>
+        <a href="index.html" class="btn btn-text">Cancel</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Set default date to 7 days from now
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    const dateStr = today.toISOString().split('T')[0];
+    document.getElementById('expiry').value = dateStr;
+
+    // Camera button simulation
+    document.querySelector('.camera-btn').addEventListener('click', function() {
+      alert('📷 Camera OCR would open here\n\nIn the real app, this would:\n1. Open device camera\n2. Scan expiry date text\n3. Auto-fill the date field');
+    });
+  </script>
+</body>
+</html>
