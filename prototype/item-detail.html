@@ -27,6 +27,14 @@
           <span class="info-value">🥛 Dairy</span>
         </div>
         <div class="info-row">
+          <span class="info-label">Type</span>
+          <span class="info-value">Raw</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Prepared Date</span>
+          <span class="info-value">—</span>
+        </div>
+        <div class="info-row">
           <span class="info-label">Location</span>
           <span class="info-value">❄️ Fridge</span>
         </div>
@@ -92,6 +100,21 @@
           <input type="radio" name="wasteReason" value="other" />
           <span>Other</span>
         </label>
+
+        <div class="form-group">
+          <label for="wastePercent">Percentage wasted</label>
+          <div class="range-group">
+            <input type="range" id="wastePercent" min="0" max="100" value="50" oninput="document.getElementById('percentValue').textContent = this.value + '%';" />
+            <span id="percentValue" class="range-value">50%</span>
+          </div>
+          <p class="help-text">Use your best estimate</p>
+        </div>
+
+        <div class="form-group">
+          <label for="wasteNotes">Notes (optional)</label>
+          <textarea id="wasteNotes" rows="3" placeholder="e.g., half the pot burned"></textarea>
+        </div>
+
         <button class="btn btn-primary" onclick="confirmWaste()">Confirm</button>
         <button class="btn btn-text" onclick="hideWasteModal()">Cancel</button>
       </div>
@@ -112,8 +135,11 @@
 
     function confirmWaste() {
       const reason = document.querySelector('input[name="wasteReason"]:checked').value;
+      const percent = document.getElementById('wastePercent').value;
+      const notes = (document.getElementById('wasteNotes').value || '').trim();
       hideWasteModal();
-      showToast('🗑️ Item marked as wasted (Reason: ' + reason + ')');
+      const msg = '🗑️ Logged: ' + percent + '% wasted (' + reason + ')' + (notes ? ' — ' + notes : '');
+      showToast(msg);
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);

@@ -31,8 +31,22 @@
             <option value="veg">🥕 Vegetables</option>
             <option value="meat">🍗 Meat</option>
             <option value="bakery">🍞 Bakery</option>
+            <option value="prepared">🍲 Prepared</option>
             <option value="other">📦 Other</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>Type *</label>
+          <div class="segmented">
+            <label><input type="radio" name="type" id="typeRaw" value="raw" checked> Raw</label>
+            <label><input type="radio" name="type" id="typePrepared" value="prepared"> Prepared (Cooked)</label>
+          </div>
+        </div>
+
+        <div class="form-group" id="preparedDateGroup" style="display:none;">
+          <label for="preparedDate">Prepared Date</label>
+          <input type="date" id="preparedDate" />
         </div>
 
         <div class="form-group">
@@ -89,6 +103,34 @@
     document.querySelector('.camera-btn').addEventListener('click', function() {
       alert('📷 Camera OCR would open here\n\nIn the real app, this would:\n1. Open device camera\n2. Scan expiry date text\n3. Auto-fill the date field');
     });
+
+    // Prepared toggle behavior
+    const preparedGroup = document.getElementById('preparedDateGroup');
+    const preparedDate = document.getElementById('preparedDate');
+    const typeRaw = document.getElementById('typeRaw');
+    const typePrepared = document.getElementById('typePrepared');
+    const locationSel = document.getElementById('location');
+    const expiryInput = document.getElementById('expiry');
+
+    const todayISO = new Date().toISOString().split('T')[0];
+    preparedDate.value = todayISO;
+
+    function applyPreparedDefaults(isPrepared) {
+      if (isPrepared) {
+        preparedGroup.style.display = '';
+        locationSel.value = 'freezer';
+        const d = new Date(); d.setDate(d.getDate() + 30);
+        expiryInput.value = d.toISOString().split('T')[0];
+      } else {
+        preparedGroup.style.display = 'none';
+        locationSel.value = 'fridge';
+        const d = new Date(); d.setDate(d.getDate() + 7);
+        expiryInput.value = d.toISOString().split('T')[0];
+      }
+    }
+
+    typePrepared.addEventListener('change', () => applyPreparedDefaults(true));
+    typeRaw.addEventListener('change', () => applyPreparedDefaults(false));
   </script>
 </body>
 </html>
