@@ -436,3 +436,60 @@ For routine work (creating issues, running scripts, organizing files in `plannin
 - Planning issues drive implementation work
 - `app/` folder will be created in M1 — see issue 090
 - Always link implementation PRs back to planning issues for traceability
+
+## Editing GitHub PR Descriptions (CLI + Web)
+
+Use these authoritative patterns to edit PR titles/descriptions so reviews are easy and consistent.
+
+### Web UI (fastest)
+- Open the PR → click "Edit" next to the title.
+- Update the title and description (Markdown supported).
+- Click "Save".
+
+### GitHub CLI (gh)
+- Edit PR for the current branch:
+  - Windows PowerShell (body from file):
+    ```powershell
+    gh pr edit --body-file PR_BODY.md
+    ```
+- Edit a specific PR by number (recommended):
+  - Using a file:
+    ```powershell
+    gh pr edit 31 --body-file PR_BODY.md
+    ```
+  - Inline from file content:
+    ```powershell
+    gh pr edit 31 --body "$(Get-Content -Raw PR_BODY.md)"
+    ```
+  - Explicit repo:
+    ```powershell
+    gh pr edit 31 --body-file PR_BODY.md --repo OWNER/REPO
+    ```
+- Update the title:
+  ```powershell
+  gh pr edit 31 --title "[WIP] M1/050: Add wireframes for core MVP screens"
+  ```
+- Add labels for clarity:
+  ```powershell
+  gh pr edit 31 --add-label "needs-review"
+  ```
+- Convert draft to ready for review:
+  ```powershell
+  gh pr ready 31
+  ```
+
+### Troubleshooting
+- If you see GraphQL errors mentioning Projects Classic:
+  - Upgrade gh: `gh version upgrade`
+  - Specify PR number and repo explicitly (see examples above).
+  - As a fallback, post a comment with the updated body:
+    ```powershell
+    gh pr comment 31 --body-file PR_BODY.md --repo OWNER/REPO
+    ```
+- Ensure you have permissions on the repo and are authenticated: `gh auth status`.
+
+### Best Practices for PR Bodies
+- Start with a "Quick Review Index" linking to specs and key files.
+- Include a suggested review flow and a checkbox checklist (UX, components, accessibility, telemetry).
+- Keep links relative to the feature branch for preview (e.g., `blob/feature/...`).
+- Mark as WIP/Draft when alignment is required prior to implementation.

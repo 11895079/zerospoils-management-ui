@@ -17,6 +17,19 @@ This folder contains wireframe specifications and UX patterns for ZeroSpoils MVP
 
 ## Design Reference
 
+### [Design Tokens](./design-tokens.md)
+Complete design system specification:
+- **Color Palette** – Primary blue, success green, warning yellow, urgent orange, error red, neutral gray
+- **Typography** – Font family, sizes (11pt–28pt), weights, line heights
+- **Spacing Scale** – 4pt base grid with xs/sm/md/lg/xl/2xl/3xl tokens
+- **Touch Targets** – Minimum 44pt × 44pt, comfortable 48pt × 48pt
+- **Elevation & Shadow** – Material 3 style shadow system (levels 0–4)
+- **Border Radius** – Corner radius scale (0pt–50%)
+- **Animation** – Timing (100–300ms), easing curves, common transitions
+- **Responsive Breakpoints** – 320pt to 428pt mobile-first layout
+- **Component Token References** – Button, TextInput, Card, Modal specs
+- **Flutter Implementation** – Dart/Flutter code examples
+
 ### [Navigation Flow Diagram](./navigation-flow.md)
 Visual representation of app navigation structure:
 - **Tab Structure** – Bottom navigation with 4 tabs
@@ -46,6 +59,8 @@ Reusable UI components used across all screens:
 ```
 docs/
 ├── ux.md                       ← You are here (this file)
+├── design-tokens.md            ← Design system specification
+├── navigation-flow.md          ← Navigation architecture diagram
 ├── ux-patterns.md              ← Component & pattern library
 └── wireframes/
     ├── 01-inventory-list.md
