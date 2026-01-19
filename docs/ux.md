@@ -17,6 +17,16 @@ This folder contains wireframe specifications and UX patterns for ZeroSpoils MVP
 
 ## Design Reference
 
+### [Navigation Flow Diagram](./navigation-flow.md)
+Visual representation of app navigation structure:
+- **Tab Structure** – Bottom navigation with 4 tabs
+- **Modal Flows** – How modals overlay screens
+- **Back Button Behavior** – Pop navigation and modal close patterns
+- **Screen Transitions** – Navigation between screens
+- **Deep Links** – URL routing to specific screens (v2)
+- **State Management** – Tab stack preservation
+- **Edge Cases** – Unsaved changes, system back, tab re-selection
+
 ### [UX Patterns & Component Library](./ux-patterns.md)
 Reusable UI components used across all screens:
 - **AppBar** – Screen headers with navigation

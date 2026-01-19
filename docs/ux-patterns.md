@@ -481,6 +481,7 @@ Label *
 ---
 
 ## Related Documentation
+- [Navigation Flow Diagram](./navigation-flow.md) - Complete navigation architecture
 - [Wireframe 01: Inventory List](./wireframes/01-inventory-list.md)
 - [Wireframe 02: Add Item Modal](./wireframes/02-add-item-modal.md)
 - [Wireframe 03: Item Detail](./wireframes/03-item-detail.md)
