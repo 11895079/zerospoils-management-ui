@@ -23,20 +23,16 @@ Deliver complete UX foundations: wireframes for MVP flows, interaction patterns,
 - **Consistency:** Reuse 5-6 core components across all screens
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Folder structure created: `docs/wireframes/` with individual screen files
-- [ ] 8 wireframes created (onboarding, inventory, add-item, item-detail, expiring-soon, shopping-list, settings, empty-states)
-- [ ] Each wireframe includes: ASCII layout, components list, interaction flows, accessibility notes
-- [ ] `docs/ux-patterns.md` created with component guidelines (buttons, cards, lists, modals, FAB)
-- [ ] `docs/ux.md` created as index, linking all wireframes and patterns
-- [ ] Design tokens in `docs/design-tokens.md` include spacing scale, typography, color palette, touch target sizes
-- [ ] Reviewed and approved by at least one team member
-- [ ] Accessibility checklist completed for each screen (tap targets, contrast, labels, font scaling)
-- [ ] Navigation flow diagram included (tab structure, modal flows, back button behavior)
-- [ ] Empty state designs for each screen with no data
-- [ ] Component specifications ready for implementation (widget names, dimensions, states)
-- [ ] Telemetry event names documented (e.g., "item_added", "item_deleted", "tab_switched")
-- [ ] Offline-first behavior noted (local-first, sync later, indicators)
-- [ ] Accessibility basics verified (labels on inputs, contrast ≥4.5:1, tap targets ≥44pt)
+- [ ] Wireframes created under `docs/wireframes/` and linked in `docs/ux.md`
+- [ ] Includes empty states + onboarding flows
+- [ ] UX patterns doc created with component guidelines (buttons, lists, cards, modals)
+- [ ] Design tokens documented in `docs/design-tokens.md`
+- [ ] Reviewed by at least one team member (engineering + product)
+- [ ] Clickable prototype (060) references patterns and tokens
+- [ ] Accessibility annotations included on wireframes (tap targets ≥44pt, contrast ≥4.5:1, semantic labels)
+- [N/A] Unit/widget/integration tests (documentation only)
+- [N/A] Offline-first behavior verification (implementation concern, not wireframes)
+- [N/A] Telemetry instrumentation (implemented in feature work)
 
 ## Out of scope
 - High-fidelity visual design system and final brand assets (handled in launch milestone)
