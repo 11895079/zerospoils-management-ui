@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Item Detail</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header detail-header">
+      <a href="index.html" class="back-btn">← Back</a>
+      <button class="edit-btn">Edit</button>
+    </header>
+
+    <!-- Item Detail Content -->
+    <div class="detail-content">
+      <div class="item-hero">
+        <div class="item-icon-large">🥛</div>
+        <h1 class="item-name">Milk</h1>
+      </div>
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Category</span>
+          <span class="info-value">🥛 Dairy</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Location</span>
+          <span class="info-value">❄️ Fridge</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Quantity</span>
+          <span class="info-value">1 Liter</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Purchase Date</span>
+          <span class="info-value">Jan 8, 2026</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Expiry Date</span>
+          <span class="info-value">Jan 15, 2026</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-value status-warning">Expires in 3 days</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-consumed" onclick="showToast('✓ Milk marked as consumed!')">
+        ✓ Mark as Consumed
+      </button>
+
+      <button class="btn btn-secondary" onclick="showWasteModal()">
+        🗑️ Mark as Wasted
+      </button>
+
+      <p class="metadata">Added on Jan 8, 2026 at 3:45pm</p>
+    </div>
+  </div>
+
+  <!-- Waste Reason Modal (hidden by default) -->
+  <div id="wasteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <header class="modal-header-simple">
+        <h2>Why was it wasted?</h2>
+        <button class="close-btn" onclick="hideWasteModal()">Close</button>
+      </header>
+      <div class="modal-body">
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="expired" checked />
+          <span>Expired / spoiled</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="forgotten" />
+          <span>Forgotten in back of fridge</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="disliked" />
+          <span>Didn't like it</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="too_much" />
+          <span>Bought too much</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="cooked_too_much" />
+          <span>Cooked too much</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="wasteReason" value="other" />
+          <span>Other</span>
+        </label>
+        <button class="btn btn-primary" onclick="confirmWaste()">Confirm</button>
+        <button class="btn btn-text" onclick="hideWasteModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast (hidden by default) -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    function showWasteModal() {
+      document.getElementById('wasteModal').style.display = 'flex';
+    }
+
+    function hideWasteModal() {
+      document.getElementById('wasteModal').style.display = 'none';
+    }
+
+    function confirmWaste() {
+      const reason = document.querySelector('input[name="wasteReason"]:checked').value;
+      hideWasteModal();
+      showToast('🗑️ Item marked as wasted (Reason: ' + reason + ')');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+        window.location.href = 'index.html';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
