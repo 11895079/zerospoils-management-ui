@@ -9,13 +9,14 @@ Define reminder timing defaults and user controls.
 - Copy is encouraging and non-judgmental
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Settings screen includes reminder lead time options
-- [ ] Notification copy templates defined (expiring today/soon/expired)
+- [ ] Settings screen wireframe includes reminder lead time configuration
+- [ ] Notification copy templates defined (expiring today/soon/expired) with supportive, non-judgmental tone
 - [ ] Document in `docs/notifications.md`
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Default lead times specified (e.g., 3 days, 1 day, day-of)
+- [ ] Copy templates include required variables (item_name, expiry_date)
+- [N/A] Unit/widget/integration tests (documentation only)
+- [N/A] Telemetry instrumentation (implemented in feature work)
+- [N/A] Accessibility testing (settings UI accessibility verified in app implementation)
 
 ## Out of scope
 - Not defined

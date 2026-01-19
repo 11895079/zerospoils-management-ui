@@ -16,12 +16,12 @@ Deliver complete UX foundations: wireframes for MVP flows, interaction patterns,
 - [ ] Includes empty states + onboarding flows
 - [ ] UX patterns doc created with component guidelines (buttons, lists, cards, modals)
 - [ ] Design tokens documented in `docs/design-tokens.md`
-- [ ] Reviewed by all team members
+- [ ] Reviewed by at least one team member (engineering + product)
 - [ ] Clickable prototype (060) references patterns and tokens
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Accessibility annotations included on wireframes (tap targets ≥44pt, contrast ≥4.5:1, semantic labels)
+- [N/A] Unit/widget/integration tests (documentation only)
+- [N/A] Offline-first behavior verification (implementation concern, not wireframes)
+- [N/A] Telemetry instrumentation (implemented in feature work)
 
 ## Out of scope
 - High-fidelity visual design system and final brand assets (handled in launch milestone)

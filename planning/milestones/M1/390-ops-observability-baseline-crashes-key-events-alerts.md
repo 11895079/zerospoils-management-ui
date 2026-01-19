@@ -12,10 +12,11 @@ Implement basic observability and alerting for core user journeys.
 - [ ] Define SLO-lite metrics: crash-free sessions, app start failures, reminder delivery failures
 - [ ] Set up alerts for spikes/drops (best-effort depending on tooling)
 - [ ] Document dashboards and alert ownership in `docs/ops/observability.md`
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Define baseline targets (e.g., 99.5% crash-free sessions)
+- [ ] Document alert ownership and runbook steps for common incidents
+- [N/A] Unit/widget/integration tests (observability configuration only)
+- [N/A] Telemetry schema changes (event types already defined in issue 040)
+- [N/A] Accessibility testing (not applicable to observability infrastructure)
 
 ## Out of scope
 - Full distributed tracing (not needed early).
