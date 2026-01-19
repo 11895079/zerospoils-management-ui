@@ -13,10 +13,10 @@ Define MVP event names and properties, with privacy-by-design.
 - [ ] Include funnel events: item_add, item_edit, expiring_view, reminder_opened, item_mark_used, item_mark_wasted, shopping_add, shopping_convert
 - [ ] Define standard properties (platform, app_version, category, location, lead_time_days)
 - [ ] Define opt-in/opt-out strategy
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Document reviewed with engineering and product teams
+- [N/A] Unit/widget/integration tests (documentation only)
+- [N/A] Offline-first behavior verification (documented in telemetry strategy)
+- [N/A] Accessibility testing (not applicable to documentation)
 
 ## Out of scope
 - Full analytics dashboard.

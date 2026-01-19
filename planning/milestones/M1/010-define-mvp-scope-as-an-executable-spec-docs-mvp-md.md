@@ -12,10 +12,10 @@ Produce a single source of truth for MVP features and non-goals.
 - [ ] Create `docs/mvp.md` documenting MVP: manual item entry/edit, inventory + expiring views, reminders, shopping list, offline-first
 - [ ] Add explicit non-goals (meal planning, required IoT hardware, selling data without consent)
 - [ ] Add MVP success metrics (items added/week, reminder actions, retention)
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Document reviewed with product lead for completeness and alignment
+- [N/A] Unit/widget/integration tests (documentation only)
+- [N/A] Telemetry instrumentation (documented in dedicated telemetry issue)
+- [N/A] Accessibility testing (not applicable to documentation)
 
 ## Out of scope
 - Not defined

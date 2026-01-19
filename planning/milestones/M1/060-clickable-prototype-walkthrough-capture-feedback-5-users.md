@@ -9,13 +9,14 @@ Run 5 quick walkthroughs and capture findings.
 - Users can add an item, find expiring items, and add shopping items with minimal guidance
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Create `docs/research/round1.md` with notes
-- [ ] List top UX issues + proposed fixes
-- [ ] Update wireframes accordingly
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Create `docs/research/round1.md` with participants, findings, and recommendations
+- [ ] List top 3 UX friction points + proposed fixes
+- [ ] Update wireframes and UX patterns based on findings
+- [ ] Share findings with team in sync meeting
+- [ ] Document reflects 5 user walkthroughs with diverse user profiles
+- [N/A] Unit/widget/integration tests (user research only)
+- [N/A] Telemetry instrumentation (research documentation only)
+- [N/A] Accessibility testing (covered in prototype evaluation)
 
 ## Out of scope
 - Not defined
