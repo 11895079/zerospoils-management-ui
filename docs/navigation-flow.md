@@ -168,47 +168,77 @@ See [Wireframe 05: Onboarding Flow](./wireframes/05-onboarding-flow.md) for deta
 
 **Question: How do users navigate FROM Inventory TO Shopping List?**
 
-Answer: Via bottom tab bar (direct tab switch).
+Answer: Via **Add to Shopping List** button on item cards (long-press menu or context menu).
 
-**Option 2 (Future Enhancement, v2):** "Add to Shopping List" button in Item Detail screen.
-
+**M1 Flow (Implemented):**
 ```
-Current Flow (M1):
-Inventory List (Tab 1) ──[Tap Tab 3]──> Shopping List (Tab 3)
-                                      • Manage lists
-                                      • Add items
-                                      • View suggestions
-
-Future Flow (v2):
-Item Detail Screen
+Inventory List (Tab 1)
    │
-   │ Tap "Add to Shopping List" button
+   │ Long-press or tap menu on item
    ▼
-Select list dropdown (or create new)
+┌──────────────────────────────────────────┐
+│ Context Menu                             │
+│ • View Details → Item Detail            │
+│ • Add to Shopping List ← NEW            │
+│ • Delete                                 │
+└──────────────────────────────────────────┘
    │
-   ├─ Confirmation toast
-   ├─ Optional: Switch to Shopping tab to show added item
-   └─ Return to Item Detail
+   │ Tap "Add to Shopping List"
+   ▼
+┌──────────────────────────────────────────┐
+│ Select List Dropdown                     │
+│ ┌──────────────────────────────────────┐ │
+│ │ Select list to add "Milk" to:       │ │
+│ │                                      │ │
+│ │ ○ Weekly Groceries (active)         │ │
+│ │ ○ Trader Joe's                      │ │
+│ │ ○ Whole Foods                       │ │
+│ │ + Create New List                   │ │
+│ └──────────────────────────────────────┘ │
+└──────────────────────────────────────────┘
+   │
+   │ Select list
+   ▼
+┌──────────────────────────────────────────┐
+│ ✓ Added to Weekly Groceries              │  ← Toast (2-3 sec)
+│                                          │
+│ (Tap to go to Shopping List)            │
+└──────────────────────────────────────────┘
+   │                              │
+   │ (auto-dismiss)              │ (tap toast)
+   │                              ▼
+   └──────────────────────► Switch to Tab 3
+                           (Shopping List)
 ```
 
-**M1 Implementation:** Direct tab switching via bottom nav (no cross-tab linking).
+**User's Choice:**
+1. Continue shopping in Inventory (toast dismisses automatically)
+2. Tap toast to jump to Shopping List and see the item
 
+**M1 Implementation Details:**
+- Toast auto-dismisses after 2-3 seconds
+- Toast message: "✓ Added to [List Name]"
+- Dismissing toast does NOT navigate away
+- Tapping toast switches to Shopping List tab
+- Item added to selected list immediately (no confirmation needed)
+- Multiple items can be added to same list without re-selecting
+
+**Future Enhancement (v2):**
 ```
-┌──────────────────────────────────────────────────────────────┐
-│   06. Shopping List Tab (Root)                               │
-│  • My Lists (active list dropdown)                           │
-│  • List items with checkboxes                                │
-│  • Suggested items (from inventory low stock)                │
-│  • Add item button                                           │
-│  • Share/export list button                                  │
-└──────────────────────────────────────────────────────────────┘
-      │
-      │ Tap shopping item (future)
-      ▼
-Item management (add qty, notes, delete)
+Shopping List Item Display:
+┌──────────────────────────────────────────┐
+│ ☐ 🥛 Milk (2 in inventory)    qty: 1    │ ← Show inventory count
+│ ☐ 🥕 Carrots (none left)       qty: 2    │   to reduce overbuying
+│ ☐ 🥬 Spinach (1 wilting)        qty: 1    │
+└──────────────────────────────────────────┘
+
+This helps users:
+- See what they already have at home
+- Avoid buying duplicates
+- Reduce food waste
 ```
 
-See [Wireframe 06: Shopping List Tab](./wireframes/06-shopping-list-tab.md) for details.
+See [Wireframe 01: Inventory List](./wireframes/01-inventory-list.md) and [Wireframe 06: Shopping List Tab](./wireframes/06-shopping-list-tab.md) for detailed interactions.
 
 ### Tab 4: Settings
 

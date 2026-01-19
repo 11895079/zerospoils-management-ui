@@ -1,7 +1,10 @@
 # Wireframe 6: Shopping List Tab
 
 ## Purpose
-User creates and manages curated shopping lists with suggested items based on inventory + recipes (future), organized by category.
+User creates and manages curated shopping lists with suggested items based on inventory + recipes (future), organized by category. Items can be added directly or from Inventory screen.
+
+## Cross-Tab Integration (New in M1)
+**From Inventory List:** Long-press or tap menu on any item → "Add to Shopping List" → Select list from dropdown → Toast confirmation → Item appears in Shopping List tab. See [Wireframe 01: Inventory List](./01-inventory-list.md) for details.
 
 ## Layout
 ```
@@ -159,9 +162,16 @@ User creates and manages curated shopping lists with suggested items based on in
 ---
 
 ## Notes
-- **Sync:** Shopping lists sync to backend for multi-device access (v2+)
-- **Offline:** Lists available offline, sync when online
-- **Recurring lists:** Allow marking lists as "recurring" (weekly, monthly) for auto-creation
-- **Integration:** Link from Inventory "Add to Shopping List" button (future)
-- **Voice input:** "Add milk to grocery list" via voice assistant (v2+)
-- **Sharing:** QR code option for sharing lists with family (v2+)
+- Sync: Shopping lists sync to backend for multi-device access (v2+)
+- Offline: Lists available offline, sync when online
+- Recurring lists: Allow marking lists as "recurring" (weekly, monthly) for auto-creation
+- Integration: Link from Inventory "Add to Shopping List" button (M1 — implemented via long-press menu)
+- Voice input: "Add milk to grocery list" via voice assistant (v2+)
+- Sharing: QR code option for sharing lists with family (v2+)
+- **Future Feature (v2):** Display inventory quantity next to shopping list items:
+  ```
+  ☐ 🥛 Milk (2 in inventory)    qty: 1
+  ☐ 🥕 Carrots (none left)      qty: 2
+  ☐ 🥬 Spinach (1 wilting)      qty: 1
+  ```
+  This helps users see what they already have while shopping, reducing overbuying and food waste.

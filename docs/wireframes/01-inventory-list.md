@@ -55,6 +55,25 @@ User sees all tracked items grouped by category. Tap to view details, swipe to d
 4. **Tap category header** → Collapse/expand category (optional v1)
 5. **Tap FAB** → Open "Add Item" modal (see wireframe 02)
 6. **Tap settings** → Navigate to Settings screen
+7. **Long-press item (or tap menu icon)** → Show context menu:
+   - "View Details" → Navigate to Item Detail
+   - "Add to Shopping List" → Show list selection dropdown
+   - "Delete" → Delete confirmation
+8. **Tap "Add to Shopping List"** → Show dropdown of available lists:
+   ```
+   Select List to Add To:
+   [Weekly Groceries ✓] (active list)
+   [Trader Joe's]
+   [Whole Foods]
+   [+ Create New List]
+   ```
+9. **Select list from dropdown** → Add item to that list, show toast:
+   ```
+   ✓ Added to Weekly Groceries
+   (auto-dismisses in 2-3 seconds)
+   ```
+   - User can tap toast to navigate to Shopping List tab
+   - Or continue browsing Inventory
 
 ## Accessibility
 - [ ] Tap targets ≥44pt (ItemCard, FAB, SearchBar)
@@ -91,6 +110,10 @@ User sees all tracked items grouped by category. Tap to view details, swipe to d
 - `item_swiped_delete` - {item_id: str, category: str}
 - `search_initiated` - {query: str}
 - `add_item_tapped` - {from_screen: "inventory_list"}
+- `add_to_shopping_list_tapped` - {item_id: str, item_name: str}
+- `shopping_list_selected` - {item_id: str, list_name: str, list_id: str}
+- `shopping_list_toast_shown` - {list_name: str, duration_ms: int}
+- `shopping_list_toast_tapped` - {list_name: str} (navigate to Shopping tab)
 
 ## Notes
 - Items sorted by days-to-expiry (most urgent first within category)
