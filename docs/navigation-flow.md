@@ -282,8 +282,10 @@ Item Detail Screen
 
 ## Deep Link Navigation (v2)
 
+> **Note:** Deep linking will use universal links (iOS) and app links (Android) with HTTPS URLs (e.g., `https://zerospoils.app/item/123`) instead of custom URL schemes to avoid conflicts and improve security. Platform-specific configuration required.
+
 ```
-Deep Link URL: zerospoils://item/123
+Deep Link URL: https://zerospoils.app/item/123
          │
          ▼
 ┌─────────────────────────────────────┐
@@ -377,21 +379,52 @@ Scroll to top (if scrollable)
 ### Flutter Navigation 2.0 (GoRouter)
 
 - Use declarative routing with `GoRouter`
-- Tab bar uses `IndexedStack` to preserve state
+- Tab bar uses `IndexedStack` to preserve state across tab switches
 - Modals use `showDialog()` or `showModalBottomSheet()`
 - Back button uses `Navigator.pop()` or `GoRouter.pop()`
 
-### Navigation Keys
+### Navigation Implementation Examples
 
 ```dart
-// Tab navigation
-bottomNavigationBar: BottomNavigationBar(
-  currentIndex: _selectedIndex,
-  onTap: (index) {
-    setState(() => _selectedIndex = index);
-    _pageController.jumpToPage(index);
-  },
-)
+// Tab navigation with IndexedStack (preserves state)
+class MainScreen extends StatefulWidget {
+  @override
+  _MainScreenState createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  // Each tab's root screen
+  final List<Widget> _screens = [
+    InventoryListScreen(),
+    ExpiringSoonScreen(),
+    ShoppingListScreen(),
+    SettingsScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens, // All screens kept in memory
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inventory'),
+          BottomNavigationBarItem(icon: Icon(Icons.alarm), label: 'Expiring'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Shopping'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        ],
+      ),
+    );
+  }
+}
 
 // Modal navigation (not in nav stack)
 showDialog(
