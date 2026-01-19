@@ -282,10 +282,15 @@ Item Detail Screen
 
 ## Deep Link Navigation (v2)
 
-> **Note:** Deep linking will use universal links (iOS) and app links (Android) with HTTPS URLs (e.g., `https://zerospoils.app/item/123`) instead of custom URL schemes to avoid conflicts and improve security. Platform-specific configuration required.
+> **Note:** Deep linking will use universal links (iOS) and app links (Android) with HTTPS URLs instead of custom URL schemes to avoid conflicts and improve security.
+> 
+> **Configuration Requirements:**
+> - iOS: Add `Associated Domains` entitlement and `.well-known/apple-app-site-association` file on web server
+> - Android: Add `intent-filter` with `autoVerify="true"` and `.well-known/assetlinks.json` on web server
+> - See [Flutter deep linking documentation](https://docs.flutter.dev/ui/navigation/deep-linking) for setup details
 
 ```
-Deep Link URL: https://zerospoils.app/item/123
+Deep Link URL: https://your-domain.com/item/123
          │
          ▼
 ┌─────────────────────────────────────┐
@@ -395,8 +400,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // Each tab's root screen
-  final List<Widget> _screens = [
+  // Lazy initialization - screens created once and preserved
+  late final List<Widget> _screens = [
     InventoryListScreen(),
     ExpiringSoonScreen(),
     ShoppingListScreen(),
@@ -408,7 +413,8 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _screens, // All screens kept in memory
+        children: _screens, // Screens kept in memory, state preserved
+      ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
