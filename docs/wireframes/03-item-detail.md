@@ -82,6 +82,9 @@ User views full item details, edits, or deletes. Accessible via tapping item fro
 - [ ] Screen reader announces item name on load
 - [ ] All interactive elements (buttons) labeled
 
+## Empty State
+**Not applicable** — This is a detail screen that displays information about a specific item selected from the inventory list. Users cannot reach this screen without first selecting an item, so an empty state scenario does not occur. If the item is deleted or no longer exists, the app should navigate back to the inventory list automatically.
+
 ## Delete Confirmation Dialog
 If user taps Delete or menu → Delete:
 ```

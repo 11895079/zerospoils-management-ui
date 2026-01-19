@@ -94,6 +94,9 @@ Shown when dropdown is expanded:
 - Default to today + 1 week (common shelf life)
 - Allow selection up to 1 year future
 
+## Empty State
+**Not applicable** — This is a modal form that appears over existing content. The form always displays with empty input fields by default (unless opened in edit mode). Empty validation states are shown inline when user attempts to save without completing required fields (see Empty Validation State below).
+
 ## Empty Validation State
 If user taps Save with empty fields:
 ```
