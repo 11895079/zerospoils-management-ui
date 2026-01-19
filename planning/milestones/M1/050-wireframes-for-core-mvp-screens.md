@@ -5,31 +5,83 @@ UX foundations (wireframes, interaction patterns, component primitives, design t
 Deliver complete UX foundations: wireframes for MVP flows, interaction patterns, component guidelines, and design tokens.
 
 ## Expected behavior
-- Wireframes cover: Add Item, Inventory, Expiring Soon, Item Detail, Shopping List, Settings
-- Navigation is consistent and minimal
-- Interaction primitives defined: quick add, scan flow, confirm dialogs, swipe actions
-- Design tokens documented: spacing, typography, touch targets, color palette
-- Accessibility notes included: tap targets ≥44pt, contrast ratios, font scaling
+
+### Screens & Flows
+1. **Onboarding** (3 screens max) - Welcome, permissions, quick tutorial
+2. **Inventory** - List all items, search/filter, quick add via FAB
+3. **Add Item Modal** - Quick entry form (name, category, expiry)
+4. **Item Detail** - Full view, edit fields, actions (delete, mark-used)
+5. **Expiring Soon** - Alerts grouped by urgency (today, 3 days, 7 days)
+6. **Shopping List** - Curated suggestions, categories
+7. **Settings** - Preferences, notifications, about
+8. **Empty States** - Each screen with no data
+
+### Design Principles
+- **Navigation:** Bottom tabs (4 max) + FAB for primary action
+- **Interaction:** Swipe, tap, modal dialogs (minimize typing)
+- **Accessibility:** Tap targets ≥44pt, labels, high contrast
+- **Consistency:** Reuse 5-6 core components across all screens
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Wireframes created under `docs/wireframes/` and linked in `docs/ux.md`
-- [ ] Includes empty states + onboarding flows
-- [ ] UX patterns doc created with component guidelines (buttons, lists, cards, modals)
-- [ ] Design tokens documented in `docs/design-tokens.md`
-- [ ] Reviewed by all team members
-- [ ] Clickable prototype (060) references patterns and tokens
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [ ] Folder structure created: `docs/wireframes/` with individual screen files
+- [ ] 8 wireframes created (onboarding, inventory, add-item, item-detail, expiring-soon, shopping-list, settings, empty-states)
+- [ ] Each wireframe includes: ASCII layout, components list, interaction flows, accessibility notes
+- [ ] `docs/ux-patterns.md` created with component guidelines (buttons, cards, lists, modals, FAB)
+- [ ] `docs/ux.md` created as index, linking all wireframes and patterns
+- [ ] Design tokens in `docs/design-tokens.md` include spacing scale, typography, color palette, touch target sizes
+- [ ] Reviewed and approved by at least one team member
+- [ ] Accessibility checklist completed for each screen (tap targets, contrast, labels, font scaling)
+- [ ] Navigation flow diagram included (tab structure, modal flows, back button behavior)
+- [ ] Empty state designs for each screen with no data
+- [ ] Component specifications ready for implementation (widget names, dimensions, states)
+- [ ] Telemetry event names documented (e.g., "item_added", "item_deleted", "tab_switched")
+- [ ] Offline-first behavior noted (local-first, sync later, indicators)
+- [ ] Accessibility basics verified (labels on inputs, contrast ≥4.5:1, tap targets ≥44pt)
 
 ## Out of scope
 - High-fidelity visual design system and final brand assets (handled in launch milestone)
 
 ## Implementation notes
-- Use grayscale wireframes; keep patterns pragmatic and mobile-first
-- Prefer simple interactions that minimize typing
-- Decide default lead times and buckets for notifications
+- **Format:** Markdown with ASCII art + structured sections (see wireframe template below)
+- **Grayscale:** Wireframes are black & white; color details in design tokens
+- **Mobile-first:** Assume 375pt width (iPhone SE), scale up to 428pt (iPhone 14)
+- **Components:** Define 6 core widgets (ItemCard, SearchBar, FAB, Modal, ListTile, EmptyState)
+- **Interactions:** Keep patterns simple—tap, swipe (delete), long-press (edit), modal dialogs
+- **Defaults:** Notification lead times (3 days warning), category buckets (Dairy, Vegetables, etc.)
+
+### Wireframe Template (Per Screen)
+Each wireframe file should include:
+```markdown
+## <Screen Name>
+
+### Purpose
+<What task does user accomplish?>
+
+### Layout
+<ASCII art of screen>
+
+### Components
+| Name | Size | Purpose |
+|------|------|---------|
+| SearchBar | 48pt | Filter items |
+
+### Interactions
+1. **Tap item** → Navigate to detail
+2. **Swipe left** → Delete option
+
+### Accessibility
+- [ ] Tap targets ≥44pt
+- [ ] Labels visible
+- [ ] Contrast ≥4.5:1
+- [ ] Font scales to 2x
+
+### Empty State
+<Description or ASCII art of empty state>
+
+### Telemetry Events
+- `inventory_opened` - {item_count, filter_active}
+- `item_tapped` - {item_id, category}
+```
 
 ## Test plan
 **Automated:**
