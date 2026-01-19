@@ -1,6 +1,16 @@
 # Navigation Flow Diagram
 
-This document provides a visual representation of the navigation structure for ZeroSpoils MVP, including tab navigation, modal flows, and back button behavior.
+**Comprehensive navigation architecture for all 8 ZeroSpoils screens,** including tab navigation, modal flows, back button behavior, and onboarding.
+
+## Wireframe Reference
+1. [05 - Onboarding Flow](./wireframes/05-onboarding-flow.md) – Welcome, permissions, tutorial (3 screens, first-time only)
+2. [01 - Inventory List](./wireframes/01-inventory-list.md) – Home tab, category grouping, search, FAB
+3. [02 - Add Item Modal](./wireframes/02-add-item-modal.md) – Form overlay for new items
+4. [03 - Item Detail](./wireframes/03-item-detail.md) – View/edit/delete item
+5. [04 - Expiring Soon Tab](./wireframes/04-expiring-soon-tab.md) – Quick view of urgent items
+6. [06 - Shopping List Tab](./wireframes/06-shopping-list-tab.md) – List management, suggestions
+7. [07 - Settings Screen](./wireframes/07-settings-screen.md) – Preferences, account, help
+8. [08 - Empty States Guide](./wireframes/08-empty-states-guide.md) – Cross-screen empty state patterns
 
 ## High-Level Navigation Architecture
 
@@ -24,27 +34,50 @@ This document provides a visual representation of the navigation structure for Z
 
 ## Tab Structure (Bottom Navigation)
 
-The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own navigation stack.
+The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own navigation stack (state preserved when switching tabs).
 
 ```
 ┌──────────────────────────────────────────────────────┐
 │                                                       │
 │              [Current Screen Content]                │
 │                                                       │
+│                                          ⊕ (FAB)     │  ← FAB on Inventory & Expiring
 │                                                       │
-│                                          ⊕ (FAB)     │
-├───────────────────────────────────────────────────────┤
+├──────────────────────────────────────────────────────┤
 │  🏠          ⏰          🛒           ⚙️              │
 │ Inventory  Expiring   Shopping    Settings           │
-│  (Active)    Soon       List                         │
+│  (Tab 1)    Soon       List        (Tab 4)           │
+│            (Tab 2)    (Tab 3)                        │
 └──────────────────────────────────────────────────────┘
 ```
 
-**Tab Behavior:**
-- Tapping a tab switches to that tab's root screen
-- Each tab has its own navigation stack
-- Tapping an active tab scrolls to top (if scrollable)
-- FAB (Floating Action Button) is visible on Inventory and Expiring Soon tabs
+### Tab Behavior
+- **Tapping a tab:** Switch to that tab's root screen
+- **Each tab has its own stack:** State preserved when switching tabs (IndexedStack keeps screens in memory)
+- **Tapping active tab:** Scroll to top (if screen is scrollable, like list)
+- **FAB:** Visible on Tab 1 (Inventory) and Tab 2 (Expiring Soon) for adding items
+- **Back button on root tab:** Exit app (entire tab stack pops)
+- **Tab switching preserves scroll position:** Users can pause work and return to same position
+
+## Onboarding Flow (First-Time Users Only)
+
+Onboarding screens appear once on app launch, then never again:
+
+```
+App Start
+   │
+   ├─ Check SharedPreferences.hasSeenOnboarding()
+   │
+   ├─ If FALSE: Show Onboarding
+   │   ├─ Screen 1: Welcome (App benefits, tagline)
+   │   ├─ Screen 2: Permissions (Notification request)
+   │   ├─ Screen 3: Tutorial (3-step feature overview)
+   │   └─ [Start Using App] → Mark hasSeenOnboarding = TRUE, show home
+   │
+   └─ If TRUE: Skip to Home (Inventory tab)
+```
+
+See [Wireframe 05: Onboarding Flow](./wireframes/05-onboarding-flow.md) for detailed screens.
 
 ## Complete Navigation Flow
 
@@ -131,29 +164,71 @@ The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own
 └─────────────────────────────────────┘
 ```
 
-### Tab 3: Shopping List (Future)
+### Tab 3: Shopping List
+
+**Question: How do users navigate FROM Inventory TO Shopping List?**
+
+Answer: Via bottom tab bar (direct tab switch).
+
+**Option 2 (Future Enhancement, v2):** "Add to Shopping List" button in Item Detail screen.
 
 ```
-┌─────────────────────────────────────┐
-│   Shopping List Tab (Root)          │
-│  • Suggested items                  │
-│  • Add to list                      │
-└─────────────────────────────────────┘
+Current Flow (M1):
+Inventory List (Tab 1) ──[Tap Tab 3]──> Shopping List (Tab 3)
+                                      • Manage lists
+                                      • Add items
+                                      • View suggestions
+
+Future Flow (v2):
+Item Detail Screen
+   │
+   │ Tap "Add to Shopping List" button
+   ▼
+Select list dropdown (or create new)
+   │
+   ├─ Confirmation toast
+   ├─ Optional: Switch to Shopping tab to show added item
+   └─ Return to Item Detail
+```
+
+**M1 Implementation:** Direct tab switching via bottom nav (no cross-tab linking).
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│   06. Shopping List Tab (Root)                               │
+│  • My Lists (active list dropdown)                           │
+│  • List items with checkboxes                                │
+│  • Suggested items (from inventory low stock)                │
+│  • Add item button                                           │
+│  • Share/export list button                                  │
+└──────────────────────────────────────────────────────────────┘
       │
-      │ (MVP: Minimal, v2: Full feature)
+      │ Tap shopping item (future)
       ▼
+Item management (add qty, notes, delete)
 ```
 
-### Tab 4: Settings (Future)
+See [Wireframe 06: Shopping List Tab](./wireframes/06-shopping-list-tab.md) for details.
+
+### Tab 4: Settings
 
 ```
-┌─────────────────────────────────────┐
-│   Settings Screen (Root)            │
-│  • Notification preferences         │
-│  • About app                        │
-│  • Privacy settings                 │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│   07. Settings Screen (Root)                                 │
+│  • Account & Data                                            │
+│  • Notifications & Alerts                                    │
+│  • Preferences                                               │
+│  • Support & Feedback                                        │
+│  • Legal (Privacy, Terms)                                    │
+└──────────────────────────────────────────────────────────────┘
+      │
+      │ Tap menu item → Navigate to sub-screen (future)
+      │ For MVP: All options in collapsed/toggle form
+      ▼
+(No sub-screens in M1; Settings is single root screen)
 ```
+
+See [Wireframe 07: Settings Screen](./wireframes/07-settings-screen.md) for details.
 
 ## Back Button Behavior
 
@@ -460,8 +535,15 @@ Navigation flows to test:
 
 ## Related Documentation
 
+- [UX Index](./ux.md) - Overview of all 8 screens and design system
+- [Design Tokens](./design-tokens.md) - Color, typography, spacing, animations
 - [UX Patterns](./ux-patterns.md) - Component interaction patterns
-- [Wireframe 01: Inventory List](./wireframes/01-inventory-list.md)
-- [Wireframe 02: Add Item Modal](./wireframes/02-add-item-modal.md)
-- [Wireframe 03: Item Detail](./wireframes/03-item-detail.md)
-- [Wireframe 04: Expiring Soon](./wireframes/04-expiring-soon-tab.md)
+- **Wireframes:**
+  - [05 - Onboarding Flow](./wireframes/05-onboarding-flow.md)
+  - [01 - Inventory List](./wireframes/01-inventory-list.md)
+  - [02 - Add Item Modal](./wireframes/02-add-item-modal.md)
+  - [03 - Item Detail](./wireframes/03-item-detail.md)
+  - [04 - Expiring Soon](./wireframes/04-expiring-soon-tab.md)
+  - [06 - Shopping List Tab](./wireframes/06-shopping-list-tab.md)
+  - [07 - Settings Screen](./wireframes/07-settings-screen.md)
+  - [08 - Empty States Guide](./wireframes/08-empty-states-guide.md)
