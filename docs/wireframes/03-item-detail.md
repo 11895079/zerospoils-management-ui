@@ -120,3 +120,9 @@ When user taps Edit:
 - Status updates in real-time as days pass (date-aware UI)
 - "Added 2 weeks ago" calculates from item creation date
 - If item expired, show clear warning at top: "🚨 This item has expired"
+
+## Empty State
+The Item Detail screen assumes a valid item context (navigated from an inventory list or deep link).
+There is no separate "empty" variant of this screen; if the item cannot be loaded (e.g., deleted or missing),
+the app should handle this by showing an error message and redirecting the user back to the inventory list
+or a generic error/empty-state pattern defined for inventory navigation.
