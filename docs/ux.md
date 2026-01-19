@@ -2,18 +2,17 @@
 
 This folder contains wireframe specifications and UX patterns for ZeroSpoils MVP screens.
 
-## Wireframes (by priority)
+## Wireframes (M1 Complete)
 
-### Core MVP Screens
+### Core MVP Screens (✅ 8 of 8 complete)
 1. **[01 - Inventory List](./wireframes/01-inventory-list.md)** – Main screen showing all items grouped by category
 2. **[02 - Add Item Modal](./wireframes/02-add-item-modal.md)** – Form to add new item (name, category, expiry, notes)
 3. **[03 - Item Detail](./wireframes/03-item-detail.md)** – View, edit, delete single item
 4. **[04 - Expiring Soon Tab](./wireframes/04-expiring-soon-tab.md)** – Quick view of items expiring in next 7 days
-
-### Future Screens (Out of M1 scope)
-- Shopping List Tab – Separate tab for meal planning
-- Settings Screen – User preferences, notifications, app info
-- Onboarding Flow – Welcome & tutorial screens (M2)
+5. **[05 - Onboarding Flow](./wireframes/05-onboarding-flow.md)** – Welcome, permissions, quick tutorial (3 screens)
+6. **[06 - Shopping List Tab](./wireframes/06-shopping-list-tab.md)** – List management, item suggestions, categories
+7. **[07 - Settings Screen](./wireframes/07-settings-screen.md)** – Preferences, notifications, account, help links
+8. **[08 - Empty States Guide](./wireframes/08-empty-states-guide.md)** – Cross-screen empty state patterns and messaging
 
 ## Design Reference
 
@@ -66,7 +65,11 @@ docs/
     ├── 01-inventory-list.md
     ├── 02-add-item-modal.md
     ├── 03-item-detail.md
-    └── 04-expiring-soon-tab.md
+    ├── 04-expiring-soon-tab.md
+    ├── 05-onboarding-flow.md
+    ├── 06-shopping-list-tab.md
+    ├── 07-settings-screen.md
+    └── 08-empty-states-guide.md
 ```
 
 ## Wireframe Template
