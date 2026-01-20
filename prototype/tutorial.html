@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Interactive Tutorial</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Tutorial Overlay Styles */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 9998;
+      display: none;
+    }
+
+    .tutorial-overlay.active {
+      display: block;
+    }
+
+    .tutorial-spotlight {
+      position: absolute;
+      border: 3px solid #51cf66;
+      border-radius: 12px;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+      z-index: 9999;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .tutorial-tooltip {
+      position: absolute;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 280px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      transition: all 0.3s ease;
+    }
+
+    .tutorial-tooltip h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .tutorial-tooltip p {
+      margin: 0 0 16px;
+      font-size: 15px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .tutorial-progress {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 16px;
+    }
+
+    .tutorial-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .tutorial-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-tutorial-skip {
+      background: transparent;
+      color: #666;
+    }
+
+    .btn-tutorial-next {
+      background: #2f9e44;
+      color: white;
+    }
+
+    .btn-tutorial-next:hover {
+      background: #26863a;
+    }
+
+    /* Demo Badge */
+    .demo-badge {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ffc107;
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 9997;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Pulse animation for highlighted elements */
+    @keyframes pulse {
+      0%, 100% {
+        border-color: #51cf66;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 16px rgba(81, 207, 102, 0.45);
+      }
+      50% {
+        border-color: #40c057;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 22px rgba(81, 207, 102, 0.7);
+      }
+    }
+
+    .tutorial-spotlight.pulse {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Demo Badge -->
+    <div class="demo-badge">📚 Demo Mode</div>
+
+    <!-- Header -->
+    <header class="app-header">
+      <h1>Inventory</h1>
+    </header>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" class="search-input" placeholder="Search items..." />
+    </div>
+
+    <!-- Filter Chips -->
+    <div class="filter-chips">
+      <button class="chip chip-active">All (6)</button>
+      <button class="chip">Dairy</button>
+      <button class="chip">Produce</button>
+      <button class="chip">Prepared</button>
+    </div>
+
+    <div class="filter-chips">
+      <button class="chip">Fridge</button>
+      <button class="chip">Freezer</button>
+      <button class="chip">Pantry</button>
+    </div>
+
+    <!-- Item List -->
+    <div class="item-list">
+      <!-- First item - will be highlighted in tutorial -->
+      <a href="#" id="first-item" class="item-card" onclick="advanceTutorial(2); return false;">
+        <div class="item-icon">🥛</div>
+        <div class="item-info">
+          <h3>Milk</h3>
+          <p>🏠 Fridge • Expires in 3 days</p>
+        </div>
+        <div class="item-badge badge-warning">Soon</div>
+      </a>
+
+      <a href="#" class="item-card">
+        <div class="item-icon">🥕</div>
+        <div class="item-info">
+          <h3>Carrots</h3>
+          <p>🏠 Fridge • Expires in 6 days</p>
+        </div>
+      </a>
+
+      <a href="#" class="item-card">
+        <div class="item-icon">🍚</div>
+        <div class="item-info">
+          <h3>Cooked Rice</h3>
+          <p>🧊 Freezer • Prepared Jan 10</p>
+        </div>
+      </a>
+
+      <a href="#" class="item-card">
+        <div class="item-icon">🧀</div>
+        <div class="item-info">
+          <h3>Cheese</h3>
+          <p>🏠 Fridge • Expires in 9 days</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- FAB -->
+    <button id="fab-button" class="fab" onclick="advanceTutorial(5); return false;">
+      +
+    </button>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="#" class="active" id="inventory-tab">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="#" id="expiring-tab" onclick="advanceTutorial(4); return false;">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="#" id="shopping-tab" onclick="advanceTutorial(6); return false;">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="#" id="progress-tab">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Tutorial Overlay -->
+  <div class="tutorial-overlay" id="tutorial-overlay"></div>
+  <div class="tutorial-spotlight pulse" id="tutorial-spotlight"></div>
+  <div class="tutorial-tooltip" id="tutorial-tooltip"></div>
+
+  <script>
+    // Tutorial steps configuration
+    const tutorialSteps = [
+      {
+        target: '#inventory-tab',
+        title: 'Welcome! 👋',
+        description: 'Here are some demo items in your inventory. Let\'s explore how the app works.',
+        position: 'top',
+        progress: 'Step 1 of 7'
+      },
+      {
+        target: '#first-item',
+        title: 'Tap to View Details',
+        description: 'Tap this item to see details and available actions like marking it as consumed.',
+        position: 'bottom',
+        progress: 'Step 2 of 7'
+      },
+      {
+        target: null, // Triggered after item tap
+        title: 'Mark as Consumed ✓',
+        description: 'When you use an item, mark it as consumed. This helps track your waste reduction!',
+        position: 'top',
+        progress: 'Step 3 of 7'
+      },
+      {
+        target: '#expiring-tab',
+        title: 'Check What\'s Expiring ⏰',
+        description: 'This tab shows items about to expire so you can prioritize eating them first.',
+        position: 'top',
+        progress: 'Step 4 of 7'
+      },
+      {
+        target: '#fab-button',
+        title: 'Add New Items ➕',
+        description: 'Use the + button to add items as you buy or prepare them. Include expiry dates!',
+        position: 'top',
+        progress: 'Step 5 of 7'
+      },
+      {
+        target: '#shopping-tab',
+        title: 'Shopping List 🛒',
+        description: 'Create shopping lists and convert purchased items to your inventory.',
+        position: 'top',
+        progress: 'Step 6 of 7'
+      },
+      {
+        target: '#progress-tab',
+        title: 'Track Your Progress 📊',
+        description: 'See how much you\'ve reduced waste and saved money over time.',
+        position: 'top',
+        progress: 'Step 7 of 7'
+      }
+    ];
+
+    let currentStep = 0;
+
+    // Initialize tutorial on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        showTutorialStep(0);
+      }, 500);
+    });
+
+    function showTutorialStep(stepIndex) {
+      if (stepIndex >= tutorialSteps.length) {
+        completeTutorial();
+        return;
+      }
+
+      currentStep = stepIndex;
+      const step = tutorialSteps[stepIndex];
+      
+      if (!step.target) {
+        // Skip steps without targets
+        return;
+      }
+
+      const targetElement = document.querySelector(step.target);
+      if (!targetElement) return;
+
+      // Show overlay
+      document.getElementById('tutorial-overlay').classList.add('active');
+
+      // Position spotlight
+      const rect = targetElement.getBoundingClientRect();
+      const spotlight = document.getElementById('tutorial-spotlight');
+      spotlight.style.top = `${rect.top - 5}px`;
+      spotlight.style.left = `${rect.left - 5}px`;
+      spotlight.style.width = `${rect.width + 10}px`;
+      spotlight.style.height = `${rect.height + 10}px`;
+      spotlight.style.display = 'block';
+
+      // Position tooltip
+      const tooltip = document.getElementById('tutorial-tooltip');
+      tooltip.innerHTML = `
+        <div class="tutorial-progress">${step.progress}</div>
+        <h3>${step.title}</h3>
+        <p>${step.description}</p>
+        <div class="tutorial-actions">
+          <button class="btn-tutorial-skip" onclick="skipTutorial()">Skip Tutorial</button>
+          <button class="btn-tutorial-next" onclick="nextStep()">
+            ${stepIndex === tutorialSteps.length - 1 ? 'Finish' : 'Next'}
+          </button>
+        </div>
+      `;
+
+      // Position tooltip relative to target
+      const tooltipY = step.position === 'top' 
+        ? rect.top - 240 
+        : rect.bottom + 20;
+      
+      tooltip.style.top = `${tooltipY}px`;
+      tooltip.style.left = `50%`;
+      tooltip.style.transform = 'translateX(-50%)';
+      tooltip.style.display = 'block';
+    }
+
+    function nextStep() {
+      currentStep++;
+      showTutorialStep(currentStep);
+    }
+
+    function advanceTutorial(toStep) {
+      if (currentStep === toStep - 1) {
+        showTutorialStep(toStep);
+      }
+    }
+
+    function skipTutorial() {
+      if (confirm('Skip tutorial? You can always restart it from Settings.')) {
+        completeTutorial();
+      }
+    }
+
+    function completeTutorial() {
+      document.getElementById('tutorial-overlay').classList.remove('active');
+      document.getElementById('tutorial-spotlight').style.display = 'none';
+      document.getElementById('tutorial-tooltip').style.display = 'none';
+      
+      alert('🎉 Tutorial complete! Now clear demo data and add your real items.\n\nDemo data cleared. You\'re ready to start!');
+      
+      // In real app, would navigate to empty inventory
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

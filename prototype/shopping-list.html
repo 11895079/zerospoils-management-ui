@@ -82,6 +82,10 @@
         <div class="nav-icon">🛒</div>
         <div class="nav-label">Shopping</div>
       </a>
+        <a href="progress.html">
+          <div class="nav-icon">📊</div>
+          <div class="nav-label">Progress</div>
+        </a>
     </nav>
   </div>
 
@@ -97,7 +101,12 @@
           <span class="item-emoji-large">🥚</span>
           <h3>Eggs</h3>
         </div>
-        <p class="help-text">This item will be added to your inventory. When does it expire?</p>
+        <p class="help-text">This item will be added to your inventory. How many and when do they expire?</p>
+
+        <div class="form-group">
+          <label for="convertQuantity">Quantity Purchased</label>
+          <input type="number" id="convertQuantity" min="1" value="1" />
+        </div>
         
         <div class="form-group">
           <label for="convertExpiry">Expiry Date</label>
@@ -147,6 +156,9 @@
     }
 
     function showConvertModal() {
+      const purchasedCount = document.querySelectorAll('.purchased-section input[type="checkbox"]:checked').length;
+      const qtyInput = document.getElementById('convertQuantity');
+      qtyInput.value = purchasedCount > 0 ? purchasedCount : 1;
       document.getElementById('convertModal').style.display = 'flex';
     }
 
@@ -156,7 +168,8 @@
 
     function confirmConvert() {
       hideConvertModal();
-      showToast('✓ Eggs added to inventory!');
+      const qty = document.getElementById('convertQuantity').value || 1;
+      showToast(`✓ ${qty} Eggs added to inventory!`);
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);
