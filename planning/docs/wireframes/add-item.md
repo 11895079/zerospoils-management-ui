@@ -51,9 +51,19 @@ graph TD
 │  │ Dairy                    ▼ ││
 │  └─────────────────────────────┘│
 │                                 │
+│  Type *                         │ ← Segmented control
+│  ┌─────────────────────────────┤
+│  │  Raw   |   Prepared (Cooked)│ │
+│  └─────────────────────────────┘│
+│                                 │
 │  Location *                     │
 │  ┌─────────────────────────────┤ ← Dropdown
 │  │ Fridge                   ▼ ││
+│  └─────────────────────────────┘│
+│                                 │
+│  Prepared Date (if Prepared)    │
+│  ┌─────────────────────────────┤ ← Date picker
+│  │ Jan 19, 2026             📅││
 │  └─────────────────────────────┘│
 │                                 │
 │  Quantity                       │
@@ -100,6 +110,15 @@ graph TD
 - **Validation:** Real-time; required fields marked with * and red border if empty
 - **Save behavior:** Save → schedule notification → close sheet → scroll to new item in list
 - **Dismiss:** Swipe down, tap Cancel, or tap outside sheet (confirm if form dirty)
+
+### Prepared/Cooked Items
+- **Type toggle:** Raw vs Prepared (Cooked)
+- **Defaults when Prepared:**
+  - Location → Freezer
+  - Expiry → +30 days
+  - Shows "Prepared Date" field (defaults to today)
+- **Visuals:** Use 🍲 icon for prepared foods; label badge "Prepared"
+- **Inventory browsing:** Prepared items surface in Freezer location for quick dinner planning
 
 ## Accessibility
 - [ ] All fields have accessible labels (not just placeholders)
