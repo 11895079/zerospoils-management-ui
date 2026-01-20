@@ -42,6 +42,8 @@ graph TD
 ├─────────────────────────────────┤
 │ [All] [Dairy] [Fruit] [Veg] →  │ ← Category chips (horizontal scroll)
 ├─────────────────────────────────┤
+│ [All Locations] [Fridge] [Freezer] [Pantry] → │ ← Location filter chips
+├─────────────────────────────────┤
 │                                 │
 │  ┌─────────────────────────────┤
 │  │ 🥛 Milk             Fridge  │ │ ← Item card
@@ -61,6 +63,11 @@ graph TD
 │  ┌─────────────────────────────┤
 │  │ 🍞 Bread            Pantry  │ │
 │  │ Expired 2 days ago   🔴     │ │ ← Expired (red)
+│  └─────────────────────────────┘│
+│                                 │
+│  ┌─────────────────────────────┤
+│  │ 🍲 Leftover soup    Freezer │ │ ← Prepared item
+│  │ Prepared on Jan 10, 2026    │ │
 │  └─────────────────────────────┘│
 │                                 │
 └─────────────────────────────────┘

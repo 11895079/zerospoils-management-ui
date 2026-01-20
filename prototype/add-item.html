@@ -20,6 +20,8 @@
         <div class="form-group">
           <label for="name">Name *</label>
           <input type="text" id="name" placeholder="Milk" required />
+           <div id="presetHelper" class="help-text" style="display:none;">Preset applied:</div>
+           <div id="presetSuggestions" class="preset-suggestions" style="display:none;"></div>
         </div>
 
         <div class="form-group">
@@ -31,8 +33,22 @@
             <option value="veg">🥕 Vegetables</option>
             <option value="meat">🍗 Meat</option>
             <option value="bakery">🍞 Bakery</option>
+            <option value="prepared">🍲 Prepared</option>
             <option value="other">📦 Other</option>
           </select>
+        </div>
+
+        <div class="form-group">
+          <label>Type *</label>
+          <div class="segmented">
+            <label><input type="radio" name="type" id="typeRaw" value="raw" checked> Raw</label>
+            <label><input type="radio" name="type" id="typePrepared" value="prepared"> Prepared (Cooked)</label>
+          </div>
+        </div>
+
+        <div class="form-group" id="preparedDateGroup" style="display:none;">
+          <label for="preparedDate">Prepared Date</label>
+          <input type="date" id="preparedDate" />
         </div>
 
         <div class="form-group">
@@ -64,6 +80,12 @@
         </div>
 
         <div class="form-group">
+          <label for="price">Price Paid (optional) 💵</label>
+          <input type="text" id="price" placeholder="$3.99" />
+          <p class="help-text">Format: $3.99 or 3.99</p>
+        </div>
+
+        <div class="form-group">
           <label for="expiry">Expiry Date *</label>
           <div class="date-input-group">
             <input type="date" id="expiry" required />
@@ -88,6 +110,117 @@
     // Camera button simulation
     document.querySelector('.camera-btn').addEventListener('click', function() {
       alert('📷 Camera OCR would open here\n\nIn the real app, this would:\n1. Open device camera\n2. Scan expiry date text\n3. Auto-fill the date field');
+    });
+
+    // Prepared toggle behavior
+    const preparedGroup = document.getElementById('preparedDateGroup');
+    const preparedDate = document.getElementById('preparedDate');
+    const typeRaw = document.getElementById('typeRaw');
+    const typePrepared = document.getElementById('typePrepared');
+    const locationSel = document.getElementById('location');
+    const expiryInput = document.getElementById('expiry');
+
+    const todayISO = new Date().toISOString().split('T')[0];
+    preparedDate.value = todayISO;
+
+    function applyPreparedDefaults(isPrepared) {
+      if (isPrepared) {
+        preparedGroup.style.display = '';
+        locationSel.value = 'freezer';
+        const d = new Date(); d.setDate(d.getDate() + 30);
+        expiryInput.value = d.toISOString().split('T')[0];
+      } else {
+        preparedGroup.style.display = 'none';
+        locationSel.value = 'fridge';
+        const d = new Date(); d.setDate(d.getDate() + 7);
+        expiryInput.value = d.toISOString().split('T')[0];
+      }
+    }
+
+    typePrepared.addEventListener('change', () => applyPreparedDefaults(true));
+    typeRaw.addEventListener('change', () => applyPreparedDefaults(false));
+
+    // Prepared presets (local stub; can point to external catalog or server cache later)
+    const preparedPresets = [
+      { name: 'Jollof rice', fridgeDays: 4, freezerDays: 30, recommended: 'fridge' },
+      { name: 'Fried rice', fridgeDays: 4, freezerDays: 30, recommended: 'fridge' },
+      { name: 'Curry', fridgeDays: 4, freezerDays: 90, recommended: 'fridge' },
+      { name: 'Soup', fridgeDays: 4, freezerDays: 90, recommended: 'freezer' },
+      { name: 'Stew (meat)', fridgeDays: 4, freezerDays: 90, recommended: 'fridge' },
+      { name: 'Pasta dish', fridgeDays: 5, freezerDays: 60, recommended: 'fridge' },
+      { name: 'Beans (cooked)', fridgeDays: 5, freezerDays: 180, recommended: 'freezer' },
+      { name: 'Chili', fridgeDays: 4, freezerDays: 90, recommended: 'freezer' },
+      { name: 'Lasagna', fridgeDays: 5, freezerDays: 90, recommended: 'fridge' }
+    ];
+
+    const nameInput = document.getElementById('name');
+    const presetSuggestions = document.getElementById('presetSuggestions');
+    const presetHelper = document.getElementById('presetHelper');
+    const categorySel = document.getElementById('category');
+
+    function isPreparedContext() {
+      return categorySel.value === 'prepared' || typePrepared.checked;
+    }
+
+    function renderSuggestions(matches) {
+      if (!matches.length || !isPreparedContext()) {
+        presetSuggestions.style.display = 'none';
+        return;
+      }
+      presetSuggestions.innerHTML = matches.map(m => `
+        <button type="button" class="preset-suggestion" data-name="${m.name}">
+          <div class="preset-suggestion-title">${m.name}</div>
+          <div class="preset-suggestion-detail">Fridge ${m.fridgeDays}d · Freezer ${m.freezerDays}d</div>
+        </button>
+      `).join('');
+      presetSuggestions.style.display = 'block';
+    }
+
+    function applyPreset(preset) {
+      const preferred = locationSel.value || preset.recommended;
+      if (preferred) {
+        locationSel.value = preferred;
+      }
+      const days = locationSel.value === 'freezer' ? preset.freezerDays : preset.fridgeDays;
+      if (days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        expiryInput.value = d.toISOString().split('T')[0];
+        preparedDate.value = todayISO;
+      }
+      presetHelper.style.display = 'block';
+      presetHelper.textContent = `Preset applied: ${preset.name} (${locationSel.value === 'freezer' ? preset.freezerDays : preset.fridgeDays} days)`;
+      presetSuggestions.style.display = 'none';
+      typePrepared.checked = true;
+      applyPreparedDefaults(true);
+    }
+
+    nameInput.addEventListener('input', (e) => {
+      if (!isPreparedContext()) {
+        presetSuggestions.style.display = 'none';
+        return;
+      }
+      const term = e.target.value.trim().toLowerCase();
+      if (term.length < 2) {
+        presetSuggestions.style.display = 'none';
+        return;
+      }
+      const matches = preparedPresets.filter(p => p.name.toLowerCase().includes(term)).slice(0, 5);
+      renderSuggestions(matches);
+    });
+
+    presetSuggestions.addEventListener('click', (e) => {
+      const btn = e.target.closest('.preset-suggestion');
+      if (!btn) return;
+      const preset = preparedPresets.find(p => p.name === btn.dataset.name);
+      if (preset) {
+        nameInput.value = preset.name;
+        applyPreset(preset);
+      }
+    });
+
+    categorySel.addEventListener('change', () => {
+      presetSuggestions.style.display = 'none';
     });
   </script>
 </body>

@@ -27,12 +27,18 @@ Interactive clickable prototype for user testing, converted from ASCII wireframe
 | **Add Item** | `add-item.html` | Form to add new food items with OCR simulation |
 | **Item Detail** | `item-detail.html` | View item details, mark consumed/wasted |
 | **Expiring Soon** | `expiring-soon.html` | Items grouped by urgency (Today/This Week/Expired) |
-| **Shopping List** | `shopping-list.html` | Checkable shopping list with convert-to-inventory flow |
+| **Shopping List** | `shopping-list.html` | Checkable shopping list with **convert-to-inventory modal** |
+| **Progress Dashboard** | `progress.html` | Local analytics: waste %, savings, impact metrics |
+| **Interactive Tutorial** | `tutorial.html` | Guided walkthrough with spotlight overlays (demo) |
+| **Onboarding Flow** | `onboarding/welcome.html` | 8-screen educational onboarding (see onboarding/README.md) |
 
 ## Features
 
 ✅ **Fully clickable navigation** between screens  
 ✅ **Interactive elements**: checkboxes, buttons, modals  
+✅ **Shopping → Inventory conversion**: Modal with expiry date + location picker  
+✅ **Progress dashboard**: Waste %, savings, environmental impact visualization  
+✅ **Interactive tutorial**: Spotlight overlays guide users through app  
 ✅ **Toast notifications** for user feedback  
 ✅ **Mobile-first design** (390×844px iPhone frame)  
 ✅ **Responsive** (adapts to real phone screens)  
@@ -95,3 +101,12 @@ After user testing:
 ---
 
 **Questions?** See main repo [`planning/AGENTS.md`](../planning/AGENTS.md) or issue [`#060`](../planning/issues/060-clickable-prototype-walkthrough-capture-feedback-5-users.md).
+
+| **Settings** | `settings.html` | Profile, notifications, privacy controls, app info |
+
+✅ **Price tracking**: Manual entry in shopping list and add item (M1)  
+✅ **Item editing**: Edit item name, location, expiry, price from detail view  
+✅ **Delete confirmation**: Modal confirmation before removing shopping items  
+✅ **Settings page**: Notifications, privacy controls, profile section  
+✅ **Input validation**: Price format hints, date validation  
+✅ **Settings toggles**: Telemetry, notifications, personalized tips (Pro)  

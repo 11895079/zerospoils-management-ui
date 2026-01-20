@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Settings</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 60px 16px 140px;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 16px 12px;
+      margin-bottom: 0;
+    }
+
+    .settings-item {
+      background: white;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .settings-item:last-child {
+      border-bottom: none;
+    }
+
+    .settings-item:hover {
+      background: #f8f9fa;
+    }
+
+    .settings-item-left {
+      flex: 1;
+    }
+
+    .settings-item-label {
+      font-size: 15px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .settings-item-desc {
+      font-size: 13px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .settings-toggle {
+      width: 50px;
+      height: 28px;
+      background: #e9ecef;
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+      border: none;
+      padding: 2px;
+    }
+
+    .settings-toggle.active {
+      background: #2f9e44;
+    }
+
+    .settings-toggle-dot {
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 12px;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: left 0.3s;
+    }
+
+    .settings-toggle.active .settings-toggle-dot {
+      left: 24px;
+    }
+
+    .settings-arrow {
+      color: #ccc;
+      font-size: 18px;
+    }
+
+    .profile-header {
+      background: linear-gradient(135deg, #2f9e44 0%, #26863a 100%);
+      color: white;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      border-radius: 12px;
+    }
+
+    .profile-avatar {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .profile-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .profile-email {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .settings-button {
+      width: calc(100% - 32px);
+      margin: 16px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-secondary-full {
+      background: #e9ecef;
+      color: #333;
+    }
+
+    .btn-secondary-full:hover {
+      opacity: 0.8;
+    }
+
+    .btn-danger-full {
+      background: #ff6b6b;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .btn-danger-full:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <a href="index.html" style="text-decoration:none;color:inherit;font-size:20px;">←</a>
+        <h1 style="margin:0;">Settings</h1>
+      </div>
+    </header>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+      <!-- Profile Section -->
+      <div class="profile-header">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-name">You</div>
+        <div class="profile-email">user@example.com</div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Notifications</h3>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Expiry Alerts</div>
+            <div class="settings-item-desc">Notify when items expire soon</div>
+          </div>
+          <button class="settings-toggle active" onclick="toggleSetting(this)">
+            <div class="settings-toggle-dot"></div>
+          </button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Waste Reminders</div>
+            <div class="settings-item-desc">Weekly summary of waste tracked</div>
+          </div>
+          <button class="settings-toggle active" onclick="toggleSetting(this)">
+            <div class="settings-toggle-dot"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Privacy & Data -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">Privacy & Data</h3>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Telemetry</div>
+            <div class="settings-item-desc">Help us improve with usage data</div>
+          </div>
+          <button class="settings-toggle active" onclick="toggleSetting(this)">
+            <div class="settings-toggle-dot"></div>
+          </button>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Personalized Tips</div>
+            <div class="settings-item-desc">AI tips based on your waste (Pro)</div>
+          </div>
+          <button class="settings-toggle" onclick="toggleSetting(this)" disabled style="opacity:0.5;cursor:not-allowed;">
+            <div class="settings-toggle-dot"></div>
+          </button>
+        </div>
+        <div class="settings-item" style="border-bottom:1px solid #eee;">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Data Privacy</div>
+            <div class="settings-item-desc">View and manage your data</div>
+          </div>
+          <div class="settings-arrow">→</div>
+        </div>
+      </div>
+
+      <!-- App Info -->
+      <div class="settings-section">
+        <h3 class="settings-section-title">App Info</h3>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Version</div>
+          </div>
+          <div style="color:#999;font-size:14px;">1.0.0</div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Help & Support</div>
+          </div>
+          <div class="settings-arrow">→</div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">Send Feedback</div>
+          </div>
+          <div class="settings-arrow">→</div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-item-left">
+            <div class="settings-item-label">About ZeroSpoils</div>
+          </div>
+          <div class="settings-arrow">→</div>
+        </div>
+      </div>
+
+      <!-- Prepared Food Presets -->
+      <div class="settings-section">
+        <div class="settings-header">
+          <div>
+            <p class="settings-label">Prepared Food Presets</p>
+            <p class="settings-subtext">Auto-fill expiry and storage for dishes you cook often</p>
+          </div>
+          <button class="settings-button" style="padding:8px 12px;" onclick="alert('Add preset')">+ Add</button>
+        </div>
+        <div class="preset-card-row">
+          <div class="preset-name">🍚 Jollof rice</div>
+          <div class="preset-detail">Fridge 4d · Freezer 30d</div>
+        </div>
+        <div class="preset-card-row">
+          <div class="preset-name">🍛 Curry</div>
+          <div class="preset-detail">Fridge 4d · Freezer 90d</div>
+        </div>
+        <div class="preset-card-row">
+          <div class="preset-name">🥣 Soup</div>
+          <div class="preset-detail">Fridge 4d · Freezer 90d</div>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div class="settings-section">
+        <button class="settings-button btn-secondary-full" onclick="alert('Sign out pressed')">
+          Sign Out
+        </button>
+        <button class="settings-button btn-danger-full" onclick="alert('Account deleted')">
+          Delete Account
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Nav (no settings tab) -->
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    function toggleSetting(button) {
+      button.classList.toggle('active');
+      const label = button.parentElement.querySelector('.settings-item-label').textContent;
+      const state = button.classList.contains('active') ? 'enabled' : 'disabled';
+      showToast(`✓ ${label} ${state}`);
+    }
+
+    function showToast(message) {
+      // Simple toast (would need proper toast div in real implementation)
+      console.log(message);
+    }
+  </script>
+</body>
+</html>

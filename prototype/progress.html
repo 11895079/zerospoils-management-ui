@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Progress</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Additional styles for progress/stats page */
+    .stats-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 60px 16px 140px;
+      background: #f8f9fa;
+    }
+
+    .stats-hero {
+      background: linear-gradient(135deg, #2f9e44 0%, #26863a 100%);
+      color: white;
+      padding: 24px 20px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(47, 158, 68, 0.3);
+    }
+
+    .stats-hero h1 {
+      font-size: 48px;
+      margin: 0 0 8px;
+      font-weight: bold;
+    }
+
+    .stats-hero p {
+      font-size: 16px;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .stats-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .stat-icon {
+      font-size: 20px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2f9e44;
+    }
+
+    .trend-up {
+      color: #2f9e44;
+      font-size: 14px;
+    }
+
+    .trend-down {
+      color: #ff6b6b;
+      font-size: 14px;
+    }
+
+    .progress-bar-container {
+      margin-top: 12px;
+    }
+
+    .progress-bar {
+      background: #e9ecef;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #2f9e44 0%, #51cf66 100%);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .achievement-badge {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-icon {
+      font-size: 40px;
+    }
+
+    .badge-text h3 {
+      margin: 0 0 4px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .badge-text p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .chart-placeholder {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 20px 32px;
+      margin-bottom: 16px;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-placeholder h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .chart-placeholder p {
+      margin: 0;
+      font-size: 14px;
+      color: #999;
+    }
+
+    .chart-bars {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 120px;
+      margin-top: 16px;
+      gap: 12px;
+      padding-bottom: 12px;
+    }
+
+    .chart-bar {
+      background: linear-gradient(180deg, #51cf66 0%, #2f9e44 100%);
+      width: 30px;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      transition: height 0.3s ease;
+    }
+
+    .chart-bar-label {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .impact-summary {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .impact-summary h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .impact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .impact-item:last-child {
+      border-bottom: none;
+    }
+
+    .impact-icon {
+      font-size: 32px;
+    }
+
+    .impact-text {
+      flex: 1;
+    }
+
+    .impact-text h4 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .impact-text p {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .share-card-section {
+      margin-top: 24px;
+    }
+
+    .share-card {
+      background: linear-gradient(135deg, #2f9e44 0%, #51cf66 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(47, 158, 68, 0.3);
+      margin-bottom: 12px;
+    }
+
+    .share-card h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .share-card-stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 16px;
+      gap: 8px;
+    }
+
+    .share-card-stat {
+      text-align: center;
+    }
+
+    .share-card-stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      display: block;
+    }
+
+    .share-card-stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .share-card-footer {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-bottom: 12px;
+    }
+
+    .btn-share {
+      background: white;
+      color: #2f9e44;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-share:hover {
+      opacity: 0.9;
+    }
+
+    .share-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .share-modal.active {
+      display: flex;
+    }
+
+    .share-modal-content {
+      background: white;
+      border-radius: 16px 16px 0 0;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 390px;
+    }
+
+      .info-link {
+        font-size: 13px;
+        color: #2f9e44;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+
+      .methodology-hint {
+        font-size: 13px;
+        color: #666;
+        margin: 6px 0 0;
+      }
+
+      .methodology-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      .methodology-modal.active {
+        display: flex;
+      }
+
+      .methodology-content {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        width: 100%;
+        max-width: 360px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      }
+
+      .methodology-content h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .methodology-content p {
+        margin: 4px 0 10px;
+        color: #555;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .methodology-list {
+        margin: 0 0 12px 16px;
+        padding: 0;
+        color: #444;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .factor-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        font-size: 13px;
+        color: #333;
+      }
+
+      .factor-grid strong {
+        color: #2f9e44;
+      }
+
+      .methodology-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .methodology-close {
+        padding: 8px 12px;
+        border: none;
+        background: #2f9e44;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+    .share-modal-content h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .share-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .share-option:last-child {
+      border-bottom: none;
+    }
+
+    .share-option-icon {
+      font-size: 24px;
+      width: 40px;
+      text-align: center;
+    }
+
+    .share-option-text {
+      flex: 1;
+    }
+
+    .share-option-text h4 {
+      margin: 0 0 2px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .share-option-text p {
+      margin: 0;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .share-modal-close {
+      background: #f0f0f0;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      width: 100%;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1 style="margin:0;">Progress</h1>
+      </div>
+    </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+      </div>
+    </aside>
+
+    <!-- Stats Content -->
+    <div class="stats-container">
+      <!-- Hero: Waste Reduction % -->
+      <div class="stats-hero">
+        <h1>12%</h1>
+        <p>Food waste this month</p>
+        <div class="progress-bar-container">
+          <div class="progress-label">
+            <span>Goal: 10%</span>
+            <span class="trend-down">↓ 3% from last month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievement Badge -->
+      <div class="achievement-badge">
+        <div class="badge-icon">🏆</div>
+        <div class="badge-text">
+          <h3>Week Streak!</h3>
+          <p>7 days without wasting food. Keep it up!</p>
+        </div>
+      </div>
+
+      <!-- Share Card -->
+      <div class="share-card-section">
+        <div class="share-card">
+          <h3>Share Your Impact 🌍</h3>
+          <div class="share-card-stats">
+            <div class="share-card-stat">
+              <span class="share-card-stat-value">12%</span>
+              <span class="share-card-stat-label">Waste</span>
+            </div>
+            <div class="share-card-stat">
+              <span class="share-card-stat-value">$124</span>
+              <span class="share-card-stat-label">Saved</span>
+            </div>
+            <div class="share-card-stat">
+              <span class="share-card-stat-value">8.2kg</span>
+              <span class="share-card-stat-label">CO₂ Avoided</span>
+            </div>
+          </div>
+          <div class="share-card-footer">Show friends your progress!</div>
+          <button class="btn-share" onclick="showShareModal()">Share</button>
+        </div>
+      </div>
+
+      <!-- This Month Stats -->
+      <p class="stats-subtitle">This Month</p>
+      <div class="stat-card">
+        <div class="stat-row">
+          <span class="stat-label">
+            <span class="stat-icon">✓</span>
+            Items consumed
+          </span>
+          <span class="stat-value">42</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">
+            <span class="stat-icon">🗑️</span>
+            Items wasted
+          </span>
+          <span class="stat-value" style="color: #ff6b6b;">6</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">
+            <span class="stat-icon">💰</span>
+            Estimated savings
+          </span>
+          <span class="stat-value">$24</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">
+            <span class="stat-icon">📦</span>
+            Items tracked
+          </span>
+          <span class="stat-value">18</span>
+        </div>
+      </div>
+
+      <!-- Waste by Category Chart -->
+      <p class="stats-subtitle">Top Waste Categories</p>
+      <div class="chart-placeholder">
+        <h3>What's Getting Wasted?</h3>
+        <div class="chart-bars">
+          <div class="chart-bar" style="height: 80%;">
+            <span class="chart-bar-label">🥛 Dairy</span>
+          </div>
+          <div class="chart-bar" style="height: 50%;">
+            <span class="chart-bar-label">🥬 Produce</span>
+          </div>
+          <div class="chart-bar" style="height: 30%;">
+            <span class="chart-bar-label">🍞 Bread</span>
+          </div>
+          <div class="chart-bar" style="height: 20%;">
+            <span class="chart-bar-label">🥩 Meat</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Waste Reasons -->
+      <p class="stats-subtitle">Why Items Were Wasted</p>
+      <div class="stat-card">
+        <div class="stat-row">
+          <span class="stat-label">Expired before I could use it</span>
+          <span class="stat-value">3</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Went bad (mold, smell, etc.)</span>
+          <span class="stat-value">2</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Bought too much</span>
+          <span class="stat-value">1</span>
+        </div>
+      </div>
+
+      <!-- Impact Summary -->
+      <p class="stats-subtitle">Your Impact</p>
+      <div class="impact-summary">
+        <h3>
+          What You've Saved
+          <span class="info-link" onclick="openMethodology()">How we calculate</span>
+        </h3>
+        <p class="methodology-hint">We use your item prices (or category averages) and standard food impact factors.</p>
+        <div class="impact-item">
+          <div class="impact-icon">💵</div>
+          <div class="impact-text">
+            <h4>$124 saved</h4>
+            <p>Since you started tracking (3 months ago)</p>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-icon">🌍</div>
+          <div class="impact-text">
+            <h4>8.2 kg CO₂ avoided</h4>
+            <p>Equivalent to 34 km driven</p>
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-icon">💧</div>
+          <div class="impact-text">
+            <h4>420 liters water saved</h4>
+            <p>That's 4 bathtubs full!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Trend -->
+      <p class="stats-subtitle">Last 7 Days</p>
+      <div class="chart-placeholder">
+        <h3>Daily Consumption vs Waste</h3>
+        <div class="chart-bars">
+          <div class="chart-bar" style="height: 90%;">
+            <span class="chart-bar-label">Mon</span>
+          </div>
+          <div class="chart-bar" style="height: 70%;">
+            <span class="chart-bar-label">Tue</span>
+          </div>
+          <div class="chart-bar" style="height: 85%;">
+            <span class="chart-bar-label">Wed</span>
+          </div>
+          <div class="chart-bar" style="height: 60%;">
+            <span class="chart-bar-label">Thu</span>
+          </div>
+          <div class="chart-bar" style="height: 95%;">
+            <span class="chart-bar-label">Fri</span>
+          </div>
+          <div class="chart-bar" style="height: 75%;">
+            <span class="chart-bar-label">Sat</span>
+          </div>
+          <div class="chart-bar" style="height: 80%;">
+            <span class="chart-bar-label">Sun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+      <div class="share-modal-content">
+        <h3>Share Your Progress</h3>
+        <div class="share-option" onclick="copyShareText()">
+          <div class="share-option-icon">📋</div>
+          <div class="share-option-text">
+            <h4>Copy Text</h4>
+            <p>Share to Messages, Email, etc.</p>
+          </div>
+        </div>
+        <div class="share-option" onclick="shareImage()">
+          <div class="share-option-icon">📸</div>
+          <div class="share-option-text">
+            <h4>Share as Image</h4>
+            <p>Download and share on social</p>
+          </div>
+        </div>
+        <div class="share-option" onclick="shareLink()">
+          <div class="share-option-icon">🔗</div>
+          <div class="share-option-text">
+            <h4>Copy Link</h4>
+            <p>Share your public profile (soon)</p>
+          </div>
+        </div>
+        <button class="share-modal-close" onclick="closeShareModal()">Close</button>
+      </div>
+    </div>
+
+    <!-- Methodology Modal -->
+    <div class="methodology-modal" id="methodologyModal" onclick="closeMethodology(event)">
+      <div class="methodology-content">
+        <h3>How we estimate savings</h3>
+        <p>We combine your item prices (or category averages) with standard impact factors.</p>
+        <ul class="methodology-list">
+          <li>Money saved: price x portion eaten instead of wasted.</li>
+          <li>CO2 avoided: item mass x emission factor x portion eaten.</li>
+          <li>Water saved: item mass x water factor x portion eaten.</li>
+        </ul>
+        <div class="factor-grid">
+          <div><strong>Beef</strong></div><div>27 kg CO2/kg | 15000 L/kg</div>
+          <div><strong>Poultry</strong></div><div>6.9 kg CO2/kg | 4300 L/kg</div>
+          <div><strong>Dairy</strong></div><div>3.0 kg CO2/kg | 1000 L/kg</div>
+          <div><strong>Bread/Grains</strong></div><div>1.1 kg CO2/kg | 1600 L/kg</div>
+          <div><strong>Produce</strong></div><div>0.5 kg CO2/kg | 400 L/kg</div>
+        </div>
+        <p class="methodology-hint">Portion eaten = 1 - waste percent logged. We use category defaults when price or weight is missing.</p>
+        <div class="methodology-actions">
+          <button class="methodology-close" onclick="closeMethodology(event)">Got it</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      function toggleDrawer(open) {
+        const drawer = document.getElementById('sideDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        if (open) {
+          drawer.classList.add('open');
+          backdrop.classList.add('show');
+        } else {
+          drawer.classList.remove('open');
+          backdrop.classList.remove('show');
+        }
+      }
+
+      function showShareModal() {
+        document.getElementById('shareModal').classList.add('active');
+      }
+
+      function closeShareModal() {
+        document.getElementById('shareModal').classList.remove('active');
+      }
+
+      function copyShareText() {
+        const text = '🌍 I\'m reducing food waste with ZeroSpoils! This month: 12% waste, $124 saved, 8.2kg CO₂ avoided. Join me!';
+        navigator.clipboard.writeText(text).then(() => {
+          alert('✓ Copied to clipboard!');
+          closeShareModal();
+        });
+      }
+
+      function shareImage() {
+        alert('📸 In the Flutter app, this will generate a shareable image card. For now, take a screenshot!');
+      }
+
+      function shareLink() {
+        alert('🔗 Public profiles coming soon! This will let users share their progress with a link.');
+      }
+
+      function openMethodology() {
+        document.getElementById('methodologyModal').classList.add('active');
+      }
+
+      function closeMethodology(event) {
+        const modal = document.getElementById('methodologyModal');
+        const isBackdrop = event && event.target === modal;
+        const isButton = event && event.target.classList.contains('methodology-close');
+        if (isBackdrop || isButton) {
+          modal.classList.remove('active');
+        }
+      }
+    </script>
+
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="progress.html" class="active">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

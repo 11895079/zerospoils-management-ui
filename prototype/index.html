@@ -8,11 +8,31 @@
 </head>
 <body>
   <div class="mobile-frame">
-    <!-- Header -->
+    <!-- Header with Onboarding Link -->
     <header class="app-header">
-      <h1>Inventory</h1>
-      <button class="filter-btn">Filter</button>
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1>Inventory</h1>
+      </div>
+      <div class="header-right">
+        <button class="filter-btn">Filter</button>
+        <a href="onboarding/welcome.html" class="help-btn" title="Onboarding">ℹ️</a>
+      </div>
     </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+      </div>
+    </aside>
 
     <!-- Search Bar -->
     <div class="search-bar">
@@ -26,6 +46,7 @@
       <button class="chip">Fruit</button>
       <button class="chip">Veg</button>
       <button class="chip">Meat</button>
+      <button class="chip">Prepared</button>
     </div>
 
     <!-- Item Cards -->
@@ -74,6 +95,15 @@
           <p class="expiry">Expires in 7 days</p>
         </div>
       </a>
+
+      <a href="item-detail.html?item=soup" class="item-card">
+        <div class="item-icon">🍲</div>
+        <div class="item-info">
+          <h3>Leftover soup</h3>
+          <p class="location">Freezer</p>
+          <p class="expiry">Prepared on Jan 10, 2026 • Good for 30 days</p>
+        </div>
+      </a>
     </div>
 
     <!-- FAB -->
@@ -93,7 +123,24 @@
         <div class="nav-icon">🛒</div>
         <div class="nav-label">Shopping</div>
       </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
     </nav>
   </div>
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
+  </script>
 </body>
 </html>

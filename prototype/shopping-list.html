@@ -10,8 +10,25 @@
   <div class="mobile-frame">
     <!-- Header -->
     <header class="app-header">
-      <h1>Shopping List</h1>
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1>Shopping List</h1>
+      </div>
     </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+      </div>
+    </aside>
 
     <!-- Shopping List Content -->
     <div class="shopping-content">
@@ -82,6 +99,10 @@
         <div class="nav-icon">🛒</div>
         <div class="nav-label">Shopping</div>
       </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
     </nav>
   </div>
 
@@ -97,7 +118,18 @@
           <span class="item-emoji-large">🥚</span>
           <h3>Eggs</h3>
         </div>
-        <p class="help-text">This item will be added to your inventory. When does it expire?</p>
+        <p class="help-text">This item will be added to your inventory. How many and when do they expire?</p>
+
+        <div class="form-group">
+          <label for="convertQuantity">Quantity Purchased</label>
+          <input type="number" id="convertQuantity" min="1" value="1" />
+        </div>
+        
+        <div class="form-group">
+          <label for="convertPrice">Price Paid (optional) 💵</label>
+          <input type="text" id="convertPrice" placeholder="$3.99" />
+          <p class="help-text">Enter price to track spending</p>
+        </div>
         
         <div class="form-group">
           <label for="convertExpiry">Expiry Date</label>
@@ -121,6 +153,21 @@
     </div>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <header class="modal-header-simple">
+        <h2>Delete Item?</h2>
+        <button class="close-btn" onclick="hideDeleteModal()">Close</button>
+      </header>
+      <div class="modal-body">
+        <p style="text-align:center;color:#666;">Remove this item from shopping list?</p>
+        <button class="btn btn-primary" onclick="confirmDelete()" style="background:#ff6b6b;">Delete</button>
+        <button class="btn btn-text" onclick="hideDeleteModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
@@ -129,6 +176,18 @@
     const today = new Date();
     today.setDate(today.getDate() + 7);
     document.getElementById('convertExpiry').value = today.toISOString().split('T')[0];
+
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
 
     function handleCheck(checkbox) {
       if (checkbox.checked) {
@@ -147,6 +206,9 @@
     }
 
     function showConvertModal() {
+      const purchasedCount = document.querySelectorAll('.purchased-section input[type="checkbox"]:checked').length;
+      const qtyInput = document.getElementById('convertQuantity');
+      qtyInput.value = purchasedCount > 0 ? purchasedCount : 1;
       document.getElementById('convertModal').style.display = 'flex';
     }
 
@@ -156,7 +218,10 @@
 
     function confirmConvert() {
       hideConvertModal();
-      showToast('✓ Eggs added to inventory!');
+      const qty = document.getElementById('convertQuantity').value || 1;
+      const price = document.getElementById('convertPrice').value;
+      const priceText = price ? ` ($${price})` : '';
+      showToast(`✓ ${qty} Eggs${priceText} added to inventory!`);
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 2000);
@@ -165,6 +230,19 @@
     function skipConvert() {
       hideConvertModal();
       showToast('Skipped conversion');
+    }
+
+    function showDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function hideDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function confirmDelete() {
+      hideDeleteModal();
+      showToast('🗑️ Item deleted from shopping list');
     }
 
     function showToast(message) {
