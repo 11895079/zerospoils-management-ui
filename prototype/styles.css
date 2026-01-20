@@ -431,6 +431,37 @@ body {
   margin-top: -4px;
 }
 
+.preset-suggestions {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.preset-suggestion {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.preset-suggestion:hover {
+  background: #eef3f0;
+  border-color: #cce6d5;
+}
+
+.preset-suggestion-title {
+  font-weight: 600;
+  color: #2f9e44;
+}
+
+.preset-suggestion-detail {
+  font-size: 12px;
+  color: #555;
+}
+
 /* Segmented control */
 .segmented {
   display: inline-flex;
@@ -549,6 +580,27 @@ body {
   align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid #e0e0e0;
+
+  .preset-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .preset-card-row:last-child {
+    border-bottom: none;
+  }
+
+  .preset-name {
+    font-weight: 600;
+  }
+
+  .preset-detail {
+    font-size: 13px;
+    color: #666;
+  }
 }
 
 .info-row:last-child {

@@ -161,6 +161,37 @@ body {
   border-radius: 8px;
 }
 
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.preset-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #f8f9fa;
+  align-items: center;
+}
+
+.preset-name {
+  font-weight: 700;
+}
+
+.preset-detail {
+  font-size: 13px;
+  color: #666;
+}
+
+.helper-text {
+  color: #555;
+  margin-bottom: 12px;
+}
+
 .benefit-icon {
   font-size: 20px;
   flex-shrink: 0;
