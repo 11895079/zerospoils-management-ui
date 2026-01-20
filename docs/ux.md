@@ -1,0 +1,174 @@
+# UX & Wireframes Index
+
+This folder contains wireframe specifications and UX patterns for ZeroSpoils MVP screens.
+
+## Wireframes (M1 Complete)
+
+### Core MVP Screens (✅ 8 of 8 complete)
+1. **[01 - Inventory List](./wireframes/01-inventory-list.md)** – Main screen showing all items grouped by category
+2. **[02 - Add Item Modal](./wireframes/02-add-item-modal.md)** – Form to add new item (name, category, expiry, notes)
+3. **[03 - Item Detail](./wireframes/03-item-detail.md)** – View, edit, delete single item
+4. **[04 - Expiring Soon Tab](./wireframes/04-expiring-soon-tab.md)** – Quick view of items expiring in next 7 days
+5. **[05 - Onboarding Flow](./wireframes/05-onboarding-flow.md)** – Welcome, permissions, quick tutorial (3 screens)
+6. **[06 - Shopping List Tab](./wireframes/06-shopping-list-tab.md)** – List management, item suggestions, categories
+7. **[07 - Settings Screen](./wireframes/07-settings-screen.md)** – Preferences, notifications, account, help links
+8. **[08 - Empty States Guide](./wireframes/08-empty-states-guide.md)** – Cross-screen empty state patterns and messaging
+
+## Design Reference
+
+### [Design Tokens](./design-tokens.md)
+Complete design system specification:
+- **Color Palette** – Primary blue, success green, warning yellow, urgent orange, error red, neutral gray
+- **Typography** – Font family, sizes (11pt–28pt), weights, line heights
+- **Spacing Scale** – 4pt base grid with xs/sm/md/lg/xl/2xl/3xl tokens
+- **Touch Targets** – Minimum 44pt × 44pt, comfortable 48pt × 48pt
+- **Elevation & Shadow** – Material 3 style shadow system (levels 0–4)
+- **Border Radius** – Corner radius scale (0pt–50%)
+- **Animation** – Timing (100–300ms), easing curves, common transitions
+- **Responsive Breakpoints** – 320pt to 428pt mobile-first layout
+- **Component Token References** – Button, TextInput, Card, Modal specs
+- **Flutter Implementation** – Dart/Flutter code examples
+
+### [Navigation Flow Diagram](./navigation-flow.md)
+Visual representation of app navigation structure:
+- **Tab Structure** – Bottom navigation with 4 tabs
+- **Modal Flows** – How modals overlay screens
+- **Back Button Behavior** – Pop navigation and modal close patterns
+- **Screen Transitions** – Navigation between screens
+- **Deep Links** – URL routing to specific screens (v2)
+- **State Management** – Tab stack preservation
+- **Edge Cases** – Unsaved changes, system back, tab re-selection
+
+### [UX Patterns & Component Library](./ux-patterns.md)
+Reusable UI components used across all screens:
+- **AppBar** – Screen headers with navigation
+- **SearchBar** – Filter items by text
+- **ItemCard** – Reusable item display component
+- **FAB** – Floating action button (add item)
+- **Modal** – Form overlays (add, edit, delete)
+- **Buttons** – Primary, secondary, danger variants
+- **Empty States** – User-friendly "no items" messages
+- **Color Coding** – Status colors (green = good, yellow = warning, red = urgent)
+- **Accessibility** – Tap targets, labels, contrast, screen readers
+- **Animations** – Smooth, 200-300ms transitions
+- **Responsive Design** – Mobile-first (320px - 428px)
+
+## File Structure
+
+```
+docs/
+├── ux.md                       ← You are here (this file)
+├── design-tokens.md            ← Design system specification
+├── navigation-flow.md          ← Navigation architecture diagram
+├── ux-patterns.md              ← Component & pattern library
+└── wireframes/
+    ├── 01-inventory-list.md
+    ├── 02-add-item-modal.md
+    ├── 03-item-detail.md
+    ├── 04-expiring-soon-tab.md
+    ├── 05-onboarding-flow.md
+    ├── 06-shopping-list-tab.md
+    ├── 07-settings-screen.md
+    └── 08-empty-states-guide.md
+```
+
+## Wireframe Template
+
+Each wireframe includes:
+1. **Purpose** – What task does user accomplish?
+2. **Layout** – ASCII art of screen structure
+3. **Components** – Reusable UI elements (from ux-patterns.md)
+4. **Interactions** – User actions and what happens
+5. **Accessibility** – Checklist for a11y compliance
+6. **Empty States** – How screen looks with no data
+7. **Telemetry Events** – Tracking events for analytics
+8. **Notes** – Implementation tips, edge cases, performance hints
+
+## How to Use These Wireframes
+
+### For Designers & Product Managers
+1. Review wireframes for layout & flow
+2. Provide feedback on screen order, components, interactions
+3. Align on UX decisions (color coding, grouping, etc.)
+4. Use as design reference for high-fidelity mockups (v2)
+
+### For Developers
+1. Read "Purpose" and "Layout" to understand screen goals
+2. Use "Components" list to identify reusable code
+3. Follow "Interactions" for navigation and form logic
+4. Check "Accessibility" checklist during implementation
+5. Implement "Telemetry Events" alongside features
+6. Handle "Empty States" explicitly in code
+7. Reference ux-patterns.md for component API
+
+### For QA & Testers
+1. Check interactions against "Interactions" section
+2. Verify all "Accessibility" checklist items
+3. Test "Empty States" with no/few items
+4. Validate telemetry events in app analytics
+5. Test on 320px (SE) and 428px (14) devices
+6. Test with 2x font size scaling
+
+## Design System Reference
+
+### Colors
+- **Primary Blue:** #2196F3 (buttons, active states)
+- **Success Green:** #4CAF50 (✓ good status)
+- **Warning Yellow:** #FFC107 (1-3 days to expiry)
+- **Urgent Orange:** #FF9800 (<1 day to expiry)
+- **Error Red:** #F44336 (expired, errors)
+- **Neutral Gray:** #666666 (labels, secondary text)
+
+### Typography
+- **Base Font:** 14pt (text), 16pt (inputs)
+- **Headings:** 24pt (page title), 18pt (section), 16pt (medium)
+- **All fonts scale to 2x** without breaking layout
+
+### Spacing
+- **Standard padding:** 16pt sides, 12pt vertical
+- **Component gap:** 8pt between elements
+- **Margins:** Consistent 16pt page margins
+
+### Tap Targets
+- **Minimum:** 44pt × 44pt (Apple/Android standard)
+- **Comfortable:** 48pt × 48pt (buttons)
+- **Buttons:** Full width on mobile (except modals)
+
+---
+
+## Implementation Status
+
+| Wireframe | Design Spec | Code | Tests | Status |
+|-----------|-------------|------|-------|--------|
+| Inventory List | ✅ | 🚧 | 🚧 | Ready to build |
+| Add Item Modal | ✅ | 🚧 | 🚧 | Ready to build |
+| Item Detail | ✅ | 🚧 | 🚧 | Ready to build |
+| Expiring Soon | ✅ | 🚧 | 🚧 | Ready to build |
+| UX Patterns | ✅ | 🚧 | 🚧 | Reference doc |
+
+---
+
+## Next Steps
+
+1. **Team Review** – Share wireframes with team, get alignment
+2. **Refinements** – Update wireframes based on feedback
+3. **Implementation** – Developers build screens per wireframe spec
+4. **Testing** – QA verifies against wireframe checklist
+5. **High-Fidelity Design** – Designers create visual mockups (v2)
+
+## Related Issues
+
+- **M1/050** – Wireframes for core MVP screens (this work)
+- **M1/090** – Flutter app skeleton (routing, theming, DI) – COMPLETE
+- **M1/060** – Clickable prototype (build from these wireframes)
+- **M1/080** – Data model implementation
+
+## Questions or Updates?
+
+If you need to:
+- **Add a new screen:** Copy wireframe template, fill in all sections
+- **Update layout:** Edit ASCII art and component list
+- **Change interaction:** Update "Interactions" section + telemetry events
+- **Find a component:** Search ux-patterns.md for component API
+
+All changes should be reviewed by team before implementation begins.
