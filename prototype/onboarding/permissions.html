@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Permissions</title>
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <div class="onboarding-screen">
+      <!-- Header -->
+      <div class="onboarding-header">
+        <a href="waste.html" class="back-btn">← Back</a>
+        <a href="../index.html" class="skip-btn">Skip →</a>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-indicator">📷 6/6</div>
+
+      <!-- Content -->
+      <div class="onboarding-content">
+        <h2>Enable Camera for Faster Entry</h2>
+        
+        <div class="info-box">
+          <p>Point your camera at the "Best By" date on packaging and we'll auto-fill it.</p>
+          <p><em>(You can always enter dates manually too)</em></p>
+        </div>
+
+        <div class="privacy-box">
+          <h4>🔒 Your Privacy Matters</h4>
+          <p>We only scan expiry dates. Nothing else. No data is sent to servers.</p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="permission-actions">
+        <button class="btn btn-primary" onclick="allowCamera()">Allow Camera Access</button>
+        <a href="get-started.html" class="btn btn-text">Not now →</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function allowCamera() {
+      // In real app, request camera permission
+      // For prototype, just advance
+      alert('📷 Camera permission would be requested here');
+      window.location.href = 'get-started.html';
+    }
+  </script>
+</body>
+</html>
