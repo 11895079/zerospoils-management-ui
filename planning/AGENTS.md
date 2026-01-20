@@ -24,6 +24,32 @@ This repo contains **backlog planning only** (not the Flutter app code). Issues 
 - Write access to both repositories
 - GitHub authentication configured (`gh auth login`)
 
+### GitHub CLI API Best Practices
+**CRITICAL: Always use `gh api` for PR/issue updates, NOT `gh pr edit` or `gh issue edit`.**
+
+The high-level CLI commands (`gh pr edit`, `gh issue edit`) have argument parsing issues with multi-line text, especially in PowerShell/Windows environments. This causes "accepts at most 1 arg(s), received N" errors.
+
+**Correct Pattern:**
+```bash
+# Write description to file
+echo "Multi-line\nPR description" > pr_body.txt
+
+# Update using API
+gh api -X PATCH "repos/:owner/:repo/pulls/36" -F body=@pr_body.txt
+gh api -X PATCH "repos/:owner/:repo/issues/123" -F body=@issue_body.txt
+```
+
+**Why this works:**
+- `-F body=@file` reads from file, avoiding shell escaping issues
+- `:owner` and `:repo` auto-resolve to current repository context
+- Works consistently across PowerShell, bash, zsh
+
+**Verification:**
+```bash
+gh api "repos/:owner/:repo/pulls/36" --jq .body  # Check PR body
+gh api "repos/:owner/:repo/issues/123" --jq .body  # Check issue body
+```
+
 ## Development Workflow
 
 ### Phase 1: Issue Selection
