@@ -49,61 +49,77 @@
       <button class="chip">Prepared</button>
     </div>
 
-    <!-- Item Cards -->
-    <div class="item-list">
-      <a href="item-detail.html?item=milk" class="item-card">
-        <div class="item-icon">🥛</div>
-        <div class="item-info">
-          <h3>Milk</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 3 days</p>
-        </div>
-      </a>
+    <!-- Content Wrapper -->
+    <div class="content" id="inventoryContent">
+      <!-- Empty State (hidden by default) -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📦</div>
+        <h2>No items yet</h2>
+        <p>Tap the + button below to add your first item and start tracking your food inventory.</p>
+      </div>
 
-      <a href="item-detail.html?item=apples" class="item-card warning">
-        <div class="item-icon">🍎</div>
-        <div class="item-info">
-          <h3>Apples</h3>
-          <p class="location">Counter</p>
-          <p class="expiry">Expires today ⚠️</p>
-        </div>
-      </a>
+      <!-- Item Cards List -->
+      <div id="itemsList">
+        <a href="item-detail.html?item=milk" class="item-card" data-item="milk">
+          <div class="item-icon">🥛</div>
+          <div class="item-info">
+            <h3>Milk</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 3 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'milk')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=carrots" class="item-card">
-        <div class="item-icon">🥕</div>
-        <div class="item-info">
-          <h3>Carrots</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 5 days</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=apples" class="item-card warning" data-item="apples">
+          <div class="item-icon">🍎</div>
+          <div class="item-info">
+            <h3>Apples</h3>
+            <p class="location">Counter</p>
+            <p class="expiry">Expires today ⚠️</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'apples')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=bread" class="item-card expired">
-        <div class="item-icon">🍞</div>
-        <div class="item-info">
-          <h3>Bread</h3>
-          <p class="location">Pantry</p>
-          <p class="expiry">Expired 2 days ago 🔴</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=carrots" class="item-card" data-item="carrots">
+          <div class="item-icon">🥕</div>
+          <div class="item-info">
+            <h3>Carrots</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 5 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'carrots')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=cheese" class="item-card">
-        <div class="item-icon">🧀</div>
-        <div class="item-info">
-          <h3>Cheese</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 7 days</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=bread" class="item-card expired" data-item="bread">
+          <div class="item-icon">🍞</div>
+          <div class="item-info">
+            <h3>Bread</h3>
+            <p class="location">Pantry</p>
+            <p class="expiry">Expired 2 days ago 🔴</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'bread')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=soup" class="item-card">
-        <div class="item-icon">🍲</div>
-        <div class="item-info">
-          <h3>Leftover soup</h3>
-          <p class="location">Freezer</p>
-          <p class="expiry">Prepared on Jan 10, 2026 • Good for 30 days</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=cheese" class="item-card" data-item="cheese">
+          <div class="item-icon">🧀</div>
+          <div class="item-info">
+            <h3>Cheese</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 7 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'cheese')" title="Delete item">🗑️</button>
+        </a>
+
+        <a href="item-detail.html?item=soup" class="item-card" data-item="soup">
+          <div class="item-icon">🍲</div>
+          <div class="item-info">
+            <h3>Leftover soup</h3>
+            <p class="location">Freezer</p>
+            <p class="expiry">Prepared on Jan 10, 2026 • Good for 30 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'soup')" title="Delete item">🗑️</button>
+        </a>
+      </div>
     </div>
 
     <!-- FAB -->
@@ -129,7 +145,38 @@
       </a>
     </nav>
   </div>
+  
   <script>
+    function deleteItem(event, itemId) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (confirm('Delete this item?')) {
+        const itemCard = event.target.closest('.item-card');
+        itemCard.style.opacity = '0';
+        itemCard.style.transform = 'translateX(-100%)';
+        
+        setTimeout(() => {
+          itemCard.remove();
+          checkEmptyState();
+        }, 300);
+      }
+    }
+
+    function checkEmptyState() {
+      const itemsList = document.getElementById('itemsList');
+      const emptyState = document.getElementById('emptyState');
+      const hasItems = itemsList.querySelectorAll('.item-card').length > 0;
+      
+      if (hasItems) {
+        itemsList.style.display = 'block';
+        emptyState.style.display = 'none';
+      } else {
+        itemsList.style.display = 'none';
+        emptyState.style.display = 'flex';
+      }
+    }
+
     function toggleDrawer(open) {
       const drawer = document.getElementById('sideDrawer');
       const backdrop = document.getElementById('drawerBackdrop');
