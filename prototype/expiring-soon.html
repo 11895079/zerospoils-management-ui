@@ -10,9 +10,27 @@
   <div class="mobile-frame">
     <!-- Header -->
     <header class="app-header">
-      <h1>Expiring Soon</h1>
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1>Expiring Soon</h1>
+      </div>
       <button class="filter-btn">Sort</button>
     </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+        <a href="index.html">📦 Inventory</a>
+      </div>
+    </aside>
 
     <!-- Expiring Items Grouped by Urgency -->
     <div class="expiring-content">
@@ -97,11 +115,24 @@
         <div class="nav-icon">🛒</div>
         <div class="nav-label">Shopping</div>
       </a>
-        <a href="progress.html">
-          <div class="nav-icon">📊</div>
-          <div class="nav-label">Progress</div>
-        </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
     </nav>
   </div>
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
+  </script>
 </body>
 </html>

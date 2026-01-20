@@ -391,11 +391,25 @@
   <div class="mobile-frame">
     <!-- Header -->
     <header class="app-header">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <a href="index.html" style="text-decoration:none;color:inherit;font-size:20px;">←</a>
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
         <h1 style="margin:0;">Progress</h1>
       </div>
     </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+      </div>
+    </aside>
 
     <!-- Stats Content -->
     <div class="stats-container">
@@ -601,6 +615,18 @@
 
     <!-- Scripts -->
     <script>
+      function toggleDrawer(open) {
+        const drawer = document.getElementById('sideDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        if (open) {
+          drawer.classList.add('open');
+          backdrop.classList.add('show');
+        } else {
+          drawer.classList.remove('open');
+          backdrop.classList.remove('show');
+        }
+      }
+
       function showShareModal() {
         document.getElementById('shareModal').classList.add('active');
       }

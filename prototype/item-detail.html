@@ -10,9 +10,27 @@
   <div class="mobile-frame">
     <!-- Header -->
     <header class="app-header detail-header">
-      <a href="index.html" class="back-btn">← Back</a>
+      <div class="header-left">
+        <a href="index.html" class="back-btn">←</a>
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1 style="font-size:18px;">Item Detail</h1>
+      </div>
       <button class="edit-btn">Edit</button>
     </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="settings.html">⚙️ Settings</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="index.html">📦 Inventory</a>
+      </div>
+    </aside>
 
     <!-- Item Detail Content -->
     <div class="detail-content">
@@ -121,10 +139,48 @@
     </div>
   </div>
 
+  <!-- Edit Item Modal (hidden by default) -->
+  <div id="editModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <header class="modal-header-simple">
+        <h2>Edit Item</h2>
+        <button class="close-btn" onclick="hideEditModal()">Close</button>
+      </header>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editName">Name</label>
+          <input type="text" id="editName" value="Milk" />
+        </div>
+        <div class="form-group">
+          <label for="editExpiry">Expiry Date</label>
+          <input type="date" id="editExpiry" value="2026-01-15" />
+        </div>
+        <div class="form-group">
+          <label for="editPrice">Price Paid (optional) 💵</label>
+          <input type="text" id="editPrice" placeholder="$3.99" />
+        </div>
+        <button class="btn btn-primary" onclick="confirmEdit()">Save Changes</button>
+        <button class="btn btn-text" onclick="hideEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast (hidden by default) -->
   <div id="toast" class="toast"></div>
 
   <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
+
     function showWasteModal() {
       document.getElementById('wasteModal').style.display = 'flex';
     }
@@ -145,6 +201,25 @@
       }, 2000);
     }
 
+    function showEditModal() {
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function hideEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    function confirmEdit() {
+      hideEditModal();
+      const name = document.getElementById('editName').value || 'Item';
+      const expiry = document.getElementById('editExpiry').value;
+      const price = document.getElementById('editPrice').value;
+      const parts = [`${name} updated`];
+      if (expiry) parts.push('Expiry ' + expiry);
+      if (price) parts.push('Price $' + price);
+      showToast('✓ ' + parts.join(' • '));
+    }
+
     function showToast(message) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -154,6 +229,8 @@
         window.location.href = 'index.html';
       }, 2000);
     }
+
+    document.querySelector('.edit-btn')?.addEventListener('click', showEditModal);
   </script>
 </body>
 </html>

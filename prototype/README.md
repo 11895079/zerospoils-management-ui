@@ -101,3 +101,12 @@ After user testing:
 ---
 
 **Questions?** See main repo [`planning/AGENTS.md`](../planning/AGENTS.md) or issue [`#060`](../planning/issues/060-clickable-prototype-walkthrough-capture-feedback-5-users.md).
+
+| **Settings** | `settings.html` | Profile, notifications, privacy controls, app info |
+
+✅ **Price tracking**: Manual entry in shopping list and add item (M1)  
+✅ **Item editing**: Edit item name, location, expiry, price from detail view  
+✅ **Delete confirmation**: Modal confirmation before removing shopping items  
+✅ **Settings page**: Notifications, privacy controls, profile section  
+✅ **Input validation**: Price format hints, date validation  
+✅ **Settings toggles**: Telemetry, notifications, personalized tips (Pro)  
