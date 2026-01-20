@@ -333,6 +333,96 @@
       max-width: 390px;
     }
 
+      .info-link {
+        font-size: 13px;
+        color: #2f9e44;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+
+      .methodology-hint {
+        font-size: 13px;
+        color: #666;
+        margin: 6px 0 0;
+      }
+
+      .methodology-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      .methodology-modal.active {
+        display: flex;
+      }
+
+      .methodology-content {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        width: 100%;
+        max-width: 360px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      }
+
+      .methodology-content h3 {
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .methodology-content p {
+        margin: 4px 0 10px;
+        color: #555;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .methodology-list {
+        margin: 0 0 12px 16px;
+        padding: 0;
+        color: #444;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .factor-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        font-size: 13px;
+        color: #333;
+      }
+
+      .factor-grid strong {
+        color: #2f9e44;
+      }
+
+      .methodology-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .methodology-close {
+        padding: 8px 12px;
+        border: none;
+        background: #2f9e44;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
     .share-modal-content h3 {
       margin: 0 0 16px;
       font-size: 18px;
@@ -530,7 +620,11 @@
       <!-- Impact Summary -->
       <p class="stats-subtitle">Your Impact</p>
       <div class="impact-summary">
-        <h3>What You've Saved</h3>
+        <h3>
+          What You've Saved
+          <span class="info-link" onclick="openMethodology()">How we calculate</span>
+        </h3>
+        <p class="methodology-hint">We use your item prices (or category averages) and standard food impact factors.</p>
         <div class="impact-item">
           <div class="impact-icon">💵</div>
           <div class="impact-text">
@@ -613,6 +707,30 @@
       </div>
     </div>
 
+    <!-- Methodology Modal -->
+    <div class="methodology-modal" id="methodologyModal" onclick="closeMethodology(event)">
+      <div class="methodology-content">
+        <h3>How we estimate savings</h3>
+        <p>We combine your item prices (or category averages) with standard impact factors.</p>
+        <ul class="methodology-list">
+          <li>Money saved: price x portion eaten instead of wasted.</li>
+          <li>CO2 avoided: item mass x emission factor x portion eaten.</li>
+          <li>Water saved: item mass x water factor x portion eaten.</li>
+        </ul>
+        <div class="factor-grid">
+          <div><strong>Beef</strong></div><div>27 kg CO2/kg | 15000 L/kg</div>
+          <div><strong>Poultry</strong></div><div>6.9 kg CO2/kg | 4300 L/kg</div>
+          <div><strong>Dairy</strong></div><div>3.0 kg CO2/kg | 1000 L/kg</div>
+          <div><strong>Bread/Grains</strong></div><div>1.1 kg CO2/kg | 1600 L/kg</div>
+          <div><strong>Produce</strong></div><div>0.5 kg CO2/kg | 400 L/kg</div>
+        </div>
+        <p class="methodology-hint">Portion eaten = 1 - waste percent logged. We use category defaults when price or weight is missing.</p>
+        <div class="methodology-actions">
+          <button class="methodology-close" onclick="closeMethodology(event)">Got it</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script>
       function toggleDrawer(open) {
@@ -649,6 +767,19 @@
 
       function shareLink() {
         alert('🔗 Public profiles coming soon! This will let users share their progress with a link.');
+      }
+
+      function openMethodology() {
+        document.getElementById('methodologyModal').classList.add('active');
+      }
+
+      function closeMethodology(event) {
+        const modal = document.getElementById('methodologyModal');
+        const isBackdrop = event && event.target === modal;
+        const isButton = event && event.target.classList.contains('methodology-close');
+        if (isBackdrop || isButton) {
+          modal.classList.remove('active');
+        }
       }
     </script>
 
