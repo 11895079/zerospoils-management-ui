@@ -50,18 +50,87 @@
 | **Offline-First** | All features work without internet | ✅ | ✅ | M1-M3 |
 | **Single Device** | Data stored locally (Hive/sqflite) | ✅ | ✅ | M1: [Issue 090](../milestones/M1/090-flutter-app-skeleton-routing-theming-di.md) |
 | | | | | |
-| **Multi-Device Sync** | Cloud backup + sync across iOS/Android/Web | ❌ | ✅ | M6: [Issue 470](../milestones/M6/470-household-sharing-multi-device-sync-cloud-backend.md) |
-| **Household Sharing** | Share inventory/shopping with family (role-based access) | ❌ | ✅ | M6: [Issue 470](../milestones/M6/470-household-sharing-multi-device-sync-cloud-backend.md) |
-| **Receipt OCR (Batch/Single)** | Scan receipts to auto-extract items, prices, and expiry dates | ❌ | ✅ | M6: [Issue 142](../issues/142-receipt-ocr-auto-extract-items-prices-expiry.md) (enhanced) |
-| **Batch Photo Capture** | Take fridge photo, detect multiple items at once | ❌ | ✅ | M6: [Issue 430](../milestones/M6/430-batch-photo-capture-multiple-items-single-image.md) |
-| **Advanced Analytics** | Money saved trends, waste by category over time, environmental impact | ❌ | ✅ | M6: [Issue 490](../milestones/M6/490-pro-advanced-insights-dashboard-trends-savings.md) |
-| **Recipe Suggestions** | AI-powered recipe ideas based on expiring items | ❌ | ✅ | M5: [Issue 185](../issues/185-recipe-suggestions-expiring-items-ml-backend.md) (gated in M6) |
+| **Multi-Device Sync** | Cloud backup + sync across iOS/Android/Web | ❌ | ✅ | M6: [Issue 470](../issues/470-pro-household-accounts-auth-shared-household-model.md) |
+| **Household Sharing** | Share inventory/shopping with family (role-based access) | ❌ | ✅ | M6: [Issue 470](../issues/470-pro-household-accounts-auth-shared-household-model.md) |
+| **Receipt OCR (Batch/Single)** | Scan receipts to auto-extract items, prices, and expiry dates | ❌ | ✅ | M6: [Issue 430](../issues/430-pro-receipt-capture-ux-photo-import-with-consent-messaging.md) |
+| **Batch Photo Capture** | Take fridge photo, detect multiple items at once | ❌ | ✅ | M6: [Issue 430](../milestones/M6/430-batch-item-detection-poc.md) |
+| **Advanced Analytics** | Money saved trends, waste by category over time, environmental impact | ❌ | ✅ | M6: [Issue 490](../issues/490-pro-advanced-insights-dashboard-money-saved-items-saved-trends.md) |
+| **Recipe Suggestions (Basic)** | Local recipe suggestions using expiring items (bundled catalog) | ✅ | ✅ | M6: [POC 185](../milestones/M6/185-recipe-suggestions-poc.md) → M5: [Full 185](../milestones/M5/185-recipe-suggestions-prioritize-expiring-items.md) |
+| **Recipe Suggestions (Cloud)** | Cloud recipe catalog (1000+ recipes) + personalized suggestions + push notifications | ❌ | ✅ | M5: [Issue 185](../milestones/M5/185-recipe-suggestions-prioritize-expiring-items.md) (Pro tier enhancements) |
 | **Smart Home: Alexa** | Voice-enabled shopping list ("Alexa, add milk to ZeroSpoils") | ❌ | ✅ | M6: [Issue 500](../milestones/M6/500-smart-home-integrations-nest-alexa-google-home.md) |
 | **Smart Home: Google Home** | Display expiry tab on Nest Hub, morning reminders | ❌ | ✅ | M6: [Issue 500](../milestones/M6/500-smart-home-integrations-nest-alexa-google-home.md) |
 | **Smart Home: Nest** | Temperature alerts (impact on food preservation) | ❌ | ✅ | M6: [Issue 500](../milestones/M6/500-smart-home-integrations-nest-alexa-google-home.md) |
-| **Data Export** | Export inventory/waste data as CSV/JSON | ❌ | ✅ | M6: Issue 495 (TBD) |
-| **Priority Support** | Email support with 24-hour response SLA | ❌ | ✅ | M6: Issue 510 (TBD) |
+| **Data Export** | Export inventory/waste data as CSV/JSON | ✅ | ✅ | M3: [Issue 240](../milestones/M3/240-mvp-data-export-delete-privacy-baseline.md) (privacy baseline for all) |
+| **Priority Support** | Email support with 24-hour response SLA | ❌ | ✅ | M6: Issue TBD (Pro-only, requires support infrastructure) |
 | **Personalized Tips** | Waste reduction tips based on YOUR data (opt-in telemetry) | ❌ | ✅ | M6: [Issue 520](../milestones/M6/520-personalized-waste-reduction-tips-opt-in-telemetry.md) (NEW) |
+
+---
+
+## Feature Deep Dive: Recipe Suggestions (Free vs Pro)
+
+### Recipe Suggestions — Free Tier (Basic Local)
+
+**What It Is:**
+- Local recipe matcher suggests 3–5 recipes using expiring items
+- Bundled catalog of 100–200 curated recipes (included in app)
+- Fuzzy matching on ingredient names and categories
+- Works 100% offline (no internet required)
+
+**Why Free Tier:**
+- Core value prop: reduce waste by using expiring items
+- Low implementation cost (bundled JSON, no backend)
+- Drives user engagement and habit formation
+- Foundation for Pro tier upsell
+
+**User Flow:**
+1. Open Inventory screen
+2. Recipe suggestions card appears (if items expiring soon)
+3. View suggested recipes ("Spaghetti Marinara uses 4 of your ingredients")
+4. Tap recipe → see ingredients list + instructions
+5. Mark ingredients as "used" → inventory updated with consumption events
+6. Add missing ingredients to shopping list
+
+**Limitations (Free Tier):**
+- Limited catalog size (100–200 recipes vs Pro's 1000+)
+- No personalization (everyone gets same suggestions)
+- No dietary filters or advanced search
+- No push notifications for recipe reminders
+
+### Recipe Suggestions — Pro Tier (Cloud-Enhanced)
+
+**What It Is:**
+- All Free tier features PLUS:
+- Cloud recipe catalog (1000+ recipes, updated weekly via API)
+- Personalized suggestions based on dietary preferences (vegetarian, vegan, gluten-free, etc.)
+- ML-powered recommendations learn from your usage patterns
+- Push notifications: "You have 5 items expiring tomorrow — try these 3 recipes!"
+- Advanced filters: cuisine type, prep time, skill level, allergen exclusions
+
+**Why Pro Tier:**
+- Backend API costs (recipe catalog hosting, updates)
+- ML model inference for personalization
+- Push notification infrastructure
+- Telemetry required for personalization (opt-in)
+- Value justification: saves time, reduces decision fatigue
+
+**User Flow (Pro-Specific Features):**
+1. First-time Pro setup: select dietary preferences (vegetarian, nut allergy, etc.)
+2. Receive push notification: "Recipe suggestions ready for your expiring items"
+3. Open app → personalized recipes prioritized based on past usage
+4. Filter recipes by cuisine ("Show me Italian recipes only")
+5. Search full catalog ("Find pasta recipes")
+6. Opt-in to telemetry for better personalization over time
+
+**Implementation:**
+- Cloud catalog via API (Spoonacular, Edamam, or proprietary)
+- Local cache for offline access (Pro recipes cached after first fetch)
+- Graceful degradation: show cached recipes if offline
+- Telemetry events: `insights_recipe_cloud_fetch`, `insights_recipe_personalized`
+
+**Privacy Model:**
+- Free tier: Zero telemetry, fully local matching
+- Pro tier: Opt-in telemetry for personalization ("Enable personalized recipes? We'll analyze your usage patterns.")
+- User can disable personalization anytime (Settings → Privacy → Personalized Recipes: OFF)
 
 ---
 

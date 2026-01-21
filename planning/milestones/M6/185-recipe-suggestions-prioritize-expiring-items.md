@@ -1,4 +1,15 @@
 ```markdown
+## DEPRECATED — See M5/185-recipe-suggestions-prioritize-expiring-items.md
+
+This file has been superseded by the comprehensive recipe suggestion spec in M5.
+
+**For POC implementation:** See `M6/185-recipe-suggestions-poc.md`  
+**For full feature spec:** See `M5/185-recipe-suggestions-prioritize-expiring-items.md`
+
+---
+
+## Original Content (Archived)
+
 ## Context
 Vision mentions recipe suggestions that prioritise soon‑to‑expire items; no implementation task exists.
 

@@ -79,6 +79,16 @@ ZeroSpoils MVP is a **cross-platform mobile app** (iOS & Android) that helps hou
 - Empty state guidance: "Start by adding an item"
 - Acceptance: Users clear on purpose; permissions clear and justified
 
+### 8. Zesto Mascot (Phase 1 - M3)
+**Interactive Mascot Companion**
+- Zesto the Avocado appears with contextual messages on key actions (first item, items consumed, items wasted, badges unlocked)
+- 10 core trigger events with 5-6 message variations each (prevents repetition fatigue)
+- Anti-spam: minimum 5-second gap between messages
+- Educational storage tips for wasted items (category-based JSON data)
+- Settings: frequency control (Always/Milestones Only/Never), message type toggles
+- Future phases: advanced animations, tap-to-cycle contextual tips, unlockable mascot characters
+- Acceptance: Mascot appears contextually; storage tips help reduce future waste; user can mute if desired
+
 ---
 
 ## Non-Goals (Explicitly Out of Scope)
