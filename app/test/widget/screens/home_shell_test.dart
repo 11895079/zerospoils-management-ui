@@ -44,7 +44,9 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
-  testWidgets('Add item modal opens and closes', (WidgetTester tester) async {
+  testWidgets('Inventory screen displays Add Item FAB', (
+    WidgetTester tester,
+  ) async {
     // Build the HomeShell widget
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: HomeShell())),
@@ -52,24 +54,25 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Verify modal is not visible initially
-    expect(find.text('Add Item'), findsNothing);
-
-    // Tap the FAB to open modal
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-
-    // Verify modal opened with correct text
+    // Verify Inventory screen (tab 0) is visible with FAB
+    expect(find.text('Inventory'), findsWidgets);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.text('Add Item'), findsOneWidget);
-    expect(find.text('Item Name'), findsOneWidget);
-    expect(find.text('Cancel'), findsOneWidget);
-    expect(find.text('Add'), findsOneWidget);
 
-    // Tap Cancel to close modal
-    await tester.tap(find.text('Cancel'));
+    // Switch to Settings tab (tab 3)
+    await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
 
-    // Verify modal closed
-    expect(find.text('Add Item'), findsNothing);
+    // Verify Settings screen is shown without FAB
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Switch back to Inventory tab (tab 0)
+    await tester.tap(find.byIcon(Icons.inventory_2));
+    await tester.pumpAndSettle();
+
+    // Verify FAB is back
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.text('Add Item'), findsOneWidget);
   });
 }
