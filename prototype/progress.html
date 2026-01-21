@@ -89,8 +89,9 @@
     }
 
     .trend-down {
-      color: #ff6b6b;
+      color: #ffd43b;
       font-size: 14px;
+      font-weight: 600;
     }
 
     .progress-bar-container {
@@ -115,8 +116,9 @@
       display: flex;
       justify-content: space-between;
       font-size: 13px;
-      color: #666;
+      color: rgba(255, 255, 255, 0.95);
       margin-top: 4px;
+      font-weight: 500;
     }
 
     .achievement-badge {
@@ -127,7 +129,53 @@
       margin-bottom: 16px;
       display: flex;
       align-items: center;
+     
+
+    .badges-overview {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .badges-overview:active {
+      transform: scale(0.98);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .badges-overview-left {
+      display: flex;
+      align-items: center;
       gap: 12px;
+    }
+
+    .badges-overview-icon {
+      font-size: 32px;
+    }
+
+    .badges-overview-text h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 4px;
+    }
+
+    .badges-overview-text p {
+      font-size: 13px;
+      color: #666;
+      margin: 0;
+    }
+
+    .badges-overview-arrow {
+      font-size: 20px;
+      color: #ccc;
+    } gap: 12px;
     }
 
     .badge-icon {
@@ -473,7 +521,67 @@
       font-weight: 600;
       color: #333;
       cursor: pointer;
-      margin-top: 12px;
+    }
+
+    /* Mascot */
+    .mascot {
+      position: absolute;
+      bottom: 140px;
+      left: 20px;
+      width: 80px;
+      height: 80px;
+      z-index: 150;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.5) translateY(20px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+
+    .mascot.show {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .mascot-character {
+      font-size: 60px;
+      animation: mascotBounce 2s ease-in-out infinite;
+    }
+
+    @keyframes mascotBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .mascot-bubble {
+      position: absolute;
+      bottom: 70px;
+      left: 0;
+      background: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      white-space: nowrap;
+      animation: bubblePop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .mascot-bubble:after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 20px;
+      width: 12px;
+      height: 12px;
+      background: white;
+      transform: rotate(45deg);
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @keyframes bubblePop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -494,10 +602,12 @@
         <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
       </div>
       <div class="drawer-links">
-        <a href="settings.html">⚙️ Settings</a>
-        <a href="index.html">📦 Inventory</a>
-        <a href="shopping-list.html">🛒 Shopping List</a>
         <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="expiring-soon.html">⏰ Expiring Soon</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="settings.html">⚙️ Settings</a>
       </div>
     </aside>
 
@@ -515,6 +625,18 @@
         </div>
       </div>
 
+      <!-- Badges Overview -->
+      <div class="badges-overview" onclick="window.location.href='all-badges.html'">
+        <div class="badges-overview-left">
+          <div class="badges-overview-icon">🏆</div>
+          <div class="badges-overview-text">
+            <h3>Badges</h3>
+            <p>2 earned • 18 locked • 10% complete</p>
+          </div>
+        </div>
+        <div class="badges-overview-arrow">›</div>
+      </div>
+
       <!-- Achievement Badge -->
       <div class="achievement-badge">
         <div class="badge-icon">🏆</div>
@@ -523,6 +645,7 @@
           <p>7 days without wasting food. Keep it up!</p>
         </div>
       </div>
+      <button class="btn btn-text" style="width:100%;margin:8px 0 16px;" onclick="window.location.href='all-badges.html'">View All Badges →</button>
 
       <!-- Share Card -->
       <div class="share-card-section">
@@ -801,6 +924,52 @@
         <div class="nav-label">Progress</div>
       </a>
     </nav>
+
+    <!-- Mascot (Zesto the Avocado) -->
+    <div id="mascot" class="mascot">
+      <div class="mascot-character">🥑</div>
+      <div id="mascotBubble" class="mascot-bubble" style="display:none;"></div>
+    </div>
   </div>
+
+  <script>
+    // Mascot greetings
+    const mascotMessages = {
+      pageLoad: ['Hey there! 👋', 'Looking good!', 'You\'re doing great!'],
+      badgeView: ['Check out your badges! 🏆', 'Badge time!', 'So many achievements!'],
+      lowWaste: ['Amazing work! 🌟', 'You\'re a hero! 💚', 'Keep it up!'],
+      streak: ['Fire streak! 🔥', 'Unstoppable! ⚡', 'On a roll!']
+    };
+
+    function showMascot(messageType = 'pageLoad') {
+      const mascot = document.getElementById('mascot');
+      const bubble = document.getElementById('mascotBubble');
+      const messages = mascotMessages[messageType];
+      const message = messages[Math.floor(Math.random() * messages.length)];
+      
+      bubble.textContent = message;
+      bubble.style.display = 'block';
+      mascot.classList.add('show');
+      
+      setTimeout(() => {
+        mascot.classList.remove('show');
+        setTimeout(() => {
+          bubble.style.display = 'none';
+        }, 400);
+      }, 3000);
+    }
+
+    // Show mascot on page load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        showMascot('pageLoad');
+      }, 800);
+    });
+
+    // Celebrate when viewing badges
+    document.querySelector('.badges-overview')?.addEventListener('click', () => {
+      setTimeout(() => showMascot('badgeView'), 100);
+    });
+  </script>
 </body>
 </html>
