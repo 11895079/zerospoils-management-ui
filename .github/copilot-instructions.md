@@ -158,6 +158,30 @@ source .venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 ```
 
+### GitHub CLI API Best Practices
+**ALWAYS use `gh api` for PR/issue updates instead of `gh pr edit` or `gh issue edit`.**
+
+Reason: The `gh pr edit` and `gh issue edit` commands have argument parsing issues with multi-line text in PowerShell/Windows environments, causing "accepts at most 1 arg(s)" errors.
+
+**Correct approach:**
+```bash
+# Update PR description (file-based)
+gh api -X PATCH "repos/:owner/:repo/pulls/<NUMBER>" -F body=@description.txt
+
+# Update issue body (file-based)
+gh api -X PATCH "repos/:owner/:repo/issues/<NUMBER>" -F body=@description.txt
+
+# Update PR title (inline)
+gh api -X PATCH "repos/:owner/:repo/pulls/<NUMBER>" -F title="New title"
+```
+
+**Why file-based?** Multi-line descriptions require proper escaping which varies by shell. Using `-F body=@file.txt` avoids all escaping issues.
+
+**Workflow:**
+1. Create temp file with description content (Markdown format)
+2. Use `gh api -X PATCH` with `-F body=@file.txt`
+3. Verify with `gh pr view <NUMBER> --json body` or `gh issue view <NUMBER> --json body`
+
 ## When Working in This Codebase
 
 ### DO

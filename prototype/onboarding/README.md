@@ -29,12 +29,18 @@ Interactive onboarding experience that educates users on the app's purpose, teac
 - Three core benefits: Track all food, plan shopping smarter, reduce waste proactively
 - Emphasizes result: save money, reduce waste, better organized kitchen
 
-### 4. **Inventory Basics** (`inventory.html`)
+### 4. **Meet Zesto** (`mascot.html`) 🆕
+- Introduces Zesto the Avocado mascot
+- Explains his role: celebrates wins, offers tips, tracks progress
+- Fun fact: Why an avocado (most wasted food)
+- Animated mascot with speech bubble
+
+### 5. **Inventory Basics** (`inventory.html`)
 - Step 1: Add items with expiry date (tap +)
 - Step 2: Check "Expiring Soon" tab to prioritize consumption
 - Visual emoji flow: 📦 → 🥛 → ⏰
 
-### 5. **Shopping List Workflow** (`shopping.html`) ⭐ **KEY SCREEN**
+### 6. **Shopping List Workflow** (`shopping.html`) ⭐ **KEY SCREEN**
 **This screen directly addresses user confusion about shopping list → inventory conversion.**
 
 Two-phase walkthrough:

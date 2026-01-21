@@ -1,0 +1,72 @@
+{
+  "dairy": [
+    "💡 Store milk in back of fridge (coldest spot)!",
+    "💡 Cheese lasts longer wrapped in wax paper!",
+    "💡 Freeze yogurt in ice cube trays for smoothies!",
+    "💡 Keep butter away from direct light!",
+    "💡 Sour cream stays fresh longer if stored upside down!"
+  ],
+  "produce": [
+    "💡 Store tomatoes at room temperature!",
+    "💡 Keep bananas separate (they ripen other fruit)!",
+    "💡 Wash berries only before eating!",
+    "💡 Store carrots in damp paper towel in fridge!",
+    "💡 Potatoes prefer cool, dark, dry places!"
+  ],
+  "meat": [
+    "💡 Freeze meat within 2 days of purchase!",
+    "💡 Thaw meat in fridge, not counter!",
+    "💡 Store raw meat on bottom shelf!",
+    "💡 Keep cooked meat separate from raw!",
+    "💡 Use meat within 1-2 days after thawing!"
+  ],
+  "bread": [
+    "💡 Freeze bread to extend life by weeks!",
+    "💡 Store bread in cool, dry place (not fridge)!",
+    "💡 Revive stale bread in oven (350°F, 5 min)!",
+    "💡 Toast frozen bread directly from freezer!",
+    "💡 Keep bread in airtight container to prevent molding!"
+  ],
+  "leftovers": [
+    "💡 Cool leftovers before refrigerating!",
+    "💡 Store in airtight containers!",
+    "💡 Freeze extras within 3 days!",
+    "💡 Label containers with date (FIFO)!",
+    "💡 Eat within 3-4 days or freeze!"
+  ],
+  "condiments": [
+    "💡 Store ketchup in fridge after opening!",
+    "💡 Honey never spoils (no fridge needed)!",
+    "💡 Hot sauce lasts months in fridge!",
+    "💡 Peanut butter is fine at room temperature!",
+    "💡 Oil & vinegar don't need refrigeration!"
+  ],
+  "beverages": [
+    "💡 Keep juice in back of fridge (coldest)!",
+    "💡 Store milk away from door (warmer)!",
+    "💡 Wine keeps longer if stored on side!",
+    "💡 Opened soda goes flat—use within 2-3 days!",
+    "💡 Freeze overripe juice for later use!"
+  ],
+  "snacks": [
+    "💡 Keep crackers in airtight container!",
+    "💡 Nuts last longer in freezer!",
+    "💡 Chips stay crispy in original bag!",
+    "💡 Chocolate prefers cool (not cold) storage!",
+    "💡 Popcorn stays fresh in sealed container!"
+  ],
+  "frozen": [
+    "💡 Keep freezer at 0°F or below!",
+    "💡 Frost buildup? Defrost monthly!",
+    "💡 Wrap items to prevent freezer burn!",
+    "💡 Label with date (FIFO principle)!",
+    "💡 Most foods last 3-6 months frozen!"
+  ],
+  "general": [
+    "💡 First in, first out (FIFO) is your friend!",
+    "💡 Organize by expiry date!",
+    "💡 Check fridge before shopping!",
+    "💡 Group items by category!",
+    "💡 Keep fridge clean to prevent odors!"
+  ]
+}

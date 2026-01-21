@@ -27,10 +27,12 @@
         <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
       </div>
       <div class="drawer-links">
-        <a href="settings.html">⚙️ Settings</a>
-        <a href="progress.html">📊 Progress</a>
-        <a href="shopping-list.html">🛒 Shopping List</a>
         <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="expiring-soon.html">⏰ Expiring Soon</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="settings.html">⚙️ Settings</a>
       </div>
     </aside>
 
@@ -49,61 +51,93 @@
       <button class="chip">Prepared</button>
     </div>
 
-    <!-- Item Cards -->
-    <div class="item-list">
-      <a href="item-detail.html?item=milk" class="item-card">
-        <div class="item-icon">🥛</div>
-        <div class="item-info">
-          <h3>Milk</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 3 days</p>
+    <!-- Gamification / Social Teaser -->
+    <div class="gamify-card">
+      <div class="streak-pill">🔥 5-day streak</div>
+      <div class="gamify-main">
+        <div>
+          <h3 class="gamify-title">No Waste Week</h3>
+          <p class="gamify-sub">Log 2 more saves to level up</p>
+          <div class="progress-track">
+            <div class="progress-bar" style="width: 60%"></div>
+          </div>
         </div>
-      </a>
+        <button class="celebrate-btn" onclick="celebrate()">✨ Level up</button>
+      </div>
+      <div class="gamify-footer">Judgement-free: compare with friends only when you opt in.</div>
+    </div>
 
-      <a href="item-detail.html?item=apples" class="item-card warning">
-        <div class="item-icon">🍎</div>
-        <div class="item-info">
-          <h3>Apples</h3>
-          <p class="location">Counter</p>
-          <p class="expiry">Expires today ⚠️</p>
-        </div>
-      </a>
+    <!-- Content Wrapper -->
+    <div class="content" id="inventoryContent">
+      <!-- Empty State (hidden by default) -->
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📦</div>
+        <h2>No items yet</h2>
+        <p>Tap the + button below to add your first item and start tracking your food inventory.</p>
+      </div>
 
-      <a href="item-detail.html?item=carrots" class="item-card">
-        <div class="item-icon">🥕</div>
-        <div class="item-info">
-          <h3>Carrots</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 5 days</p>
-        </div>
-      </a>
+      <!-- Item Cards List -->
+      <div id="itemsList">
+        <a href="item-detail.html?item=milk" class="item-card" data-item="milk">
+          <div class="item-icon">🥛</div>
+          <div class="item-info">
+            <h3>Milk</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 3 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'milk')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=bread" class="item-card expired">
-        <div class="item-icon">🍞</div>
-        <div class="item-info">
-          <h3>Bread</h3>
-          <p class="location">Pantry</p>
-          <p class="expiry">Expired 2 days ago 🔴</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=apples" class="item-card warning" data-item="apples">
+          <div class="item-icon">🍎</div>
+          <div class="item-info">
+            <h3>Apples</h3>
+            <p class="location">Counter</p>
+            <p class="expiry">Expires today ⚠️</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'apples')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=cheese" class="item-card">
-        <div class="item-icon">🧀</div>
-        <div class="item-info">
-          <h3>Cheese</h3>
-          <p class="location">Fridge</p>
-          <p class="expiry">Expires in 7 days</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=carrots" class="item-card" data-item="carrots">
+          <div class="item-icon">🥕</div>
+          <div class="item-info">
+            <h3>Carrots</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 5 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'carrots')" title="Delete item">🗑️</button>
+        </a>
 
-      <a href="item-detail.html?item=soup" class="item-card">
-        <div class="item-icon">🍲</div>
-        <div class="item-info">
-          <h3>Leftover soup</h3>
-          <p class="location">Freezer</p>
-          <p class="expiry">Prepared on Jan 10, 2026 • Good for 30 days</p>
-        </div>
-      </a>
+        <a href="item-detail.html?item=bread" class="item-card expired" data-item="bread">
+          <div class="item-icon">🍞</div>
+          <div class="item-info">
+            <h3>Bread</h3>
+            <p class="location">Pantry</p>
+            <p class="expiry">Expired 2 days ago 🔴</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'bread')" title="Delete item">🗑️</button>
+        </a>
+
+        <a href="item-detail.html?item=cheese" class="item-card" data-item="cheese">
+          <div class="item-icon">🧀</div>
+          <div class="item-info">
+            <h3>Cheese</h3>
+            <p class="location">Fridge</p>
+            <p class="expiry">Expires in 7 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'cheese')" title="Delete item">🗑️</button>
+        </a>
+
+        <a href="item-detail.html?item=soup" class="item-card" data-item="soup">
+          <div class="item-icon">🍲</div>
+          <div class="item-info">
+            <h3>Leftover soup</h3>
+            <p class="location">Freezer</p>
+            <p class="expiry">Prepared on Jan 10, 2026 • Good for 30 days</p>
+          </div>
+          <button class="item-delete-btn" onclick="deleteItem(event, 'soup')" title="Delete item">🗑️</button>
+        </a>
+      </div>
     </div>
 
     <!-- FAB -->
@@ -128,8 +162,203 @@
         <div class="nav-label">Progress</div>
       </a>
     </nav>
+
+    <!-- Mascot (Zesto) -->
+    <div id="mascot" class="mascot">
+      <div class="mascot-character">🥑</div>
+      <div id="mascotBubble" class="mascot-bubble" style="display:none;"></div>
+    </div>
   </div>
+  
+  <!-- Confetti + Toast -->
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <script>
+    // ===== ZESTO PHASE 1: CORE TRIGGERS & INFRASTRUCTURE =====
+    
+    // Phase 1 Message Pool (5-6 variations each)
+    const mascotMessages = {
+      // Existing
+      celebration: ['Amazing! 🎉', 'You\'re crushing it! 💚', 'Keep going! 🌟', 'Nice work! 🌟', 'Awesome! 💪'],
+      welcome: ['Welcome back! 👋', 'Ready to save food?', 'Let\'s do this! 💪', 'Back again! 🎉', 'Let\'s save food! 🌱'],
+      
+      // Phase 1: New Triggers
+      firstItem: ['Welcome! 🎉', 'Great start! 💚', 'Your first item! 🌟', 'Nice work! 💪', 'Let\'s save food! 🌱'],
+      consumed: ['Saved it! 🎉', 'Zero waste! 💚', 'Yum! 😋', 'Perfect! 🌟', 'Well done! 💪'],
+      wasted: [],  // Will be populated from storage_tips.json
+      quickSave: ['Just in time! ⏰', 'Beat the clock! 🏃', 'Close call! 💚', 'Saved at the buzzer! 🔔', 'Nick of time! ⌛'],
+      badgeUnlocked: ['New badge! 🏆', 'Achievement unlocked! 🎉', 'You earned it! 💪', 'Badge get! 🌟', 'Congrats! 🎊'],
+      streakMilestone: ['5 days strong! 🔥', '10 days! Legendary! ⚡', '30 days! Amazing! 🤯', '100 days! Incredible! 🏆', 'On fire! 🔥'],
+      savingsMilestone: ['$50 saved! 💰', 'You\'re rich! 💵', 'Money in the bank! 🏦', 'Cha-ching! 💸', 'Savings hero! 💳'],
+      zeroWaste: ['Perfect week! 🌟', 'No waste! 🎉', 'Flawless! 💚', '100% saved! 💯', 'Waste-free! 🌱'],
+      dailyWelcome: ['Good morning! ☀️', 'Welcome back! 👋', 'Let\'s check in! 📱', 'Ready to save? 🌟', 'New day! 🌅'],
+      expiryAlert: ['3 items expiring! ⏰', 'Check fridge! 🥛', 'Use these soon! 🍎', 'Expiry alert! 🔔', 'Time to cook! 🍳']
+    };
+
+    // Anti-spam & message history tracking
+    let mascotLastTimestamp = 0;
+    let mascotMessageHistory = [];
+    let storageTips = {};
+    const ANTI_SPAM_GAP = 5000; // 5 seconds minimum
+
+    // Load storage tips on page load
+    async function loadStorageTips() {
+      try {
+        const response = await fetch('data/storage_tips.json');
+        storageTips = await response.json();
+        console.log('✅ Storage tips loaded:', Object.keys(storageTips).length, 'categories');
+      } catch (error) {
+        console.warn('⚠️ Could not load storage tips:', error);
+      }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', loadStorageTips);
+
+    // Check if inventory is empty (for firstItem trigger)
+    function isInventoryEmpty() {
+      const itemsList = document.getElementById('itemsList');
+      const items = itemsList ? itemsList.querySelectorAll('.item-card').length : 0;
+      return items === 0;
+    }
+
+    // Core mascot display function with anti-spam & message history
+    function showMascot(messageType = 'welcome') {
+      const now = Date.now();
+
+      // Anti-spam check: 5 second minimum gap
+      if (now - mascotLastTimestamp < ANTI_SPAM_GAP) {
+        console.log(`⏸️ Mascot spam prevented (${now - mascotLastTimestamp}ms since last)`);
+        return;
+      }
+
+      const mascot = document.getElementById('mascot');
+      const bubble = document.getElementById('mascotBubble');
+      
+      // Get messages for this trigger type
+      let messages = mascotMessages[messageType] || mascotMessages.welcome;
+      
+      // Handle wasted items with storage tips
+      if (messageType === 'wasted' && storageTips) {
+        // Get random category tip
+        const categories = Object.keys(storageTips);
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        const categoryTips = storageTips[randomCategory];
+        messages = [categoryTips[Math.floor(Math.random() * categoryTips.length)]];
+      }
+
+      // Select random message
+      let selectedMessage = messages[Math.floor(Math.random() * messages.length)];
+
+      // Re-roll if in last 3 messages (avoid repetition)
+      if (mascotMessageHistory.includes(selectedMessage) && messages.length > 1) {
+        selectedMessage = messages[Math.floor(Math.random() * messages.length)];
+      }
+
+      // Update message history (keep last 3)
+      mascotMessageHistory.push(selectedMessage);
+      if (mascotMessageHistory.length > 3) {
+        mascotMessageHistory.shift();
+      }
+
+      // Display mascot
+      bubble.textContent = selectedMessage;
+      bubble.style.display = 'block';
+      mascot.classList.add('show');
+
+      // Update last timestamp
+      mascotLastTimestamp = now;
+
+      // Telemetry (log to console for now)
+      console.log(`🥑 Mascot shown: ${messageType} → "${selectedMessage}"`);
+
+      // Auto-dismiss after 3 seconds
+      setTimeout(() => {
+        mascot.classList.remove('show');
+        setTimeout(() => {
+          bubble.style.display = 'none';
+        }, 400);
+      }, 3000);
+    }
+
+    // Trigger handlers for Phase 1 events
+    function onItemAdded() {
+      // Check if this is the first item
+      if (isInventoryEmpty()) {
+        console.log('📦 First item detected!');
+        showMascot('firstItem');
+      }
+    }
+
+    function onItemConsumed(item) {
+      // Check if it's a quick save (< 24h from expiry)
+      const daysUntilExpiry = item.daysUntilExpiry || 0;
+      if (daysUntilExpiry < 1) {
+        console.log('⏰ Quick save detected!');
+        showMascot('quickSave');
+      } else {
+        console.log('✅ Item consumed');
+        showMascot('consumed');
+      }
+    }
+
+    function onItemWasted(item) {
+      console.log('⚠️ Item wasted - showing storage tip');
+      showMascot('wasted');
+    }
+
+    function celebrate() {
+      triggerConfetti();
+      showToast('Nice! You advanced your No Waste Week progress.');
+      setTimeout(() => {
+        showMascot('celebration');
+      }, 500);
+    }
+
+    function triggerConfetti() {
+      const confetti = document.getElementById('confetti');
+      confetti.classList.add('burst');
+      setTimeout(() => confetti.classList.remove('burst'), 1200);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function deleteItem(event, itemId) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      if (confirm('Delete this item?')) {
+        const itemCard = event.target.closest('.item-card');
+        itemCard.style.opacity = '0';
+        itemCard.style.transform = 'translateX(-100%)';
+        
+        setTimeout(() => {
+          itemCard.remove();
+          checkEmptyState();
+        }, 300);
+      }
+    }
+
+    function checkEmptyState() {
+      const itemsList = document.getElementById('itemsList');
+      const emptyState = document.getElementById('emptyState');
+      const hasItems = itemsList.querySelectorAll('.item-card').length > 0;
+      
+      if (hasItems) {
+        itemsList.style.display = 'block';
+        emptyState.style.display = 'none';
+      } else {
+        itemsList.style.display = 'none';
+        emptyState.style.display = 'flex';
+      }
+    }
+
     function toggleDrawer(open) {
       const drawer = document.getElementById('sideDrawer');
       const backdrop = document.getElementById('drawerBackdrop');

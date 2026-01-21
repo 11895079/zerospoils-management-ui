@@ -9,7 +9,7 @@
     .settings-content {
       flex: 1;
       overflow-y: auto;
-      padding: 60px 16px 140px;
+      padding: 16px 16px 100px;
     }
 
     .settings-section {
@@ -152,6 +152,123 @@
     .btn-danger-full:hover {
       opacity: 0.9;
     }
+
+    /* Accordion styles */
+    .accordion-section {
+      margin-bottom: 12px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      cursor: pointer;
+      background: white;
+      border: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.2s;
+    }
+
+    .accordion-header:hover {
+      background: #f8f9fa;
+    }
+
+    .accordion-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .accordion-icon {
+      font-size: 20px;
+    }
+
+    .accordion-chevron {
+      font-size: 18px;
+      color: #999;
+      transition: transform 0.3s;
+    }
+
+    .accordion-section.open .accordion-chevron {
+      transform: rotate(90deg);
+    }
+
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-section.open .accordion-body {
+      max-height: 800px;
+    }
+
+    .accordion-content {
+      padding: 0 16px 16px;
+    }
+
+    .preset-card-row {
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .preset-card-row:last-child {
+      border-bottom: none;
+    }
+
+    .preset-name {
+      font-size: 15px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .preset-detail {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .badge-preview {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .badge-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 70px;
+    }
+
+    .badge-icon {
+      font-size: 32px;
+      filter: grayscale(100%);
+      opacity: 0.4;
+    }
+
+    .badge-icon.earned {
+      filter: grayscale(0%);
+      opacity: 1;
+    }
+
+    .badge-label {
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      line-height: 1.2;
+    }
   </style>
 </head>
 <body>
@@ -173,113 +290,235 @@
         <div class="profile-email">user@example.com</div>
       </div>
 
-      <!-- Notifications -->
-      <div class="settings-section">
-        <h3 class="settings-section-title">Notifications</h3>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Expiry Alerts</div>
-            <div class="settings-item-desc">Notify when items expire soon</div>
+      <!-- Accordion: Notifications -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">🔔</span>
+            <span>Notifications</span>
           </div>
-          <button class="settings-toggle active" onclick="toggleSetting(this)">
-            <div class="settings-toggle-dot"></div>
-          </button>
-        </div>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Waste Reminders</div>
-            <div class="settings-item-desc">Weekly summary of waste tracked</div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Expiry Alerts</div>
+                <div class="settings-item-desc">Notify when items expire soon</div>
+              </div>
+              <button class="settings-toggle active" onclick="toggleSetting(this)">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Waste Reminders</div>
+                <div class="settings-item-desc">Weekly summary of waste tracked</div>
+              </div>
+              <button class="settings-toggle active" onclick="toggleSetting(this)">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Challenge Updates</div>
+                <div class="settings-item-desc">Notifications for weekly challenges</div>
+              </div>
+              <button class="settings-toggle active" onclick="toggleSetting(this)">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
           </div>
-          <button class="settings-toggle active" onclick="toggleSetting(this)">
-            <div class="settings-toggle-dot"></div>
-          </button>
         </div>
       </div>
 
-      <!-- Privacy & Data -->
-      <div class="settings-section">
-        <h3 class="settings-section-title">Privacy & Data</h3>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Telemetry</div>
-            <div class="settings-item-desc">Help us improve with usage data</div>
+      <!-- Accordion: Privacy & Data -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">🔒</span>
+            <span>Privacy & Data</span>
           </div>
-          <button class="settings-toggle active" onclick="toggleSetting(this)">
-            <div class="settings-toggle-dot"></div>
-          </button>
-        </div>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Personalized Tips</div>
-            <div class="settings-item-desc">AI tips based on your waste (Pro)</div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Telemetry</div>
+                <div class="settings-item-desc">Help us improve with usage data</div>
+              </div>
+              <button class="settings-toggle active" onclick="toggleSetting(this)">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Personalized Tips</div>
+                <div class="settings-item-desc">AI tips based on your waste (Pro)</div>
+              </div>
+              <button class="settings-toggle" onclick="toggleSetting(this)" disabled style="opacity:0.5;cursor:not-allowed;">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Data Export</div>
+                <div class="settings-item-desc">Download all your data</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
           </div>
-          <button class="settings-toggle" onclick="toggleSetting(this)" disabled style="opacity:0.5;cursor:not-allowed;">
-            <div class="settings-toggle-dot"></div>
-          </button>
-        </div>
-        <div class="settings-item" style="border-bottom:1px solid #eee;">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Data Privacy</div>
-            <div class="settings-item-desc">View and manage your data</div>
-          </div>
-          <div class="settings-arrow">→</div>
         </div>
       </div>
 
-      <!-- App Info -->
-      <div class="settings-section">
-        <h3 class="settings-section-title">App Info</h3>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Version</div>
+      <!-- Accordion: Prepared Food Presets -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">🍲</span>
+            <span>Prepared Food Presets</span>
           </div>
-          <div style="color:#999;font-size:14px;">1.0.0</div>
-        </div>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Help & Support</div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">Auto-fill expiry and storage for dishes you cook often</p>
+            <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;" onclick="alert('Add preset')">+ Add Preset</button>
+            <div class="preset-card-row">
+              <div class="preset-name">🍚 Jollof rice</div>
+              <div class="preset-detail">Fridge 4d · Freezer 30d</div>
+            </div>
+            <div class="preset-card-row">
+              <div class="preset-name">🍛 Curry</div>
+              <div class="preset-detail">Fridge 4d · Freezer 90d</div>
+            </div>
+            <div class="preset-card-row">
+              <div class="preset-name">🥣 Soup</div>
+              <div class="preset-detail">Fridge 4d · Freezer 90d</div>
+            </div>
           </div>
-          <div class="settings-arrow">→</div>
-        </div>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">Send Feedback</div>
-          </div>
-          <div class="settings-arrow">→</div>
-        </div>
-        <div class="settings-item">
-          <div class="settings-item-left">
-            <div class="settings-item-label">About ZeroSpoils</div>
-          </div>
-          <div class="settings-arrow">→</div>
         </div>
       </div>
 
-      <!-- Prepared Food Presets -->
-      <div class="settings-section">
-        <div class="settings-header">
-          <div>
-            <p class="settings-label">Prepared Food Presets</p>
-            <p class="settings-subtext">Auto-fill expiry and storage for dishes you cook often</p>
+      <!-- Accordion: Achievements & Badges -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">🏆</span>
+            <span>Achievements & Badges</span>
           </div>
-          <button class="settings-button" style="padding:8px 12px;" onclick="alert('Add preset')">+ Add</button>
-        </div>
-        <div class="preset-card-row">
-          <div class="preset-name">🍚 Jollof rice</div>
-          <div class="preset-detail">Fridge 4d · Freezer 30d</div>
-        </div>
-        <div class="preset-card-row">
-          <div class="preset-name">🍛 Curry</div>
-          <div class="preset-detail">Fridge 4d · Freezer 90d</div>
-        </div>
-        <div class="preset-card-row">
-          <div class="preset-name">🥣 Soup</div>
-          <div class="preset-detail">Fridge 4d · Freezer 90d</div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">Earn badges by reducing waste and completing challenges</p>
+            <div class="badge-preview">
+              <div class="badge-item">
+                <div class="badge-icon earned">🌟</div>
+                <div class="badge-label">First Save</div>
+              </div>
+              <div class="badge-item">
+                <div class="badge-icon earned">🔥</div>
+                <div class="badge-label">5-Day Streak</div>
+              </div>
+              <div class="badge-item">
+                <div class="badge-icon">🏅</div>
+                <div class="badge-label">No Waste Week</div>
+              </div>
+              <div class="badge-item">
+                <div class="badge-icon">💰</div>
+                <div class="badge-label">$50 Saved</div>
+              </div>
+              <div class="badge-item">
+                <div class="badge-icon">🌍</div>
+                <div class="badge-label">Eco Warrior</div>
+              </div>
+            </div>
+             <button class="btn btn-text" style="width:100%;margin-top:8px;" onclick="window.location.href='all-badges.html'">View All Badges →</button>
+          </div>
         </div>
       </div>
 
-      <!-- Account -->
-      <div class="settings-section">
+      <!-- Accordion: App Preferences -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">⚙️</span>
+            <span>App Preferences</span>
+          </div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Dark Mode</div>
+                <div class="settings-item-desc">Use dark theme</div>
+              </div>
+              <button class="settings-toggle" onclick="toggleSetting(this)">
+                <div class="settings-toggle-dot"></div>
+              </button>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Default Location</div>
+                <div class="settings-item-desc">Fridge</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Language</div>
+                <div class="settings-item-desc">English</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accordion: Help & Support -->
+      <div class="accordion-section">
+        <button class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-title">
+            <span class="accordion-icon">❓</span>
+            <span>Help & Support</span>
+          </div>
+          <span class="accordion-chevron">›</span>
+        </button>
+        <div class="accordion-body">
+          <div class="accordion-content">
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Version</div>
+              </div>
+              <div style="color:#999;font-size:14px;">1.0.0</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Tutorial</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">Send Feedback</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left">
+                <div class="settings-item-label">About ZeroSpoils</div>
+              </div>
+              <div class="settings-arrow">→</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Actions (always visible) -->
+      <div style="margin-top:24px;">
         <button class="settings-button btn-secondary-full" onclick="alert('Sign out pressed')">
           Sign Out
         </button>
@@ -311,16 +550,27 @@
   </div>
 
   <script>
+    function toggleAccordion(button) {
+      const section = button.closest('.accordion-section');
+      const wasOpen = section.classList.contains('open');
+      
+      // Close all accordion sections
+      document.querySelectorAll('.accordion-section').forEach(s => {
+        s.classList.remove('open');
+      });
+      
+      // Toggle the clicked section (reopen if it was open)
+      if (!wasOpen) {
+        section.classList.add('open');
+      }
+    }
+
     function toggleSetting(button) {
+      if (button.disabled) return;
       button.classList.toggle('active');
       const label = button.parentElement.querySelector('.settings-item-label').textContent;
       const state = button.classList.contains('active') ? 'enabled' : 'disabled';
-      showToast(`✓ ${label} ${state}`);
-    }
-
-    function showToast(message) {
-      // Simple toast (would need proper toast div in real implementation)
-      console.log(message);
+      console.log(`✓ ${label} ${state}`);
     }
   </script>
 </body>

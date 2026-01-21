@@ -15,6 +15,10 @@
 
 **Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations, full recipe feature.
 
-**Issues:** 130, 180, 190, 195, 200, 210, 220, 230, 240, 250
+**Issues:** 130, 180, 190, 195, 200, 210, 220, 230, 240, 250, 300, 350
+
+**New M3 Features (Zesto Mascot - Phase 1):**
+- **Issue 300:** Badge system (20 badges) — prerequisite for mascot unlocks
+- **Issue 350:** Zesto Phase 1 (10 triggers, anti-spam, storage tips) — interactive mascot companion with educational content
 
 **Dependencies:** M2 complete (core screens functional, build pipelines working).

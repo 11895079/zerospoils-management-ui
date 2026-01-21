@@ -17,6 +17,19 @@
 | **090** | Flutter app skeleton (routing, theming, DI) | 🔧 **Spec Complete, Ready for Implementation** | 160+ line spec, ready to scaffold |
 | **390** | Ops observability baseline (crashes, key events, alerts) | 📋 **Pending M4/M5** | Post-launch instrumentation |
 
+---
+
+## M3 Progress
+
+| Issue | Title | Status | Notes |
+|-------|-------|--------|-------|
+| **300** | Badge system: 20 badges across 5 categories | 📋 **Pending** | Prerequisite for Zesto Phase 1 unlocks |
+| **350** | Zesto Phase 1: Core triggers, anti-spam, storage tips | 📋 **Pending M3** | Depends on 300; 10 triggers, JSON tips, message filtering |
+| **360** | Zesto Phase 2: Advanced animations, rich UI | 📋 **Pending M4** | 4 animation states, storage tips UI enhancements |
+| **370** | Zesto Phase 3a: Tap-to-cycle contextual tips | 📋 **Pending M5** | Interactive mascot, page-specific messages |
+| **375** | Zesto Phase 3b: Unlockable mascot characters | 📋 **Pending M5** | 4 characters, achievement-based unlocks |
+| **380** | Zesto Phase 3c: Settings controls (frequency, message types) | 📋 **Pending M5** | User preference toggles, filtering logic |
+
 ### Implementation Blockers
 
 **M1/090 (Flutter App Skeleton) is critical blocker for:**
