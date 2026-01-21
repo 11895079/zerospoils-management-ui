@@ -31,5 +31,13 @@ if ! flutter analyze --no-pub; then
 fi
 echo "? Analyzer passed"
 
+# Run tests
+echo "?? Running tests..."
+if ! flutter test; then
+    echo "? Tests failed. Fix them before committing."
+    exit 1
+fi
+echo "? Tests passed"
+
 echo "? All pre-commit checks passed!"
 exit 0
