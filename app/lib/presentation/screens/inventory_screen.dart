@@ -10,6 +10,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/item_card.dart';
+import 'package:go_router/go_router.dart';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -164,10 +165,9 @@ class _InventoryScreenState extends State<InventoryScreen> {
                       return ItemCard(
                         item: item,
                         onTap: () {
-                          // TODO: Navigate to item detail
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Tapped ${item.name}')),
-                          );
+                          // Navigate to item detail screen via named route
+                          context.goNamed('item-detail',
+                              pathParameters: {'id': item.id});
                         },
                         onDelete: () {
                           // TODO: Delete item

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/home_shell.dart';
+import '../screens/item_detail_screen.dart';
 
 final router = GoRouter(
   routes: <RouteBase>[
@@ -14,11 +15,8 @@ final router = GoRouter(
           path: 'item/:id',
           name: 'item-detail',
           builder: (context, state) {
-            final itemId = state.pathParameters['id'];
-            return Scaffold(
-              appBar: AppBar(title: const Text('Item Details')),
-              body: Center(child: Text('Item: $itemId')),
-            );
+            final itemId = state.pathParameters['id'] ?? '';
+            return ItemDetailScreen(itemId: itemId);
           },
         ),
       ],
