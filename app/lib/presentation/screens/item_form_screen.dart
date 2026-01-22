@@ -74,9 +74,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
 
     // TODO: Save to repository
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isEditMode ? 'Item updated!' : 'Item added!'),
-      ),
+      SnackBar(content: Text(_isEditMode ? 'Item updated!' : 'Item added!')),
     );
 
     Navigator.of(context).pop();
