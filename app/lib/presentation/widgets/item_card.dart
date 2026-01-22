@@ -12,9 +12,16 @@ import '../../domain/models/item_model.dart';
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const ItemCard({super.key, required this.item, this.onTap, this.onDelete});
+  const ItemCard({
+    super.key,
+    required this.item,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +109,15 @@ class ItemCard extends StatelessWidget {
               ),
             ),
 
-            // Delete button
+            if (onEdit != null)
+              GestureDetector(
+                onTap: onEdit,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('✏️', style: TextStyle(fontSize: 18)),
+                ),
+              ),
+
             if (onDelete != null)
               GestureDetector(
                 onTap: onDelete,

@@ -8,54 +8,22 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
+import '../di/repository_providers.dart';
 import '../widgets/category_chip.dart';
 import '../widgets/item_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class InventoryScreen extends StatefulWidget {
+class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
 
   @override
-  State<InventoryScreen> createState() => _InventoryScreenState();
+  ConsumerState<InventoryScreen> createState() => _InventoryScreenState();
 }
 
-class _InventoryScreenState extends State<InventoryScreen> {
-  String? _selectedCategory;
+class _InventoryScreenState extends ConsumerState<InventoryScreen> {
+  ItemCategory? _selectedCategory;
   final TextEditingController _searchController = TextEditingController();
-
-  // TODO: Replace with real data from repository
-  final List<Item> _mockItems = [
-    Item(
-      id: '1',
-      name: 'Milk',
-      category: ItemCategory.dairy,
-      location: StorageLocation.fridge,
-      quantity: 1,
-      expiryDate: DateTime.now().add(const Duration(days: 3)),
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-    Item(
-      id: '2',
-      name: 'Apples',
-      category: ItemCategory.produce,
-      location: StorageLocation.other,
-      quantity: 5,
-      expiryDate: DateTime.now(),
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    Item(
-      id: '3',
-      name: 'Chicken Breast',
-      category: ItemCategory.meat,
-      location: StorageLocation.fridge,
-      quantity: 500,
-      expiryDate: DateTime.now().add(const Duration(days: 2)),
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-  ];
 
   @override
   void dispose() {
@@ -63,31 +31,33 @@ class _InventoryScreenState extends State<InventoryScreen> {
     super.dispose();
   }
 
-  List<Item> get _filteredItems {
-    var items = _mockItems;
+  Future<void> _refreshItems() async {
+    ref.invalidate(itemsFutureProvider);
+    await ref.read(hiveItemRepositoryProvider).init();
+  }
 
-    // Filter by category
-    if (_selectedCategory != null && _selectedCategory != 'All') {
-      items = items.where((item) {
-        return item.category.name.toLowerCase() ==
-            _selectedCategory!.toLowerCase();
-      }).toList();
+  List<Item> _applyFilters(List<Item> items) {
+    var filtered = items;
+
+    if (_selectedCategory != null) {
+      filtered = filtered
+          .where((item) => item.category == _selectedCategory)
+          .toList();
     }
 
-    // Filter by search
     if (_searchController.text.isNotEmpty) {
       final query = _searchController.text.toLowerCase();
-      items = items.where((item) {
-        return item.name.toLowerCase().contains(query);
-      }).toList();
+      filtered = filtered
+          .where((item) => item.name.toLowerCase().contains(query))
+          .toList();
     }
 
-    return items;
+    return filtered;
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredItems = _filteredItems;
+    final itemsAsync = ref.watch(itemsFutureProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -109,101 +79,81 @@ class _InventoryScreenState extends State<InventoryScreen> {
           const SizedBox(width: AppSpacing.sm),
         ],
       ),
-      body: Column(
-        children: [
-          // Search bar
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: '🔍 Search items...',
-                hintStyle: AppTextStyles.body.copyWith(
-                  color: AppColors.textTertiary,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-              ),
-            ),
-          ),
+      body: itemsAsync.when(
+        data: (items) {
+          final filteredItems = _applyFilters(items);
 
-          // Category chips
-          SizedBox(
-            height: 50,
-            child: ListView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.pagePadding,
-              ),
-              scrollDirection: Axis.horizontal,
-              children:
-                  ['All', 'Dairy', 'Fruit', 'Vegetables', 'Meat', 'Prepared']
-                      .map(
-                        (category) => Padding(
-                          padding: const EdgeInsets.only(right: AppSpacing.sm),
-                          child: CategoryChip(
-                            label: category,
-                            isSelected:
-                                _selectedCategory == category ||
-                                (_selectedCategory == null &&
-                                    category == 'All'),
+          return Column(
+            children: [
+              _buildSearchBar(),
+              _buildCategoryChips(),
+              Expanded(
+                child: filteredItems.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems[index];
+                          return ItemCard(
+                            item: item,
                             onTap: () {
-                              setState(() {
-                                _selectedCategory = category == 'All'
-                                    ? null
-                                    : category;
-                              });
+                              context.goNamed(
+                                'item-detail',
+                                pathParameters: {'id': item.id},
+                              );
                             },
-                          ),
-                        ),
-                      )
-                      .toList(),
+                            onEdit: () async {
+                              await context.pushNamed(
+                                'edit-item',
+                                pathParameters: {'id': item.id},
+                              );
+                              await _refreshItems();
+                            },
+                            onDelete: () async {
+                              final repo = ref.read(hiveItemRepositoryProvider);
+                              await repo.init();
+                              await repo.deleteItem(item.id);
+                              await _refreshItems();
+                            },
+                          );
+                        },
+                      ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxxl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('⚠️', style: TextStyle(fontSize: 40)),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Unable to load items',
+                  style: AppTextStyles.h3,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  error.toString(),
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
-
-          // Items list or empty state
-          Expanded(
-            child: filteredItems.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                    itemCount: filteredItems.length,
-                    itemBuilder: (context, index) {
-                      final item = filteredItems[index];
-                      return ItemCard(
-                        item: item,
-                        onTap: () {
-                          // Navigate to item detail screen via named route
-                          context.goNamed(
-                            'item-detail',
-                            pathParameters: {'id': item.id},
-                          );
-                        },
-                        onDelete: () {
-                          // TODO: Delete item
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Delete ${item.name}')),
-                          );
-                        },
-                      );
-                    },
-                  ),
-          ),
-        ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to add item form
-          context.goNamed('add-item');
+        onPressed: () async {
+          await context.pushNamed('add-item');
+          await _refreshItems();
         },
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
@@ -216,6 +166,61 @@ class _InventoryScreenState extends State<InventoryScreen> {
             color: Colors.white,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: (_) => setState(() {}),
+        decoration: InputDecoration(
+          hintText: '🔍 Search items...',
+          hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryChips() {
+    final categories = <ItemCategory?>[null, ...ItemCategory.values];
+
+    return SizedBox(
+      height: 50,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding),
+        scrollDirection: Axis.horizontal,
+        children: categories
+            .map(
+              (category) => Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: CategoryChip(
+                  label: category?.displayName ?? 'All',
+                  isSelected:
+                      _selectedCategory == category ||
+                      (_selectedCategory == null && category == null),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = category;
+                    });
+                  },
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }

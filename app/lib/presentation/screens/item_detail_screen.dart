@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import 'package:go_router/go_router.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final String itemId;
@@ -17,6 +18,14 @@ class ItemDetailScreen extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         title: const Text('Item Details', style: AppTextStyles.h3),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.pushNamed('edit-item', pathParameters: {'id': itemId});
+            },
+            icon: const Text('✏️', style: TextStyle(fontSize: 18)),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxxl),

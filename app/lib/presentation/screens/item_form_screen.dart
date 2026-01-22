@@ -4,22 +4,24 @@ library;
 /// Captures item name, category, location, quantity, expiry date
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../widgets/app_button.dart';
+import '../di/repository_providers.dart';
 
-class ItemFormScreen extends StatefulWidget {
+class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
 
   const ItemFormScreen({super.key, this.itemId});
 
   @override
-  State<ItemFormScreen> createState() => _ItemFormScreenState();
+  ConsumerState<ItemFormScreen> createState() => _ItemFormScreenState();
 }
 
-class _ItemFormScreenState extends State<ItemFormScreen> {
+class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -27,6 +29,8 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   ItemCategory _selectedCategory = ItemCategory.produce;
   StorageLocation _selectedLocation = StorageLocation.fridge;
   DateTime? _selectedExpiryDate;
+  DateTime? _existingCreatedAt; // preserve original creation time when editing
+  bool _isLoading = false;
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -34,18 +38,45 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   void initState() {
     super.initState();
     if (_isEditMode) {
-      // TODO: Load item from repository by itemId
       _loadItem();
     }
   }
 
-  void _loadItem() {
-    // Placeholder: In real implementation, fetch from repository
-    _nameController.text = 'Existing Item';
-    _quantityController.text = '2';
-    _selectedCategory = ItemCategory.dairy;
-    _selectedLocation = StorageLocation.fridge;
-    _selectedExpiryDate = DateTime.now().add(const Duration(days: 5));
+  Future<void> _loadItem() async {
+    setState(() => _isLoading = true);
+    try {
+      final repository = ref.read(hiveItemRepositoryProvider);
+      await repository.init();
+      final item = await repository.getItem(widget.itemId!);
+
+      if (mounted) {
+        if (item != null) {
+          setState(() {
+            _nameController.text = item.name;
+            _selectedCategory = item.category;
+            _selectedLocation = item.location;
+            _quantityController.text = item.quantity.toString();
+            _selectedExpiryDate = item.expiryDate;
+            _existingCreatedAt = item.createdAt;
+            _isLoading = false;
+          });
+        } else {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Item not found'),
+            ), // simple user feedback
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading item: $e')));
+      }
+    }
   }
 
   @override
@@ -72,12 +103,49 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   void _saveItem() {
     if (!_formKey.currentState!.validate()) return;
 
-    // TODO: Save to repository
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(_isEditMode ? 'Item updated!' : 'Item added!')),
-    );
+    setState(() => _isLoading = true);
+    _performSave();
+  }
 
-    Navigator.of(context).pop();
+  Future<void> _performSave() async {
+    try {
+      final repository = ref.read(hiveItemRepositoryProvider);
+      await repository.init();
+
+      final quantity = int.tryParse(_quantityController.text);
+
+      final item = Item(
+        id: _isEditMode
+            ? widget.itemId!
+            : DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _nameController.text.trim(),
+        category: _selectedCategory,
+        location: _selectedLocation,
+        quantity: quantity == null || quantity <= 0 ? 1 : quantity,
+        expiryDate: _selectedExpiryDate,
+        status: ItemStatus.available,
+        wasteReason: null,
+        createdAt: _existingCreatedAt ?? DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await repository.saveItem(item);
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${item.name} saved successfully')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving item: $e')));
+      }
+    }
   }
 
   @override
@@ -234,7 +302,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
               height: 50,
               child: AppButton(
                 text: _isEditMode ? 'Update Item' : 'Add Item',
-                onPressed: _saveItem,
+                onPressed: _isLoading ? null : _saveItem,
               ),
             ),
 

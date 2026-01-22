@@ -3,17 +3,25 @@ library;
 /// Hive-based implementation of Item repository
 /// Provides local persistent storage for inventory items
 
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
 
 class HiveItemRepository {
   static const String _boxName = 'items';
+  final HiveInterface _hive;
   Box<Item>? _box;
+
+  HiveItemRepository({HiveInterface? hive}) : _hive = hive ?? Hive;
 
   /// Initialize Hive and open items box
   Future<void> init() async {
-    await Hive.initFlutter();
-    _box = await Hive.openBox<Item>(_boxName);
+    if (_box != null && _box!.isOpen) return;
+
+    if (!_hive.isBoxOpen(_boxName)) {
+      _box = await _hive.openBox<Item>(_boxName);
+    } else {
+      _box = _hive.box<Item>(_boxName);
+    }
   }
 
   /// Get all items
