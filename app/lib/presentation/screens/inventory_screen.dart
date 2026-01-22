@@ -185,10 +185,8 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Navigate to add item screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Add item screen - TODO')),
-          );
+          // Navigate to add item form
+          context.goNamed('add-item');
         },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add),
