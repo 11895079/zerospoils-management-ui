@@ -1,6 +1,7 @@
 // Home shell with 4-tab navigation
 import 'package:flutter/material.dart';
 import '../widgets/base_components.dart';
+import 'inventory_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -13,7 +14,7 @@ class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const PlaceholderScreen(title: 'Inventory', icon: Icons.inventory_2),
+    const InventoryScreen(),
     const PlaceholderScreen(title: 'Expiring Soon', icon: Icons.schedule),
     const PlaceholderScreen(title: 'Shopping List', icon: Icons.shopping_cart),
     const PlaceholderScreen(title: 'Settings', icon: Icons.settings),
@@ -23,13 +24,7 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      floatingActionButton: _selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: _showAddItemModal,
-              tooltip: 'Add Item',
-              child: const Icon(Icons.add),
-            )
-          : null,
+      // FAB is now handled by individual screens (e.g., InventoryScreen)
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -56,14 +51,6 @@ class _HomeShellState extends State<HomeShell> {
           ),
         ],
       ),
-    );
-  }
-
-  void _showAddItemModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => const AddItemModal(),
     );
   }
 }

@@ -14,13 +14,19 @@ The pre-commit hook automatically runs:
    - Checks for lint errors, warnings, and code issues
    - Fails if any analyzer issues are found
 
+3. **Tests**: `flutter test`
+   - Runs all unit, widget, and integration tests
+   - Fails if any tests fail
+   - Catches regressions locally before pushing to CI
+
 ## How It Works
 
 When you run `git commit`, the hook automatically:
 1. ✅ Checks formatting of all Dart files
 2. ✅ Runs the Flutter analyzer
-3. ✅ Only allows the commit if all checks pass
-4. ❌ Blocks the commit and shows errors if checks fail
+3. ✅ Runs all tests
+4. ✅ Only allows the commit if all checks pass
+5. ❌ Blocks the commit and shows errors if checks fail
 
 ## Example Output
 
@@ -32,16 +38,22 @@ $ git commit -m "feat: add new feature"
 ✅ Formatting check passed
 🔎 Running Flutter analyzer...
 ✅ Analyzer passed
+🧪 Running tests...
+✅ Tests passed
 ✨ All pre-commit checks passed!
 [feature-branch abc123] feat: add new feature
 ```
 
-**Failed commit (formatting issue):**
+**Failed commit (test failure):**
 ```bash
 $ git commit -m "fix: update logic"
 🔍 Running pre-commit checks...
 📝 Checking Dart formatting...
-❌ Formatting check failed. Run 'cd app && dart format .' to fix.
+✅ Formatting check passed
+🔎 Running Flutter analyzer...
+✅ Analyzer passed
+🧪 Running tests...
+❌ Tests failed. Fix them before committing.
 ```
 
 ## Fixing Issues

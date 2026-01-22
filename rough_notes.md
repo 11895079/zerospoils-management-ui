@@ -16,3 +16,14 @@ We will achieve this through this process.
 
 
 Do I need an AGENTS.md
+
+
+let's groom some features on social engagement
+objective - foster competition, engagement on the platform
+how
+- adding friends on the platform
+- competitions
+- messaging
+- any others
+- free or pro tier
+

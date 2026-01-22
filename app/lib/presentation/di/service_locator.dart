@@ -1,6 +1,8 @@
 // Service locator and dependency injection setup using Riverpod
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../../domain/models/item_model.dart';
+import '../../domain/repositories/badge_service.dart';
 
 /// Connectivity service provider
 final connectivityProvider = StreamProvider<bool>((ref) {
@@ -9,17 +11,22 @@ final connectivityProvider = StreamProvider<bool>((ref) {
   });
 });
 
-/// Example: Telemetry client provider (stub for now)
+/// Telemetry client provider
 final telemetryClientProvider = Provider((ref) {
   return TelemetryClient();
 });
 
-/// Example: Repository provider
+/// Item repository provider
 final itemRepositoryProvider = Provider((ref) {
   return ItemRepository();
 });
 
-// Stub implementations for M1/090
+/// Badge service provider
+final badgeServiceProvider = Provider((ref) {
+  return BadgeService();
+});
+
+// Service implementations
 
 /// Basic telemetry client for local event queuing
 class TelemetryClient {
@@ -33,7 +40,7 @@ class TelemetryClient {
     print('Telemetry event enqueued: ${event['name']}');
   }
 
-  /// Enqueue app installed event (called on first launch)
+  /// Track app installed event (called on first launch)
   void trackAppInstalled({required bool isFirstInstall}) {
     enqueue({
       'name': 'app_installed',
@@ -41,7 +48,7 @@ class TelemetryClient {
     });
   }
 
-  /// Enqueue tab switched event
+  /// Track tab switched event
   void trackTabSwitched({required String tabName}) {
     enqueue({
       'name': 'tab_switched',
@@ -50,7 +57,7 @@ class TelemetryClient {
   }
 }
 
-/// Example repository (stub)
+/// Item repository (stub implementation)
 class ItemRepository {
   /// Get all items from local Hive database
   Future<List<Item>> getAllItems() async {
@@ -62,13 +69,4 @@ class ItemRepository {
   Future<void> addItem(Item item) async {
     // TODO: M1/090 - Implement with Hive
   }
-}
-
-/// Item model (stub)
-class Item {
-  final String id;
-  final String name;
-  final String category;
-
-  Item({required this.id, required this.name, required this.category});
 }
