@@ -57,10 +57,10 @@ void main() {
     // Verify Inventory screen (tab 0) is visible with FAB
     expect(find.text('Inventory'), findsWidgets);
     expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(find.text('Add Item'), findsOneWidget);
+    expect(find.text('+'), findsOneWidget);
 
     // Switch to Settings tab (tab 3)
-    await tester.tap(find.byIcon(Icons.settings));
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
     // Verify Settings screen is shown without FAB
@@ -68,11 +68,11 @@ void main() {
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Switch back to Inventory tab (tab 0)
-    await tester.tap(find.byIcon(Icons.inventory_2));
+    await tester.tap(find.text('Inventory'));
     await tester.pumpAndSettle();
 
     // Verify FAB is back
     expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(find.text('Add Item'), findsOneWidget);
+    expect(find.text('+'), findsOneWidget);
   });
 }

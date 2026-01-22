@@ -90,168 +90,229 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
           _isEditMode ? 'Edit Item' : 'Add Item',
           style: AppTextStyles.h3,
         ),
+        elevation: 0,
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.pagePadding),
           children: [
-            // Name field
-            TextFormField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Item Name *',
-                labelStyle: AppTextStyles.label,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
+            // Name field (required)
+            _buildFormGroup(
+              label: 'Name *',
+              child: TextFormField(
+                controller: _nameController,
+                decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Name is required';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter an item name';
-                }
-                return null;
-              },
             ),
-            const SizedBox(height: AppSpacing.lg),
 
-            // Category dropdown
-            DropdownButtonFormField<ItemCategory>(
-              initialValue: _selectedCategory,
-              decoration: InputDecoration(
-                labelText: 'Category *',
-                labelStyle: AppTextStyles.label,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
+            // Category dropdown (required)
+            _buildFormGroup(
+              label: 'Category *',
+              child: DropdownButtonFormField<ItemCategory>(
+                initialValue: _selectedCategory,
+                decoration: _buildInputDecoration(hintText: 'Select category'),
+                items: ItemCategory.values
+                    .map(
+                      (cat) => DropdownMenuItem(
+                        value: cat,
+                        child: Row(
+                          children: [
+                            Text(
+                              _getCategoryEmoji(cat),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(cat.displayName),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedCategory = value);
+                  }
+                },
               ),
-              items: ItemCategory.values.map((category) {
-                return DropdownMenuItem(
-                  value: category,
-                  child: Text(category.displayName),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                }
-              },
             ),
-            const SizedBox(height: AppSpacing.lg),
 
-            // Location dropdown
-            DropdownButtonFormField<StorageLocation>(
-              initialValue: _selectedLocation,
-              decoration: InputDecoration(
-                labelText: 'Location *',
-                labelStyle: AppTextStyles.label,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
+            // Location dropdown (required)
+            _buildFormGroup(
+              label: 'Location *',
+              child: DropdownButtonFormField<StorageLocation>(
+                initialValue: _selectedLocation,
+                decoration: _buildInputDecoration(hintText: 'Select location'),
+                items: StorageLocation.values
+                    .map(
+                      (loc) => DropdownMenuItem(
+                        value: loc,
+                        child: Row(
+                          children: [
+                            Text(
+                              _getLocationEmoji(loc),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(loc.displayName),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _selectedLocation = value);
+                  }
+                },
               ),
-              items: StorageLocation.values.map((location) {
-                return DropdownMenuItem(
-                  value: location,
-                  child: Text(location.displayName),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedLocation = value;
-                  });
-                }
-              },
             ),
-            const SizedBox(height: AppSpacing.lg),
 
             // Quantity field
-            TextFormField(
-              controller: _quantityController,
-              decoration: InputDecoration(
-                labelText: 'Quantity',
-                labelStyle: AppTextStyles.label,
-                hintText: 'e.g., 1, 500 (grams)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (value) {
-                if (value != null && value.isNotEmpty) {
-                  final quantity = int.tryParse(value);
-                  if (quantity == null || quantity <= 0) {
-                    return 'Please enter a valid positive number';
+            _buildFormGroup(
+              label: 'Quantity',
+              child: TextFormField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                decoration: _buildInputDecoration(hintText: '1'),
+                validator: (value) {
+                  if (value != null && value.isNotEmpty) {
+                    final qty = int.tryParse(value);
+                    if (qty == null || qty <= 0) {
+                      return 'Quantity must be a positive number';
+                    }
                   }
-                }
-                return null;
-              },
+                  return null;
+                },
+              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
 
             // Expiry date picker
-            InkWell(
-              onTap: () => _selectDate(context),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Expiry Date',
-                  labelStyle: AppTextStyles.label,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
+            _buildFormGroup(
+              label: 'Expiry Date',
+              child: GestureDetector(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
                     vertical: AppSpacing.md,
                   ),
-                  suffixIcon: const Icon(Icons.calendar_today),
-                ),
-                child: Text(
-                  _selectedExpiryDate == null
-                      ? 'Select date (optional)'
-                      : '${_selectedExpiryDate!.year}-${_selectedExpiryDate!.month.toString().padLeft(2, '0')}-${_selectedExpiryDate!.day.toString().padLeft(2, '0')}',
-                  style: AppTextStyles.body,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.border),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _selectedExpiryDate == null
+                            ? 'Select date'
+                            : 'Expires: ${_selectedExpiryDate!.toLocal().toString().split(' ')[0]}',
+                        style: AppTextStyles.body.copyWith(
+                          color: _selectedExpiryDate == null
+                              ? AppColors.textSecondary
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      const Text('📅', style: TextStyle(fontSize: 20)),
+                    ],
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.xxxl),
+
+            const SizedBox(height: AppSpacing.xl),
 
             // Save button
-            AppButton(
-              onPressed: _saveItem,
-              text: _isEditMode ? 'Update Item' : 'Add Item',
-              fullWidth: true,
+            SizedBox(
+              height: 50,
+              child: AppButton(
+                text: _isEditMode ? 'Update Item' : 'Add Item',
+                onPressed: _saveItem,
+              ),
             ),
 
             const SizedBox(height: AppSpacing.md),
 
             // Cancel button
-            AppButton(
-              onPressed: () => Navigator.of(context).pop(),
-              text: 'Cancel',
-              secondary: true,
-              fullWidth: true,
+            SizedBox(
+              height: 50,
+              child: AppButton(
+                text: 'Cancel',
+                onPressed: () => Navigator.of(context).pop(),
+                secondary: true,
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildFormGroup({required String label, required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          child,
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _buildInputDecoration({required String hintText}) {
+    return InputDecoration(
+      hintText: hintText,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
+    );
+  }
+
+  String _getCategoryEmoji(ItemCategory category) {
+    switch (category) {
+      case ItemCategory.dairy:
+        return '🥛';
+      case ItemCategory.produce:
+        return '🍎';
+      case ItemCategory.meat:
+        return '🍗';
+      case ItemCategory.grains:
+        return '🍞';
+      case ItemCategory.pantry:
+        return '🗄️';
+      case ItemCategory.other:
+        return '📦';
+    }
+  }
+
+  String _getLocationEmoji(StorageLocation location) {
+    switch (location) {
+      case StorageLocation.fridge:
+        return '❄️';
+      case StorageLocation.freezer:
+        return '🧊';
+      case StorageLocation.pantry:
+        return '🗄️';
+      default:
+        return '🏠';
+    }
   }
 }

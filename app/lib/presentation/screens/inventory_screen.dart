@@ -95,12 +95,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         title: const Text('Inventory', style: AppTextStyles.h3),
+        elevation: 0,
         actions: [
           TextButton(
             onPressed: () {
               // TODO: Show filter options
             },
-            child: const Text('Filter', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Filter',
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
@@ -122,7 +126,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   color: AppColors.textTertiary,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(20),
                   borderSide: const BorderSide(color: AppColors.border),
                 ),
                 contentPadding: const EdgeInsets.symmetric(
@@ -134,24 +138,37 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
 
           // Category chips
-          const SizedBox(height: AppSpacing.md),
-          CategoryChipList(
-            categories: const [
-              'All',
-              'Dairy',
-              'Fruit',
-              'Vegetables',
-              'Meat',
-              'Prepared',
-            ],
-            selectedCategory: _selectedCategory ?? 'All',
-            onCategorySelected: (category) {
-              setState(() {
-                _selectedCategory = category == 'All' ? null : category;
-              });
-            },
+          SizedBox(
+            height: 50,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePadding,
+              ),
+              scrollDirection: Axis.horizontal,
+              children:
+                  ['All', 'Dairy', 'Fruit', 'Vegetables', 'Meat', 'Prepared']
+                      .map(
+                        (category) => Padding(
+                          padding: const EdgeInsets.only(right: AppSpacing.sm),
+                          child: CategoryChip(
+                            label: category,
+                            isSelected:
+                                _selectedCategory == category ||
+                                (_selectedCategory == null &&
+                                    category == 'All'),
+                            onTap: () {
+                              setState(() {
+                                _selectedCategory = category == 'All'
+                                    ? null
+                                    : category;
+                              });
+                            },
+                          ),
+                        ),
+                      )
+                      .toList(),
+            ),
           ),
-          const SizedBox(height: AppSpacing.md),
 
           // Items list or empty state
           Expanded(
@@ -183,14 +200,22 @@ class _InventoryScreenState extends State<InventoryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to add item form
           context.goNamed('add-item');
         },
         backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
+        shape: const CircleBorder(),
+        elevation: 4,
+        child: const Text(
+          '+',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
