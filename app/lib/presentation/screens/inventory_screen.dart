@@ -166,8 +166,10 @@ class _InventoryScreenState extends State<InventoryScreen> {
                         item: item,
                         onTap: () {
                           // Navigate to item detail screen via named route
-                          context.goNamed('item-detail',
-                              pathParameters: {'id': item.id});
+                          context.goNamed(
+                            'item-detail',
+                            pathParameters: {'id': item.id},
+                          );
                         },
                         onDelete: () {
                           // TODO: Delete item

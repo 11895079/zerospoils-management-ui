@@ -5,9 +5,9 @@ import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
 
 void main() {
   testWidgets('ItemDetailScreen renders with item ID', (tester) async {
-    await tester.pumpWidget(const MaterialApp(
-      home: ItemDetailScreen(itemId: '42'),
-    ));
+    await tester.pumpWidget(
+      const MaterialApp(home: ItemDetailScreen(itemId: '42')),
+    );
 
     await tester.pumpAndSettle();
 
