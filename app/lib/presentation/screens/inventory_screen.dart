@@ -267,7 +267,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                             onPressed: () {
                               ref
                                   .read(inventoryFilterProvider.notifier)
-                                  .state = InventoryFilterState(
+                                  .state = currentState.copyWith(
                                 category: tempCategory,
                                 location: tempLocation,
                                 expiringSoonOnly: tempExpiringSoonOnly,
@@ -541,14 +541,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   _buildFilterChip(
                     label: filterState.category!.displayName,
                     onRemove: () {
-                      ref
-                          .read(inventoryFilterProvider.notifier)
-                          .state = InventoryFilterState(
-                        category: null,
-                        location: filterState.location,
-                        expiringSoonOnly: filterState.expiringSoonOnly,
-                        searchQuery: filterState.searchQuery,
-                      );
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(category: null);
                       setState(() {});
                     },
                   ),
@@ -556,14 +550,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   _buildFilterChip(
                     label: filterState.location!.displayName,
                     onRemove: () {
-                      ref
-                          .read(inventoryFilterProvider.notifier)
-                          .state = InventoryFilterState(
-                        category: filterState.category,
-                        location: null,
-                        expiringSoonOnly: filterState.expiringSoonOnly,
-                        searchQuery: filterState.searchQuery,
-                      );
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(location: null);
                       setState(() {});
                     },
                   ),
@@ -571,14 +559,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   _buildFilterChip(
                     label: 'Expiring Soon',
                     onRemove: () {
-                      ref
-                          .read(inventoryFilterProvider.notifier)
-                          .state = InventoryFilterState(
-                        category: filterState.category,
-                        location: filterState.location,
-                        expiringSoonOnly: false,
-                        searchQuery: filterState.searchQuery,
-                      );
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(expiringSoonOnly: false);
                       setState(() {});
                     },
                   ),
@@ -588,7 +570,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           TextButton(
             onPressed: () {
               ref.read(inventoryFilterProvider.notifier).state =
-                  InventoryFilterState(searchQuery: _searchController.text);
+                  const InventoryFilterState();
+              _searchController.clear();
               setState(() {});
             },
             style: TextButton.styleFrom(
@@ -596,7 +579,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('Clear filters', style: TextStyle(fontSize: 12)),
+            child: const Text('Clear all', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
@@ -629,12 +612,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
           ),
           const SizedBox(width: 4),
-          IconButton(
-            onPressed: onRemove,
-            icon: const Icon(Icons.close, size: 14, color: AppColors.primary),
-            tooltip: 'Remove $label filter',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          GestureDetector(
+            onTap: onRemove,
+            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
           ),
         ],
       ),
@@ -650,16 +630,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
-          ref
-              .read(inventoryFilterProvider.notifier)
-              .state = InventoryFilterState(
-            category: ref.read(inventoryFilterProvider).category,
-            location: ref.read(inventoryFilterProvider).location,
-            expiringSoonOnly: ref
-                .read(inventoryFilterProvider)
-                .expiringSoonOnly,
-            searchQuery: value,
-          );
+          ref.read(inventoryFilterProvider.notifier).state = ref
+              .read(inventoryFilterProvider)
+              .copyWith(searchQuery: value);
           setState(() {});
         },
         decoration: InputDecoration(
