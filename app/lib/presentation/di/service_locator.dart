@@ -30,8 +30,12 @@ final badgeServiceProvider = Provider((ref) {
 
 /// Basic telemetry client for local event queuing
 class TelemetryClient {
+  /// In-memory event sink to aid testing before Hive queue lands
+  final List<Map<String, dynamic>> events = [];
+
   /// Enqueue an event locally (no upload yet)
   void enqueue(Map<String, dynamic> event) {
+    events.add(event);
     // TODO: M1/090 - Implement local queue with Hive
     // - Apply redaction rules from telemetry/policies/redaction.yaml
     // - Apply sampling from telemetry/policies/sampling.yaml

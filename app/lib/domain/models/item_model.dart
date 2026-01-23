@@ -78,13 +78,52 @@ enum WasteReason {
   }
 }
 
+/// Item type enum (raw vs prepared)
+enum ItemType {
+  raw('Raw'),
+  prepared('Prepared');
+
+  final String displayName;
+  const ItemType(this.displayName);
+
+  static ItemType fromString(String value) {
+    return ItemType.values.firstWhere(
+      (type) => type.name == value,
+      orElse: () => ItemType.raw,
+    );
+  }
+}
+
+/// Unit of measurement enum
+enum Unit {
+  count('Count'),
+  liter('Liter'),
+  kg('Kg'),
+  g('g'),
+  lb('lb'),
+  oz('oz');
+
+  final String displayName;
+  const Unit(this.displayName);
+
+  static Unit fromString(String value) {
+    return Unit.values.firstWhere(
+      (unit) => unit.name == value,
+      orElse: () => Unit.count,
+    );
+  }
+}
+
 /// Item model for inventory
 class Item extends Equatable {
   final String id;
   final String name;
   final ItemCategory category;
+  final ItemType type;
+  final DateTime? preparedDate;
   final StorageLocation location;
   final int quantity;
+  final Unit unit;
   final DateTime? expiryDate;
   final double? purchasePrice;
   final ItemStatus status;
@@ -96,8 +135,11 @@ class Item extends Equatable {
     required this.id,
     required this.name,
     required this.category,
+    this.type = ItemType.raw,
+    this.preparedDate,
     required this.location,
     this.quantity = 1,
+    this.unit = Unit.count,
     this.expiryDate,
     this.purchasePrice,
     this.status = ItemStatus.available,
@@ -111,8 +153,11 @@ class Item extends Equatable {
     String? id,
     String? name,
     ItemCategory? category,
+    ItemType? type,
+    DateTime? preparedDate,
     StorageLocation? location,
     int? quantity,
+    Unit? unit,
     DateTime? expiryDate,
     double? purchasePrice,
     ItemStatus? status,
@@ -124,8 +169,11 @@ class Item extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       category: category ?? this.category,
+      type: type ?? this.type,
+      preparedDate: preparedDate ?? this.preparedDate,
       location: location ?? this.location,
       quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
       expiryDate: expiryDate ?? this.expiryDate,
       purchasePrice: purchasePrice ?? this.purchasePrice,
       status: status ?? this.status,
@@ -165,8 +213,11 @@ class Item extends Equatable {
     id,
     name,
     category,
+    type,
+    preparedDate,
     location,
     quantity,
+    unit,
     expiryDate,
     purchasePrice,
     status,

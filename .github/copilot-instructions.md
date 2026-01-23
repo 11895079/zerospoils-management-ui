@@ -69,9 +69,33 @@ This monorepo supports a workflow where planning drives implementation:
 3. **Create Feature Branch**: `git checkout -b feature/descriptive-name`
 4. **Implement in `app/`** — code + tests + telemetry per Definition of Done
 5. **Submit PR** linking back to planning issue (e.g., "Closes planning/milestones/M1/090-*")
-6. **Update Issue** status in planning when PR merges
+6. **After PR merges, update this planning repo** ⚠️ **CRITICAL STEP**
 
-See `CONTRIBUTING.md` for detailed contribution guidelines and PR checklist.
+### ⚠️ CRITICAL: Keep Planning & Code in Sync
+
+**After implementation is complete and merged to app repo main branch:**
+
+1. **Update the issue file acceptance criteria** to reflect actual implementation:
+   - Mark items `[x]` if code is complete and tested
+   - Leave incomplete items as `[ ]`
+   - Do NOT modify issue descriptions (they are the authoritative spec)
+   - Add implementation notes if details changed (e.g., "Used Riverpod instead of GetIt")
+
+2. **Update the milestone README** with current progress:
+   - Add or update issue status table showing completion % (see `planning/milestones/M1/README.md` for example format)
+   - Include test results (e.g., "19/19 tests passing")
+   - List any pending work or deferred items
+   - Update "Last Updated" timestamp
+
+3. **Update the root README.md** with project hours:
+   - Bump cumulative hours estimate (see "Project Status & Hours Tracking" section in root README)
+   - Update "Last Updated" timestamp
+   - Add brief summary of what was completed
+
+**Why this is critical:**
+- Planning files are the ground truth for all stakeholders
+- Stale documentation leads to rework and duplicate effort
+- Acceptance criteria updates enable traceability: spec → PR → test results
 
 ### Adding/Editing Issues (Planning Work)
 1. Use the standard template (see any `milestones/M1/*.md` for reference)

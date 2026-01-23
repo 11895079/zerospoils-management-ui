@@ -4,15 +4,22 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart';
+import 'data/adapters/item_adapter.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Initialize Hive for local storage
   await Hive.initFlutter();
 
-  // TODO: M1/090 - Register Hive adapters for models
-  // Hive.registerAdapter(ItemAdapter());
-  // Hive.registerAdapter(ShoppingListItemAdapter());
-  // Hive.registerAdapter(EventAdapter());
+  // Register Hive adapters for domain models
+  Hive.registerAdapter(ItemAdapter());
+  Hive.registerAdapter(ItemCategoryAdapter());
+  Hive.registerAdapter(StorageLocationAdapter());
+  Hive.registerAdapter(ItemStatusAdapter());
+  Hive.registerAdapter(WasteReasonAdapter());
+  Hive.registerAdapter(ItemTypeAdapter());
+  Hive.registerAdapter(UnitAdapter());
 
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }

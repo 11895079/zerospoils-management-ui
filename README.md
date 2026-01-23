@@ -97,6 +97,22 @@ git checkout -b feature/item-inventory
 5. **Submit PR** linking back to planning issue
 6. **Update Issue** status in planning/ when merged
 
+## Project Status & Hours Tracking
+
+**Last Updated:** January 23, 2026
+
+### Cumulative Human Hours Invested
+| Phase | Hours | Status | Notes |
+|-------|-------|--------|-------|
+| Planning & Documentation | ~40h | ✅ Complete | Repo setup, design tokens, data model, telemetry schemas, UX docs |
+| M1/090 Flutter Skeleton | ~20h | ✅ 95% Complete | App compiles, routing, DI, telemetry, tests pass; deep link integration test + CI pipeline pending |
+| M2/100 Hive Storage | ~12h | ✅ Complete | Repository CRUD, Hive init, Riverpod providers wired |
+| M2/140 Add Item Screen | ~8h | ✅ Complete | Form with prepared type toggle, price validation, date picker, accessibility |
+| Testing & Polish | ~4h | ✅ Complete | Deprecated API fixes, widget tests (19/19 passing), accessibility improvements |
+| **Total** | **~84h** | **75% to M2** | Core MVP loop (add → view → use) scaffold complete |
+
+**Next Milestones:** M2/150 (Inventory List), M2/170 (Item Detail), M1 gaps (deep link test, CI pipeline)
+
 ## CI/CD Strategy
 
 - **Planning changes**: Lint markdown, validate issue structure

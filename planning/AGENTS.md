@@ -132,11 +132,99 @@ or
 
 1. **Always read full issue** before implementation (not just summary)
 2. **Follow test plan exactly** (don't skip automated tests)
-3. **Update this repo after merging** (not during implementation)
+3. **Update planning repo AFTER implementation merges** (not during implementation) ⚠️ **CRITICAL**
 4. **Preserve issue structure** (never delete acceptance criteria or test plans)
 5. **Document deviations:** If implementation differs from issue, add notes to issue file
 
+### ⚠️ CRITICAL: Keep Planning & Code in Sync
+
+**After completing implementation in app repo:**
+
+1. **Update issue file acceptance criteria** to reflect actual implementation:
+   - Mark items `[x]` if code is complete and tested
+   - Leave incomplete items as `[ ]`
+   - Do NOT modify issue descriptions (they are the authoritative specification)
+   - Add implementation notes if details changed (e.g., "Used Riverpod instead of GetIt")
+
+2. **Update milestone README** with current progress:
+   - Add issue status table showing completion % (see `planning/milestones/M1/README.md` for example)
+   - Include test results (e.g., "19/19 tests passing")
+   - List any pending work or deferred items
+   - Update "Last Updated" timestamp
+
+3. **Update root README.md** project hours:
+   - Bump cumulative hours estimate after each major feature/milestone
+   - Include "Last Updated" timestamp (e.g., "January 23, 2026")
+   - Add brief notes on what was completed and remaining work
+
+**Why this matters:**
+- Planning files are the ground truth for stakeholders and future developers
+- Stale documentation leads to rework and confusion
+- Acceptance criteria updates allow traceability between spec and implementation
+
 ### Test Plan Execution
+
+Every issue has concrete test plans. Agents must:
+- **Automated tests:** Implement all listed tests (widget/unit/integration)
+- **Manual tests:** Follow step-by-step scenarios and verify expected results
+- **Never skip tests:** If test is infeasible, document why in issue status update
+
+### Telemetry Requirements
+
+If issue mentions telemetry:
+- Implement event logging as specified
+- Document event names and properties in code comments
+- Add telemetry verification to test plan results
+
+## Issue File Updates
+
+### When to Update
+- ✅ Issue complete (merged to main in app repo)
+- ⚠️ Issue blocked (dependency not met, clarification needed)
+- 🔄 Issue scope changed (implementation revealed new requirements)
+- ❌ Issue cancelled (no longer needed, superseded by another issue)
+
+### How to Update
+
+**Option 1: Add status section (recommended)**
+```markdown
+---
+
+## Status
+✅ **COMPLETE** — [PR #123](app-repo-pr-link) on 2026-01-15
+
+**Implementation notes:**
+- Used Provider for state management (not Bloc)
+- Added 3 widget tests, 5 unit tests
+- Telemetry events: item_added, item_edited, item_deleted
+
+**Deviations:**
+- Skipped encryption-at-rest (deferred to issue 245)
+```
+
+**Option 2: Checkbox completion**
+For simple completions, just check all DoD items:
+```markdown
+## Acceptance criteria (Definition of Done)
+- [x] UI implemented and integrated into navigation
+- [x] State management implemented with repository layer
+- [x] Unit/widget/integration tests added or updated
+...
+```
+
+### Milestone README Updates
+
+When all issues in milestone complete:
+```markdown
+# Milestone M2 - Offline MVP (No Backend)
+
+**Status:** ✅ **COMPLETE** (2026-01-20)
+
+**Objective:** Deliver the first user-facing MVP...
+
+**Actual outcomes:**
+- All 10 core issues implemented
+```
 
 Every issue has concrete test plans. Agents must:
 - **Automated tests:** Implement all listed tests (widget/unit/integration)
