@@ -226,24 +226,6 @@ When all issues in milestone complete:
 - All 10 core issues implemented
 ```
 
-Every issue has concrete test plans. Agents must:
-- **Automated tests:** Implement all listed tests (widget/unit/integration)
-- **Manual tests:** Follow step-by-step scenarios and verify expected results
-- **Never skip tests:** If test is infeasible, document why in issue status update
-
-### Telemetry Requirements
-
-If issue mentions telemetry:
-- Implement event logging as specified
-- Document event names and properties in code comments
-- Add telemetry verification to test plan results
-
-## Issue File Updates
-
-### When to Update
-- ✅ Issue complete (merged to main in app repo)
-- ⚠️ Issue blocked (dependency not met, clarification needed)
-- 🔄 Issue scope changed (implementation revealed new requirements)
 - ❌ Issue cancelled (no longer needed, superseded by another issue)
 
 ### How to Update
