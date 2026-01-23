@@ -31,13 +31,29 @@ void main() {
 
       final telemetryClient = container.read(telemetryClientProvider);
 
-      // Verify enqueue doesn't throw (stub implementation prints to console)
       expect(
         () => telemetryClient.enqueue({
           'name': 'test_event',
           'properties': {'test': 'value'},
         }),
         returnsNormally,
+      );
+    });
+
+    test('Telemetry client tracks helper events into memory sink', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final telemetryClient = container.read(telemetryClientProvider);
+
+      telemetryClient.trackAppInstalled(isFirstInstall: true);
+      telemetryClient.trackTabSwitched(tabName: 'inventory');
+
+      expect(telemetryClient.events.length, 2);
+      expect(telemetryClient.events.first['name'], equals('app_installed'));
+      expect(
+        telemetryClient.events.last['properties']['tab_name'],
+        equals('inventory'),
       );
     });
   });

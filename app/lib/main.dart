@@ -18,6 +18,8 @@ void main() async {
   Hive.registerAdapter(StorageLocationAdapter());
   Hive.registerAdapter(ItemStatusAdapter());
   Hive.registerAdapter(WasteReasonAdapter());
+  Hive.registerAdapter(ItemTypeAdapter());
+  Hive.registerAdapter(UnitAdapter());
 
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }

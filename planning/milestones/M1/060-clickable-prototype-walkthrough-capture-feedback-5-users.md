@@ -1,4 +1,5 @@
-```markdown
+**STATUS: Informal feedback received** — Structured user research deferred to post-MVP validation (M4). Current feedback confirms core flows are viable.
+
 ## Context
 Validate whether the MVP flows are intuitive and low-friction, **especially the shopping list → inventory conversion workflow**. Use an interactive HTML prototype with a comprehensive onboarding flow to prime users with WHY they're using the app and HOW the core workflows operate before asking them to complete tasks.
 
@@ -77,4 +78,3 @@ The onboarding flow addresses user feedback on unclear shopping list → invento
 ## Dependencies
 - None
 
-```

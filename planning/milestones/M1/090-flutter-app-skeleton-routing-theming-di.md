@@ -26,18 +26,20 @@ Create a Flutter app skeleton with:
 - [x] Placeholder screens for each tab (AppBar + empty state)
 - [x] Modal for Add Item (bottom sheet, dismissible)
 - [x] Deep link routing configured (`zerospoils://` scheme)
-- [x] DI container (GetIt or similar) with test service resolution
+- [x] DI container (Riverpod) with test service resolution
 - [x] Connectivity service integrated (monitors online/offline)
-- [x] Telemetry client wired (enqueues events locally, no upload yet)
-- [x] Base components: PrimaryButton, SecondaryButton, EmptyStateWidget
+- [x] Telemetry client wired (enqueues events locally, in-memory queue + Hive TODO)
+- [x] Base components: AppButton, EmptyStateWidget
 - [x] Linting passes (`flutter analyze` clean, no warnings)
 - [x] Formatting passes (`dart format` applied)
-- [x] Unit tests: DI container resolves all services (≥1 test)
-- [x] Widget tests: App launches, renders home, tabs switch (≥3 tests)
-- [x] Integration test: Deep link navigation (≥1 test)
-- [x] Telemetry instrumented: app_installed, tab_switched events logged
+- [x] Unit tests: DI container + telemetry helpers (≥4 tests) ✅ 4 passing
+- [x] Widget tests: App launches, renders home, tabs switch, form flows (≥5 tests) ✅ 11 passing
+- [ ] Integration test: Deep link navigation (≥1 test) — *Pending: zerospoils://item/{id} → ItemDetailScreen*
+- [x] Telemetry instrumented: app_installed, tab_switched, item_added, item_updated events logged
 - [x] Offline-first verified: app works with no network (no runtime crashes)
-- [x] Accessibility verified: 44pt buttons, semantic labels, 4.5:1 contrast on text
+- [x] Accessibility verified: 44pt buttons, Material icons, semantic labels, 4.5:1 contrast on text
+
+**Overall Completion:** 95% — 18/19 criteria met; deep link integration test deferred to M2/170 (Item Detail Screen implementation)
 
 ## Out of scope
 - Feature implementation (actual inventory, shopping, expiring logic) — that's M2

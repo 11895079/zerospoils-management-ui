@@ -74,6 +74,40 @@ class WasteReasonAdapter extends TypeAdapter<WasteReason> {
   }
 }
 
+// ItemType adapter (type ID: 5)
+class ItemTypeAdapter extends TypeAdapter<ItemType> {
+  @override
+  final int typeId = 5;
+
+  @override
+  ItemType read(BinaryReader reader) {
+    final index = reader.readByte();
+    return ItemType.values[index];
+  }
+
+  @override
+  void write(BinaryWriter writer, ItemType obj) {
+    writer.writeByte(obj.index);
+  }
+}
+
+// Unit adapter (type ID: 6)
+class UnitAdapter extends TypeAdapter<Unit> {
+  @override
+  final int typeId = 6;
+
+  @override
+  Unit read(BinaryReader reader) {
+    final index = reader.readByte();
+    return Unit.values[index];
+  }
+
+  @override
+  void write(BinaryWriter writer, Unit obj) {
+    writer.writeByte(obj.index);
+  }
+}
+
 // Item adapter (type ID: 0)
 class ItemAdapter extends TypeAdapter<Item> {
   @override
@@ -85,8 +119,11 @@ class ItemAdapter extends TypeAdapter<Item> {
       id: reader.readString(),
       name: reader.readString(),
       category: ItemCategory.values[reader.readByte()],
+      type: ItemType.values[reader.readByte()],
+      preparedDate: reader.read() as DateTime?,
       location: StorageLocation.values[reader.readByte()],
       quantity: reader.readInt(),
+      unit: Unit.values[reader.readByte()],
       expiryDate: reader.read() as DateTime?,
       purchasePrice: reader.read() as double?,
       status: ItemStatus.values[reader.readByte()],
@@ -103,8 +140,11 @@ class ItemAdapter extends TypeAdapter<Item> {
     writer.writeString(obj.id);
     writer.writeString(obj.name);
     writer.writeByte(obj.category.index);
+    writer.writeByte(obj.type.index);
+    writer.write(obj.preparedDate);
     writer.writeByte(obj.location.index);
     writer.writeInt(obj.quantity);
+    writer.writeByte(obj.unit.index);
     writer.write(obj.expiryDate);
     writer.write(obj.purchasePrice);
     writer.writeByte(obj.status.index);

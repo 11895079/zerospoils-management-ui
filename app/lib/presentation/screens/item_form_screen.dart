@@ -26,9 +26,13 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
+  final _priceController = TextEditingController();
 
   ItemCategory _selectedCategory = ItemCategory.produce;
+  ItemType _selectedType = ItemType.raw;
+  DateTime? _selectedPreparedDate;
   StorageLocation _selectedLocation = StorageLocation.fridge;
+  Unit _selectedUnit = Unit.count;
   DateTime? _selectedExpiryDate;
   DateTime? _existingCreatedAt; // preserve original creation time when editing
   bool _isLoading = false;
@@ -55,8 +59,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           setState(() {
             _nameController.text = item.name;
             _selectedCategory = item.category;
+            _selectedType = item.type;
+            _selectedPreparedDate = item.preparedDate;
             _selectedLocation = item.location;
+            _selectedUnit = item.unit;
             _quantityController.text = item.quantity.toString();
+            if (item.purchasePrice != null) {
+              _priceController.text = item.purchasePrice!.toStringAsFixed(2);
+            }
             _selectedExpiryDate = item.expiryDate;
             _existingCreatedAt = item.createdAt;
             _isLoading = false;
@@ -84,6 +94,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   void dispose() {
     _nameController.dispose();
     _quantityController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 
@@ -114,6 +125,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       await repository.init();
 
       final quantity = int.tryParse(_quantityController.text);
+      final price = _priceController.text.isEmpty
+          ? null
+          : double.tryParse(_priceController.text.replaceAll(r'$', ''));
 
       final item = Item(
         id: _isEditMode
@@ -121,9 +135,13 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             : DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text.trim(),
         category: _selectedCategory,
+        type: _selectedType,
+        preparedDate: _selectedPreparedDate,
         location: _selectedLocation,
         quantity: quantity == null || quantity <= 0 ? 1 : quantity,
+        unit: _selectedUnit,
         expiryDate: _selectedExpiryDate,
+        purchasePrice: price,
         status: ItemStatus.available,
         wasteReason: null,
         createdAt: _existingCreatedAt ?? DateTime.now(),
@@ -225,6 +243,89 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               ),
             ),
 
+            // Type toggle (Raw vs Prepared)
+            _buildFormGroup(
+              label: 'Type *',
+              child: SegmentedButton<ItemType>(
+                segments: const [
+                  ButtonSegment(value: ItemType.raw, label: Text('Raw')),
+                  ButtonSegment(
+                    value: ItemType.prepared,
+                    label: Text('Prepared'),
+                  ),
+                ],
+                selected: {_selectedType},
+                showSelectedIcon: false,
+                onSelectionChanged: (selection) {
+                  final selected = selection.first;
+                  setState(() {
+                    _selectedType = selected;
+                    if (selected == ItemType.raw) {
+                      _selectedLocation = StorageLocation.fridge;
+                      _selectedExpiryDate = DateTime.now().add(
+                        const Duration(days: 7),
+                      );
+                    } else {
+                      _selectedPreparedDate = DateTime.now();
+                      _selectedLocation = StorageLocation.freezer;
+                      _selectedExpiryDate = DateTime.now().add(
+                        const Duration(days: 30),
+                      );
+                    }
+                  });
+                },
+              ),
+            ),
+
+            // Prepared date (only shown if type is Prepared)
+            if (_selectedType == ItemType.prepared)
+              _buildFormGroup(
+                label: 'Prepared Date',
+                child: GestureDetector(
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedPreparedDate ?? DateTime.now(),
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 30),
+                      ),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _selectedPreparedDate = picked;
+                      });
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _selectedPreparedDate == null
+                              ? 'Select date'
+                              : 'Prepared: ${_selectedPreparedDate!.toLocal().toString().split(' ')[0]}',
+                          style: AppTextStyles.body.copyWith(
+                            color: _selectedPreparedDate == null
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        const Text('📅', style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
             // Location dropdown (required)
             _buildFormGroup(
               label: 'Location *',
@@ -256,18 +357,75 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               ),
             ),
 
-            // Quantity field
+            // Quantity and Unit in a row
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: _buildFormGroup(
+                    label: 'Quantity',
+                    child: TextFormField(
+                      controller: _quantityController,
+                      keyboardType: TextInputType.number,
+                      decoration: _buildInputDecoration(hintText: '1'),
+                      validator: (value) {
+                        if (value != null && value.isNotEmpty) {
+                          final qty = int.tryParse(value);
+                          if (qty == null || qty <= 0) {
+                            return 'Must be positive';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  flex: 3,
+                  child: _buildFormGroup(
+                    label: 'Unit',
+                    child: DropdownButtonFormField<Unit>(
+                      initialValue: _selectedUnit,
+                      decoration: _buildInputDecoration(
+                        hintText: 'Select unit',
+                      ),
+                      items: Unit.values
+                          .map(
+                            (unit) => DropdownMenuItem(
+                              value: unit,
+                              child: Text(unit.displayName),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedUnit = value);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Price field (optional)
             _buildFormGroup(
-              label: 'Quantity',
+              label: 'Price Paid (optional) 💵',
               child: TextFormField(
-                controller: _quantityController,
-                keyboardType: TextInputType.number,
-                decoration: _buildInputDecoration(hintText: '1'),
+                controller: _priceController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: _buildInputDecoration(
+                  hintText: '\$3.99 total for this item',
+                ),
                 validator: (value) {
                   if (value != null && value.isNotEmpty) {
-                    final qty = int.tryParse(value);
-                    if (qty == null || qty <= 0) {
-                      return 'Quantity must be a positive number';
+                    final cleanValue = value.replaceAll(r'$', '');
+                    final price = double.tryParse(cleanValue);
+                    if (price == null || price < 0) {
+                      return 'Enter a valid price';
                     }
                   }
                   return null;
@@ -275,37 +433,91 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               ),
             ),
 
-            // Expiry date picker
+            // Expiry date picker with camera button
             _buildFormGroup(
               label: 'Expiry Date',
-              child: GestureDetector(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.border),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _selectedExpiryDate == null
-                            ? 'Select date'
-                            : 'Expires: ${_selectedExpiryDate!.toLocal().toString().split(' ')[0]}',
-                        style: AppTextStyles.body.copyWith(
-                          color: _selectedExpiryDate == null
-                              ? AppColors.textSecondary
-                              : AppColors.textPrimary,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
                         ),
                       ),
-                      const Text('📅', style: TextStyle(fontSize: 20)),
-                    ],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _selectedExpiryDate == null
+                                  ? 'Select date'
+                                  : 'Expires: ${_selectedExpiryDate!.toLocal().toString().split(' ')[0]}',
+                              style: AppTextStyles.body.copyWith(
+                                color: _selectedExpiryDate == null
+                                    ? AppColors.textSecondary
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Tooltip(
+                                message: 'Scan expiry date (OCR coming soon)',
+                                child: Semantics(
+                                  button: true,
+                                  label: 'Scan expiry date',
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 20,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(
+                                      minWidth: 44,
+                                      minHeight: 44,
+                                    ),
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Camera OCR coming soon!',
+                                          ),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Or scan the expiry date with camera',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
 

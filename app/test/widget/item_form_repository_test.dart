@@ -6,6 +6,7 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
+import 'package:zerospoils/presentation/widgets/app_button.dart';
 
 /// Mock repository for testing without Hive file I/O
 class MockItemRepository extends HiveItemRepository {
@@ -52,12 +53,20 @@ void main() {
 
   late MockItemRepository repository;
 
-  setUp(() {
+  setUp(() async {
     repository = MockItemRepository();
-    repository.init(); // Initialize before use
+    await repository.init(); // Initialize before use
   });
 
   testWidgets('saving new item calls repository.saveItem', (tester) async {
+    // Make the viewport large enough to avoid overflow/scroll issues
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
@@ -65,20 +74,24 @@ void main() {
       ),
     );
 
-    // Wait for initial build
-    await tester.pump();
-
-    await tester.enterText(find.byType(TextFormField).first, 'Test Milk');
-    await tester.enterText(find.byType(TextFormField).at(1), '2');
-
-    // Scroll to make button visible and tap
-    await tester.ensureVisible(find.byType(ElevatedButton).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ElevatedButton).first);
 
-    // Wait for async save operation
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    // Enter required fields
+    final nameField = find.byType(TextFormField).first;
+    await tester.enterText(nameField, 'Test Milk');
+
+    // Quantity field is the second TextFormField (after name)
+    final quantityField = find.byType(TextFormField).at(1);
+    await tester.enterText(quantityField, '2');
+
+    await tester.pumpAndSettle();
+
+    // Tap the primary action button (AppButton)
+    final addButton = find.byWidgetPredicate(
+      (widget) => widget is AppButton && widget.text == 'Add Item',
+    );
+    await tester.tap(addButton);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final items = await repository.getAllItems();
     expect(items.length, 1);
@@ -87,6 +100,13 @@ void main() {
   });
 
   testWidgets('edit mode loads existing item from repository', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     final existingItem = Item(
       id: 'edit-1',
       name: 'Carrots',
@@ -100,7 +120,6 @@ void main() {
       updatedAt: DateTime.now().subtract(const Duration(days: 1)),
     );
 
-    await repository.init();
     await repository.saveItem(existingItem);
 
     await tester.pumpWidget(
@@ -110,28 +129,138 @@ void main() {
       ),
     );
 
-    // Wait for async load
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
 
-    // Verify form is populated
+    // Ensure existing data is shown
     final nameField = find.byType(TextFormField).first;
     expect(tester.widget<TextFormField>(nameField).controller?.text, 'Carrots');
 
-    // Clear and update the name
     await tester.enterText(nameField, 'Baby Carrots');
-
-    // Scroll to button and tap
-    await tester.ensureVisible(find.byType(ElevatedButton).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(ElevatedButton).first);
 
-    // Wait for save
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pump(const Duration(milliseconds: 100));
+    final updateButton = find.byWidgetPredicate(
+      (widget) => widget is AppButton && widget.text == 'Update Item',
+    );
+    await tester.tap(updateButton);
+    await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final updated = await repository.getItem(existingItem.id);
     expect(updated?.name, 'Baby Carrots');
     expect(updated?.quantity, 3);
+  });
+
+  testWidgets(
+    'selecting prepared type applies defaults and saves prepared item',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Prepared'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Prepared Date'), findsOneWidget);
+      expect(find.text(StorageLocation.freezer.displayName), findsOneWidget);
+      expect(find.textContaining('Expires:'), findsOneWidget);
+
+      final nameField = find.byType(TextFormField).first;
+      await tester.enterText(nameField, 'Tomato Soup');
+      await tester.pumpAndSettle();
+
+      final addButton = find.byWidgetPredicate(
+        (widget) => widget is AppButton && widget.text == 'Add Item',
+      );
+      await tester.tap(addButton);
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+
+      final saved = (await repository.getAllItems()).single;
+      expect(saved.type, ItemType.prepared);
+      expect(saved.location, StorageLocation.freezer);
+      expect(saved.preparedDate, isNotNull);
+      expect(saved.expiryDate, isNotNull);
+    },
+  );
+
+  testWidgets('invalid price shows validation error and prevents save', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final nameField = find.byType(TextFormField).first;
+    await tester.enterText(nameField, 'Price Test');
+
+    final quantityField = find.byType(TextFormField).at(1);
+    await tester.enterText(quantityField, '1');
+
+    final priceField = find.byType(TextFormField).at(2);
+    await tester.enterText(priceField, '-5');
+
+    final addButton = find.byWidgetPredicate(
+      (widget) => widget is AppButton && widget.text == 'Add Item',
+    );
+    await tester.tap(addButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter a valid price'), findsOneWidget);
+    final items = await repository.getAllItems();
+    expect(items, isEmpty);
+  });
+
+  testWidgets('tapping expiry opens date picker and applies selection', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Select date'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CalendarDatePicker), findsOneWidget);
+
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Expires:'), findsOneWidget);
   });
 }
