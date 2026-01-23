@@ -1,5 +1,6 @@
-// Home shell with 4-tab navigation
+// Home shell with 4-tab navigation using emoji icons
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 import '../widgets/base_components.dart';
 import 'inventory_screen.dart';
 
@@ -32,21 +33,25 @@ class _HomeShellState extends State<HomeShell> {
             _selectedIndex = index;
           });
         },
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.textSecondary,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2),
+            icon: Text('📦', style: TextStyle(fontSize: 20)),
             label: 'Inventory',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule),
+            icon: Text('⏰', style: TextStyle(fontSize: 20)),
             label: 'Expiring',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: Text('🛒', style: TextStyle(fontSize: 20)),
             label: 'Shopping',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
+            icon: Text('⚙️', style: TextStyle(fontSize: 20)),
             label: 'Settings',
           ),
         ],

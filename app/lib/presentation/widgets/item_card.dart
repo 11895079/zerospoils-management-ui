@@ -12,14 +12,22 @@ import '../../domain/models/item_model.dart';
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const ItemCard({super.key, required this.item, this.onTap, this.onDelete});
+  const ItemCard({
+    super.key,
+    required this.item,
+    this.onTap,
+    this.onEdit,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isWarning =
-        item.daysUntilExpiry != null && item.daysUntilExpiry! <= 1;
+    final daysLeft = item.daysUntilExpiry;
+    final isExpired = daysLeft != null && daysLeft < 0;
+    final isUrgent = daysLeft != null && daysLeft <= 1 && !isExpired;
 
     return GestureDetector(
       onTap: onTap,
@@ -30,17 +38,25 @@ class ItemCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isExpired
+              ? const Color(0xFFFCE4EC) // Light pink background
+              : isUrgent
+              ? const Color(0xFFFFF8E1) // Light yellow background
+              : Colors.white,
           border: Border.all(
-            color: isWarning ? AppColors.warning : AppColors.border,
-            width: isWarning ? 2 : 1,
+            color: isExpired
+                ? AppColors.danger
+                : isUrgent
+                ? AppColors.warning
+                : AppColors.border,
+            width: isExpired || isUrgent ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           boxShadow: [
             BoxShadow(
               color: AppColors.shadowLight,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -48,8 +64,8 @@ class ItemCard extends StatelessWidget {
           children: [
             // Icon
             Container(
-              width: AppSpacing.iconXl,
-              height: AppSpacing.iconXl,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
                 color: AppColors.backgroundSecondary,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -57,7 +73,7 @@ class ItemCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 _getCategoryEmoji(item.category),
-                style: const TextStyle(fontSize: 24),
+                style: const TextStyle(fontSize: 28),
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -71,28 +87,44 @@ class ItemCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     _getLocationDisplay(item.location),
-                    style: AppTextStyles.bodySmall,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _getExpiryDisplay(),
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: isWarning
+                      color: isExpired
+                          ? AppColors.danger
+                          : isUrgent
                           ? AppColors.warning
                           : AppColors.textSecondary,
+                      fontWeight: isUrgent || isExpired
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Delete button
+            if (onEdit != null)
+              GestureDetector(
+                onTap: onEdit,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('✏️', style: TextStyle(fontSize: 18)),
+                ),
+              ),
+
             if (onDelete != null)
-              IconButton(
-                icon: const Text('🗑️', style: TextStyle(fontSize: 20)),
-                onPressed: onDelete,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              GestureDetector(
+                onTap: onDelete,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text('🗑️', style: TextStyle(fontSize: 18)),
+                ),
               ),
           ],
         ),
