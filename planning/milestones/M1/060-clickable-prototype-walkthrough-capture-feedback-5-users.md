@@ -1,4 +1,3 @@
-```markdown
 **STATUS: Informal feedback received** — Structured user research deferred to post-MVP validation (M4). Current feedback confirms core flows are viable.
 
 ## Context
@@ -79,4 +78,3 @@ The onboarding flow addresses user feedback on unclear shopping list → invento
 ## Dependencies
 - None
 
-```
