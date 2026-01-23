@@ -3,14 +3,62 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/presentation/screens/home_shell.dart';
+import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/data/repositories/hive_item_repository.dart';
+import 'package:zerospoils/presentation/di/repository_providers.dart';
+
+/// Lightweight in-memory mock to avoid Hive I/O during widget tests
+class MockItemRepository extends HiveItemRepository {
+  bool _initialized = false;
+  final Map<String, Item> _items = {};
+
+  @override
+  Future<void> init() async {
+    _initialized = true;
+  }
+
+  @override
+  Future<List<Item>> getAllItems() async {
+    if (!_initialized) throw Exception('Repository not initialized');
+    return _items.values.toList();
+  }
+
+  @override
+  Future<Item?> getItem(String id) async {
+    if (!_initialized) throw Exception('Repository not initialized');
+    return _items[id];
+  }
+
+  @override
+  Future<void> saveItem(Item item) async {
+    if (!_initialized) throw Exception('Repository not initialized');
+    _items[item.id] = item;
+  }
+
+  @override
+  Future<void> deleteItem(String id) async {
+    if (!_initialized) throw Exception('Repository not initialized');
+    _items.remove(id);
+  }
+}
 
 void main() {
+  late MockItemRepository mockRepo;
+
+  setUp(() {
+    mockRepo = MockItemRepository();
+    mockRepo.init();
+  });
+
   testWidgets('Tab navigation switches between screens', (
     WidgetTester tester,
   ) async {
-    // Build the HomeShell widget
+    // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: HomeShell())),
+      ProviderScope(
+        overrides: [hiveItemRepositoryProvider.overrideWithValue(mockRepo)],
+        child: const MaterialApp(home: HomeShell()),
+      ),
     );
 
     await tester.pumpAndSettle();
@@ -47,9 +95,12 @@ void main() {
   testWidgets('Inventory screen displays Add Item FAB', (
     WidgetTester tester,
   ) async {
-    // Build the HomeShell widget
+    // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
-      const ProviderScope(child: MaterialApp(home: HomeShell())),
+      ProviderScope(
+        overrides: [hiveItemRepositoryProvider.overrideWithValue(mockRepo)],
+        child: const MaterialApp(home: HomeShell()),
+      ),
     );
 
     await tester.pumpAndSettle();

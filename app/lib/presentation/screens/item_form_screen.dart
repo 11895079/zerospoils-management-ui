@@ -11,6 +11,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../widgets/app_button.dart';
 import '../di/repository_providers.dart';
+import '../di/service_locator.dart';
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
@@ -130,6 +131,19 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       );
 
       await repository.saveItem(item);
+
+      // Telemetry: item added or updated
+      final telemetry = ref.read(telemetryClientProvider);
+      telemetry.enqueue({
+        'name': _isEditMode ? 'item_updated' : 'item_added',
+        'properties': {
+          'item_id': item.id,
+          'category': item.category.name,
+          'location': item.location.name,
+          'quantity': item.quantity,
+          'has_expiry': item.expiryDate != null,
+        },
+      });
 
       if (mounted) {
         setState(() => _isLoading = false);
