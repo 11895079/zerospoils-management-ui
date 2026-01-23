@@ -628,9 +628,19 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
           ),
           const SizedBox(width: 4),
-          GestureDetector(
-            onTap: onRemove,
-            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
+          IconButton(
+            onPressed: onRemove,
+            icon: const Icon(
+              Icons.close,
+              size: 14,
+              color: AppColors.primary,
+            ),
+            tooltip: 'Remove $label filter',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 44,
+              minHeight: 44,
+            ),
           ),
         ],
       ),
