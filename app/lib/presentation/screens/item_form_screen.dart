@@ -485,7 +485,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                       size: 20,
                                     ),
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 44,
+                                      minHeight: 44,
+                                    ),
                                     onPressed: () {
                                       ScaffoldMessenger.of(
                                         context,
