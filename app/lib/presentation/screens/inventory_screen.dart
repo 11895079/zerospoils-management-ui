@@ -16,22 +16,35 @@ import 'package:go_router/go_router.dart';
 
 // Provider to persist filter state across tab switches
 final inventoryFilterProvider = StateProvider<InventoryFilterState>((ref) {
-  return InventoryFilterState();
+  return const InventoryFilterState();
 });
 
 class InventoryFilterState {
-  ItemCategory? category;
-  StorageLocation? location;
-  bool expiringSoonOnly;
-  String searchQuery;
+  final ItemCategory? category;
+  final StorageLocation? location;
+  final bool expiringSoonOnly;
+  final String searchQuery;
 
-  InventoryFilterState({
+  const InventoryFilterState({
     this.category,
     this.location,
     this.expiringSoonOnly = false,
     this.searchQuery = '',
   });
 
+  InventoryFilterState copyWith({
+    ItemCategory? category,
+    StorageLocation? location,
+    bool? expiringSoonOnly,
+    String? searchQuery,
+  }) {
+    return InventoryFilterState(
+      category: category ?? this.category,
+      location: location ?? this.location,
+      expiringSoonOnly: expiringSoonOnly ?? this.expiringSoonOnly,
+      searchQuery: searchQuery ?? this.searchQuery,
+    );
+  }
   int get activeFilterCount {
     int count = 0;
     if (category != null) count++;
