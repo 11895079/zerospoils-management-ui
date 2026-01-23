@@ -595,7 +595,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('Clear all', style: TextStyle(fontSize: 12)),
+            child: const Text('Clear filters', style: TextStyle(fontSize: 12)),
           ),
         ],
       ),
