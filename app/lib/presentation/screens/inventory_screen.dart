@@ -45,6 +45,7 @@ class InventoryFilterState {
       searchQuery: searchQuery ?? this.searchQuery,
     );
   }
+
   int get activeFilterCount {
     int count = 0;
     if (category != null) count++;
@@ -630,17 +631,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           const SizedBox(width: 4),
           IconButton(
             onPressed: onRemove,
-            icon: const Icon(
-              Icons.close,
-              size: 14,
-              color: AppColors.primary,
-            ),
+            icon: const Icon(Icons.close, size: 14, color: AppColors.primary),
             tooltip: 'Remove $label filter',
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 44,
-              minHeight: 44,
-            ),
+            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           ),
         ],
       ),
