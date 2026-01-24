@@ -25,6 +25,15 @@ if exist "%SOURCE_HOOKS%\pre-commit" (
     exit /b 1
 )
 
+REM Copy pre-push hook
+if exist "%SOURCE_HOOKS%\pre-push" (
+    copy /Y "%SOURCE_HOOKS%\pre-push" "%HOOKS_DIR%\pre-push" >nul
+    echo [OK] Installed pre-push hook
+) else (
+    echo [ERROR] pre-push hook not found at %SOURCE_HOOKS%\pre-push
+    exit /b 1
+)
+
 echo.
 echo Git hooks installed successfully!
 echo.
@@ -32,4 +41,9 @@ echo The following checks will run before each commit:
 echo   * Dart formatting (dart format)
 echo   * Flutter analyzer (flutter analyze)
 echo.
-echo To bypass hooks in rare cases, use: git commit --no-verify
+echo The following check will run before each push:
+echo   * Branch protection (blocks push to main/master/develop)
+echo.
+echo To bypass hooks in rare cases:
+echo   git commit --no-verify   (Skip pre-commit checks)
+echo   git push --no-verify     (Skip pre-push checks - ONLY for emergencies)

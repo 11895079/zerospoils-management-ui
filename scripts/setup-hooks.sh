@@ -23,6 +23,16 @@ else
     exit 1
 fi
 
+# Copy pre-push hook
+if [ -f "$SOURCE_HOOKS/pre-push" ]; then
+    cp "$SOURCE_HOOKS/pre-push" "$HOOKS_DIR/pre-push"
+    chmod +x "$HOOKS_DIR/pre-push"
+    echo "✅ Installed pre-push hook"
+else
+    echo "❌ Error: pre-push hook not found at $SOURCE_HOOKS/pre-push"
+    exit 1
+fi
+
 echo ""
 echo "✨ Git hooks installed successfully!"
 echo ""
