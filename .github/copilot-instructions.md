@@ -65,11 +65,17 @@ See milestone M1 issue 090 (`planning/milestones/M1/090-flutter-app-skeleton-rou
 This monorepo supports a workflow where planning drives implementation:
 
 1. **Select Issue** from `planning/milestones/MX/` (start with M1)
-2. **Read Issue** — acceptance criteria + test plan are your implementation spec
-3. **Create Feature Branch**: `git checkout -b feature/descriptive-name`
-4. **Implement in `app/`** — code + tests + telemetry per Definition of Done
-5. **Submit PR** linking back to planning issue (e.g., "Closes planning/milestones/M1/090-*")
-6. **After PR merges, update this planning repo** ⚠️ **CRITICAL STEP**
+2. **Groom Issue** ⚠️ **REQUIRED BEFORE IMPLEMENTATION**
+   - Check for empty test plans, generic DoD items, missing implementation notes
+   - Add concrete automated tests (not "add tests") + step-by-step manual scenarios
+   - Add implementation notes with technical decisions, patterns, trade-offs
+   - Define clear out-of-scope boundaries
+   - Commit grooming changes before starting feature branch
+3. **Read Issue** — acceptance criteria + test plan are your implementation spec
+4. **Create Feature Branch**: `git checkout -b feature/descriptive-name`
+5. **Implement in `app/`** — code + tests + telemetry per Definition of Done
+6. **Submit PR** linking back to planning issue (e.g., "Closes planning/milestones/M1/090-*")
+7. **After PR merges, update this planning repo** ⚠️ **CRITICAL STEP**
 
 ### ⚠️ CRITICAL: Keep Planning & Code in Sync
 

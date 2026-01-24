@@ -19,6 +19,22 @@
 
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
+## Progress
+**Status:** In Progress (2/10 completed) — Last Updated: Jan 24, 2026
+
+| Issue | Title | Status | PR | Completed |
+|-------|-------|--------|----|-----------|
+| [M2/100](100-local-storage-implementation-with-migrations.md) | Hive local storage for Items + migrations | ✅ DONE | [#44](https://github.com/bakintunde/zerospoils/pull/44) | Jan 24, 2026 |
+| [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
+| [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen | ⏳ TODO | — | — |
+| [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen | ⏳ TODO | — | — |
+| [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ⏳ TODO | — | — |
+| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ⏳ TODO | — | — |
+| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
+| [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | — |
+| [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | — |
+| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ⏳ TODO | — | — |
+
 **Key tasks (issue files in this folder):**
 - `030-set-up-build-pipelines-android-ios-on-tags.md` - CI/CD for iOS/Android builds
 - `100-local-storage-implementation-with-migrations.md` - Hive/sqflite local database

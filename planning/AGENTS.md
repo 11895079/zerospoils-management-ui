@@ -57,8 +57,49 @@ gh api "repos/:owner/:repo/issues/123" --jq .body  # Check issue body
 2. Check issue dependencies before starting work
 3. Verify prerequisites are complete (referenced issues, documentation)
 
-### Phase 2: Implementation (in App Repo)
-1. **Copy issue content** from this repo as the agent prompt
+### Phase 2: Issue Grooming (REQUIRED BEFORE IMPLEMENTATION)
+**⚠️ ALWAYS groom the issue file before starting implementation:**
+
+1. **Check for empty or incomplete sections:**
+   - Empty test plans ("Steps: 1. 2." or "Scenarios: -")
+   - Generic DoD items not applicable to the task (e.g., "accessibility" for CI/CD)
+   - Missing implementation details or ambiguous acceptance criteria
+   - Lack of concrete examples in test plans
+
+2. **Add concrete details:**
+   - Write specific automated test cases (not "add tests")
+   - Write step-by-step manual test scenarios with expected outcomes
+   - Add implementation notes with technical decisions (frameworks, patterns, trade-offs)
+   - Define clear out-of-scope boundaries
+
+3. **Commit grooming changes:**
+   ```bash
+   git add planning/milestones/MX/NNN-issue.md
+   git commit -m "docs(MX/NNN): Groom issue with concrete test plan and implementation details"
+   git push
+   ```
+
+**Example transformation:**
+```markdown
+# BAD (empty stub)
+## Test plan
+- Steps:
+  1.
+  2.
+
+# GOOD (concrete)
+## Test plan
+**Automated:**
+- Unit test: saveItem persists and retrieves
+- Widget test: form validates required fields
+
+**Manual:**
+1. Add item via UI → close app → reopen → verify present
+2. Submit empty form → verify validation error shown
+```
+
+### Phase 3: Implementation (in App Repo)
+1. **Copy groomed issue content** from this repo as the agent prompt
 2. **Navigate to app repo** (not this planning repo)
 3. **Use issue acceptance criteria as direct prompt:**
    ```bash
@@ -74,7 +115,7 @@ gh api "repos/:owner/:repo/issues/123" --jq .body  # Check issue body
    - Run manual test scenarios
    - Verify DoD checklist items
 
-### Phase 3: Update This Repo (Status Tracking)
+### Phase 4: Update This Repo (Status Tracking)
 After completing implementation in app repo, update this planning repo:
 
 1. **Mark issue complete** by updating the issue file:

@@ -9,12 +9,12 @@ Implement local persistence for Items with reliable CRUD operations and migratio
 - Migration strategy exists
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Repository layer abstracts storage
-- [ ] Migration mechanism documented + tested
-- [ ] Optional encryption-at-rest evaluated and decision recorded
-- [ ] Unit/widget/integration tests added or updated
+- [x] Repository layer abstracts storage
+- [x] Migration mechanism documented + tested
+- [x] Optional encryption-at-rest evaluated and decision recorded
+- [x] Unit/widget/integration tests added or updated
 - [ ] Telemetry added/updated (event names + key properties)
-- [ ] Offline-first behavior verified (where applicable)
+- [x] Offline-first behavior verified (where applicable)
 - [ ] Accessibility basics (labels, contrast, tap targets)
 
 ## Out of scope
@@ -31,6 +31,8 @@ Implement local persistence for Items with reliable CRUD operations and migratio
 - Add versioned migrations and tests.
 - Hive supports encrypted boxes (AES-256) - evaluate but defer to M3 unless security critical
 - Track schema version in metadata box for migration decisions
+ - Use Hive code generation with `@HiveType` and `@HiveField` for `Item`; remove manual adapter to avoid field-order bugs
+ - Status: Completed via PR #44, merged Jan 24, 2026 (34/34 tests passing)
 
 ## Performance Requirements
 - getAllItems: <100ms for 1000 items
