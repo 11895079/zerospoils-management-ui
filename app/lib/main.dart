@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart';
@@ -45,5 +46,3 @@ class ZeroSpoilsApp extends ConsumerWidget {
     );
   }
 }
-
-// test comment

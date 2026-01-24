@@ -3,6 +3,9 @@ library;
 /// Domain models for ZeroSpoils inventory system
 /// Based on planning/docs/data-model.md
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'item_model.g.dart';
 
 /// Item categories enum
 enum ItemCategory {
@@ -115,20 +118,35 @@ enum Unit {
 }
 
 /// Item model for inventory
+@HiveType(typeId: 0)
 class Item extends Equatable {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String name;
+  @HiveField(2)
   final ItemCategory category;
+  @HiveField(3)
   final ItemType type;
+  @HiveField(4)
   final DateTime? preparedDate;
+  @HiveField(5)
   final StorageLocation location;
+  @HiveField(6)
   final int quantity;
+  @HiveField(7)
   final Unit unit;
+  @HiveField(8)
   final DateTime? expiryDate;
+  @HiveField(9)
   final double? purchasePrice;
+  @HiveField(10)
   final ItemStatus status;
+  @HiveField(11)
   final WasteReason? wasteReason;
+  @HiveField(12)
   final DateTime createdAt;
+  @HiveField(13)
   final DateTime updatedAt;
 
   const Item({
