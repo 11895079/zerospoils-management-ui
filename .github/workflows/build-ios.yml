@@ -1,0 +1,133 @@
+name: Build iOS Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+          cache: true
+      
+      - name: Get dependencies
+        working-directory: ./app
+        run: flutter pub get
+      
+      - name: Verify version matches tag
+        working-directory: ./app
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d'+' -f1)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          if [ "$VERSION" != "$TAG_VERSION" ]; then
+            echo "Error: pubspec.yaml version ($VERSION) does not match tag version ($TAG_VERSION)"
+            exit 1
+          fi
+          echo "Version check passed: $VERSION"
+      
+      - name: Run tests
+        working-directory: ./app
+        run: flutter test
+      
+      - name: Run analyzer
+        working-directory: ./app
+        run: flutter analyze
+      
+      - name: Install provisioning profile
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
+            PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $PP_PATH
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
+            echo "Provisioning profile installed"
+          else
+            echo "Warning: IOS_PROVISIONING_PROFILE_BASE64 secret not set. Build may fail."
+          fi
+      
+      - name: Install certificate
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -n "$CERTIFICATE_BASE64" ]; then
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+            KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+            
+            # Decode certificate
+            echo "$CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+            
+            # Create temporary keychain
+            security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            
+            # Import certificate
+            security import $CERTIFICATE_PATH \
+              -P "$CERTIFICATE_PASSWORD" \
+              -A -t cert -f pkcs12 \
+              -k $KEYCHAIN_PATH
+            security list-keychain -d user -s $KEYCHAIN_PATH
+            
+            echo "Certificate installed in keychain"
+          else
+            echo "Warning: IOS_CERTIFICATE_BASE64 secret not set. Build may fail."
+          fi
+      
+      - name: Build iOS IPA
+        working-directory: ./app
+        run: |
+          flutter build ios --release --no-codesign
+          
+          # Create IPA manually if codesigning is available
+          if [ -n "${{ secrets.IOS_CERTIFICATE_BASE64 }}" ]; then
+            cd build/ios/iphoneos
+            mkdir -p Payload
+            cp -r Runner.app Payload/
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+            zip -r zerospoils-$TAG_VERSION.ipa Payload
+            mv zerospoils-$TAG_VERSION.ipa ../../../
+          else
+            echo "Unsigned build completed. IPA creation skipped."
+          fi
+      
+      - name: Upload IPA artifact
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-${{ github.ref_name }}
+          path: app/zerospoils-*.ipa
+          retention-days: 90
+          if-no-files-found: warn
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: app/zerospoils-*.ipa
+          draft: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/app-signing.keychain-db" ]; then
+            security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          fi

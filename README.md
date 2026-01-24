@@ -118,9 +118,22 @@ git checkout -b feature/item-inventory
 - **Planning changes**: Lint markdown, validate issue structure
 - **App changes**: Run tests on `app/` path only (don't re-test planning docs)
 - **Feature branches**: Small PRs implementing one issue at a time
+- **Releases**: Tag-triggered builds for Android (APK/AAB) and iOS (IPA) – see [docs/release.md](docs/release.md)
+
+## Creating a Release
+
+**Quick version:**
+1. Update version in `app/pubspec.yaml` (e.g., `0.1.0-beta.1+1`)
+2. Commit: `git commit -m "chore: Bump version to 0.1.0-beta.1"`
+3. Tag: `git tag v0.1.0-beta.1`
+4. Push: `git push origin v0.1.0-beta.1`
+5. GitHub Actions builds APK, AAB, IPA → uploads artifacts + creates draft release
+
+**Full guide:** See [docs/release.md](docs/release.md) for versioning strategy, code signing setup, and troubleshooting.
 
 ## References
 - [planning/AGENTS.md](planning/AGENTS.md) – AI coding agent instructions
 - [planning/README.md](planning/README.md) – Backlog details
 - [planning/milestones/M1/README.md](planning/milestones/M1/README.md) – First milestone guide
 - [CONTRIBUTING.md](CONTRIBUTING.md) – Contribution workflow & PR checklist
+- [docs/release.md](docs/release.md) – Release workflow & versioning guide
