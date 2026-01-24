@@ -55,11 +55,12 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+            echo "$KEYSTORE_BASE64" | base64 --decode > /tmp/release-keystore.jks
+            echo "KEYSTORE_AVAILABLE=true" >> $GITHUB_ENV
           else
             echo "Warning: ANDROID_KEYSTORE_BASE64 secret not set. Build will be unsigned."
+            echo "KEYSTORE_AVAILABLE=false" >> $GITHUB_ENV
           fi
-        working-directory: ./app
       
       - name: Build APK
         working-directory: ./app
@@ -68,11 +69,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -f android/app/release-keystore.jks ]; then
+          if [ "${{ env.KEYSTORE_AVAILABLE }}" = "true" ]; then
             flutter build apk --release \
-              --dart-define=KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD \
-              --dart-define=KEY_ALIAS=$KEY_ALIAS \
-              --dart-define=KEY_PASSWORD=$KEY_PASSWORD
+              --android-signing-key=/tmp/release-keystore.jks \
+              --android-signing-key-pass=$KEYSTORE_PASSWORD \
+              --android-signing-key-alias=$KEY_ALIAS \
+              --android-signing-key-alias-pass=$KEY_PASSWORD
           else
             flutter build apk --release
           fi
@@ -84,11 +86,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -f android/app/release-keystore.jks ]; then
+          if [ "${{ env.KEYSTORE_AVAILABLE }}" = "true" ]; then
             flutter build appbundle --release \
-              --dart-define=KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD \
-              --dart-define=KEY_ALIAS=$KEY_ALIAS \
-              --dart-define=KEY_PASSWORD=$KEY_PASSWORD
+              --android-signing-key=/tmp/release-keystore.jks \
+              --android-signing-key-pass=$KEYSTORE_PASSWORD \
+              --android-signing-key-alias=$KEY_ALIAS \
+              --android-signing-key-alias-pass=$KEY_PASSWORD
           else
             flutter build appbundle --release
           fi

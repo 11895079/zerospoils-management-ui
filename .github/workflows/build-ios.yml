@@ -92,18 +92,22 @@ jobs:
       - name: Build iOS IPA
         working-directory: ./app
         run: |
-          flutter build ios --release --no-codesign
-          
-          # Create IPA manually if codesigning is available
           if [ -n "${{ secrets.IOS_CERTIFICATE_BASE64 }}" ]; then
+            # Build for release with code signing
+            flutter build ios --release
+            
+            # Create IPA from signed build
             cd build/ios/iphoneos
             mkdir -p Payload
             cp -r Runner.app Payload/
             TAG_VERSION=${GITHUB_REF#refs/tags/v}
             zip -r zerospoils-$TAG_VERSION.ipa Payload
             mv zerospoils-$TAG_VERSION.ipa ../../../
+            echo "Signed IPA created: zerospoils-$TAG_VERSION.ipa"
           else
-            echo "Unsigned build completed. IPA creation skipped."
+            # Build unsigned for testing
+            flutter build ios --release --no-codesign
+            echo "Warning: Unsigned build completed (no certificate available)."
           fi
       
       - name: Upload IPA artifact
