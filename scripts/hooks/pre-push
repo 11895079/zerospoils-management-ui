@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Pre-push hook to prevent accidental pushes to main
+# This enforces the workflow: feature branch → PR → code review → merge to main
+# 
+# Bypass (only in emergencies): git push --no-verify
+
+set -e
+
+# Get the branch being pushed
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# List of protected branches (cannot push directly)
+PROTECTED_BRANCHES=("main" "master" "develop")
+
+# Check if the branch is protected
+for protected in "${PROTECTED_BRANCHES[@]}"; do
+    if [ "$BRANCH" = "$protected" ]; then
+        echo ""
+        echo "❌ Cannot push directly to '$BRANCH' branch!"
+        echo ""
+        echo "📋 Workflow:"
+        echo "  1. Create feature branch:  git checkout -b feature/xxx"
+        echo "  2. Commit changes:         git commit -m '...'"
+        echo "  3. Push feature branch:    git push -u origin feature/xxx"
+        echo "  4. Create PR on GitHub:    https://github.com/bakintunde/zerospoils"
+        echo "  5. Request review and merge via GitHub UI"
+        echo ""
+        echo "This ensures all changes go through code review."
+        echo ""
+        echo "🚀 To bypass (ONLY in emergencies): git push --no-verify"
+        echo ""
+        exit 1
+    fi
+done
+
+exit 0
