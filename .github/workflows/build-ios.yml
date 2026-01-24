@@ -92,23 +92,23 @@ jobs:
       - name: Build iOS IPA
         working-directory: ./app
         run: |
+          # Always build for release (with or without signing)
           if [ -n "${{ secrets.IOS_CERTIFICATE_BASE64 }}" ]; then
-            # Build for release with code signing
             flutter build ios --release
-            
-            # Create IPA from signed build
-            cd build/ios/iphoneos
-            mkdir -p Payload
-            cp -r Runner.app Payload/
-            TAG_VERSION=${GITHUB_REF#refs/tags/v}
-            zip -r zerospoils-$TAG_VERSION.ipa Payload
-            mv zerospoils-$TAG_VERSION.ipa ../../../
-            echo "Signed IPA created: zerospoils-$TAG_VERSION.ipa"
+            BUILD_TYPE="signed"
           else
-            # Build unsigned for testing
             flutter build ios --release --no-codesign
-            echo "Warning: Unsigned build completed (no certificate available)."
+            BUILD_TYPE="unsigned"
           fi
+          
+          # Create IPA from build artifacts
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -r Runner.app Payload/
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          zip -r zerospoils-$TAG_VERSION.ipa Payload
+          mv zerospoils-$TAG_VERSION.ipa ../../../
+          echo "IPA created ($BUILD_TYPE): zerospoils-$TAG_VERSION.ipa"
       
       - name: Upload IPA artifact
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -118,16 +118,6 @@ jobs:
           path: app/zerospoils-*.ipa
           retention-days: 90
           if-no-files-found: warn
-      
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          files: app/zerospoils-*.ipa
-          draft: true
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Cleanup keychain
         if: always()
