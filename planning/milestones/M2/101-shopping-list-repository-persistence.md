@@ -11,13 +11,13 @@ Implement local persistence for ShoppingListItem with CRUD and query operations.
 - Data persists across app restarts
 
 ## Acceptance criteria (Definition of Done)
-- [x] Repository layer abstracts storage (HiveShoppingListRepository)
-- [x] CRUD operations implemented (add, get, delete, clear, list all)
-- [x] Query operations (getPurchased, getUnpurchased)
-- [x] Unit tests added or updated (8+ tests)
-- [x] Offline-first behavior verified
-- [x] Telemetry added (tracking purchase actions)
-- [x] Data persists across restarts
+- [ ] Repository layer abstracts storage (HiveShoppingListRepository)
+- [ ] CRUD operations implemented (add, get, delete, clear, list all)
+- [ ] Query operations (getPurchased, getUnpurchased)
+- [ ] Unit tests added or updated (8+ tests)
+- [ ] Offline-first behavior verified
+- [ ] Telemetry added (tracking purchase actions)
+- [ ] Data persists across restarts
 - [ ] Accessibility basics (labels, contrast, tap targets)
 
 ## Out of scope

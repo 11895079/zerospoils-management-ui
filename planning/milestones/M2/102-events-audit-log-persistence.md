@@ -11,13 +11,13 @@ Implement local persistence for Events (audit log) with flexible JSON metadata f
 - Events persist for analytics reporting
 
 ## Acceptance criteria (Definition of Done)
-- [x] Repository layer abstracts storage (HiveEventRepository)
-- [x] CRUD operations implemented (add, query, clear)
-- [x] Query operations (getByItemId, getByType, getByDateRange)
-- [x] Unit tests added or updated (10+ tests)
-- [x] Offline-first behavior verified
-- [x] Event schema matches planning/docs/data-model.md
-- [x] Data persists across restarts
+- [ ] Repository layer abstracts storage (HiveEventRepository)
+- [ ] CRUD operations implemented (add, query, clear)
+- [ ] Query operations (getByItemId, getByType, getByDateRange)
+- [ ] Unit tests added or updated (10+ tests)
+- [ ] Offline-first behavior verified
+- [ ] Event schema matches planning/docs/data-model.md
+- [ ] Data persists across restarts
 - [ ] Accessibility basics (N/A for audit log)
 
 ## Out of scope
