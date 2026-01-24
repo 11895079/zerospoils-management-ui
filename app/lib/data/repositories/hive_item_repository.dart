@@ -13,6 +13,9 @@ class HiveItemRepository {
 
   HiveItemRepository({HiveInterface? hive}) : _hive = hive ?? Hive;
 
+  /// Check if repository is initialized
+  bool get isInitialized => _box != null && _box!.isOpen;
+
   /// Initialize Hive and open items box
   Future<void> init() async {
     if (_box != null && _box!.isOpen) return;

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/badge_service.dart';
+import '../../data/repositories/hive_item_repository.dart';
 
 /// Connectivity service provider
 final connectivityProvider = StreamProvider<bool>((ref) {
@@ -18,7 +19,7 @@ final telemetryClientProvider = Provider((ref) {
 
 /// Item repository provider
 final itemRepositoryProvider = Provider((ref) {
-  return ItemRepository();
+  return HiveItemRepository();
 });
 
 /// Badge service provider
@@ -65,12 +66,12 @@ class TelemetryClient {
 class ItemRepository {
   /// Get all items from local Hive database
   Future<List<Item>> getAllItems() async {
-    // TODO: M1/090 - Implement with Hive
+    // TODO: M2/100 - Implement with Hive
     return [];
   }
 
   /// Add item to local database
   Future<void> addItem(Item item) async {
-    // TODO: M1/090 - Implement with Hive
+    // TODO: M2/100 - Implement with Hive
   }
 }

@@ -2,6 +2,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
+import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 
 void main() {
   group('Service Locator Tests', () {
@@ -22,7 +23,7 @@ void main() {
       // Verify repository provider resolves
       final repository = container.read(itemRepositoryProvider);
       expect(repository, isNotNull);
-      expect(repository, isA<ItemRepository>());
+      expect(repository, isA<HiveItemRepository>());
     });
 
     test('Telemetry client can enqueue events', () {
