@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
-import 'package:zerospoils/presentation/di/service_locator.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart'
+    hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/screens/inventory_screen.dart';
 import 'package:zerospoils/presentation/widgets/item_card.dart';
 
@@ -49,7 +50,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          hiveItemRepositoryProvider.overrideWithValue(mockRepository),
+          itemRepositoryProvider.overrideWithValue(mockRepository),
           itemsFutureProvider.overrideWith((ref) async {
             // Bypass Hive init - return mock items directly
             return mockRepository.items;
@@ -284,8 +285,8 @@ void main() {
     await tester.tap(find.text('Filter'));
     await tester.pumpAndSettle();
 
-    // Enable expiring soon filter
-    await tester.tap(find.byType(SwitchListTile));
+    // Enable expiring soon filter (first switch is "Expiring soon only", second is "Hide consumed")
+    await tester.tap(find.byType(SwitchListTile).first);
     await tester.pumpAndSettle();
 
     // Apply filters

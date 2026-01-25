@@ -56,7 +56,7 @@ void main() {
     // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
         child: const MaterialApp(home: HomeShell()),
       ),
     );
@@ -98,7 +98,7 @@ void main() {
     // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
         child: const MaterialApp(home: HomeShell()),
       ),
     );

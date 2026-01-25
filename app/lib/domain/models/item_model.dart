@@ -27,6 +27,26 @@ enum ItemCategory {
   }
 }
 
+/// Extension to provide emoji for ItemCategory
+extension ItemCategoryExtension on ItemCategory {
+  String get emoji {
+    switch (this) {
+      case ItemCategory.produce:
+        return '🥬';
+      case ItemCategory.dairy:
+        return '🥛';
+      case ItemCategory.meat:
+        return '🍖';
+      case ItemCategory.grains:
+        return '🌾';
+      case ItemCategory.pantry:
+        return '🥫';
+      case ItemCategory.other:
+        return '📦';
+    }
+  }
+}
+
 /// Storage location enum
 enum StorageLocation {
   fridge('Fridge'),
@@ -42,6 +62,22 @@ enum StorageLocation {
       (loc) => loc.name == value,
       orElse: () => StorageLocation.other,
     );
+  }
+}
+
+/// Extension to provide emoji for StorageLocation
+extension StorageLocationExtension on StorageLocation {
+  String get emoji {
+    switch (this) {
+      case StorageLocation.fridge:
+        return '❄️';
+      case StorageLocation.pantry:
+        return '🗄️';
+      case StorageLocation.freezer:
+        return '🧊';
+      case StorageLocation.other:
+        return '📍';
+    }
   }
 }
 

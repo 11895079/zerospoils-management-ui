@@ -5,7 +5,9 @@ import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart';
+import 'presentation/di/repository_providers.dart';
 import 'data/adapters/item_adapter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,9 +35,22 @@ class ZeroSpoilsApp extends ConsumerWidget {
     // Initialize telemetry client
     final telemetry = ref.watch(telemetryClientProvider);
 
-    // Track app install on first launch
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Initialize telemetry and state from prefs
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       telemetry.trackAppInstalled(isFirstInstall: true);
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load demo mode preference
+      final saved = prefs.getBool('demo_mode_enabled');
+      if (saved != null) {
+        ref.read(demoModeProvider.notifier).state = saved;
+      }
+
+      // Load hasManualItems flag
+      final hasManual = prefs.getBool('has_manual_items') ?? false;
+      if (hasManual) {
+        ref.read(hasManualItemsProvider.notifier).state = true;
+      }
     });
 
     return MaterialApp.router(

@@ -9,10 +9,11 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../di/repository_providers.dart';
-import '../di/service_locator.dart';
+import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Provider to persist filter state across tab switches
 final inventoryFilterProvider = StateProvider<InventoryFilterState>((ref) {
@@ -23,12 +24,14 @@ class InventoryFilterState {
   final ItemCategory? category;
   final StorageLocation? location;
   final bool expiringSoonOnly;
+  final bool hideConsumed;
   final String searchQuery;
 
   const InventoryFilterState({
     this.category,
     this.location,
     this.expiringSoonOnly = false,
+    this.hideConsumed = true,
     this.searchQuery = '',
   });
 
@@ -36,12 +39,14 @@ class InventoryFilterState {
     ItemCategory? category,
     StorageLocation? location,
     bool? expiringSoonOnly,
+    bool? hideConsumed,
     String? searchQuery,
   }) {
     return InventoryFilterState(
       category: category ?? this.category,
       location: location ?? this.location,
       expiringSoonOnly: expiringSoonOnly ?? this.expiringSoonOnly,
+      hideConsumed: hideConsumed ?? this.hideConsumed,
       searchQuery: searchQuery ?? this.searchQuery,
     );
   }
@@ -51,6 +56,7 @@ class InventoryFilterState {
     if (category != null) count++;
     if (location != null) count++;
     if (expiringSoonOnly) count++;
+    if (!hideConsumed) count++; // Count if showing consumed items
     return count;
   }
 
@@ -67,6 +73,7 @@ class InventoryScreen extends ConsumerStatefulWidget {
 class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _listController = ScrollController();
+  late final ProviderSubscription<AsyncValue<List<Item>>> _itemsSubscription;
 
   @override
   void initState() {
@@ -74,10 +81,33 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     // Restore search query from persisted state
     final filterState = ref.read(inventoryFilterProvider);
     _searchController.text = filterState.searchQuery;
+
+    _itemsSubscription = ref.listenManual<AsyncValue<List<Item>>>(
+      itemsFutureProvider,
+      (previous, next) {
+        if (ref.read(demoModeProvider)) return;
+
+        next.whenData((items) {
+          final hasItems = items.isNotEmpty;
+          final notifier = ref.read(hasManualItemsProvider.notifier);
+          if (notifier.state == hasItems) return;
+
+          notifier.state = hasItems;
+          () async {
+            try {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('has_manual_items', hasItems);
+            } catch (_) {}
+          }();
+        });
+      },
+      fireImmediately: true,
+    );
   }
 
   @override
   void dispose() {
+    _itemsSubscription.close();
     _searchController.dispose();
     _listController.dispose();
     super.dispose();
@@ -85,11 +115,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   Future<void> _refreshItems() async {
     ref.invalidate(itemsFutureProvider);
-    await ref.read(hiveItemRepositoryProvider).init();
+    await ref.read(itemRepositoryProvider).init();
   }
 
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
     var filtered = items;
+
+    // Filter out consumed/wasted if hideConsumed is true
+    if (filterState.hideConsumed) {
+      filtered = filtered
+          .where((item) => item.status == ItemStatus.available)
+          .toList();
+    }
 
     if (filterState.category != null) {
       filtered = filtered
@@ -114,6 +151,23 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       filtered = filtered.where((item) => item.isExpiringSoon).toList();
     }
 
+    // Sort: available items first, then consumed/wasted at bottom
+    filtered.sort((a, b) {
+      if (a.status == ItemStatus.available &&
+          b.status != ItemStatus.available) {
+        return -1;
+      }
+      if (a.status != ItemStatus.available &&
+          b.status == ItemStatus.available) {
+        return 1;
+      }
+      // Within same status group, sort by expiry (items expiring soonest first)
+      if (a.expiryDate == null && b.expiryDate == null) return 0;
+      if (a.expiryDate == null) return 1;
+      if (b.expiryDate == null) return -1;
+      return a.expiryDate!.compareTo(b.expiryDate!);
+    });
+
     return filtered;
   }
 
@@ -132,6 +186,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         var tempCategory = currentState.category;
         var tempLocation = currentState.location;
         var tempExpiringSoonOnly = currentState.expiringSoonOnly;
+        var tempHideConsumed = currentState.hideConsumed;
 
         return StatefulBuilder(
           builder: (context, setSheetState) {
@@ -236,6 +291,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                         ),
                         contentPadding: EdgeInsets.zero,
                       ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SwitchListTile(
+                        value: tempHideConsumed,
+                        onChanged: (value) {
+                          setSheetState(() {
+                            tempHideConsumed = value;
+                          });
+                        },
+                        activeTrackColor: AppColors.primary,
+                        title: const Text('Hide consumed items'),
+                        subtitle: const Text(
+                          'Hide items marked as consumed or wasted',
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       Row(
                         children: [
@@ -245,6 +315,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 tempCategory = null;
                                 tempLocation = null;
                                 tempExpiringSoonOnly = false;
+                                tempHideConsumed = true;
                               });
                             },
                             child: const Text('Reset'),
@@ -271,6 +342,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 category: tempCategory,
                                 location: tempLocation,
                                 expiringSoonOnly: tempExpiringSoonOnly,
+                                hideConsumed: tempHideConsumed,
                                 searchQuery: _searchController.text,
                               );
                               ref.read(telemetryClientProvider).enqueue({
@@ -279,6 +351,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'category': tempCategory?.name ?? 'all',
                                   'location': tempLocation?.name ?? 'all',
                                   'expiringSoonOnly': tempExpiringSoonOnly,
+                                  'hideConsumed': tempHideConsumed,
                                   'searchQuery': _searchController.text,
                                 },
                               });
@@ -356,9 +429,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       body: itemsAsync.when(
         data: (items) {
           final filteredItems = _applyFilters(items, filterState);
+          final demoEnabled = ref.watch(demoModeProvider);
 
           return Column(
             children: [
+              if (demoEnabled) _buildDemoModeWarning(),
               _buildSearchBar(),
               if (filterState.hasActiveFilters)
                 _buildActiveFilters(filterState),
@@ -435,11 +510,28 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                               );
 
                               if (confirmed == true) {
-                                final repo = ref.read(
-                                  hiveItemRepositoryProvider,
-                                );
+                                final repo = ref.read(itemRepositoryProvider);
                                 await repo.init();
                                 await repo.deleteItem(item.id);
+
+                                // Check if this was the last item; if so, allow demo mode again
+                                final remainingItems = await repo.getAllItems();
+                                if (remainingItems.isEmpty) {
+                                  // Reset manual items flag to allow demo mode again
+                                  ref
+                                          .read(hasManualItemsProvider.notifier)
+                                          .state =
+                                      false;
+                                  try {
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setBool(
+                                      'has_manual_items',
+                                      false,
+                                    );
+                                  } catch (_) {}
+                                }
+
                                 ref.read(telemetryClientProvider).enqueue({
                                   'name': 'item_deleted',
                                   'properties': {
@@ -507,6 +599,45 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             color: Colors.white,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDemoModeWarning() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFF3CD),
+        border: Border(bottom: BorderSide(color: Color(0xFFFFD700))),
+      ),
+      child: Row(
+        children: [
+          const Text('📝', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Demo Mode',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF856404),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Showing sample items. Turn off in Settings to use real data.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF856404).withAlpha(204),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

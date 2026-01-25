@@ -5,8 +5,9 @@ library;
 
 import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
+import 'item_repository_base.dart';
 
-class HiveItemRepository {
+class HiveItemRepository implements ItemRepositoryBase {
   static const String _boxName = 'items';
   final HiveInterface _hive;
   Box<Item>? _box;
@@ -17,6 +18,7 @@ class HiveItemRepository {
   bool get isInitialized => _box != null && _box!.isOpen;
 
   /// Initialize Hive and open items box
+  @override
   Future<void> init() async {
     if (_box != null && _box!.isOpen) return;
 
@@ -28,24 +30,28 @@ class HiveItemRepository {
   }
 
   /// Get all items
+  @override
   Future<List<Item>> getAllItems() async {
     if (_box == null) throw Exception('Repository not initialized');
     return _box!.values.toList();
   }
 
   /// Get item by ID
+  @override
   Future<Item?> getItem(String id) async {
     if (_box == null) throw Exception('Repository not initialized');
     return _box!.get(id);
   }
 
   /// Add or update item
+  @override
   Future<void> saveItem(Item item) async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.put(item.id, item);
   }
 
   /// Delete item
+  @override
   Future<void> deleteItem(String id) async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.delete(id);
@@ -69,12 +75,14 @@ class HiveItemRepository {
   }
 
   /// Clear all items (for testing)
+  @override
   Future<void> clear() async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.clear();
   }
 
   /// Close box
+  @override
   Future<void> close() async {
     await _box?.close();
   }

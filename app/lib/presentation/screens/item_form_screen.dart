@@ -11,7 +11,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../widgets/app_button.dart';
 import '../di/repository_providers.dart';
-import '../di/service_locator.dart';
+import '../di/service_locator.dart' hide itemRepositoryProvider;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
@@ -50,7 +51,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   Future<void> _loadItem() async {
     setState(() => _isLoading = true);
     try {
-      final repository = ref.read(hiveItemRepositoryProvider);
+      final repository = ref.read(itemRepositoryProvider);
       await repository.init();
       final item = await repository.getItem(widget.itemId!);
 
@@ -121,7 +122,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   Future<void> _performSave() async {
     try {
-      final repository = ref.read(hiveItemRepositoryProvider);
+      final repository = ref.read(itemRepositoryProvider);
       await repository.init();
 
       final quantity = int.tryParse(_quantityController.text);
@@ -149,6 +150,26 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       );
 
       await repository.saveItem(item);
+
+      // Mark that user has manually entered items (disables demo toggle)
+      ref.read(hasManualItemsProvider.notifier).state = true;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('has_manual_items', true);
+      } catch (_) {}
+
+      // If demo mode is enabled, turn it off permanently after first save
+      final wasDemo = ref.read(demoModeProvider);
+      if (wasDemo) {
+        ref.read(demoModeProvider.notifier).state = false;
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('demo_mode_enabled', false);
+        } catch (_) {}
+      }
+
+      // Force refresh of inventory list
+      ref.invalidate(itemsFutureProvider);
 
       // Telemetry: item added or updated
       final telemetry = ref.read(telemetryClientProvider);

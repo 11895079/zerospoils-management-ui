@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/base_components.dart';
 import 'inventory_screen.dart';
+import 'settings_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -18,7 +19,7 @@ class _HomeShellState extends State<HomeShell> {
     const InventoryScreen(),
     const PlaceholderScreen(title: 'Expiring Soon', icon: Icons.schedule),
     const PlaceholderScreen(title: 'Shopping List', icon: Icons.shopping_cart),
-    const PlaceholderScreen(title: 'Settings', icon: Icons.settings),
+    const SettingsScreen(),
   ];
 
   @override
