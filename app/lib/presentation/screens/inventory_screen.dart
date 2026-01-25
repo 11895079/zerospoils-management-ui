@@ -631,7 +631,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   'Showing sample items. Turn off in Settings to use real data.',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF856404).withOpacity(0.8),
+                    color: Color(0xFF856404).withAlpha(204),
                   ),
                 ),
               ],

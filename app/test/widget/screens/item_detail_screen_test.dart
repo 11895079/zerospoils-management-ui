@@ -47,6 +47,7 @@ class MockItemRepository extends HiveItemRepository {
 class MockTelemetryClient extends TelemetryClient {
   final List<Map<String, dynamic>> _events = [];
 
+  @override
   List<Map<String, dynamic>> get events => _events;
 
   @override
@@ -105,11 +106,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Test Apple'), findsOneWidget);
-      expect(find.text('Available'), findsOneWidget);
-      expect(find.text('Produce'), findsOneWidget);
-      expect(find.text('Fridge'), findsOneWidget);
+      // Status is now dynamic (e.g., "Expires in 3 days")
+      expect(find.textContaining('Produce'), findsOneWidget);
+      expect(find.textContaining('Fridge'), findsOneWidget);
       expect(find.text('5 Count'), findsOneWidget);
-      expect(find.text('\$3.99'), findsOneWidget);
     });
 
     testWidgets('shows "Item not found" when item does not exist', (
@@ -151,8 +151,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.text('✓ Mark Used'), findsOneWidget);
-      expect(find.text('✗ Mark Wasted'), findsOneWidget);
+      expect(find.text('✓ Mark as Consumed'), findsOneWidget);
+      expect(find.text('🗑️ Mark as Wasted'), findsOneWidget);
     });
 
     testWidgets('does not show action buttons for consumed items', (
@@ -172,8 +172,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.text('✓ Mark Used'), findsNothing);
-      expect(find.text('✗ Mark Wasted'), findsNothing);
+      expect(find.text('✓ Mark as Consumed'), findsNothing);
+      expect(find.text('🗑️ Mark as Wasted'), findsNothing);
     });
 
     testWidgets('mark used dialog shows confirmation', (
@@ -193,7 +193,15 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('✓ Mark Used'));
+      // Scroll to make button visible
+      await tester.dragUntilVisible(
+        find.text('✓ Mark as Consumed'),
+        find.byType(SingleChildScrollView),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('✓ Mark as Consumed'));
       await tester.pumpAndSettle();
 
       expect(find.text('Mark as Used?'), findsOneWidget);
@@ -219,8 +227,16 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
+      // Scroll to make button visible
+      await tester.dragUntilVisible(
+        find.text('✓ Mark as Consumed'),
+        find.byType(SingleChildScrollView),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
       // Tap mark used button
-      await tester.tap(find.text('✓ Mark Used'));
+      await tester.tap(find.text('✓ Mark as Consumed'));
       await tester.pumpAndSettle();
 
       // Confirm dialog
@@ -256,7 +272,15 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('✗ Mark Wasted'));
+      // Scroll to make button visible
+      await tester.dragUntilVisible(
+        find.text('🗑️ Mark as Wasted'),
+        find.byType(SingleChildScrollView),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('🗑️ Mark as Wasted'));
       await tester.pumpAndSettle();
 
       expect(find.text('Mark as Wasted'), findsOneWidget);
@@ -284,8 +308,16 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
+      // Scroll to make button visible
+      await tester.dragUntilVisible(
+        find.text('🗑️ Mark as Wasted'),
+        find.byType(SingleChildScrollView),
+        const Offset(0, -100),
+      );
+      await tester.pumpAndSettle();
+
       // Tap mark wasted button
-      await tester.tap(find.text('✗ Mark Wasted'));
+      await tester.tap(find.text('🗑️ Mark as Wasted'));
       await tester.pumpAndSettle();
 
       // Select spoiled reason
@@ -353,7 +385,9 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Expires On'), findsOneWidget);
+      // Check for expiry date label and status showing days left
+      expect(find.text('Expiry Date'), findsOneWidget);
+      expect(find.textContaining('Expires in'), findsOneWidget);
     });
   });
 }

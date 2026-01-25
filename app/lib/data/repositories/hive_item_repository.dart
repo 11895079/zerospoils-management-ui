@@ -18,6 +18,7 @@ class HiveItemRepository implements ItemRepositoryBase {
   bool get isInitialized => _box != null && _box!.isOpen;
 
   /// Initialize Hive and open items box
+  @override
   Future<void> init() async {
     if (_box != null && _box!.isOpen) return;
 
@@ -29,24 +30,28 @@ class HiveItemRepository implements ItemRepositoryBase {
   }
 
   /// Get all items
+  @override
   Future<List<Item>> getAllItems() async {
     if (_box == null) throw Exception('Repository not initialized');
     return _box!.values.toList();
   }
 
   /// Get item by ID
+  @override
   Future<Item?> getItem(String id) async {
     if (_box == null) throw Exception('Repository not initialized');
     return _box!.get(id);
   }
 
   /// Add or update item
+  @override
   Future<void> saveItem(Item item) async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.put(item.id, item);
   }
 
   /// Delete item
+  @override
   Future<void> deleteItem(String id) async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.delete(id);
@@ -70,12 +75,14 @@ class HiveItemRepository implements ItemRepositoryBase {
   }
 
   /// Clear all items (for testing)
+  @override
   Future<void> clear() async {
     if (_box == null) throw Exception('Repository not initialized');
     await _box!.clear();
   }
 
   /// Close box
+  @override
   Future<void> close() async {
     await _box?.close();
   }

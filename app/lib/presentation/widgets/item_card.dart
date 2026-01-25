@@ -33,7 +33,7 @@ class ItemCard extends StatelessWidget {
     // Calculate progress percentage (0-1)
     double? expiryProgress;
     Color? progressColor;
-    if (item.expiryDate != null && item.createdAt != null) {
+    if (item.expiryDate != null) {
       final totalDays = item.expiryDate!.difference(item.createdAt).inDays;
       final daysElapsed = DateTime.now().difference(item.createdAt).inDays;
       if (totalDays > 0) {
@@ -130,8 +130,8 @@ class ItemCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: item.status == ItemStatus.consumed
-                                    ? AppColors.textSecondary.withOpacity(0.2)
-                                    : AppColors.danger.withOpacity(0.2),
+                                    ? AppColors.textSecondary.withAlpha(51)
+                                    : AppColors.danger.withAlpha(51),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

@@ -1,4 +1,5 @@
 library;
+// ignore_for_file: deprecated_member_use
 
 /// Item detail screen
 /// Shows full item details with mark used/wasted actions
@@ -207,56 +208,27 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     }
   }
 
-  Widget _buildDetailRow(String label, String value, {bool highlight = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: highlight
-                  ? AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    )
-                  : AppTextStyles.body,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text('Item Details', style: AppTextStyles.h3),
+        title: const Text('Item Detail', style: AppTextStyles.h3),
         actions: [
           if (_item != null && _item!.status == ItemStatus.available)
-            IconButton(
-              onPressed: () {
-                context.pushNamed(
+            TextButton(
+              onPressed: () async {
+                await context.pushNamed(
                   'edit-item',
                   pathParameters: {'id': widget.itemId},
                 );
+                _loadItem(); // Reload after edit
               },
-              icon: const Text('✏️', style: TextStyle(fontSize: 18)),
-              tooltip: 'Edit Item',
+              child: const Text(
+                'Edit',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
             ),
         ],
       ),
@@ -302,111 +274,201 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               ),
             )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Item name and status
-                  Text(_item!.name, style: AppTextStyles.h2),
-                  const SizedBox(height: AppSpacing.xs),
+                  // Item hero section (large emoji + name)
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.xs,
+                      vertical: AppSpacing.xl,
+                      horizontal: AppSpacing.lg,
                     ),
-                    decoration: BoxDecoration(
-                      color: _item!.status == ItemStatus.available
-                          ? AppColors.success.withOpacity(0.1)
-                          : _item!.status == ItemStatus.consumed
-                          ? AppColors.textSecondary.withOpacity(0.1)
-                          : AppColors.danger.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _item!.status.displayName,
-                      style: AppTextStyles.caption.copyWith(
-                        color: _item!.status == ItemStatus.available
-                            ? AppColors.success
-                            : _item!.status == ItemStatus.consumed
-                            ? AppColors.textSecondary
-                            : AppColors.danger,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Details section
-                  _buildDetailRow('Category', _item!.category.displayName),
-                  _buildDetailRow('Type', _item!.type.displayName),
-                  _buildDetailRow('Location', _item!.location.displayName),
-                  _buildDetailRow(
-                    'Quantity',
-                    '${_item!.quantity} ${_item!.unit.displayName}',
-                  ),
-                  if (_item!.expiryDate != null)
-                    _buildDetailRow(
-                      'Expires On',
-                      DateFormat.yMMMd().format(_item!.expiryDate!),
-                      highlight: _item!.expiryDate!.isBefore(
-                        DateTime.now().add(const Duration(days: 3)),
-                      ),
-                    ),
-                  if (_item!.preparedDate != null)
-                    _buildDetailRow(
-                      'Prepared On',
-                      DateFormat.yMMMd().format(_item!.preparedDate!),
-                    ),
-                  if (_item!.purchasePrice != null)
-                    _buildDetailRow(
-                      'Purchase Price',
-                      '\$${_item!.purchasePrice!.toStringAsFixed(2)}',
-                    ),
-                  if (_item!.wasteReason != null)
-                    _buildDetailRow(
-                      'Waste Reason',
-                      _item!.wasteReason!.displayName,
-                    ),
-                  _buildDetailRow(
-                    'Added On',
-                    DateFormat.yMMMd().format(_item!.createdAt),
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
-
-                  // Action buttons (only show for available items)
-                  if (_item!.status == ItemStatus.available) ...[
-                    const Divider(),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'Mark Item Status',
-                      style: AppTextStyles.h4.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
+                    decoration: BoxDecoration(color: AppColors.cardBackground),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: AppButton(
-                            text: '✓ Mark Used',
-                            onPressed: _markItemUsed,
-                            secondary: false,
-                          ),
+                        Text(
+                          _item!.category.emoji,
+                          style: const TextStyle(fontSize: 64),
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: AppButton(
-                            text: '✗ Mark Wasted',
-                            onPressed: _markItemWasted,
-                            secondary: true,
-                          ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          _item!.name,
+                          style: AppTextStyles.h1,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
+                  ),
+
+                  // Details card
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: AppColors.border, width: 1),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Column(
+                          children: [
+                            _buildInfoRow(
+                              'Category',
+                              '${_item!.category.emoji} ${_item!.category.displayName}',
+                            ),
+                            const Divider(height: 1),
+                            _buildInfoRow('Type', _item!.type.displayName),
+                            const Divider(height: 1),
+                            if (_item!.preparedDate != null) ...[
+                              _buildInfoRow(
+                                'Prepared Date',
+                                DateFormat.yMMMd().format(_item!.preparedDate!),
+                              ),
+                              const Divider(height: 1),
+                            ] else ...[
+                              _buildInfoRow('Prepared Date', '—'),
+                              const Divider(height: 1),
+                            ],
+                            _buildInfoRow(
+                              'Location',
+                              '${_item!.location.emoji} ${_item!.location.displayName}',
+                            ),
+                            const Divider(height: 1),
+                            _buildInfoRow(
+                              'Quantity',
+                              '${_item!.quantity} ${_item!.unit.displayName}',
+                            ),
+                            const Divider(height: 1),
+                            _buildInfoRow(
+                              'Purchase Date',
+                              DateFormat.yMMMd().format(_item!.createdAt),
+                            ),
+                            const Divider(height: 1),
+                            if (_item!.expiryDate != null) ...[
+                              _buildInfoRow(
+                                'Expiry Date',
+                                DateFormat.yMMMd().format(_item!.expiryDate!),
+                              ),
+                              const Divider(height: 1),
+                            ],
+                            _buildInfoRow(
+                              'Status',
+                              _getStatusText(),
+                              valueColor: _getStatusColor(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Action buttons (only show for available items)
+                  if (_item!.status == ItemStatus.available) ...[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AppButton(
+                            text: '✓ Mark as Consumed',
+                            onPressed: _markItemUsed,
+                            secondary: false,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          AppButton(
+                            text: '🗑️ Mark as Wasted',
+                            onPressed: _markItemWasted,
+                            secondary: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
+
+                  // Metadata
+                  Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Text(
+                      'Added on ${DateFormat('MMM d, yyyy \'at\' h:mm a').format(_item!.createdAt)}',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
             ),
     );
+  }
+
+  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+          ),
+          Text(
+            value,
+            style: AppTextStyles.body.copyWith(
+              fontWeight: FontWeight.w500,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getStatusText() {
+    if (_item!.status != ItemStatus.available) {
+      return _item!.status.displayName;
+    }
+
+    if (_item!.expiryDate == null) {
+      return 'Available';
+    }
+
+    final daysLeft = _item!.expiryDate!.difference(DateTime.now()).inDays;
+
+    if (daysLeft < 0) {
+      return 'Expired';
+    } else if (daysLeft == 0) {
+      return 'Expires today';
+    } else if (daysLeft == 1) {
+      return 'Expires in 1 day';
+    } else {
+      return 'Expires in $daysLeft days';
+    }
+  }
+
+  Color? _getStatusColor() {
+    if (_item!.status != ItemStatus.available) {
+      return _item!.status == ItemStatus.consumed
+          ? AppColors.success
+          : AppColors.danger;
+    }
+
+    if (_item!.expiryDate == null) {
+      return AppColors.success;
+    }
+
+    final daysLeft = _item!.expiryDate!.difference(DateTime.now()).inDays;
+
+    if (daysLeft < 0) {
+      return AppColors.danger;
+    } else if (daysLeft <= 3) {
+      return AppColors.warning;
+    } else {
+      return AppColors.success;
+    }
   }
 }
