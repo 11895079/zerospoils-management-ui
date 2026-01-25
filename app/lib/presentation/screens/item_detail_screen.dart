@@ -132,28 +132,96 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
 
     // Show waste reason selection dialog
     WasteReason? selectedReason;
+    double wastePercentage = 50.0; // Default to 50%
+    final notesController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: const Text('Mark as Wasted'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Why was "${_item!.name}" wasted?'),
-              const SizedBox(height: AppSpacing.md),
-              ...WasteReason.values.map(
-                (reason) => RadioListTile<WasteReason>(
-                  title: Text(reason.displayName),
-                  value: reason,
-                  groupValue: selectedReason,
-                  onChanged: (value) {
-                    setDialogState(() => selectedReason = value);
-                  },
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Why was "${_item!.name}" wasted?'),
+                const SizedBox(height: AppSpacing.md),
+                ...WasteReason.values.map(
+                  (reason) => RadioListTile<WasteReason>(
+                    title: Text(reason.displayName),
+                    value: reason,
+                    groupValue: selectedReason,
+                    onChanged: (value) {
+                      setDialogState(() => selectedReason = value);
+                    },
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Percentage wasted',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Slider(
+                        value: wastePercentage,
+                        min: 0,
+                        max: 100,
+                        divisions: 20,
+                        label: '${wastePercentage.toInt()}%',
+                        onChanged: (value) {
+                          setDialogState(() => wastePercentage = value);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 48,
+                      child: Text(
+                        '${wastePercentage.toInt()}%',
+                        style: AppTextStyles.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  'Use your best estimate',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'Notes (optional)',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextField(
+                  controller: notesController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'e.g., half the pot burned',
+                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.primary),
+                    ),
+                    contentPadding: const EdgeInsets.all(AppSpacing.md),
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -164,7 +232,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               onPressed: selectedReason == null
                   ? null
                   : () => Navigator.pop(context, true),
-              child: const Text('Mark Wasted'),
+              child: const Text('Confirm'),
             ),
           ],
         ),
@@ -190,8 +258,12 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
           'category': _item!.category.name,
           'location': _item!.location.name,
           'waste_reason': selectedReason?.name ?? 'unknown',
+          'waste_percentage': wastePercentage.toInt(),
+          'has_notes': notesController.text.isNotEmpty,
         },
       });
+
+      notesController.dispose();
 
       if (mounted) {
         ScaffoldMessenger.of(
