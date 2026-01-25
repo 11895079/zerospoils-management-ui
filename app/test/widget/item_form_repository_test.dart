@@ -69,7 +69,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
         child: const MaterialApp(home: ItemFormScreen()),
       ),
     );
@@ -124,7 +124,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
         child: MaterialApp(home: ItemFormScreen(itemId: existingItem.id)),
       ),
     );
@@ -161,7 +161,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+          overrides: [itemRepositoryProvider.overrideWithValue(repository)],
           child: const MaterialApp(home: ItemFormScreen()),
         ),
       );
@@ -205,7 +205,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
         child: const MaterialApp(home: ItemFormScreen()),
       ),
     );
@@ -244,7 +244,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(repository)],
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
         child: const MaterialApp(home: ItemFormScreen()),
       ),
     );

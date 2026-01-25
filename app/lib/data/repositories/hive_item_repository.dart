@@ -5,8 +5,9 @@ library;
 
 import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
+import 'item_repository_base.dart';
 
-class HiveItemRepository {
+class HiveItemRepository implements ItemRepositoryBase {
   static const String _boxName = 'items';
   final HiveInterface _hive;
   Box<Item>? _box;

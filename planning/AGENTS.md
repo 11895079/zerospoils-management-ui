@@ -111,6 +111,7 @@ gh api "repos/:owner/:repo/issues/123" --jq .body  # Check issue body
    - Implementation notes → Test plan → Dependencies
 5. **Implement according to test plan:**
    - Write automated tests first (widget/unit/integration)
+   - Add or update a failing test before writing code; verify it fails to prove coverage, then implement until it passes
    - Implement feature
    - Run manual test scenarios
    - Verify DoD checklist items

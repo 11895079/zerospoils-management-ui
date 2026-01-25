@@ -28,6 +28,26 @@ class ItemCard extends StatelessWidget {
     final daysLeft = item.daysUntilExpiry;
     final isExpired = daysLeft != null && daysLeft < 0;
     final isUrgent = daysLeft != null && daysLeft <= 1 && !isExpired;
+    final isConsumedOrWasted = item.status != ItemStatus.available;
+
+    // Calculate progress percentage (0-1)
+    double? expiryProgress;
+    Color? progressColor;
+    if (item.expiryDate != null && item.createdAt != null) {
+      final totalDays = item.expiryDate!.difference(item.createdAt).inDays;
+      final daysElapsed = DateTime.now().difference(item.createdAt).inDays;
+      if (totalDays > 0) {
+        expiryProgress = (daysElapsed / totalDays).clamp(0.0, 1.0);
+        // Color based on progress
+        if (expiryProgress >= 0.85 || isExpired) {
+          progressColor = AppColors.danger;
+        } else if (expiryProgress >= 0.6) {
+          progressColor = AppColors.warning;
+        } else {
+          progressColor = AppColors.success;
+        }
+      }
+    }
 
     return GestureDetector(
       onTap: onTap,
@@ -38,13 +58,17 @@ class ItemCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: isExpired
+          color: isConsumedOrWasted
+              ? AppColors.backgroundSecondary
+              : isExpired
               ? const Color(0xFFFCE4EC) // Light pink background
               : isUrgent
               ? const Color(0xFFFFF8E1) // Light yellow background
               : Colors.white,
           border: Border.all(
-            color: isExpired
+            color: isConsumedOrWasted
+                ? AppColors.border
+                : isExpired
                 ? AppColors.danger
                 : isUrgent
                 ? AppColors.warning
@@ -60,70 +84,153 @@ class ItemCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
           children: [
-            // Icon
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundSecondary,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                _getCategoryEmoji(item.category),
-                style: const TextStyle(fontSize: 28),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-
-            // Item info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.name, style: AppTextStyles.h4),
-                  const SizedBox(height: 2),
-                  Text(
-                    _getLocationDisplay(item.location),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+            Row(
+              children: [
+                // Icon
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: isConsumedOrWasted
+                        ? AppColors.border
+                        : AppColors.backgroundSecondary,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  alignment: Alignment.center,
+                  child: Opacity(
+                    opacity: isConsumedOrWasted ? 0.4 : 1.0,
+                    child: Text(
+                      _getCategoryEmoji(item.category),
+                      style: const TextStyle(fontSize: 28),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _getExpiryDisplay(),
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: isExpired
-                          ? AppColors.danger
-                          : isUrgent
-                          ? AppColors.warning
-                          : AppColors.textSecondary,
-                      fontWeight: isUrgent || isExpired
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                ),
+                const SizedBox(width: AppSpacing.md),
+
+                // Item info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Opacity(
+                              opacity: isConsumedOrWasted ? 0.5 : 1.0,
+                              child: Text(item.name, style: AppTextStyles.h4),
+                            ),
+                          ),
+                          if (isConsumedOrWasted)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: item.status == ItemStatus.consumed
+                                    ? AppColors.textSecondary.withOpacity(0.2)
+                                    : AppColors.danger.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                item.status == ItemStatus.consumed
+                                    ? 'Used'
+                                    : 'Wasted',
+                                style: AppTextStyles.caption.copyWith(
+                                  color: item.status == ItemStatus.consumed
+                                      ? AppColors.textSecondary
+                                      : AppColors.danger,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Opacity(
+                        opacity: isConsumedOrWasted ? 0.5 : 1.0,
+                        child: Text(
+                          _getLocationDisplay(item.location),
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                      if (!isConsumedOrWasted) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _getExpiryDisplay(),
+                                style: AppTextStyles.body.copyWith(
+                                  color: isExpired
+                                      ? AppColors.danger
+                                      : isUrgent
+                                      ? AppColors.warning
+                                      : AppColors.textSecondary,
+                                  fontWeight: isUrgent || isExpired
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  fontSize: isUrgent || isExpired ? 14 : 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                if (onEdit != null && !isConsumedOrWasted)
+                  GestureDetector(
+                    onTap: onEdit,
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('✏️', style: TextStyle(fontSize: 18)),
                     ),
                   ),
-                ],
-              ),
-            ),
 
-            if (onEdit != null)
-              GestureDetector(
-                onTap: onEdit,
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('✏️', style: TextStyle(fontSize: 18)),
+                if (onDelete != null && !isConsumedOrWasted)
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text('🗑️', style: TextStyle(fontSize: 18)),
+                    ),
+                  ),
+              ],
+            ),
+            // Progress bar at bottom
+            if (expiryProgress != null && !isConsumedOrWasted)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.md),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: expiryProgress,
+                    backgroundColor: AppColors.border,
+                    valueColor: AlwaysStoppedAnimation<Color>(progressColor!),
+                    minHeight: 4,
+                  ),
                 ),
               ),
-
-            if (onDelete != null)
-              GestureDetector(
-                onTap: onDelete,
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('🗑️', style: TextStyle(fontSize: 18)),
+            if (item.expiryDate == null && !isConsumedOrWasted)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.md),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(2),
+                  child: LinearProgressIndicator(
+                    value: 0.5,
+                    backgroundColor: AppColors.border,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      AppColors.textTertiary,
+                    ),
+                    minHeight: 4,
+                  ),
                 ),
               ),
           ],

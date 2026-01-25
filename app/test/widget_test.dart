@@ -52,7 +52,7 @@ void main() {
     await mockRepo.init();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [hiveItemRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
         child: const ZeroSpoilsApp(),
       ),
     );
