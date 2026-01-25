@@ -325,7 +325,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm dialog
-      await tester.tap(find.text('Mark Wasted'));
+      await tester.tap(find.text('Confirm'));
       await tester.pumpAndSettle();
 
       // Verify item updated with waste reason

@@ -130,8 +130,10 @@ class ItemCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: item.status == ItemStatus.consumed
-                                    ? AppColors.textSecondary.withAlpha(51)
-                                    : AppColors.danger.withAlpha(51),
+                                    ? AppColors.textSecondary.withValues(
+                                        alpha: 0.2,
+                                      )
+                                    : AppColors.danger.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
