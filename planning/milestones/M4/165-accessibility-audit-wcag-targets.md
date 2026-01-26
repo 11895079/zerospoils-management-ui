@@ -14,6 +14,7 @@ Run an accessibility audit, define WCAG targets, and implement remediation tasks
 - [ ] Accessibility smoke tests added to CI (a11y checks for labels, contrast, tap targets).
 - [ ] Key widgets updated to include semantics, accessible labels and focus order.
 - [ ] Manual audit report and remediation backlog created.
+- [ ] Tab/page header text contrast improved: ensure minimum 4.5:1 contrast ratio for Inventory, Expiring Soon, Shopping tab headers against green background; consider darker text color or lighter background variant.
 
 ## Out of scope
 - Full WCAG AAA compliance for v1.

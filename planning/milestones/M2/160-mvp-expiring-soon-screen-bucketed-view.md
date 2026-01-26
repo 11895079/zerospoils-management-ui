@@ -30,7 +30,7 @@ Deliver Expiring Soon screen (bucketed view) with tests and telemetry.
 - Leverage ExpiryClassifier from domain/utils/expiry_classifier.dart
 - Sections: TODAY (red alert emoji ⚠️), THIS_WEEK (clock emoji ⏰), EXPIRED (red circle emoji 🔴)
 - Reuse ItemCard widget from inventory screen with tap routing to Item Detail
-- Empty state: positive messaging with celebration emoji 🎉 + "Review Inventory" CTA button
+- Empty state: positive messaging with celebration emoji 🎉 + "Review Inventory" CTA button that navigates to Inventory screen
 - Pull-to-refresh to recalculate buckets (triggers itemRepository.getAllItems())
 - Track telemetry: screen_viewed, item_tapped_from_expiring_soon, pull_to_refresh
 - Accessibility: section headers have semantic labels; tap targets ≥44pt

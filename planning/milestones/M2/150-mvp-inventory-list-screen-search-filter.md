@@ -13,6 +13,7 @@ Deliver Inventory list screen (search/filter) with tests and telemetry.
 - [ ] UI implemented and integrated into navigation
 - [ ] State management implemented with repository layer
 - [ ] CRUD persists to local storage (where applicable)
+- [ ] Search bar with clear button (X icon) that resets filter when tapped
 - [ ] Telemetry events emitted for key actions (as applicable)
 - [ ] Unit/widget/integration tests added or updated
 - [ ] Telemetry added/updated (event names + key properties)
