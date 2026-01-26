@@ -23,8 +23,12 @@ Primary entity representing food items in inventory.
 | `cost` | Decimal | No | Purchase cost | Currency amount (e.g., 3.99), nullable, min 0 |
 | `expiry_date` | Date | No | Expiration date | ISO 8601, nullable for non-perishables |
 | `purchase_date` | Date | No | Date purchased/added | ISO 8601, defaults to created_at |
+| `purchase_source` | Enum | No | Where item was acquired | See PurchaseSource enum, nullable |
+| `batch_code` | String | No | Batch/lot identifier | Max 50 chars, nullable |
+| `images` | Array | No | Image attachment refs | Up to 5 entries, each with uri + checksum + created_at |
 | `status` | Enum | Yes | Current state | See Status enum |
 | `notes` | String | No | User notes | Max 500 chars, nullable |
+| `sublocation` | String | No | Sub-area within location | e.g., fridge.crisper_left; optional for hierarchy |
 | `created_at` | DateTime | Yes | Creation timestamp | ISO 8601 UTC |
 | `updated_at` | DateTime | Yes | Last update timestamp | ISO 8601 UTC, auto-update |
 
@@ -37,6 +41,9 @@ Primary entity representing food items in inventory.
   - `active` → `wasted` when `quantity_wasted = quantity` (full wastage)
   - `active` → remains `active` for partial consumption/wastage
   - UI can show "partially consumed" or "partially wasted" badges based on these fields
+- Weight/volume capture: default precision 2 decimal places for weight/volume units; counts must be integers. Reject quantities where decimal places exceed unit precision.
+- Enforce max 5 attachments per item; dedupe attachments by checksum.
+- Sublocation is free-text but constrained to 50 chars; suggest pattern `location.segment` (e.g., fridge.crisper_left).
 
 **Indexes:**
 - Primary: `id`
@@ -133,6 +140,11 @@ counter
 other
 ```
 
+**Hierarchy guidance:**
+- `sublocation` stores optional child placement (e.g., `fridge.crisper_left`, `freezer.bin_2`, `pantry.top_shelf`).
+- Keep base `location` for indexing; use `sublocation` for UX filtering and expiring-soon grouping.
+- Do not enforce hierarchy in the enum; treat `sublocation` as denormalized text for flexible queries.
+
 ### Status
 Item lifecycle state.
 
@@ -174,6 +186,16 @@ reminder_sent
 reminder_opened
 ```
 
+### PurchaseSource
+Origin of the item.
+
+```
+grocery
+farmers_market
+delivery
+other
+```
+
 ---
 
 ## Relationships
@@ -196,11 +218,73 @@ When `ShoppingListItem.is_purchased = true`:
 
 ---
 
+## Attachments (Images)
+
+Images are stored as a separate collection/table to future-proof for cloud sync and deduping.
+
+| Field | Type | Required | Description | Notes |
+|-------|------|----------|-------------|-------|
+| `id` | UUID | Yes | Unique identifier | Primary key |
+| `item_id` | UUID | Yes | Linked item | Foreign key to Item |
+| `uri` | String | Yes | File URI | Local file path reference |
+| `checksum` | String | Yes | Content hash | Used for dedupe |
+| `width` | Int | No | Pixel width | Nullable |
+| `height` | Int | No | Pixel height | Nullable |
+| `created_at` | DateTime | Yes | When captured/added | ISO 8601 UTC |
+
+**Constraints:**
+- Max 5 attachments per item.
+- Deduplicate by `(item_id, checksum)`.
+- Store only local URIs in MVP; cloud sync mapping is out of scope.
+
+---
+
+## Category Presets
+
+Purpose: seed default expiry offsets, storage location, and unit per category to speed up add-item UX.
+
+| Category | Default expiry (days) | Default storage | Default unit |
+|----------|-----------------------|-----------------|--------------|
+| vegetables | 5 | fridge | count |
+| fruit | 7 | fridge | count |
+| dairy | 7 | fridge | oz |
+| meat_poultry | 3 | fridge | lbs |
+| seafood | 2 | fridge | lbs |
+| grains | 30 | pantry | oz |
+| bakery | 3 | counter | count |
+| condiments_sauces | 60 | fridge | oz |
+| beverages | 14 | fridge | ml |
+| snacks | 30 | pantry | count |
+| leftovers | 3 | fridge | count |
+| prepared_meals | 4 | fridge | count |
+| frozen_foods | 90 | freezer | count |
+| canned_goods | 180 | pantry | count |
+| other | 14 | pantry | count |
+
+**Persistence Format:**
+- Stored as JSON map: `{ "category": { "default_expiry_days": int, "default_storage": "location", "default_unit": "string" } }`.
+- Allow user overrides; keep household-level preset overrides separate from base defaults.
+- Treat presets as optional hints; user edits persist as last-used defaults per category.
+
+---
+
+## Measurement & Validation Rules
+
+- Units are tagged as measure types: `count` (integer), `weight` (lbs, oz, kg, g), `volume` (ml, l, cup, tbsp, tsp).
+- For `count`, `quantity` must be an integer; reject decimals.
+- For `weight`/`volume`, allow up to 2 decimal places; enforce min > 0.
+- `quantity_consumed`/`quantity_wasted` follow same precision rules as `quantity`.
+- Derived remaining quantity uses the same precision; round to 2 decimals for display.
+- When unit changes, normalize quantities to base unit before recalculating consumed/wasted.
+
+---
+
 ## Migration Strategy
 
 ### Version Tracking
 - Store `schema_version` in local metadata table
 - Current version: **v1.0.0**
+- Planned additive bump to **v1.1.0** for attachments, batch/purchase_source, sublocations, and presets (backward compatible)
 - Version format: Semantic versioning (MAJOR.MINOR.PATCH)
 
 ### Migration Approach
@@ -368,12 +452,17 @@ Track financial impact of food waste to motivate behavior change and calculate v
 ## Validation Checklist
 
 - [x] All MVP entities defined (Item, ShoppingListItem, Event)
-- [x] Required fields for item management (name, category, location, quantity, expiry)
+- [x] Required fields for item management (name, category, location, quantity, expiry, notes, images, batch/purchase_source, sublocation)
 - [x] Partial consumption/wastage tracking fields added (quantity_consumed, quantity_wasted)
 - [x] Business rules documented for partial usage scenarios
 - [x] Proportional cost calculation queries provided
-- [x] Enums have ≥3 values (Category: 15, Location: 5, WasteReason: 7, Status: 4, EventType: 10)
+- [x] Attachments entity defined (image URI, checksum, max 5 per item)
+- [x] Category presets defined (default expiry/storage/unit per category)
+- [x] Storage hierarchy guidance (sublocation pattern for fridge/freezer sublocations)
+- [x] Measurement/validation rules (count=integer, weight/volume=2 decimals, min>0)
+- [x] Enums have ≥3 values (Category: 15, Location: 5, WasteReason: 7, Status: 4, EventType: 10, PurchaseSource: 4)
 - [x] Migration strategy includes versioning approach
+- [x] Planned schema version bump to v1.1.0 for additive fields
 - [x] Relationships documented (Item → Events)
 - [x] Indexes defined for performance
 - [x] Query patterns provided for common use cases

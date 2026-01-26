@@ -34,6 +34,7 @@ Define consistent event instrumentation for measuring adoption, retention, and v
    - **expiry_date_scanned:** `scan_success` (boolean), `scan_duration_ms` (int), `date_format_detected` (string | null)
    - **item_wasted:** `category`, `location`, `waste_reason` (enum), `days_overdue` (int)
    - **reminder_opened:** `lead_time_days`, `time_of_day` ("morning" | "afternoon" | "evening")
+   - **inventory_view_mode_changed:** `from` ("list" | "table" | "grid"), `to` ("list" | "table" | "grid"), `filters_applied` (boolean), `sort_key` (string | null), `result_count` (int)
 
 5. **Privacy Strategy:**
    - **No PII:** Never collect email, phone, device_id without hashing

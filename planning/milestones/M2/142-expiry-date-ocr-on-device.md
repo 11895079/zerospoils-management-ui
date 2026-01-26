@@ -2,7 +2,7 @@
 Manual date entry is tedious and error-prone. On-device OCR for expiry dates reduces friction and improves data quality.
 
 ## Goal
-Enable users to scan product labels with device camera and auto-extract expiry dates using Google ML Kit (offline, privacy-first).
+Enable users (Pro tier) to scan product labels with device camera and auto-extract expiry dates using Google ML Kit (offline, privacy-first). Free tier keeps manual entry and basic photos only.
 
 ## Expected behavior
 - Camera icon button next to expiry date field in Add Item form
@@ -11,10 +11,10 @@ Enable users to scan product labels with device camera and auto-extract expiry d
 - Pre-fill expiry date field with extracted date (user can edit if incorrect)
 - Graceful fallback to manual entry if OCR fails or unavailable
 
-## Acceptance criteria (Definition of Done)
-- [ ] Google ML Kit Text Recognition integrated (iOS + Android)
+- [ ] Google ML Kit Text Recognition integrated (iOS + Android) for Pro tier only; feature flag `expiry_date_ocr`
+- [ ] Free tier: camera/OCR controls hidden; manual entry + basic photos remain
 - [ ] Camera permission added to onboarding flow (145)
-- [ ] Camera button appears next to expiry date field
+- [ ] Camera button appears next to expiry date field when flag enabled and user is Pro
 - [ ] Camera capture UI with focus guidance ("Point camera at expiry date")
 - [ ] Date parsing logic supports common formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, "Best By", "Use By", "Exp", etc.
 - [ ] Extracted date pre-fills expiry field (editable)
@@ -32,13 +32,14 @@ Enable users to scan product labels with device camera and auto-extract expiry d
 - Multi-item batch scanning
 
 ## Implementation notes
-- Use Google ML Kit Text Recognition v2 (on-device, free)
+- Use Google ML Kit Text Recognition v2 (on-device, free); gate behind Pro entitlement + feature flag
 - iOS: `GoogleMLKit/TextRecognition` pod
 - Android: `com.google.mlkit:text-recognition` Maven
 - Date parsing regex: capture common patterns, prioritize dates within next 2 years (avoid false positives)
 - Camera UI: Show crosshair/focus box overlay
 - Permission handling: Request camera on first tap; graceful denial handling
 - Keep manual entry as primary method; OCR is optional enhancement
+- Feature flag from M3/130; entitlement check from Pro subscription (M6/410/420)
 
 ## Test plan
 **Automated:**
