@@ -60,6 +60,78 @@ class TelemetryClient {
       'properties': {'tab_name': tabName},
     });
   }
+
+  /// Track backup started
+  void trackBackupStarted() {
+    enqueue({'name': 'backup_started', 'properties': {}});
+  }
+
+  /// Track backup succeeded
+  void trackBackupSucceeded({
+    required int sizeBytes,
+    required int itemCount,
+    required String appVersion,
+  }) {
+    enqueue({
+      'name': 'backup_succeeded',
+      'properties': {
+        'size_bytes': sizeBytes,
+        'item_count': itemCount,
+        'app_version': appVersion,
+      },
+    });
+  }
+
+  /// Track backup failed
+  void trackBackupFailed({required String reason}) {
+    enqueue({
+      'name': 'backup_failed',
+      'properties': {'reason': reason},
+    });
+  }
+
+  /// Track restore started
+  void trackRestoreStarted({
+    required String schemaVersion,
+    required String appVersion,
+  }) {
+    enqueue({
+      'name': 'restore_started',
+      'properties': {
+        'schema_version_from': schemaVersion,
+        'app_version_from': appVersion,
+      },
+    });
+  }
+
+  /// Track restore succeeded
+  void trackRestoreSucceeded({
+    required int itemCountImported,
+    required int migrationsApplied,
+    required String schemaVersionFrom,
+    required String appVersionFrom,
+  }) {
+    enqueue({
+      'name': 'restore_succeeded',
+      'properties': {
+        'item_count_imported': itemCountImported,
+        'migrations_applied': migrationsApplied,
+        'schema_version_from': schemaVersionFrom,
+        'app_version_from': appVersionFrom,
+      },
+    });
+  }
+
+  /// Track restore failed
+  void trackRestoreFailed({
+    required String reason,
+    required bool schemaMismatch,
+  }) {
+    enqueue({
+      'name': 'restore_failed',
+      'properties': {'reason': reason, 'schema_mismatch': schemaMismatch},
+    });
+  }
 }
 
 /// Item repository (stub implementation)

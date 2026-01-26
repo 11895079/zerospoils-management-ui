@@ -54,6 +54,13 @@ dependencies:
   # Local preferences storage
   shared_preferences: ^2.3.4
   
+  # File system access
+  file_picker: ^8.1.6
+  path_provider: ^2.1.5
+  
+  # App version and package info
+  package_info_plus: ^8.0.0
+  
   # Serialization
   json_serializable: ^6.8.0
   
