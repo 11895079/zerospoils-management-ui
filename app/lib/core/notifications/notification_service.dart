@@ -28,6 +28,13 @@ class NotificationService {
 
     // Timezone initialization
     tz.initializeTimeZones();
+    // Set local timezone to ensure tz.local resolves to device timezone, not UTC
+    final timeZoneName = await _getDeviceTimeZone();
+    try {
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+    } catch (e) {
+      // Fallback silently if timezone setup fails
+    }
 
     const AndroidInitializationSettings androidInit =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -106,7 +113,8 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      // Omit matchDateTimeComponents to prevent repeating notifications;
+      // rely on explicit rescheduling when expiry date changes.
     );
 
     // Track telemetry
@@ -122,7 +130,10 @@ class NotificationService {
     String? title,
     String? body,
   }) async {
-    await cancelForItem(itemId);
+    // Cancel existing notification without emitting telemetry
+    // (to avoid double-counting; reschedule is a single operation)
+    await _plugin.cancel(itemId);
+
     await scheduleForItem(
       itemId: itemId,
       expiryDate: newExpiryDate,
@@ -153,5 +164,51 @@ class NotificationService {
   Future<void> restoreScheduled() async {
     // In M2 we rely on system persistence of scheduled alarms.
     // A future enhancement can re-scan items and re-schedule here if required.
+  }
+
+  /// Get device timezone name for configuration.
+  /// Returns a timezone name from the IANA timezone database.
+  /// For M2/120, attempts to detect local timezone offset and map to known zone.
+  /// Fallback: 'UTC' (will be set by platform-specific code in production).
+  Future<String> _getDeviceTimeZone() async {
+    try {
+      // Get current time to calculate offset
+      final now = DateTime.now();
+      final offset = now.timeZoneOffset;
+
+      // Simple mapping of common UTC offsets to timezone names
+      // Production code should use a proper timezone detection library
+      final hours = offset.inHours;
+      switch (hours) {
+        case 0:
+          return 'UTC'; // UTC, GMT, etc.
+        case 1:
+          return 'Europe/London'; // or 'Africa/Lagos'
+        case 2:
+          return 'Europe/Paris'; // or 'Africa/Cairo'
+        case 3:
+          return 'Europe/Moscow'; // or 'Africa/Johannesburg'
+        case -5:
+          return 'America/New_York';
+        case -6:
+          return 'America/Chicago';
+        case -7:
+          return 'America/Denver';
+        case -8:
+          return 'America/Los_Angeles';
+        case 8:
+          return 'Asia/Shanghai';
+        case 9:
+          return 'Asia/Tokyo';
+        case 10:
+          return 'Australia/Sydney';
+        default:
+          // Fallback to UTC if offset doesn't match common zones
+          return 'UTC';
+      }
+    } catch (e) {
+      // If detection fails, default to UTC
+      return 'UTC';
+    }
   }
 }

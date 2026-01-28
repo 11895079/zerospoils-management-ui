@@ -64,13 +64,25 @@ void main() {
     tempDir = await Directory.systemTemp.createTemp('hive_test');
     Hive.init(tempDir.path);
 
-    // Register all Hive adapters
-    Hive.registerAdapter(ItemAdapter());
-    Hive.registerAdapter(ItemCategoryAdapter());
-    Hive.registerAdapter(ItemStatusAdapter());
-    Hive.registerAdapter(StorageLocationAdapter());
-    Hive.registerAdapter(ItemTypeAdapter());
-    Hive.registerAdapter(UnitAdapter());
+    // Register all Hive adapters with guards to avoid duplicate registration errors
+    if (!Hive.isAdapterRegistered(ItemAdapter().typeId)) {
+      Hive.registerAdapter(ItemAdapter());
+    }
+    if (!Hive.isAdapterRegistered(ItemCategoryAdapter().typeId)) {
+      Hive.registerAdapter(ItemCategoryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(ItemStatusAdapter().typeId)) {
+      Hive.registerAdapter(ItemStatusAdapter());
+    }
+    if (!Hive.isAdapterRegistered(StorageLocationAdapter().typeId)) {
+      Hive.registerAdapter(StorageLocationAdapter());
+    }
+    if (!Hive.isAdapterRegistered(ItemTypeAdapter().typeId)) {
+      Hive.registerAdapter(ItemTypeAdapter());
+    }
+    if (!Hive.isAdapterRegistered(UnitAdapter().typeId)) {
+      Hive.registerAdapter(UnitAdapter());
+    }
   });
 
   tearDownAll(() async {

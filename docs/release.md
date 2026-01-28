@@ -202,7 +202,7 @@ Example:
   6. Upload APK artifact
 
 **Signing:**
-- Uses GitHub Secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`
+- Uses GitHub Secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`
 - Keystore must be base64 encoded and stored in repository secrets
 
 #### `build-ios.yml`
@@ -242,17 +242,18 @@ Example:
 3. **Add to GitHub Secrets:**
    - Go to GitHub repo → Settings → Secrets and variables → Actions
    - Create new secrets:
-     - `KEYSTORE_BASE64`: Content of keystore-base64.txt
-     - `KEYSTORE_PASSWORD`: Keystore password
-     - `KEY_ALIAS`: Signing key alias (from keytool step)
-     - `KEY_PASSWORD`: Key password
+     - `ANDROID_KEYSTORE_BASE64`: Content of keystore-base64.txt
+     - `ANDROID_KEYSTORE_PASSWORD`: Keystore password
+     - `ANDROID_KEY_ALIAS`: Signing key alias (from keytool step)
+     - `ANDROID_KEY_PASSWORD`: Key password
 
 #### iOS Signing Setup
 
-1. **Export signing certificate** from Apple Developer:
+1. **Export signing certificate** from Apple Developer as PKCS#12:
    - Open Xcode → Preferences → Accounts
    - Select Apple ID → Manage Certificates
-   - Right-click Developer ID → Export → Save as .p8 file
+   - Right-click Developer ID → Export → Save as .p12 file (with password)
+   - **Note:** .p12 format is required; .p8 is not used for code signing certificates
 
 2. **Export provisioning profile:**
    - Visit [Apple Developer - Certificates](https://developer.apple.com/account/resources/certificates/list)
@@ -260,16 +261,15 @@ Example:
 
 3. **Encode files to base64:**
    ```bash
-   cat certificate.p8 | base64 | tr -d '\n' > cert-base64.txt
+   cat certificate.p12 | base64 | tr -d '\n' > cert-base64.txt
    cat profile.mobileprovision | base64 | tr -d '\n' > profile-base64.txt
    ```
 
 4. **Add to GitHub Secrets:**
-   - `IOS_CERTIFICATE_BASE64`: Content of cert-base64.txt
+   - `IOS_CERTIFICATE_BASE64`: Content of cert-base64.txt (.p12 format)
+   - `IOS_CERTIFICATE_PASSWORD`: Certificate password (set when exporting .p12)
    - `IOS_PROVISIONING_PROFILE_BASE64`: Content of profile-base64.txt
-   - `IOS_CERTIFICATE_PASSWORD`: Certificate password
-   - `APPLE_ID`: Apple ID email
-   - `APPLE_APP_PASSWORD`: App-specific password (from appleid.apple.com)
+   - Note: Remove any `APPLE_ID` or `APPLE_APP_PASSWORD` secrets if not needed
 
 ## Next Steps
 
