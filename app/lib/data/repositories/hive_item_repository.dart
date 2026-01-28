@@ -63,29 +63,32 @@ class HiveItemRepository implements ItemRepositoryBase {
 
     // Handle notification scheduling
     if (_notificationService != null) {
-      if (isNewItem && item.expiryDate != null) {
-        // New item with expiry: schedule notification
-        await _notificationService.scheduleForItem(
-          itemId: int.parse(item.id), // Use item ID as notification ID
-          expiryDate: item.expiryDate!,
-          title: 'Item expiring soon',
-          body: '${item.name} expires tomorrow',
-        );
-      } else if (!isNewItem && existingItem.expiryDate != item.expiryDate) {
-        // Expiry date changed: reschedule notification
-        if (item.expiryDate != null) {
-          await _notificationService.rescheduleForItem(
-            itemId: int.parse(item.id),
-            newExpiryDate: item.expiryDate!,
+      final notificationId = _parseItemId(item.id);
+      if (notificationId != null) {
+        if (isNewItem && item.expiryDate != null) {
+          // New item with expiry: schedule notification
+          await _notificationService.scheduleForItem(
+            itemId: notificationId,
+            expiryDate: item.expiryDate!,
             title: 'Item expiring soon',
             body: '${item.name} expires tomorrow',
           );
-        } else {
-          // Expiry date cleared: cancel notification
-          await _notificationService.cancelForItem(
-            int.parse(item.id),
-            reason: 'expiry_cleared',
-          );
+        } else if (!isNewItem && existingItem.expiryDate != item.expiryDate) {
+          // Expiry date changed: reschedule notification
+          if (item.expiryDate != null) {
+            await _notificationService.rescheduleForItem(
+              itemId: notificationId,
+              newExpiryDate: item.expiryDate!,
+              title: 'Item expiring soon',
+              body: '${item.name} expires tomorrow',
+            );
+          } else {
+            // Expiry date cleared: cancel notification
+            await _notificationService.cancelForItem(
+              notificationId,
+              reason: 'expiry_cleared',
+            );
+          }
         }
       }
     }
@@ -98,13 +101,12 @@ class HiveItemRepository implements ItemRepositoryBase {
 
     // Cancel any scheduled notification
     if (_notificationService != null) {
-      try {
+      final notificationId = _parseItemId(id);
+      if (notificationId != null) {
         await _notificationService.cancelForItem(
-          int.parse(id),
+          notificationId,
           reason: 'item_deleted',
         );
-      } catch (_) {
-        // Silently ignore if ID parsing fails
       }
     }
 
@@ -136,13 +138,12 @@ class HiveItemRepository implements ItemRepositoryBase {
     // Cancel all scheduled notifications
     if (_notificationService != null) {
       for (final item in _box!.values) {
-        try {
+        final notificationId = _parseItemId(item.id);
+        if (notificationId != null) {
           await _notificationService.cancelForItem(
-            int.parse(item.id),
+            notificationId,
             reason: 'clear_all',
           );
-        } catch (_) {
-          // Silently ignore parse errors
         }
       }
     }
@@ -154,5 +155,16 @@ class HiveItemRepository implements ItemRepositoryBase {
   @override
   Future<void> close() async {
     await _box?.close();
+  }
+
+  /// Parse item ID to notification ID safely
+  /// Returns null if ID is not numeric (for non-numeric IDs, notifications are skipped)
+  int? _parseItemId(String id) {
+    try {
+      return int.parse(id);
+    } catch (e) {
+      // Silently skip notifications for non-numeric IDs
+      return null;
+    }
   }
 }

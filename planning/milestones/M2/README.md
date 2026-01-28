@@ -27,7 +27,7 @@
 | [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN REVIEW | [#46](https://github.com/bakintunde/zerospoils/pull/46) | Tag triggered 2026-01-27 |
 | [M2/100](100-local-storage-implementation-with-migrations.md) | Hive local storage for Items + migrations | ✅ DONE | [#44](https://github.com/bakintunde/zerospoils/pull/44) | Jan 24, 2026 |
 | [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | 🔄 IN PROGRESS | Local impl exists | ExpiryClassifier complete, 17 tests passing |
-| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/11895079/zerospoils/pull/57) | Jan 27, 2026 |
+| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 27, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
 | [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR (on-device) | ⏳ TODO | — | Deferred to M3+ (complex, Pro tier) |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | Ready to start (M2/120 dependency) |
