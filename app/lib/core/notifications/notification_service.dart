@@ -14,6 +14,14 @@ class NotificationService {
   
   static final NotificationService _instance = NotificationService._internal();
   
+  /// Create a NotificationService instance.
+  /// 
+  /// By default, returns the singleton instance. If [plugin] is provided,
+  /// creates a new instance for testing purposes with the custom plugin.
+  /// 
+  /// Note: Providing a plugin creates a new instance that bypasses the singleton.
+  /// This is primarily intended for unit tests where you need to mock the
+  /// notification plugin behavior.
   factory NotificationService({FlutterLocalNotificationsPlugin? plugin}) {
     // If a plugin is provided, create a new instance for testing
     if (plugin != null) {

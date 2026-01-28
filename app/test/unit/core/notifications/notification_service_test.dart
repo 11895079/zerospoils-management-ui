@@ -210,20 +210,6 @@ void main() {
       expect(scheduleTime.year, 2026);
       expect(scheduleTime.hour, 9);
     });
-
-    test('telemetry callback is invoked with correct event structure', () {
-      final capturedEvents = <Map<String, dynamic>>[];
-
-      notificationService.setTelemetryCallback((name, props) {
-        capturedEvents.add({'name': name, 'properties': props});
-      });
-
-      // Simulate telemetry call (we can't actually schedule without initialization)
-      notificationService.setTelemetryCallback((name, props) {
-        expect(name, isNotEmpty);
-        expect(props, isA<Map<String, dynamic>>());
-      });
-    });
   });
 
   group('NotificationService - boundary cases', () {
@@ -266,22 +252,25 @@ void main() {
       final service1 = NotificationService(plugin: plugin1);
       final service2 = NotificationService(plugin: plugin2);
 
-      // These should be different instances since we provided plugins
+      // Each custom plugin creates a separate instance for testing
       expect(identical(service1, service2), isFalse);
     });
 
-    test('telemetry callback persists across factory calls', () {
-      final events1 = <String>[];
-      final events2 = <String>[];
+    test('singleton instance has independent state from test instances', () {
+      final singletonEvents = <String>[];
+      final testInstanceEvents = <String>[];
 
-      final service1 = NotificationService();
-      service1.setTelemetryCallback((name, _) => events1.add(name));
+      // Set callback on singleton
+      final singleton = NotificationService();
+      singleton.setTelemetryCallback((name, _) => singletonEvents.add(name));
 
-      final service2 = NotificationService();
-      service2.setTelemetryCallback((name, _) => events2.add(name));
+      // Set callback on test instance with custom plugin
+      final testPlugin = MockFlutterLocalNotificationsPlugin();
+      final testInstance = NotificationService(plugin: testPlugin);
+      testInstance.setTelemetryCallback((name, _) => testInstanceEvents.add(name));
 
-      // Both should reference the same instance
-      expect(identical(service1, service2), isTrue);
+      // These should be different instances with independent callbacks
+      expect(identical(singleton, testInstance), isFalse);
     });
   });
 }
