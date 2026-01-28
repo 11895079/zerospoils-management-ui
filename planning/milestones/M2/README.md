@@ -20,27 +20,79 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** In Progress (5/14 completed) — Last Updated: Jan 27, 2026
+**Status:** In Progress (8/14 completed) — Last Updated: Jan 27, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
-| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⏳ TODO | — | — |
-| [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ⏳ TODO | — | — |
-| [M2/165](165-backup-restore-local-json-in-settings.md) | Backup/restore (local JSON) in Settings | ⏳ TODO | — | — |
-| [M2/180](180-inventory-view-modes-list-table-grid.md) | Inventory view modes (list/table/grid) | ⏳ TODO | — | — |
 | [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN REVIEW | [#46](https://github.com/bakintunde/zerospoils/pull/46) | Tag triggered 2026-01-27 |
 | [M2/100](100-local-storage-implementation-with-migrations.md) | Hive local storage for Items + migrations | ✅ DONE | [#44](https://github.com/bakintunde/zerospoils/pull/44) | Jan 24, 2026 |
+| [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | 🔄 IN PROGRESS | Local impl exists | ExpiryClassifier complete, 17 tests passing |
+| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/11895079/zerospoils/pull/57) | Jan 27, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
+| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR (on-device) | ⏳ TODO | — | Deferred to M3+ (complex, Pro tier) |
+| [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | Ready to start (M2/120 dependency) |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
+| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⏳ TODO | — | Design in issue file |
+| [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ⏳ TODO | — | Design in issue file (depends on M2/110) |
+| [M2/165](165-backup-restore-local-json-in-settings.md) | Backup/restore (local JSON) in Settings | 🔄 IN PROGRESS | Local impl exists | BackupRestoreService complete, 8 tests passing |
 | [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen (mark used/wasted) | ✅ DONE | Implemented locally | Jan 24, 2026 |
-| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | Local implementation | Jan 27, 2026 |
-| [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ⏳ TODO | — | — |
-| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
-| [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | — |
-| [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | — |
-| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ⏳ TODO | — | — |
+| [M2/180](180-inventory-view-modes-list-table-grid.md) | Inventory view modes (list/table/grid) | ⏳ TODO | — | Design in issue file |
+| [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | Deferred (post-MVP) |
+| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ⏳ TODO | — | Deferred (post-MVP) |
 
-**Test Results:** 20/20 tests passing for M2/120 (12 NotificationService unit tests + 8 HiveItemRepository integration tests)
+### 🔄 Hidden Implementations (Code Exists, Ready for PR)
+
+**M2/110 (Expiry Bucketing Algorithm)**
+- **File:** `app/lib/domain/utils/expiry_classifier.dart`
+- **Tests:** 17/17 passing in `expiry_classifier_test.dart`
+- **Implementation:**
+  - `ExpiryClassifier.classify(item)` → returns `ExpiryBucket` (expired, today, thisWeek, later)
+  - Date-only comparisons (no timezone issues)
+  - Handles: null expiry, today detection, 1-7 day window, future dates
+  - Edge cases: month boundaries, leap years, year rollover, DST transitions
+- **Dependencies:** None (pure utility function)
+
+**M2/165 (Backup & Restore Service)**
+- **File:** `app/lib/data/services/backup_restore_service.dart`
+- **Tests:** 8/8 passing in `backup_restore_service_test.dart`
+- **Implementation:**
+  - `backup()` → JSON with metadata (app version, schema version, timestamp)
+  - `restore(file)` → validates schema, imports items, handles migrations
+  - `RestorePreview` for pre-import validation
+  - Metadata: backup_version, schema_version, appVersion, exportedAt
+- **Dependencies:** Hive (for Item persistence)
+
+---
+
+### 🎯 Phase 1: Merge In-Progress Implementations (Days 1-3)
+**Goal:** Get 3 more issues to "DONE" by merging existing code
+
+1. **M2/110 (Expiry Bucketing)** — 17 tests passing, ready for PR
+   - Impact: Unblocks M2/160 (Expiring Soon screen)
+   - Effort: 30 min (review + merge)
+
+2. **M2/165 (Backup/Restore)** — 8 tests passing, ready for PR
+   - Impact: Settings get backup/restore functionality
+   - Effort: 45 min (review + integrate)
+
+3. **M2/030 (Build Pipelines - Code Signing)** — Workflows exist, docs in place
+   - Impact: CI builds are reproducible for iOS/Android
+   - Effort: 1 hour (setup secrets, document)
+
+### 🚀 Phase 2: Start New Implementation (Days 4-7)
+4. **M2/145 (Onboarding + Permissions)** — No blockers, design complete
+   - Effort: 2-3 days
+   - Impact: Users get proper onboarding experience + notification permissions flow
+
+### 📊 Phase 3: Dependent Features (Days 8+)
+5. **M2/160 (Expiring Soon Screen)** — Blocked by M2/110
+   - Effort: 1-2 days (once M2/110 merged)
+   - Impact: Users see expiring items bucketed by urgency
+
+### 🔐 Deferred (Complex/Post-MVP)
+- **M2/142 (OCR)** — On-device ML Kit OCR for expiry dates (Pro tier feature)
+- **M2/101, M2/102** — ShoppingList and events audit (post-MVP)
+- **M2/155, M2/180** — Demo mode and view modes (nice-to-have)
 
 **Key tasks (issue files in this folder):**
 - `030-set-up-build-pipelines-android-ios-on-tags.md` - CI/CD for iOS/Android builds
