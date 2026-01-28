@@ -1,11 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz show TZDateTime;
 import 'package:zerospoils/core/notifications/notification_service.dart';
 
 /// Mock plugin for testing notification scheduling
-class MockFlutterLocalNotificationsPlugin extends FlutterLocalNotificationsPlugin {
+import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
+
+class MockFlutterLocalNotificationsPlugin
+    implements FlutterLocalNotificationsPlugin {
   final List<Map<String, dynamic>> scheduledNotifications = [];
   final List<int> cancelledNotifications = [];
   bool initializeCalled = false;
@@ -16,20 +20,28 @@ class MockFlutterLocalNotificationsPlugin extends FlutterLocalNotificationsPlugi
     InitializationSettings initializationSettings, {
     DidReceiveNotificationResponseCallback? onDidReceiveNotificationResponse,
     DidReceiveBackgroundNotificationResponseCallback?
-        onDidReceiveBackgroundNotificationResponse,
+    onDidReceiveBackgroundNotificationResponse,
   }) async {
     initializeCalled = true;
     return true;
   }
 
   @override
-  AndroidFlutterLocalNotificationsPlugin?
-      resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>() {
-    return MockAndroidFlutterLocalNotificationsPlugin(
-      onChannelCreated: () => channelCreated = true,
-    ) as AndroidFlutterLocalNotificationsPlugin?;
+  T? resolvePlatformSpecificImplementation<
+    T extends FlutterLocalNotificationsPlatform
+  >() {
+    channelCreated = true;
+    if (T == AndroidFlutterLocalNotificationsPlugin) {
+      return MockAndroidFlutterLocalNotificationsPlugin(
+            onChannelCreated: () => channelCreated = true,
+          )
+          as T;
+    }
+    return null;
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
   Future<void> zonedSchedule(
@@ -39,10 +51,12 @@ class MockFlutterLocalNotificationsPlugin extends FlutterLocalNotificationsPlugi
     tz.TZDateTime scheduledDate,
     NotificationDetails notificationDetails, {
     required UILocalNotificationDateInterpretation
-        uiLocalNotificationDateInterpretation,
+    uiLocalNotificationDateInterpretation,
     AndroidScheduleMode? androidScheduleMode,
     DateTimeComponents? matchDateTimeComponents,
     String? payload,
+    bool? androidAllowWhileIdle,
+    String? tag,
   }) async {
     scheduledNotifications.add({
       'id': id,
@@ -54,17 +68,20 @@ class MockFlutterLocalNotificationsPlugin extends FlutterLocalNotificationsPlugi
   }
 
   @override
-  Future<void> cancel(int id) async {
+  Future<void> cancel(int id, {String? tag}) async {
     cancelledNotifications.add(id);
   }
 }
 
 /// Mock Android-specific implementation
-class MockAndroidFlutterLocalNotificationsPlugin {
+
+class MockAndroidFlutterLocalNotificationsPlugin
+    extends AndroidFlutterLocalNotificationsPlugin {
   final void Function()? onChannelCreated;
 
   MockAndroidFlutterLocalNotificationsPlugin({this.onChannelCreated});
 
+  @override
   Future<void> createNotificationChannel(
     AndroidNotificationChannel channel,
   ) async {
@@ -190,21 +207,21 @@ void main() {
       // Verify that the plugin received the schedule call
       expect(mockPlugin.scheduledNotifications.length, 1);
       expect(mockPlugin.scheduledNotifications[0]['id'], itemId);
-      expect(mockPlugin.scheduledNotifications[0]['title'], 'Test Item Expiring');
+      expect(
+        mockPlugin.scheduledNotifications[0]['title'],
+        'Test Item Expiring',
+      );
 
       // Verify that telemetry was emitted
       expect(telemetryEvents.length, 1);
       expect(telemetryEvents[0]['name'], 'notification_scheduled');
       expect(telemetryEvents[0]['properties']['item_id'], itemId.toString());
-      expect(
-        telemetryEvents[0]['properties']['schedule_time'],
-        isA<String>(),
-      );
+      expect(telemetryEvents[0]['properties']['schedule_time'], isA<String>());
 
-      // Verify the schedule time is correct (Feb 14, 2026 at 9am)
+      // Verify the schedule time is correct: day before expiry at 9am local time
       final scheduleTimeStr =
           telemetryEvents[0]['properties']['schedule_time'] as String;
-      final scheduleTime = DateTime.parse(scheduleTimeStr);
+      final scheduleTime = DateTime.parse(scheduleTimeStr).toLocal();
       expect(scheduleTime.day, 14);
       expect(scheduleTime.month, 2);
       expect(scheduleTime.year, 2026);
@@ -248,7 +265,7 @@ void main() {
     test('factory returns new instance when plugin is provided', () {
       final plugin1 = MockFlutterLocalNotificationsPlugin();
       final plugin2 = MockFlutterLocalNotificationsPlugin();
-      
+
       final service1 = NotificationService(plugin: plugin1);
       final service2 = NotificationService(plugin: plugin2);
 
@@ -267,7 +284,9 @@ void main() {
       // Set callback on test instance with custom plugin
       final testPlugin = MockFlutterLocalNotificationsPlugin();
       final testInstance = NotificationService(plugin: testPlugin);
-      testInstance.setTelemetryCallback((name, _) => testInstanceEvents.add(name));
+      testInstance.setTelemetryCallback(
+        (name, _) => testInstanceEvents.add(name),
+      );
 
       // These should be different instances with independent callbacks
       expect(identical(singleton, testInstance), isFalse);
