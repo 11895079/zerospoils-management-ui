@@ -12,8 +12,8 @@ Create CI workflows that build Android APK/AAB and iOS IPA artifacts when taggin
 - Version number in `pubspec.yaml` matches the tag
 
 ## Acceptance criteria (Definition of Done)
-- [ ] `.github/workflows/build-android.yml` workflow exists and triggers on tag push
-- [ ] `.github/workflows/build-ios.yml` workflow exists and triggers on tag push
+- [x] `.github/workflows/build-android.yml` workflow exists and triggers on tag push
+- [x] `.github/workflows/build-ios.yml` workflow exists and triggers on tag push
 - [ ] Android workflow builds release APK and AAB, uploads as artifacts
 - [ ] iOS workflow builds release IPA (ad-hoc or enterprise), uploads as artifact
 - [ ] Versioning strategy documented in `docs/release.md` (semver, tag format, changelog)

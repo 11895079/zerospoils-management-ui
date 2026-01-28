@@ -20,7 +20,7 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** In Progress (4/14 completed) — Last Updated: Jan 25, 2026
+**Status:** In Progress (5/14 completed) — Last Updated: Jan 27, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
@@ -28,17 +28,19 @@
 | [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ⏳ TODO | — | — |
 | [M2/165](165-backup-restore-local-json-in-settings.md) | Backup/restore (local JSON) in Settings | ⏳ TODO | — | — |
 | [M2/180](180-inventory-view-modes-list-table-grid.md) | Inventory view modes (list/table/grid) | ⏳ TODO | — | — |
-| [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN REVIEW | [#46](https://github.com/bakintunde/zerospoils/pull/46) | — |
+| [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN REVIEW | [#46](https://github.com/bakintunde/zerospoils/pull/46) | Tag triggered 2026-01-27 |
 | [M2/100](100-local-storage-implementation-with-migrations.md) | Hive local storage for Items + migrations | ✅ DONE | [#44](https://github.com/bakintunde/zerospoils/pull/44) | Jan 24, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
 | [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen (mark used/wasted) | ✅ DONE | Implemented locally | Jan 24, 2026 |
+| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | Local implementation | Jan 27, 2026 |
 | [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ⏳ TODO | — | — |
-| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ⏳ TODO | — | — |
 | [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | — |
 | [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | — |
 | [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ⏳ TODO | — | — |
+
+**Test Results:** 20/20 tests passing for M2/120 (12 NotificationService unit tests + 8 HiveItemRepository integration tests)
 
 **Key tasks (issue files in this folder):**
 - `030-set-up-build-pipelines-android-ios-on-tags.md` - CI/CD for iOS/Android builds

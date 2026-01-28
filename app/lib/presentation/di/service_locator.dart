@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/badge_service.dart';
 import '../../data/repositories/hive_item_repository.dart';
+import '../../core/notifications/notification_service.dart';
 
 /// Connectivity service provider
 final connectivityProvider = StreamProvider<bool>((ref) {
@@ -17,9 +18,15 @@ final telemetryClientProvider = Provider((ref) {
   return TelemetryClient();
 });
 
-/// Item repository provider
+/// Notification service provider
+final notificationServiceProvider = Provider((ref) {
+  return NotificationService();
+});
+
+/// Item repository provider with notification service wired in
 final itemRepositoryProvider = Provider((ref) {
-  return HiveItemRepository();
+  final notificationService = ref.watch(notificationServiceProvider);
+  return HiveItemRepository(notificationService: notificationService);
 });
 
 /// Badge service provider
@@ -130,6 +137,45 @@ class TelemetryClient {
     enqueue({
       'name': 'restore_failed',
       'properties': {'reason': reason, 'schema_mismatch': schemaMismatch},
+    });
+  }
+
+  /// Track notification scheduled
+  void trackNotificationScheduled({
+    required String itemId,
+    required DateTime scheduleTime,
+  }) {
+    enqueue({
+      'name': 'notification_scheduled',
+      'properties': {
+        'item_id': itemId,
+        'schedule_time': scheduleTime.toIso8601String(),
+      },
+    });
+  }
+
+  /// Track notification rescheduled
+  void trackNotificationRescheduled({
+    required String itemId,
+    required DateTime newScheduleTime,
+  }) {
+    enqueue({
+      'name': 'notification_rescheduled',
+      'properties': {
+        'item_id': itemId,
+        'new_schedule_time': newScheduleTime.toIso8601String(),
+      },
+    });
+  }
+
+  /// Track notification cancelled
+  void trackNotificationCancelled({
+    required String itemId,
+    required String reason,
+  }) {
+    enqueue({
+      'name': 'notification_cancelled',
+      'properties': {'item_id': itemId, 'reason': reason},
     });
   }
 }

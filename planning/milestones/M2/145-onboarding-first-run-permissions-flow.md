@@ -24,8 +24,18 @@ Design and implement first‑run onboarding and permission flows that reduce dro
 - Keep flows short (3 screens max) and mobile‑friendly. Use feature flags for experiments.
 
 ## Test plan
-- Manual: fresh install, follow onboarding, skip and reopen from settings.
-- Automated: widget tests for navigation, telemetry mock assertions.
+ **Automated:**
+ - Widget: first-run shows onboarding, skip returns to home, reopen from settings works
+ - Widget: camera and notification permission prompts appear contextually with deferral option
+ - Telemetry: `onboarding_started`, `onboarding_completed`, `permission_prompt_shown` (type), `permission_deferred` events emitted
+ - Feature flag: A/B toggle switches between short (1–2 screens) and long (3 screens) flow
+
+ **Manual:**
+ 1. Fresh install → onboarding appears; complete flow and add 1–3 items
+ 2. Tap "Maybe later" on camera permission → proceed without blocking; verify manual add still works
+ 3. Enable notifications permission when prompted → see success confirmation; navigate back
+ 4. Skip onboarding → from Settings, reopen onboarding and complete; verify telemetry records conversion
+ 5. Switch A/B flag → experience alternate flow length; verify both paths function
 
 ## Dependencies
 - `130-feature-flags-framework-prepare-for-pro.md`

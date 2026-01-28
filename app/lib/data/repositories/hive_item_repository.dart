@@ -5,14 +5,20 @@ library;
 
 import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
+import '../../core/notifications/notification_service.dart';
 import 'item_repository_base.dart';
 
 class HiveItemRepository implements ItemRepositoryBase {
   static const String _boxName = 'items';
   final HiveInterface _hive;
+  final NotificationService? _notificationService;
   Box<Item>? _box;
 
-  HiveItemRepository({HiveInterface? hive}) : _hive = hive ?? Hive;
+  HiveItemRepository({
+    HiveInterface? hive,
+    NotificationService? notificationService,
+  }) : _hive = hive ?? Hive,
+       _notificationService = notificationService;
 
   /// Check if repository is initialized
   bool get isInitialized => _box != null && _box!.isOpen;
@@ -47,13 +53,61 @@ class HiveItemRepository implements ItemRepositoryBase {
   @override
   Future<void> saveItem(Item item) async {
     if (_box == null) throw Exception('Repository not initialized');
+
+    // Determine if this is a new item or an update
+    final existingItem = _box!.get(item.id);
+    final isNewItem = existingItem == null;
+
+    // Persist to Hive
     await _box!.put(item.id, item);
+
+    // Handle notification scheduling
+    if (_notificationService != null) {
+      if (isNewItem && item.expiryDate != null) {
+        // New item with expiry: schedule notification
+        await _notificationService.scheduleForItem(
+          itemId: int.parse(item.id), // Use item ID as notification ID
+          expiryDate: item.expiryDate!,
+          title: 'Item expiring soon',
+          body: '${item.name} expires tomorrow',
+        );
+      } else if (!isNewItem && existingItem.expiryDate != item.expiryDate) {
+        // Expiry date changed: reschedule notification
+        if (item.expiryDate != null) {
+          await _notificationService.rescheduleForItem(
+            itemId: int.parse(item.id),
+            newExpiryDate: item.expiryDate!,
+            title: 'Item expiring soon',
+            body: '${item.name} expires tomorrow',
+          );
+        } else {
+          // Expiry date cleared: cancel notification
+          await _notificationService.cancelForItem(
+            int.parse(item.id),
+            reason: 'expiry_cleared',
+          );
+        }
+      }
+    }
   }
 
   /// Delete item
   @override
   Future<void> deleteItem(String id) async {
     if (_box == null) throw Exception('Repository not initialized');
+
+    // Cancel any scheduled notification
+    if (_notificationService != null) {
+      try {
+        await _notificationService.cancelForItem(
+          int.parse(id),
+          reason: 'item_deleted',
+        );
+      } catch (_) {
+        // Silently ignore if ID parsing fails
+      }
+    }
+
     await _box!.delete(id);
   }
 
@@ -78,6 +132,21 @@ class HiveItemRepository implements ItemRepositoryBase {
   @override
   Future<void> clear() async {
     if (_box == null) throw Exception('Repository not initialized');
+
+    // Cancel all scheduled notifications
+    if (_notificationService != null) {
+      for (final item in _box!.values) {
+        try {
+          await _notificationService.cancelForItem(
+            int.parse(item.id),
+            reason: 'clear_all',
+          );
+        } catch (_) {
+          // Silently ignore parse errors
+        }
+      }
+    }
+
     await _box!.clear();
   }
 

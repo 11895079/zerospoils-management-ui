@@ -8,6 +8,7 @@ import 'presentation/di/service_locator.dart';
 import 'presentation/di/repository_providers.dart';
 import 'data/adapters/item_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/notifications/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,9 @@ void main() async {
   Hive.registerAdapter(ItemTypeAdapter());
   Hive.registerAdapter(UnitAdapter());
 
+  // Initialize notifications
+  await NotificationService().initialize();
+
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }
 
@@ -34,6 +38,11 @@ class ZeroSpoilsApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Initialize telemetry client
     final telemetry = ref.watch(telemetryClientProvider);
+
+    // Wire telemetry callback into notification service
+    NotificationService().setTelemetryCallback((eventName, properties) {
+      telemetry.enqueue({'name': eventName, 'properties': properties});
+    });
 
     // Initialize telemetry and state from prefs
     WidgetsBinding.instance.addPostFrameCallback((_) async {
