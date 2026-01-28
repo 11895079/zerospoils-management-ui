@@ -9,12 +9,28 @@ typedef TelemetryCallback =
 
 /// Basic notifications scaffolding for M2/120: schedule/reschedule/cancel.
 class NotificationService {
-  NotificationService._internal();
+  NotificationService._internal({FlutterLocalNotificationsPlugin? plugin})
+      : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  
   static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
+  
+  /// Create a NotificationService instance.
+  /// 
+  /// By default, returns the singleton instance. If [plugin] is provided,
+  /// creates a new instance for testing purposes with the custom plugin.
+  /// 
+  /// Note: Providing a plugin creates a new instance that bypasses the singleton.
+  /// This is primarily intended for unit tests where you need to mock the
+  /// notification plugin behavior.
+  factory NotificationService({FlutterLocalNotificationsPlugin? plugin}) {
+    // If a plugin is provided, create a new instance for testing
+    if (plugin != null) {
+      return NotificationService._internal(plugin: plugin);
+    }
+    return _instance;
+  }
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _plugin;
   bool _initialized = false;
   TelemetryCallback? _telemetryCallback;
 
