@@ -40,16 +40,27 @@ final badgeServiceProvider = Provider((ref) {
 class TelemetryClient {
   /// In-memory event sink to aid testing before Hive queue lands
   final List<Map<String, dynamic>> events = [];
+  void Function(String, Map<String, dynamic>)? _emitCallback;
 
   /// Enqueue an event locally (no upload yet)
   void enqueue(Map<String, dynamic> event) {
     events.add(event);
+    if (_emitCallback != null &&
+        event['name'] is String &&
+        event['properties'] is Map<String, dynamic>) {
+      _emitCallback!(event['name'], event['properties']);
+    }
     // TODO: M1/090 - Implement local queue with Hive
     // - Apply redaction rules from telemetry/policies/redaction.yaml
     // - Apply sampling from telemetry/policies/sampling.yaml
     // - Store in Hive queue for later batch upload
     // ignore: avoid_print
     print('Telemetry event enqueued: ${event['name']}');
+  }
+
+  /// Allow test to inject a callback for event emission
+  void setEmitCallback(void Function(String, Map<String, dynamic>) callback) {
+    _emitCallback = callback;
   }
 
   /// Track app installed event (called on first launch)

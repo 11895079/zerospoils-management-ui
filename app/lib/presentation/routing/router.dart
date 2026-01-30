@@ -3,9 +3,15 @@ import 'package:go_router/go_router.dart';
 import '../screens/home_shell.dart';
 import '../screens/item_detail_screen.dart';
 import '../screens/item_form_screen.dart';
+import '../screens/onboarding_screen.dart';
 
 final router = GoRouter(
   routes: <RouteBase>[
+    GoRoute(
+      path: '/onboarding',
+      name: 'onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
     GoRoute(
       path: '/',
       name: 'home',
@@ -35,6 +41,5 @@ final router = GoRouter(
       ],
     ),
   ],
-  // Deep linking configuration
-  initialLocation: '/',
+  initialLocation: '/onboarding',
 );

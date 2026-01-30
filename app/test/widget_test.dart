@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:zerospoils/main.dart';
+// ...existing code...
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/screens/home_shell.dart';
 
 // Lightweight in-memory mock to avoid Hive I/O during widget tests
 class MockItemRepository extends HiveItemRepository {
@@ -50,10 +51,11 @@ void main() {
     // Build our app with mock repository to avoid disk I/O
     final mockRepo = MockItemRepository();
     await mockRepo.init();
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
-        child: const ZeroSpoilsApp(),
+        child: MaterialApp(home: HomeShell()),
       ),
     );
 

@@ -31,42 +31,71 @@ void main() async {
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }
 
-class ZeroSpoilsApp extends ConsumerWidget {
-  const ZeroSpoilsApp({super.key});
+class ZeroSpoilsApp extends ConsumerStatefulWidget {
+  final bool skipInit;
+  const ZeroSpoilsApp({super.key, this.skipInit = false});
+
+  // Test-only constructor
+  const ZeroSpoilsApp.test({super.key}) : skipInit = true;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Initialize telemetry client
-    final telemetry = ref.watch(telemetryClientProvider);
+  ConsumerState<ZeroSpoilsApp> createState() => _ZeroSpoilsAppState();
+}
 
-    // Wire telemetry callback into notification service
+class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
+  // Removed unused _initialLocation
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.skipInit) {
+      _initialized = true;
+    } else {
+      _initPrefs();
+    }
+  }
+
+  Future<void> _initPrefs() async {
+    final telemetry = ref.read(telemetryClientProvider);
     NotificationService().setTelemetryCallback((eventName, properties) {
       telemetry.enqueue({'name': eventName, 'properties': properties});
     });
-
-    // Initialize telemetry and state from prefs
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      telemetry.trackAppInstalled(isFirstInstall: true);
-      final prefs = await SharedPreferences.getInstance();
-
-      // Load demo mode preference
-      final saved = prefs.getBool('demo_mode_enabled');
-      if (saved != null) {
-        ref.read(demoModeProvider.notifier).state = saved;
-      }
-
-      // Load hasManualItems flag
-      final hasManual = prefs.getBool('has_manual_items') ?? false;
-      if (hasManual) {
-        ref.read(hasManualItemsProvider.notifier).state = true;
-      }
+    telemetry.trackAppInstalled(isFirstInstall: true);
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getBool('demo_mode_enabled');
+    if (saved != null) {
+      ref.read(demoModeProvider.notifier).state = saved;
+    }
+    final hasManual = prefs.getBool('has_manual_items') ?? false;
+    if (hasManual) {
+      ref.read(hasManualItemsProvider.notifier).state = true;
+    }
+    // final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+    // No _initialLocation field; just use onboardingComplete to control UI
+    setState(() {
+      _initialized = true;
     });
+    // Optionally, you can use GoRouter.of(context).go(...) if you want to redirect
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
     return MaterialApp.router(
       title: 'ZeroSpoils',
       theme: AppTheme.lightTheme,
       routerConfig: router,
+      routeInformationProvider: router.routeInformationProvider,
+      routeInformationParser: router.routeInformationParser,
+      routerDelegate: router.routerDelegate,
       debugShowCheckedModeBanner: false,
+      // Set initial route based on onboarding completion
+      // GoRouter will use initialLocation
     );
   }
 }

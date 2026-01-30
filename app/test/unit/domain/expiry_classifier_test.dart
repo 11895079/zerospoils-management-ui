@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/utils/expiry_classifier.dart';
+import 'package:zerospoils/domain/models/expiry_bucket.dart';
 
 void main() {
   group('ExpiryClassifier', () {
