@@ -6,12 +6,21 @@ library;
 import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
 import '../../core/notifications/notification_service.dart';
+import '../../presentation/di/service_locator.dart';
 import 'item_repository_base.dart';
 
 class HiveItemRepository implements ItemRepositoryBase {
+  /// Allow test to inject a telemetry callback
+  void setTelemetryCallback(
+    void Function(String, Map<String, dynamic>) callback,
+  ) {
+    _telemetryClient.setEmitCallback(callback);
+  }
+
   static const String _boxName = 'items';
   final HiveInterface _hive;
   final NotificationService? _notificationService;
+  final TelemetryClient _telemetryClient = TelemetryClient();
   Box<Item>? _box;
 
   HiveItemRepository({
@@ -60,6 +69,27 @@ class HiveItemRepository implements ItemRepositoryBase {
 
     // Persist to Hive
     await _box!.put(item.id, item);
+
+    // Emit telemetry event
+    if (isNewItem) {
+      _telemetryClient.enqueue({
+        'name': 'item_created',
+        'properties': {
+          'item_id': item.id,
+          'category': item.category.toString(),
+          'expiry_date': item.expiryDate?.toIso8601String(),
+        },
+      });
+    } else {
+      _telemetryClient.enqueue({
+        'name': 'item_updated',
+        'properties': {
+          'item_id': item.id,
+          'category': item.category.toString(),
+          'expiry_date': item.expiryDate?.toIso8601String(),
+        },
+      });
+    }
 
     // Handle notification scheduling
     if (_notificationService != null) {
@@ -111,6 +141,12 @@ class HiveItemRepository implements ItemRepositoryBase {
     }
 
     await _box!.delete(id);
+
+    // Emit telemetry event
+    _telemetryClient.enqueue({
+      'name': 'item_deleted',
+      'properties': {'item_id': id},
+    });
   }
 
   /// Get items by category

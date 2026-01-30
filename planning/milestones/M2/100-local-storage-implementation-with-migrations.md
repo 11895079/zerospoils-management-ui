@@ -13,7 +13,7 @@ Implement local persistence for Items with reliable CRUD operations and migratio
 - [x] Migration mechanism documented + tested
 - [x] Optional encryption-at-rest evaluated and decision recorded
 - [x] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
+- [ ] Telemetry added/updated (event names + key properties)  <!-- NOT YET IMPLEMENTED -->
 - [x] Offline-first behavior verified (where applicable)
 - [ ] Accessibility basics (labels, contrast, tap targets)
 

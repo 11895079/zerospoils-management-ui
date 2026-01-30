@@ -217,7 +217,7 @@ gh api -X PATCH "repos/:owner/:repo/pulls/<NUMBER>" -F title="New title"
 ### DO
 - Consolidate overlapping issues (example: merged 050 wireframes + 055 UX foundations)
 - Add concrete, automatable test plans to every new issue
-- Practice TDD: add or update a failing test before changing production code, then implement until it passes
+- **MANDATORY TDD:** For every new feature, bugfix, or refactor, always write or update a failing test (unit/widget/integration) before implementing code. Verify the test fails, then implement code until it passes. This applies to all future work items.
 - Keep milestone READMEs concise (80-120 words: objective, scope, acceptance, issue reference)
 - Use 10-step numbering for easy reordering of planning issues
 - **When implementing features**: Create code in `app/` folder, link PRs to planning issues
