@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -41,6 +42,12 @@ class NotificationService {
 
   Future<void> initialize() async {
     if (_initialized) return;
+
+    // Skip notification initialization on Windows (not supported yet)
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      _initialized = true;
+      return;
+    }
 
     // Timezone initialization
     tz.initializeTimeZones();
