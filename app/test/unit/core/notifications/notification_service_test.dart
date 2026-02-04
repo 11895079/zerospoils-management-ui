@@ -6,7 +6,6 @@ import 'package:timezone/timezone.dart' as tz show TZDateTime;
 import 'package:zerospoils/core/notifications/notification_service.dart';
 
 /// Mock plugin for testing notification scheduling
-import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 
 class MockFlutterLocalNotificationsPlugin
     implements FlutterLocalNotificationsPlugin {
@@ -16,11 +15,10 @@ class MockFlutterLocalNotificationsPlugin
   bool channelCreated = false;
 
   @override
-  Future<bool?> initialize(
-    InitializationSettings initializationSettings, {
+  Future<bool?> initialize({
+    required InitializationSettings settings,
     DidReceiveNotificationResponseCallback? onDidReceiveNotificationResponse,
-    DidReceiveBackgroundNotificationResponseCallback?
-    onDidReceiveBackgroundNotificationResponse,
+    DidReceiveBackgroundNotificationResponseCallback? onDidReceiveBackgroundNotificationResponse,
   }) async {
     initializeCalled = true;
     return true;
@@ -44,14 +42,12 @@ class MockFlutterLocalNotificationsPlugin
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  Future<void> zonedSchedule(
-    int id,
+  Future<void> zonedSchedule({
+    required int id,
     String? title,
     String? body,
-    tz.TZDateTime scheduledDate,
-    NotificationDetails notificationDetails, {
-    required UILocalNotificationDateInterpretation
-    uiLocalNotificationDateInterpretation,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails notificationDetails,
     AndroidScheduleMode? androidScheduleMode,
     DateTimeComponents? matchDateTimeComponents,
     String? payload,
@@ -68,7 +64,7 @@ class MockFlutterLocalNotificationsPlugin
   }
 
   @override
-  Future<void> cancel(int id, {String? tag}) async {
+  Future<void> cancel({required int id, String? tag}) async {
     cancelledNotifications.add(id);
   }
 }
