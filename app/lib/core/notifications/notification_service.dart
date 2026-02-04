@@ -65,7 +65,7 @@ class NotificationService {
       iOS: iosInit,
     );
 
-    await _plugin.initialize(initSettings);
+    await _plugin.initialize(settings: initSettings);
 
     // Create Android channels (basic default). Refinements later per M2/120.
     const AndroidNotificationChannel defaultChannel =
@@ -112,11 +112,11 @@ class NotificationService {
   }) async {
     final when = computeScheduleTime(expiryDate);
     await _plugin.zonedSchedule(
-      itemId, // use itemId as notificationId
-      title ?? 'Upcoming expiry',
-      body ?? 'An item is nearing expiry',
-      when,
-      const NotificationDetails(
+      id: itemId,
+      title: title ?? 'Upcoming expiry',
+      body: body ?? 'An item is nearing expiry',
+      scheduledDate: when,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'zerospoils_default',
           'ZeroSpoils Notifications',
@@ -127,10 +127,6 @@ class NotificationService {
         iOS: DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      // Omit matchDateTimeComponents to prevent repeating notifications;
-      // rely on explicit rescheduling when expiry date changes.
     );
 
     // Track telemetry
@@ -148,7 +144,7 @@ class NotificationService {
   }) async {
     // Cancel existing notification without emitting telemetry
     // (to avoid double-counting; reschedule is a single operation)
-    await _plugin.cancel(itemId);
+    await _plugin.cancel(id: itemId);
 
     await scheduleForItem(
       itemId: itemId,
@@ -168,7 +164,7 @@ class NotificationService {
     int itemId, {
     String reason = 'item_deleted',
   }) async {
-    await _plugin.cancel(itemId);
+    await _plugin.cancel(id: itemId);
 
     _telemetryCallback?.call('notification_cancelled', {
       'item_id': itemId.toString(),

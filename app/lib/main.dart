@@ -90,9 +90,6 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       title: 'ZeroSpoils',
       theme: AppTheme.lightTheme,
       routerConfig: router,
-      routeInformationProvider: router.routeInformationProvider,
-      routeInformationParser: router.routeInformationParser,
-      routerDelegate: router.routerDelegate,
       debugShowCheckedModeBanner: false,
       // Set initial route based on onboarding completion
       // GoRouter will use initialLocation

@@ -1,0 +1,164 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mockito/mockito.dart';
+import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
+import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart' as sl;
+import 'package:zerospoils/data/repositories/item_repository_base.dart';
+
+class MockTelemetryClient extends Mock implements sl.TelemetryClient {
+  int enqueueCallCount = 0;
+  Map<String, dynamic>? lastEvent;
+  @override
+  void enqueue(Map<String, dynamic> event) {
+    enqueueCallCount++;
+    lastEvent = event;
+  }
+}
+
+class MockItemRepository extends Mock implements ItemRepositoryBase {
+  @override
+  Future<void> init() async {}
+  Item? testItem;
+  @override
+  Future<Item?> getItem(String id) async {
+    return testItem;
+  }
+
+  int saveItemCallCount = 0;
+  Item? lastSavedItem;
+  bool shouldThrow = false;
+  @override
+  Future<void> saveItem(Item item) async {
+    saveItemCallCount++;
+    lastSavedItem = item;
+    if (shouldThrow) throw Exception('fail');
+  }
+
+  // ...existing code...
+}
+
+void main() {
+  group('ItemDetailScreen - Mark as Wasted', () {
+    late MockItemRepository mockRepo;
+    late MockTelemetryClient mockTelemetry;
+    late Item testItem;
+
+    setUp(() {
+      mockRepo = MockItemRepository();
+      mockTelemetry = MockTelemetryClient();
+      testItem = Item(
+        id: 'item-1',
+        name: 'Milk',
+        status: ItemStatus.available,
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        expiryDate: DateTime.now().add(const Duration(days: 2)),
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      );
+    });
+
+    testWidgets('saves item with wasted status and emits telemetry', (
+      tester,
+    ) async {
+      mockRepo.testItem = testItem;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            itemRepositoryProvider.overrideWithValue(mockRepo),
+            sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+          ],
+          child: MaterialApp.router(
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      ItemDetailScreen(itemId: 'item-1'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find and tap any ElevatedButton (the mark as wasted action button)
+      final wastedButton = find.byType(ElevatedButton).at(1); // Second button
+      await tester.ensureVisible(wastedButton);
+      await tester.tap(wastedButton);
+      await tester.pumpAndSettle();
+
+      // Find and interact with waste reason radio button
+      final reasonTile = find.byType(RadioListTile<WasteReason>).first;
+      await tester.tap(reasonTile);
+      await tester.pump();
+
+      // Find and tap the confirm button
+      final confirmBtn = find.byType(TextButton).last;
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Verify actions: saveItem called with wasted status
+      expect(mockRepo.saveItemCallCount, 1);
+      expect(mockRepo.lastSavedItem?.status, ItemStatus.wasted);
+
+      // Verify telemetry event was emitted
+      expect(mockTelemetry.enqueueCallCount, greaterThan(0));
+      expect(mockTelemetry.lastEvent?['name'], 'item_marked_wasted');
+    });
+
+    testWidgets('handles save failure gracefully', (tester) async {
+      mockRepo.testItem = testItem;
+      mockRepo.shouldThrow = true;
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            itemRepositoryProvider.overrideWithValue(mockRepo),
+            sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+          ],
+          child: MaterialApp.router(
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      ItemDetailScreen(itemId: 'item-1'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap mark as wasted button
+      final wastedButton = find.byType(ElevatedButton).at(1);
+      await tester.ensureVisible(wastedButton);
+      await tester.tap(wastedButton);
+      await tester.pumpAndSettle();
+
+      // Select a waste reason
+      final reasonTile = find.byType(RadioListTile<WasteReason>).first;
+      await tester.tap(reasonTile);
+      await tester.pump();
+
+      // Tap confirm
+      final confirmBtn = find.byType(TextButton).last;
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      // Verify: snackbar appears on error
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // Verify: save was attempted even though it failed
+      expect(mockRepo.saveItemCallCount, 1);
+    });
+  });
+}

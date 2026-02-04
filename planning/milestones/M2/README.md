@@ -38,7 +38,7 @@
 | [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | — |
 | [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | — |
-| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ⏳ TODO | — | — |
+| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ✅ DONE | [#PR_TODO] | Jan 29, 2026 |
 
 **Key tasks (issue files in this folder):**
 

@@ -55,13 +55,19 @@ class NotificationPermissionPrompt extends ConsumerWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) Navigator.of(context).pop();
+            });
+          },
           child: const Text('Not now'),
         ),
         ElevatedButton(
           onPressed: () async {
             await _requestPermissions(context);
-            if (context.mounted) Navigator.of(context).pop();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) Navigator.of(context).pop();
+            });
           },
           child: const Text('Enable'),
         ),

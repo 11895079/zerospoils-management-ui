@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/notification_permission_prompt.dart';
 
 /// Simple onboarding screen for ZeroSpoils
@@ -23,7 +24,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() {
       _onboardingComplete = true;
     });
-    Navigator.of(context).pushReplacementNamed('/home');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.go('/');
+      }
+    });
   }
 
   @override
