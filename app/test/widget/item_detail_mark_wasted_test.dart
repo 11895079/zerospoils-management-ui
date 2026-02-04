@@ -20,8 +20,8 @@ class MockTelemetryClient extends Mock implements sl.TelemetryClient {
 }
 
 class MockItemRepository extends Mock implements ItemRepositoryBase {
-    @override
-    Future<void> init() async {}
+  @override
+  Future<void> init() async {}
   Item? testItem;
   @override
   Future<Item?> getItem(String id) async {
@@ -62,7 +62,9 @@ void main() {
       );
     });
 
-    testWidgets('saves item with wasted status and emits telemetry', (tester) async {
+    testWidgets('saves item with wasted status and emits telemetry', (
+      tester,
+    ) async {
       mockRepo.testItem = testItem;
 
       await tester.pumpWidget(
