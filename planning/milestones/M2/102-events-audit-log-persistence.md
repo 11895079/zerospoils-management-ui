@@ -14,11 +14,15 @@ Implement local persistence for Events (audit log) with flexible JSON metadata f
 - [x] Repository layer abstracts storage (HiveEventRepository)
 - [x] CRUD operations implemented (add, query, clear)
 - [x] Query operations (getByItemId, getByType, getByDateRange)
-- [x] Unit tests added or updated (10+ tests)
+- [x] Unit tests added or updated (15+ tests)
 - [x] Offline-first behavior verified
 - [x] Event schema matches planning/docs/data-model.md
 - [x] Data persists across restarts
 - [x] Accessibility basics (N/A for audit log)
+- [x] Widget tests refactored for action-focused assertions (not brittle text matching)
+- [x] Telemetry integration verified (item_marked_wasted event emitted)
+
+**Completed:** PR #66 merged to main on Feb 3, 2026
 
 ## Out of scope
 - Real-time event streaming (M6+)
