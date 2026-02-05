@@ -80,10 +80,14 @@ void main() {
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Test Milk');
 
-    // Quantity field is the second TextFormField (after name)
-    final quantityField = find.byType(TextFormField).at(1);
-    await tester.enterText(quantityField, '2');
+    // Increment quantity using QuantityToggle's add button
+    final addQuantityButton = find.byIcon(Icons.add_circle_outline).first;
+    await tester.tap(addQuantityButton);
+    await tester.pumpAndSettle();
 
+    // Confirm the quantity change using the check icon button
+    final confirmButton = find.byIcon(Icons.check_circle).first;
+    await tester.tap(confirmButton);
     await tester.pumpAndSettle();
 
     // Tap the primary action button (AppButton)
@@ -215,10 +219,7 @@ void main() {
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Price Test');
 
-    final quantityField = find.byType(TextFormField).at(1);
-    await tester.enterText(quantityField, '1');
-
-    final priceField = find.byType(TextFormField).at(2);
+    final priceField = find.byType(TextFormField).at(1);
     await tester.enterText(priceField, '-5');
 
     final addButton = find.byWidgetPredicate(

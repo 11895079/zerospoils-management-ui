@@ -71,12 +71,9 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
     if (hasManual) {
       ref.read(hasManualItemsProvider.notifier).state = true;
     }
-    // final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
-    // No _initialLocation field; just use onboardingComplete to control UI
     setState(() {
       _initialized = true;
     });
-    // Optionally, you can use GoRouter.of(context).go(...) if you want to redirect
   }
 
   @override
@@ -91,8 +88,6 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       theme: AppTheme.lightTheme,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      // Set initial route based on onboarding completion
-      // GoRouter will use initialLocation
     );
   }
 }

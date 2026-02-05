@@ -6,15 +6,20 @@ Provide a Settings toggle that swaps between a demo database and the live databa
 
 ## Expected behavior
 - Settings toggle: Demo Mode on/off
-- When toggled on, app reads/writes to demo DB; when off, to live DB
+- When toggled on, app reads/writes to demo DB (in-memory); when off, to live DB (Hive)
 - Demo DB comes pre-seeded with items spanning expired/today/this-week/later
+- **Demo mode persists across sessions and operations** - adding/editing/deleting items in demo mode does NOT disable demo mode
+- Only the Settings toggle can change demo mode state
 - Telemetry records toggle events (on/off)
 - Offline-first; no cloud dependency
 
 ## Acceptance criteria (DoD)
-- [ ] Separate persisted namespaces for demo and live data (items, settings, telemetry sinks)
-- [ ] Settings toggle instantly swaps active namespace; survives app restarts
-- [ ] Seed demo items cover multiple categories and expiry buckets:
+- [x] Separate persisted namespaces for demo and live data (items, settings, telemetry sinks)
+  - Demo uses `DemoItemRepository` (in-memory with seed data)
+  - Live uses `HiveItemRepository` (persisted local storage)
+- [x] Settings toggle instantly swaps active namespace; survives app restarts
+- [x] Demo mode remains enabled when adding/editing/deleting items - only Settings toggle changes mode
+- [x] Seed demo items cover multiple categories and expiry buckets:
   - **Expired (past expiry):** 3-5 items (milk, lettuce, yogurt) with expiry dates 1-7 days ago
   - **Today:** 2-3 items (chicken, berries) expiring today
   - **This Week (1-7 days):** 5-7 items (bread, eggs, cheese, leftovers) expiring within 7 days

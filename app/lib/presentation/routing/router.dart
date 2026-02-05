@@ -1,9 +1,17 @@
 // GoRouter configuration with deep linking support
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/home_shell.dart';
 import '../screens/item_detail_screen.dart';
 import '../screens/item_form_screen.dart';
 import '../screens/onboarding_screen.dart';
+
+/// Determine initial location based on onboarding completion status
+Future<String> getInitialLocation() async {
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+  return onboardingComplete ? '/' : '/onboarding';
+}
 
 final router = GoRouter(
   routes: <RouteBase>[
@@ -42,4 +50,24 @@ final router = GoRouter(
     ),
   ],
   initialLocation: '/onboarding',
+  redirect: (context, state) async {
+    // Check if onboarding is complete
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+
+    final isOnOnboardingPage = state.matchedLocation == '/onboarding';
+
+    // If onboarding is complete and user is on onboarding page, redirect to home
+    if (onboardingComplete && isOnOnboardingPage) {
+      return '/';
+    }
+
+    // If onboarding is not complete and user is not on onboarding page, redirect to onboarding
+    if (!onboardingComplete && !isOnOnboardingPage) {
+      return '/onboarding';
+    }
+
+    // No redirect needed
+    return null;
+  },
 );

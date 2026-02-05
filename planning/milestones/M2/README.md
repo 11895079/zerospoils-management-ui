@@ -20,7 +20,7 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** In Progress (4/14 completed) — Last Updated: Jan 25, 2026
+**Status:** In Progress (8/15 completed) — Last Updated: Feb 3, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
@@ -33,12 +33,30 @@
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
 | [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen (mark used/wasted) | ✅ DONE | Implemented locally | Jan 24, 2026 |
-| [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ⏳ TODO | — | — |
+| [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ✅ DONE | Implemented locally | Jan 27, 2026 |
 | [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ⚠️ PARTIAL | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 28, 2026 (Permissions flow pending) |
 | [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
-| [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ⏳ TODO | — | — |
+| [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ✅ DONE | [commit 7264c7d](https://github.com/bakintunde/zerospoils/commit/7264c7d) | Feb 3, 2026 |
 | [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ⏳ TODO | — | — |
-| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ✅ DONE | [#PR_TODO] | Jan 29, 2026 |
+| [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ✅ DONE | [#66](https://github.com/11895079/zerospoils/pull/66) | Feb 3, 2026 |
 
-**Key tasks (issue files in this folder):**
+## Next Priorities
+
+**Recommended next issue: M2/101 - Shopping List Repository Persistence**
+- Core MVP feature (parallel path to item inventory)
+- Self-contained like M2/102 (data layer implementation)
+- Enables shopping list screens in later milestones
+- Estimated effort: 4-6 hours
+
+**Secondary: M2/160 - Expiring Soon Screen**
+- Uses M2/110 expiry logic + M2/120 notifications
+- User-facing feature that unlocks MVP value
+- Estimated effort: 3-4 hours
+
+**Backlog (strategic priorities for M2):**
+1. **M2/160** - Expiring Soon screen (uses M2/110 + M2/120)
+2. **M2/165** - Backup/restore feature (builds on M2/100 + M2/102)
+3. **M2/101** - Shopping list repository (parallel feature track)
+4. **M2/142** - Expiry date OCR (optional enhancement)
+5. **M2/030** - Build pipelines (currently in review)
 

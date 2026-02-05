@@ -20,12 +20,6 @@ class SettingsScreen extends ConsumerWidget {
     await prefs.setBool('demo_mode_enabled', enabled);
   }
 
-  Future<void> _clearAllItems(WidgetRef ref) async {
-    final repository = ref.read(itemRepositoryProvider);
-    await repository.init();
-    await repository.clear();
-  }
-
   Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
     try {
       final telemetry = ref.read(telemetryClientProvider);
@@ -188,7 +182,6 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final demoEnabled = ref.watch(demoModeProvider);
-    final hasManualItems = ref.watch(hasManualItemsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -221,9 +214,7 @@ class SettingsScreen extends ConsumerWidget {
                       Text('Demo Mode', style: AppTextStyles.h4),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        hasManualItems
-                            ? 'Demo mode is disabled after manual items are added.'
-                            : 'Preload sample items for quick exploration. Will turn off automatically after you add your first item.',
+                        'Preload sample items for quick exploration. All changes in demo mode are isolated and don\'t affect your real inventory. Toggle off to switch to your personal data.',
                         style: AppTextStyles.body.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -233,34 +224,26 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 Switch(
                   value: demoEnabled,
-                  onChanged: hasManualItems
-                      ? null
-                      : (value) async {
-                          // Update provider and persist
-                          ref.read(demoModeProvider.notifier).state = value;
-                          await _persistDemoMode(value);
+                  onChanged: (value) async {
+                    // Update provider and persist
+                    ref.read(demoModeProvider.notifier).state = value;
+                    await _persistDemoMode(value);
 
-                          // Clear items if turning off demo mode
-                          if (!value) {
-                            await _clearAllItems(ref);
-                          }
+                    // Force refresh of inventory list
+                    // This will switch to the appropriate repository (demo or live)
+                    ref.invalidate(itemsFutureProvider);
 
-                          // Force refresh of inventory list
-                          ref.invalidate(itemsFutureProvider);
-
-                          // Show feedback
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  value
-                                      ? 'Demo mode enabled'
-                                      : 'Demo mode disabled',
-                                ),
-                              ),
-                            );
-                          }
-                        },
+                    // Show feedback
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            value ? 'Demo mode enabled' : 'Demo mode disabled',
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),

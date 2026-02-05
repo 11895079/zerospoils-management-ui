@@ -8,12 +8,14 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
+import 'quantity_toggle.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final ValueChanged<int>? onQuantityChanged;
 
   const ItemCard({
     super.key,
@@ -21,6 +23,7 @@ class ItemCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onQuantityChanged,
   });
 
   @override
@@ -61,9 +64,9 @@ class ItemCard extends StatelessWidget {
           color: isConsumedOrWasted
               ? AppColors.backgroundSecondary
               : isExpired
-              ? const Color(0xFFFCE4EC) // Light pink background
+              ? const Color(0xFFFCE4EC)
               : isUrgent
-              ? const Color(0xFFFFF8E1) // Light yellow background
+              ? const Color(0xFFFFF8E1)
               : Colors.white,
           border: Border.all(
             color: isConsumedOrWasted
@@ -87,6 +90,7 @@ class ItemCard extends StatelessWidget {
         child: Column(
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Icon
                 Container(
@@ -102,24 +106,42 @@ class ItemCard extends StatelessWidget {
                   child: Opacity(
                     opacity: isConsumedOrWasted ? 0.4 : 1.0,
                     child: Text(
-                      _getCategoryEmoji(item.category),
+                      _getItemEmoji(item),
                       style: const TextStyle(fontSize: 28),
                     ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
-
-                // Item info
+                // Main item details (name, unit, etc.)
                 Expanded(
+                  flex: 3,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Expanded(
                             child: Opacity(
                               opacity: isConsumedOrWasted ? 0.5 : 1.0,
-                              child: Text(item.name, style: AppTextStyles.h4),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(item.name, style: AppTextStyles.h4),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        item.unit.displayName,
+                                        style: AppTextStyles.bodySmall.copyWith(
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           if (isConsumedOrWasted)
@@ -186,7 +208,28 @@ class ItemCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
+                // Cost (purchasePrice)
+                if (item.purchasePrice != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      '\$${item.purchasePrice!.toStringAsFixed(2)}',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                // Number toggle for quantity
+                QuantityToggle(
+                  quantity: item.quantity,
+                  isEnabled: !isConsumedOrWasted,
+                  onConfirm: (newQty) {
+                    if (onQuantityChanged != null && newQty != item.quantity) {
+                      onQuantityChanged!(newQty);
+                    }
+                  },
+                ),
                 if (onEdit != null && !isConsumedOrWasted)
                   GestureDetector(
                     onTap: onEdit,
@@ -195,7 +238,6 @@ class ItemCard extends StatelessWidget {
                       child: Text('✏️', style: TextStyle(fontSize: 18)),
                     ),
                   ),
-
                 if (onDelete != null && !isConsumedOrWasted)
                   GestureDetector(
                     onTap: onDelete,
@@ -239,6 +281,56 @@ class ItemCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Returns a specific emoji for common items, else falls back to category emoji
+  String _getItemEmoji(Item item) {
+    final name = item.name.toLowerCase();
+    if (name.contains('milk')) return '🥛';
+    if (name.contains('egg')) return '🥚';
+    if (name.contains('cheese')) return '🧀';
+    if (name.contains('yogurt')) return '🥣';
+    if (name.contains('butter')) return '🧈';
+    if (name.contains('bread')) return '🍞';
+    if (name.contains('apple')) return '🍏';
+    if (name.contains('banana')) return '🍌';
+    if (name.contains('orange')) return '🍊';
+    if (name.contains('carrot')) return '🥕';
+    if (name.contains('potato')) return '🥔';
+    if (name.contains('onion')) return '🧅';
+    if (name.contains('chicken')) return '🍗';
+    if (name.contains('beef')) return '🥩';
+    if (name.contains('fish')) return '🐟';
+    if (name.contains('rice')) return '🍚';
+    if (name.contains('pasta')) return '🍝';
+    if (name.contains('tomato')) return '🍅';
+    if (name.contains('lettuce')) return '🥬';
+    if (name.contains('cucumber')) return '🥒';
+    if (name.contains('grape')) return '🍇';
+    if (name.contains('berry')) return '🫐';
+    if (name.contains('lemon')) return '🍋';
+    if (name.contains('lime')) return '🍈';
+    if (name.contains('corn')) return '🌽';
+    if (name.contains('avocado')) return '🥑';
+    if (name.contains('mushroom')) return '🍄';
+    if (name.contains('pepper')) return '🫑';
+    if (name.contains('garlic')) return '🧄';
+    if (name.contains('sausage')) return '🌭';
+    if (name.contains('bacon')) return '🥓';
+    if (name.contains('shrimp')) return '🦐';
+    if (name.contains('crab')) return '🦀';
+    if (name.contains('lobster')) return '🦞';
+    if (name.contains('ice cream')) return '🍨';
+    if (name.contains('cake')) return '🍰';
+    if (name.contains('cookie')) return '🍪';
+    if (name.contains('chocolate')) return '🍫';
+    if (name.contains('juice')) return '🧃';
+    if (name.contains('water')) return '💧';
+    if (name.contains('soda')) return '🥤';
+    if (name.contains('beer')) return '🍺';
+    if (name.contains('wine')) return '🍷';
+    // fallback to category emoji
+    return _getCategoryEmoji(item.category);
   }
 
   String _getCategoryEmoji(ItemCategory category) {

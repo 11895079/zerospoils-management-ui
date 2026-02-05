@@ -544,6 +544,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 setState(() {});
                               }
                             },
+                            onQuantityChanged: (newQty) async {
+                              final repo = ref.read(itemRepositoryProvider);
+                              await repo.init();
+                              final updated = item.copyWith(quantity: newQty);
+                              await repo.saveItem(updated);
+                              await _refreshItems();
+                              setState(() {});
+                            },
                           );
                         },
                       ),
