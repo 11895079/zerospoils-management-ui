@@ -28,10 +28,6 @@ void main() async {
   // Initialize notifications
   await NotificationService().initialize();
 
-  // Determine initial route based on onboarding completion
-  final initialLocation = await getInitialLocation();
-  router.go(initialLocation);
-
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }
 

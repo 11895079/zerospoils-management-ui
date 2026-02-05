@@ -17,7 +17,7 @@ void main() {
     testWidgets('Emits onboarding_started event on first load', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -31,7 +31,7 @@ void main() {
     testWidgets('Navigates between pages with PageView', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -52,7 +52,7 @@ void main() {
     testWidgets('Shows permission prompts when permission buttons are tapped', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -73,7 +73,7 @@ void main() {
     testWidgets('Skip button dismisses onboarding', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(
@@ -93,7 +93,7 @@ void main() {
     testWidgets('Continue to App button completes onboarding', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       final app = ProviderScope(
         child: MaterialApp(home: Scaffold(body: OnboardingScreen())),
@@ -117,7 +117,7 @@ void main() {
     testWidgets('Bottom navigation shows correct page indicator', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -137,7 +137,7 @@ void main() {
     testWidgets('Deferring camera permission closes dialog', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -165,7 +165,7 @@ void main() {
     testWidgets('Welcome page displays key content elements', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -192,7 +192,7 @@ void main() {
     testWidgets('AppBar includes Skip button on all pages', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
@@ -212,7 +212,7 @@ void main() {
     testWidgets('Permission buttons have correct icons', (
       WidgetTester tester,
     ) async {
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),

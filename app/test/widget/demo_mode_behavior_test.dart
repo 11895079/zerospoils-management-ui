@@ -93,30 +93,6 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('Settings toggle is disabled when manual items exist', (
-    tester,
-  ) async {
-    final repo = InMemoryItemRepository(seed: [_sampleItem()]);
-    final container = ProviderContainer(
-      overrides: [
-        itemRepositoryProvider.overrideWithValue(repo),
-        demoModeProvider.overrideWith((ref) => false),
-        hasManualItemsProvider.overrideWith((ref) => true),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const MaterialApp(home: SettingsScreen()),
-      ),
-    );
-
-    final switchWidget = tester.widget<Switch>(find.byType(Switch));
-    expect(switchWidget.onChanged, isNull);
-  });
-
   testWidgets(
     'Deleting last real item clears manual flag and shows empty state',
     (tester) async {
@@ -153,7 +129,7 @@ void main() {
     },
   );
 
-  testWidgets('Turning demo off clears repo and persists preference', (
+  testWidgets('Toggling demo mode switches databases without clearing', (
     tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -176,11 +152,22 @@ void main() {
       ),
     );
 
+    // Verify demo mode is on and has seed item
+    var items = await repo.getAllItems();
+    expect(items.length, 1);
+    expect(container.read(demoModeProvider), isTrue);
+
+    // Toggle demo mode off
     await tester.tap(find.byType(Switch));
     await tester.pumpAndSettle();
 
-    final items = await repo.getAllItems();
-    expect(items, isEmpty);
+    // Demo data should NOT be cleared - toggling just switches the database
+    items = await repo.getAllItems();
+    expect(
+      items.length,
+      1,
+      reason: 'Demo data should persist when switching databases',
+    );
     expect(container.read(demoModeProvider), isFalse);
 
     final prefs = await SharedPreferences.getInstance();

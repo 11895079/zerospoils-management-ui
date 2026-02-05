@@ -228,7 +228,12 @@ gh api -X PATCH "repos/:owner/:repo/pulls/<NUMBER>" -F title="New title"
 - Create high-fidelity designs in M1 (wireframes only, defer polish to launch milestone)
 - Mix issue planning with actual Flutter code (planning in `planning/`, implementation in `app/`)
 - Commit Flutter app code to `planning/` folder or vice versa
-- Skip running tests before submitting app code PRs
+- **Search for text strings in widget tests** — Tests that rely on finding UI text are brittle and break when copy changes. Instead, verify behavior through:
+  - **Object inspection**: Check state/model changes (`expect(item.quantity, 2)`)
+  - **Widget properties**: Verify widget presence and state (`expect(find.byType(QuantityToggle), findsOneWidget)`)
+  - **Actions**: Tap buttons by icon/type (`find.byIcon(Icons.add_circle_outline)`) and verify resulting state changes
+  - **Accessibility**: Use semantic finds like `find.byType(IconButton)` or `find.byWidgetPredicate()` for widget-based selection
+  - Example: Instead of `find.text('Confirm')`, use `find.byIcon(Icons.check_circle)` and verify the quantity value changed
 
 ## Common AI Agent Workflows
 

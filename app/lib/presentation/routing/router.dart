@@ -49,6 +49,25 @@ final router = GoRouter(
       ],
     ),
   ],
-  initialLocation:
-      '/onboarding', // Default for initialization; updated in main.dart
+  initialLocation: '/onboarding',
+  redirect: (context, state) async {
+    // Check if onboarding is complete
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
+
+    final isOnOnboardingPage = state.matchedLocation == '/onboarding';
+
+    // If onboarding is complete and user is on onboarding page, redirect to home
+    if (onboardingComplete && isOnOnboardingPage) {
+      return '/';
+    }
+
+    // If onboarding is not complete and user is not on onboarding page, redirect to onboarding
+    if (!onboardingComplete && !isOnOnboardingPage) {
+      return '/onboarding';
+    }
+
+    // No redirect needed
+    return null;
+  },
 );

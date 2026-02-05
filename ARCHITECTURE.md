@@ -186,8 +186,15 @@ final item = itemBox.get('item_1');
 
 **In our app:**
 - Initialized in `main.dart` before the app starts
-- Used by repositories to store and fetch data
+- Used by repositories to store and fetch data (via `HiveItemRepository`)
 - Will be used for offline inventory, shopping lists, etc.
+
+**Demo Mode:**
+The app also includes a **demo mode** using `DemoItemRepository` (in-memory) for quick exploration:
+- Demo mode uses a separate in-memory database pre-seeded with sample items
+- All operations in demo mode are isolated from live data
+- Only the Settings toggle switches between demo (`DemoItemRepository`) and live (`HiveItemRepository`)
+- Demo mode persists across sessions - adding/editing items doesn't disable it
 
 ---
 
