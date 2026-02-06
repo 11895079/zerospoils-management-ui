@@ -6,9 +6,13 @@
 - Brand assets pack: icon, screenshots, feature graphic (310)
 - Store listing copy for iOS App Store and Google Play (320)
 - Privacy policy and terms of service (hosted and in-app links) (330)
+- Settings legal links wiring (335)
 - End-to-end release checklist (340)
 - Support workflow: triage labels, ownership (350)
 - In-app FAQ/help center stub (360)
+- Settings help & FAQ entry (365)
+- Rate app entry (375)
+- Settings account entry (345)
 - App store review monitoring and response playbook (370)
 - Performance/scalability/cost baseline (380)
 - Ops observability (crashes, key events, alerts) (390)
@@ -19,6 +23,6 @@
 
 **Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations (deferred to M6/M7).
 
-**Issues:** 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 405
+**Issues:** 310, 320, 330, 335, 340, 345, 350, 360, 365, 370, 375, 380, 390, 400, 405
 
 **Dependencies:** M4 complete (beta testing done, feedback incorporated, crash-free).
