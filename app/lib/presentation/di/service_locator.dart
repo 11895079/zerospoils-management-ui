@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/badge_service.dart';
+import '../../domain/repositories/progress_stats_service.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../core/notifications/notification_service.dart';
 
@@ -32,6 +33,12 @@ final itemRepositoryProvider = Provider((ref) {
 /// Badge service provider
 final badgeServiceProvider = Provider((ref) {
   return BadgeService();
+});
+
+/// Progress stats service provider
+final progressStatsServiceProvider = Provider((ref) {
+  final badgeService = ref.watch(badgeServiceProvider);
+  return ProgressStatsService(badgeService: badgeService);
 });
 
 // Service implementations

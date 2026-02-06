@@ -15,6 +15,7 @@ import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/app_button.dart';
 import '../widgets/item_card.dart';
+import '../widgets/app_drawer.dart';
 import 'package:go_router/go_router.dart';
 
 class ExpiringTodayScreen extends ConsumerStatefulWidget {
@@ -92,6 +93,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,

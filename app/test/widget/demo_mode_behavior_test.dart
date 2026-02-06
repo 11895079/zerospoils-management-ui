@@ -122,7 +122,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Inventory should show empty state
-      expect(find.text('No items yet'), findsOneWidget);
+      expect(find.textContaining('Your inventory is empty'), findsOneWidget);
 
       // Manual items flag should be reset
       expect(container.read(hasManualItemsProvider), isFalse);
@@ -158,7 +158,15 @@ void main() {
     expect(container.read(demoModeProvider), isTrue);
 
     // Toggle demo mode off
-    await tester.tap(find.byType(Switch));
+    final demoTile = find.ancestor(
+      of: find.byIcon(Icons.bug_report),
+      matching: find.byType(ListTile),
+    );
+    final demoSwitch = find.descendant(
+      of: demoTile,
+      matching: find.byType(Switch),
+    );
+    await tester.tap(demoSwitch);
     await tester.pumpAndSettle();
 
     // Demo data should NOT be cleared - toggling just switches the database

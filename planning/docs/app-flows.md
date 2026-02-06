@@ -12,7 +12,8 @@ Visualize end-to-end user journeys through the app with happy paths, edge cases,
    - **Shopping List Workflow:** Create list → Add items → Mark purchased → Convert to inventory → Update expiry dates
 
 2. **Screen Transitions:** Document navigation patterns
-   - Tab bar navigation (Inventory, Expiring, Shopping, Settings)
+   - Tab bar navigation (Inventory, Expiring, Shopping, Progress)
+   - Left drawer navigation (Onboarding, Inventory, Expiring Soon, Shopping List, Progress, Settings)
    - Modal sheets for Add Item, Edit Item
    - Deep links from notifications to Expiring Soon screen
 

@@ -23,7 +23,7 @@
 ┌─────────────────────────────────────────────────────────────┐
 │                    Bottom Tab Navigation                     │
 │   ┌──────────┬──────────┬──────────┬──────────┐            │
-│   │ Inventory│ Expiring │ Shopping │ Settings │            │
+│   │ Inventory│ Expiring │ Shopping │ Progress │            │
 │   │   (Home) │   Soon   │   List   │          │            │
 │   └────┬─────┴─────┬────┴─────┬────┴─────┬────┘            │
 └────────┼───────────┼──────────┼──────────┼─────────────────┘
@@ -34,7 +34,7 @@
 
 ## Tab Structure (Bottom Navigation)
 
-The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own navigation stack (state preserved when switching tabs).
+The app uses a bottom tab bar with 4 primary screens (Inventory, Expiring, Shopping, Progress). Each tab maintains its own navigation stack (state preserved when switching tabs). Settings is accessed via the left drawer.
 
 ```
 ┌──────────────────────────────────────────────────────┐
@@ -44,8 +44,8 @@ The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own
 │                                          ⊕ (FAB)     │  ← FAB on Inventory & Expiring
 │                                                       │
 ├──────────────────────────────────────────────────────┤
-│  🏠          ⏰          🛒           ⚙️              │
-│ Inventory  Expiring   Shopping    Settings           │
+│  🏠          ⏰          🛒           📈              │
+│ Inventory  Expiring   Shopping    Progress           │
 │  (Tab 1)    Soon       List        (Tab 4)           │
 │            (Tab 2)    (Tab 3)                        │
 └──────────────────────────────────────────────────────┘
@@ -58,6 +58,11 @@ The app uses a bottom tab bar with 4 primary screens. Each tab maintains its own
 - **FAB:** Visible on Tab 1 (Inventory) and Tab 2 (Expiring Soon) for adding items
 - **Back button on root tab:** Exit app (entire tab stack pops)
 - **Tab switching preserves scroll position:** Users can pause work and return to same position
+
+### Drawer Navigation (All Tabs)
+- **Open drawer:** Hamburger icon on AppBar or edge swipe
+- **Menu items:** Onboarding, Inventory, Expiring Soon, Shopping List, Progress, Settings
+- **Settings:** Accessible only via drawer (not a bottom tab)
 
 ## Onboarding Flow (First-Time Users Only)
 

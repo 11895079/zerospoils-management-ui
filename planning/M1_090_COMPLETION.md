@@ -197,7 +197,8 @@ app/lib/
 - [x] Hive, Riverpod, Go Router dependencies configured
 
 ### Navigation ✅
-- [x] Tab-based shell with 4 tabs (Inventory, Expiring, Shopping, Settings)
+- [x] Tab-based shell with 4 tabs (Inventory, Expiring, Shopping, Progress)
+- [x] Drawer navigation on all tabs (Settings via drawer only)
 - [x] Bottom navigation bar switches screens
 - [x] Placeholder screens for each tab with AppBar
 - [x] FAB on Inventory tab only

@@ -43,7 +43,8 @@ This session completed three major milestones:
 
 **Key Features Implemented:**
 - ✅ Clean architecture (domain/data/presentation)
-- ✅ 4-tab bottom navigation (Inventory, Expiring, Shopping, Settings)
+- ✅ 4-tab bottom navigation (Inventory, Expiring, Shopping, Progress)
+- ✅ Drawer navigation on all tabs (Settings via drawer only)
 - ✅ FloatingActionButton on Inventory tab
 - ✅ Add Item modal (bottom sheet)
 - ✅ Deep linking with Go Router (`zerospoils://` scheme)

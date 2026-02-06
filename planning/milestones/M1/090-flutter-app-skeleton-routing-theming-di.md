@@ -3,17 +3,17 @@ Establish a maintainable architecture for rapid iteration. Foundation for all su
 
 ## Goal
 Create a Flutter app skeleton with:
-- **Navigation:** Tab-based shell (Inventory, Expiring, Shopping, Settings) + modals for Add/Edit
+- **Navigation:** Tab-based shell (Inventory, Expiring, Shopping, Progress) + drawer (Onboarding, Inventory, Expiring Soon, Shopping List, Progress, Settings) + modals for Add/Edit
 - **Theming:** Design tokens from `docs/design-tokens.md` as Flutter ThemeData
 - **DI:** Service layer with repository pattern (local DB access, telemetry client, connectivity monitor)
 - **Testing:** Widget tests for navigation, unit tests for DI resolution
 - **Accessibility:** WCAG 2.1 AA baseline (44pt touch targets, 4.5:1 contrast, semantic labels)
 
 ## Expected behavior
-- App launches to home shell with 4 tabs visible
+- App launches to home shell with 4 tabs visible (Inventory, Expiring, Shopping, Progress)
 - Tab navigation switches between screens (no data loss on tab switch)
 - Theme tokens (spacing, colors, typography) applied consistently
-- Placeholder screens render correctly (Inventory, Expiring, Shopping, Settings)
+- Placeholder screens render correctly (Inventory, Expiring, Shopping, Progress)
 - DI container resolves services (TelemetryClient, Repository, ConnectivityService)
 - Deep links work (e.g., `zerospoils://item/{itemId}` opens Item Detail)
 - Telemetry events logged on key actions (app_installed, tab_switched, item_add_initiated)
@@ -22,7 +22,8 @@ Create a Flutter app skeleton with:
 - [x] Project structure: domain/data/presentation layers
 - [x] Project compiles for iOS and Android without warnings
 - [x] Theme applied from `docs/design-tokens.md` (colors, spacing, typography)
-- [x] Tab-based navigation with 4 tabs (Inventory, Expiring, Shopping, Settings)
+- [x] Tab-based navigation with 4 tabs (Inventory, Expiring, Shopping, Progress)
+- [x] Drawer navigation on all tabs (Settings available via drawer only)
 - [x] Placeholder screens for each tab (AppBar + empty state)
 - [x] Modal for Add Item (bottom sheet, dismissible)
 - [x] Deep link routing configured (`zerospoils://` scheme)
@@ -104,7 +105,7 @@ Create a Flutter app skeleton with:
   
 - **Widget (test/presentation/):**
   - App launches and renders home shell (4 tabs visible)
-  - Tab bar switches between Inventory, Expiring, Shopping, Settings screens
+- Tab bar switches between Inventory, Expiring, Shopping, Progress screens
   - Each tab renders AppBar with title and placeholder empty state
   - Add Item modal opens on FAB tap (bottom sheet appears)
   - Modal dismisses on back/scrim tap

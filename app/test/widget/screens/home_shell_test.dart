@@ -83,12 +83,12 @@ void main() {
     expect(find.text('Shopping List'), findsWidgets);
     expect(find.byType(FloatingActionButton), findsNothing);
 
-    // Tap on Settings tab
-    await tester.tap(find.text('Settings'));
+    // Tap on Progress tab
+    await tester.tap(find.text('Progress'));
     await tester.pumpAndSettle();
 
-    // Verify Settings screen is shown
-    expect(find.text('Settings'), findsWidgets);
+    // Verify Progress screen is shown
+    expect(find.text('Progress'), findsWidgets);
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
@@ -110,15 +110,27 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
     expect(find.text('+'), findsOneWidget);
 
-    // Switch to Settings tab (tab 3)
+    // Switch to Progress tab (tab 3)
+    await tester.tap(find.text('Progress'));
+    await tester.pumpAndSettle();
+
+    // Verify Progress screen is shown without FAB
+    expect(find.text('Progress'), findsWidgets);
+    expect(find.byType(FloatingActionButton), findsNothing);
+
+    // Open drawer and navigate to Settings
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
-    // Verify Settings screen is shown without FAB
+    // Verify Settings screen is shown
     expect(find.text('Settings'), findsWidgets);
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Switch back to Inventory tab (tab 0)
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Inventory'));
     await tester.pumpAndSettle();
 
