@@ -1,6 +1,7 @@
 // Base UI components used across the app
 import 'package:flutter/material.dart';
 import '../../core/constants/design_tokens.dart';
+import '../widgets/app_drawer.dart';
 
 /// Empty state widget for empty lists/screens
 class EmptyStateWidget extends StatelessWidget {
@@ -62,6 +63,7 @@ class PlaceholderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(title: Text(title), elevation: 0),
       body: Center(
         child: Column(

@@ -1,60 +1,57 @@
-// Home shell with 4-tab navigation using emoji icons
+// Home shell with 4-tab navigation
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/base_components.dart';
+import '../di/repository_providers.dart';
 import 'inventory_screen.dart';
 import 'expiring_today_screen.dart';
-import 'settings_screen.dart';
+import 'progress_screen.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends ConsumerWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIndex = ref.watch(homeTabIndexProvider);
+    final screens = [
+      const InventoryScreen(),
+      const ExpiringTodayScreen(),
+      const PlaceholderScreen(
+        title: 'Shopping List',
+        icon: Icons.shopping_cart,
+      ),
+      const ProgressScreen(),
+    ];
 
-class _HomeShellState extends State<HomeShell> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    const InventoryScreen(),
-    const ExpiringTodayScreen(),
-    const PlaceholderScreen(title: 'Shopping List', icon: Icons.shopping_cart),
-    const SettingsScreen(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
+      body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+        currentIndex: selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          ref.read(homeTabIndexProvider.notifier).state = index;
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
-        selectedItemColor: AppColors.primary,
+        selectedItemColor: AppColors.textSecondary,
         unselectedItemColor: AppColors.textSecondary,
         items: const [
           BottomNavigationBarItem(
-            icon: Text('📦', style: TextStyle(fontSize: 20)),
+            icon: Icon(Icons.inventory_2, color: Color(0xFF2E7D32)),
             label: 'Inventory',
           ),
           BottomNavigationBarItem(
-            icon: Text('⏰', style: TextStyle(fontSize: 20)),
+            icon: Icon(Icons.schedule, color: Color(0xFFEF6C00)),
             label: 'Expiring',
           ),
           BottomNavigationBarItem(
-            icon: Text('🛒', style: TextStyle(fontSize: 20)),
+            icon: Icon(Icons.shopping_cart, color: Color(0xFF1565C0)),
             label: 'Shopping',
           ),
           BottomNavigationBarItem(
-            icon: Text('⚙️', style: TextStyle(fontSize: 20)),
-            label: 'Settings',
+            icon: Icon(Icons.insights, color: Color(0xFF6A1B9A)),
+            label: 'Progress',
           ),
         ],
       ),

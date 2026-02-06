@@ -71,7 +71,8 @@
 - [x] Project structure: domain/data/presentation layers
 - [x] Project compiles for iOS and Android without warnings
 - [x] Theme applied from design tokens (colors, spacing, typography)
-- [x] Tab-based navigation with 4 tabs (Inventory, Expiring, Shopping, Settings)
+- [x] Tab-based navigation with 4 tabs (Inventory, Expiring, Shopping, Progress)
+- [x] Drawer navigation on all tabs (Onboarding, Inventory, Expiring Soon, Shopping List, Progress, Settings)
 - [x] Placeholder screens for each tab (AppBar + empty state)
 - [x] Modal for Add Item (bottom sheet, dismissible)
 - [x] Deep link routing configured (zerospoils:// scheme)

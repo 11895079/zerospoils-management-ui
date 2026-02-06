@@ -8,9 +8,11 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
+import '../widgets/app_drawer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -377,24 +379,23 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget build(BuildContext context) {
     final itemsAsync = ref.watch(itemsFutureProvider);
     final filterState = ref.watch(inventoryFilterProvider);
+    final progressStatsAsync = ref.watch(progressStatsProvider);
 
     return Scaffold(
+      drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimary,
         title: const Text('Inventory', style: AppTextStyles.h3),
-        elevation: 0,
+        elevation: 1,
         actions: [
           Stack(
             alignment: Alignment.center,
             children: [
-              TextButton(
+              IconButton(
                 onPressed: _showFilterOptions,
-                child: const Text(
-                  'Filter',
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
+                icon: const Icon(Icons.tune, color: AppColors.textPrimary),
               ),
               if (filterState.activeFilterCount > 0)
                 Positioned(
@@ -434,6 +435,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           return Column(
             children: [
               if (demoEnabled) _buildDemoModeWarning(),
+              progressStatsAsync.when(
+                data: _buildStreakBadge,
+                loading: () => const SizedBox.shrink(),
+                error: (error, stackTrace) => const SizedBox.shrink(),
+              ),
               _buildSearchBar(),
               if (filterState.hasActiveFilters)
                 _buildActiveFilters(filterState),
@@ -650,6 +656,102 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
+  Widget _buildStreakBadge(ProgressStats stats) {
+    final streak = stats.noWasteStreak;
+    final daysRemaining = streak.daysRemaining;
+    final progress = streak.streakDays / 7;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF9BD47F), Color(0xFF5E8F3E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                ),
+                child: Text(
+                  '🔥 ${streak.streakDays}-day streak',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              const Spacer(),
+              TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.auto_awesome, size: 16),
+                label: const Text('Level up'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  backgroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Text(
+            'No Waste Week',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            daysRemaining == 0
+                ? 'You made it! Keep the streak alive.'
+                : 'Log $daysRemaining more saves to level up',
+            style: AppTextStyles.body.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            child: LinearProgressIndicator(
+              value: progress.clamp(0, 1),
+              minHeight: 10,
+              backgroundColor: Colors.white.withValues(alpha: 0.35),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFFE3F2A8)),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Judgement-free: compare with friends only when you opt in.',
+            style: AppTextStyles.body.copyWith(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActiveFilters(InventoryFilterState filterState) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -762,9 +864,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: TextField(
         controller: _searchController,
@@ -775,42 +881,63 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           setState(() {});
         },
         decoration: InputDecoration(
-          hintText: '🔍 Search items...',
+          hintText: 'Search items...',
           hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderSide: const BorderSide(color: AppColors.border, width: 0.5),
           ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
+          isDense: true,
         ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxxl),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.xxxl),
+      child: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('📦', style: TextStyle(fontSize: 64)),
+            const Text('🛒', style: TextStyle(fontSize: 64)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'No items yet',
+              'Your inventory is empty',
               style: AppTextStyles.h2,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.md),
             Text(
-              'Tap the + button below to add your first item and start tracking your food inventory.',
+              'Start tracking your food to reduce waste and save money',
               style: AppTextStyles.body.copyWith(
                 color: AppColors.textSecondary,
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xxl),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.md,
+                ),
+              ),
+              onPressed: () {
+                ref.read(telemetryClientProvider).enqueue({
+                  'name': 'add_item_from_empty_state',
+                  'properties': {},
+                });
+                context.pushNamed('add-item');
+              },
+              child: const Text('Add your first item'),
             ),
           ],
         ),

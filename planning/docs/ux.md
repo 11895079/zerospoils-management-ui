@@ -21,7 +21,8 @@ Document core UX principles, interaction patterns, component guidelines, and nav
    - **Quick add:** Floating action button (FAB) on Inventory screen
    - **Swipe actions:** Left swipe = Delete, Right swipe = Mark consumed
    - **Pull to refresh:** Update expiry bucketing (even in offline mode)
-   - **Tab bar navigation:** 4 tabs (Inventory, Expiring, Shopping, Settings)
+   - **Tab bar navigation:** 4 tabs (Inventory, Expiring, Shopping, Progress)
+   - **Left drawer navigation:** Onboarding, Inventory, Expiring Soon, Shopping List, Progress, Settings
    - **OCR capture:** Camera button (📷) in expiry date field; tap → camera overlay with focus area → capture → extract → pre-fill
 
 4. **Wireframes:** Link to screen mockups

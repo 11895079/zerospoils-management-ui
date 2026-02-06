@@ -239,7 +239,7 @@ git commit -m "feat(app): scaffold Flutter app skeleton with routing, theming, D
 
 - Setup Riverpod for state management and DI
 - Configure GoRouter for deep linking (zerospoils://)
-- Implement 4-tab navigation (Inventory, Expiring, Shopping, Settings)
+- Implement 4-tab navigation (Inventory, Expiring, Shopping, Progress) with Settings in drawer
 - Apply theme from design tokens (colors, spacing, typography)
 - Setup Hive for local storage (Item, ShoppingListItem, Event models)
 - Integrate connectivity monitoring
@@ -283,7 +283,8 @@ After M1/090 is merged, implement M1/020:
 - [ ] Project structure matches spec (domain/data/presentation/core/telemetry)
 - [ ] Compiles for iOS and Android without warnings
 - [ ] Theme applied from design-tokens.md (colors, spacing, typography)
-- [ ] 4 tabs visible and functional (Inventory, Expiring, Shopping, Settings)
+- [ ] 4 tabs visible and functional (Inventory, Expiring, Shopping, Progress)
+- [ ] Drawer navigation available on all tabs (Settings via drawer only)
 - [ ] Add Item modal opens and dismisses
 - [ ] Deep linking works (`zerospoils://item/123`)
 - [ ] DI container resolves all services

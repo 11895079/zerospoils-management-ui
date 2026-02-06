@@ -68,7 +68,7 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    expect(find.textContaining('No items yet'), findsOneWidget);
+    expect(find.textContaining('Your inventory is empty'), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
@@ -191,7 +191,7 @@ void main() {
     expect(find.text('Chicken'), findsOneWidget);
 
     // Open filter dialog
-    await tester.tap(find.text('Filter'));
+    await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
 
     // Select Dairy category and apply
@@ -231,7 +231,7 @@ void main() {
     await pumpInventoryScreen(tester);
 
     // Open filter dialog
-    await tester.tap(find.text('Filter'));
+    await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
 
     expect(find.text('Filters'), findsOneWidget);
@@ -282,7 +282,7 @@ void main() {
     expect(find.text('Cheese'), findsOneWidget);
 
     // Open filter dialog
-    await tester.tap(find.text('Filter'));
+    await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
 
     // Enable expiring soon filter (first switch is "Expiring soon only", second is "Hide consumed")

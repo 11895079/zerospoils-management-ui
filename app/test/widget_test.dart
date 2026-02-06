@@ -69,7 +69,7 @@ void main() {
     expect(find.text('Inventory'), findsWidgets);
     expect(find.text('Expiring'), findsWidgets);
     expect(find.text('Shopping'), findsWidgets);
-    expect(find.text('Settings'), findsWidgets);
+    expect(find.text('Progress'), findsWidgets);
 
     // Verify floating action button is present on inventory tab
     expect(find.byType(FloatingActionButton), findsOneWidget);

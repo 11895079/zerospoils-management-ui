@@ -38,6 +38,11 @@ graph TD
 ┌─────────────────────────────────┐
 │  Inventory            [Filter]  │ ← Header
 ├─────────────────────────────────┤
+│  🔥 5-day streak    [Level up]  │ ← Streak badge card
+│  No Waste Week                   │
+│  Log 2 more saves to level up    │
+│  [progress bar]                  │
+├─────────────────────────────────┤
 │  🔍 Search items...             │ ← Search bar
 ├─────────────────────────────────┤
 │ [All] [Dairy] [Fruit] [Veg] →  │ ← Category chips (horizontal scroll)

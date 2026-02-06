@@ -8,9 +8,15 @@ import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/demo_item_repository.dart';
 import '../../data/repositories/item_repository_base.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/repositories/progress_stats_service.dart';
+import 'service_locator.dart'
+    show telemetryClientProvider, progressStatsServiceProvider;
 
 /// Demo mode flag (enabled by default for prototyping)
 final demoModeProvider = StateProvider<bool>((ref) => true);
+
+/// Home tab index for bottom navigation (Inventory, Expiring, Shopping, Progress)
+final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 
 /// Track if user has manually entered items (disables demo toggle)
 final hasManualItemsProvider = StateProvider<bool>((ref) => false);
@@ -27,4 +33,16 @@ final itemsFutureProvider = FutureProvider<List<Item>>((ref) async {
   final repository = ref.watch(itemRepositoryProvider);
   await repository.init();
   return repository.getAllItems();
+});
+
+/// Progress stats provider (aggregates items + telemetry locally)
+final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {
+  final repository = ref.watch(itemRepositoryProvider);
+  final statsService = ref.watch(progressStatsServiceProvider);
+  final telemetry = ref.watch(telemetryClientProvider);
+
+  await repository.init();
+  final items = await repository.getAllItems();
+
+  return statsService.build(items: items, telemetryEvents: telemetry.events);
 });
