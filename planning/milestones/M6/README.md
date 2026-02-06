@@ -10,8 +10,10 @@
 - Receipt parsing with normalized line items and confidence scoring (450)
 - Receipt review UI: add to inventory with mapping rules (460)
 - Household accounts: auth + shared household model (470)
+- Data sync settings toggle + status (475)
 - Sync rules and conflict resolution (inventory + shopping list) (480)
 - Advanced insights dashboard (money saved, items saved, trends) (490)
+- Meal planning toggle in Settings (495)
 - Consent model for aggregated analytics export (500)
 - Full recipe suggestions feature (prioritize expiring items) (185)
 
@@ -19,6 +21,6 @@
 
 **Out of Scope:** IoT integrations (deferred to M7).
 
-**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 480, 490, 500
+**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500
 
 **Dependencies:** M5 complete (public launch successful, user base established).
