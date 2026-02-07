@@ -413,7 +413,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             ),
                             const Divider(height: 1),
                             _buildInfoRow(
-                              'Purchase Date',
+                              'Added',
                               DateFormat.yMMMd().format(_item!.createdAt),
                             ),
                             const Divider(height: 1),
@@ -460,18 +460,6 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     ),
                     const SizedBox(height: AppSpacing.lg),
                   ],
-
-                  // Metadata
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text(
-                      'Added on ${DateFormat('MMM d, yyyy \'at\' h:mm a').format(_item!.createdAt)}',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
                 ],
               ),
             ),

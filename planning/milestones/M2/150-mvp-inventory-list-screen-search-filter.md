@@ -8,12 +8,16 @@ Deliver Inventory list screen (search/filter) with tests and telemetry.
 - Behavior matches wireframes and MVP spec
 - Works offline without requiring login
 - Error and empty states handled
+- Inventory list surfaces prepared items distinctly (prepared label/badge + prepared date)
+- Category chips include a Prepared filter
 
 ## Acceptance criteria (Definition of Done)
 - [ ] UI implemented and integrated into navigation
 - [ ] State management implemented with repository layer
 - [ ] CRUD persists to local storage (where applicable)
 - [ ] Search bar with clear button (X icon) that resets filter when tapped
+- [ ] Prepared items render a Prepared label/badge and show prepared date (e.g., “Prepared Jan 10”)
+- [ ] Category chips include Prepared and filter prepared items correctly
 - [ ] Telemetry events emitted for key actions (as applicable)
 - [ ] Unit/widget/integration tests added or updated
 - [ ] Telemetry added/updated (event names + key properties)
@@ -31,14 +35,16 @@ Deliver Inventory list screen (search/filter) with tests and telemetry.
 - Add widget tests where feasible.
 
 ## Test plan
-- Steps:
-  1. Fresh install.
-  2. Use the feature.
-  3. Restart app; confirm persistence.
-- Scenarios:
-  - Airplane mode.
-  - Invalid inputs.
-  - Date edge cases.
+**Automated:**
+- Widget test: prepared item shows Prepared label and prepared date text
+- Widget test: Prepared filter chip shows only prepared items
+- Widget test: search clear button resets filter
+
+**Manual:**
+1. Add prepared item with prepared date
+2. Verify list shows Prepared badge + date
+3. Tap Prepared chip → only prepared items shown
+4. Restart app; prepared item still displays correctly
 
 ## Dependencies
 - None

@@ -110,6 +110,7 @@ void main() {
       expect(find.textContaining('Produce'), findsOneWidget);
       expect(find.textContaining('Fridge'), findsOneWidget);
       expect(find.text('5 Count'), findsOneWidget);
+      expect(find.text('Added'), findsOneWidget);
     });
 
     testWidgets('shows "Item not found" when item does not exist', (

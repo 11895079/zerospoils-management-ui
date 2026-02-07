@@ -50,6 +50,19 @@ void main() {
       expect(all, containsAll(items));
     });
 
+    test('getItem returns item by id', () async {
+      final now = DateTime.now();
+      final item = ShoppingListItem(
+        id: '1',
+        name: 'Milk',
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repository.saveShoppingListItem(item);
+      final result = await repository.getItem('1');
+      expect(result, item);
+    });
+
     test('getPurchased filters correctly', () async {
       final now = DateTime.now();
       final purchased = ShoppingListItem(
