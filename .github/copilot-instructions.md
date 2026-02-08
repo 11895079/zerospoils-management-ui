@@ -64,6 +64,11 @@ See milestone M1 issue 090 (`planning/milestones/M1/090-flutter-app-skeleton-rou
 ### Development Workflow (Planning → Implementation)
 This monorepo supports a workflow where planning drives implementation:
 
+0. **Create Todo Tasks for the Work Item**
+  - Immediately break the selected work item into concrete todo tasks using the work item details.
+  - Track progress by updating task status as work proceeds.
+  - Do not start implementation until the todo list is created.
+
 1. **Select Issue** from `planning/milestones/MX/` (start with M1)
 2. **Groom Issue** ⚠️ **REQUIRED BEFORE IMPLEMENTATION**
    - Check for empty test plans, generic DoD items, missing implementation notes

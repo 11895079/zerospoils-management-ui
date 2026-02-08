@@ -41,13 +41,16 @@ class HiveShoppingListRepository {
           'category': item.category,
           'quantity': item.quantity,
           'unit': item.unit,
+          'source': 'manual',
         },
       });
     }
   }
 
   Future<List<ShoppingListItem>> getAllItems() async {
-    return _box?.values.toList() ?? [];
+    final items = _box?.values.toList() ?? [];
+    items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return items;
   }
 
   Future<ShoppingListItem?> getItem(String id) async {

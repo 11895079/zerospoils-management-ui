@@ -10,12 +10,12 @@ Deliver Expiring Soon screen (bucketed view) with tests and telemetry.
 - Error and empty states handled
 
 ## Acceptance criteria (Definition of Done)
-- [ ] UI implemented and integrated into navigation
-- [ ] State management implemented with repository layer
-- [ ] CRUD persists to local storage (where applicable)
-- [ ] Telemetry events emitted for key actions (as applicable)
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event names + key properties)
+- [x] UI implemented and integrated into navigation
+- [x] State management implemented with repository layer
+- [x] CRUD persists to local storage (where applicable)
+- [x] Telemetry events emitted for key actions (as applicable)
+- [x] Unit/widget/integration tests added or updated
+- [x] Telemetry added/updated (event names + key properties)
 - [ ] Offline-first behavior verified (where applicable)
 - [ ] Accessibility basics (labels, contrast, tap targets)
 

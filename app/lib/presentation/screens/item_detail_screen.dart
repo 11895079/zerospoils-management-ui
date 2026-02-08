@@ -136,107 +136,176 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     final notesController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Mark as Wasted'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Why was "${_item!.name}" wasted?'),
-                const SizedBox(height: AppSpacing.md),
-                ...WasteReason.values.map(
-                  (reason) => RadioListTile<WasteReason>(
-                    title: Text(reason.displayName),
-                    value: reason,
-                    groupValue: selectedReason,
-                    onChanged: (value) {
-                      setDialogState(() => selectedReason = value);
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Percentage wasted',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
+      builder: (context) {
+        final dialogWidth = MediaQuery.of(context).size.width * 0.9;
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.lg,
+            ),
+            titlePadding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            contentPadding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            actionsPadding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.lg,
+            ),
+            title: Text('Mark as Wasted', style: AppTextStyles.h3),
+            content: SizedBox(
+              width: dialogWidth,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Slider(
-                        value: wastePercentage,
-                        min: 0,
-                        max: 100,
-                        divisions: 20,
-                        label: '${wastePercentage.toInt()}%',
+                    Text(
+                      'Why was "${_item!.name}" wasted?',
+                      style: AppTextStyles.body,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      'Reason',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    ...WasteReason.values.map(
+                      (reason) => RadioListTile<WasteReason>(
+                        title: Text(reason.displayName),
+                        value: reason,
+                        groupValue: selectedReason,
+                        dense: false,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 0,
+                          vertical: AppSpacing.xs,
+                        ),
                         onChanged: (value) {
-                          setDialogState(() => wastePercentage = value);
+                          setDialogState(() => selectedReason = value);
                         },
                       ),
                     ),
-                    SizedBox(
-                      width: 48,
-                      child: Text(
-                        '${wastePercentage.toInt()}%',
-                        style: AppTextStyles.body.copyWith(
-                          fontWeight: FontWeight.w600,
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Percentage wasted',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Slider(
+                            value: wastePercentage,
+                            min: 0,
+                            max: 100,
+                            divisions: 20,
+                            label: '${wastePercentage.toInt()}%',
+                            onChanged: (value) {
+                              setDialogState(() => wastePercentage = value);
+                            },
+                          ),
                         ),
+                        SizedBox(
+                          width: 56,
+                          child: Text(
+                            '${wastePercentage.toInt()}%',
+                            style: AppTextStyles.body.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      'Use your best estimate',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Notes (optional)',
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextField(
+                      controller: notesController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'e.g., half the pot burned',
+                        hintStyle: TextStyle(color: AppColors.textSecondary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.primary),
+                        ),
+                        contentPadding: const EdgeInsets.all(AppSpacing.md),
                       ),
                     ),
                   ],
                 ),
-                Text(
-                  'Use your best estimate',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  'Notes (optional)',
-                  style: AppTextStyles.body.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                TextField(
-                  controller: notesController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'e.g., half the pot burned',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.border),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.primary),
-                    ),
-                    contentPadding: const EdgeInsets.all(AppSpacing.md),
-                  ),
-                ),
-              ],
+              ),
             ),
+            actions: [
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: 48,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                          side: const BorderSide(
+                            color: AppColors.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      height: 48,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: selectedReason == null
+                            ? null
+                            : () => Navigator.pop(context, true),
+                        child: const Text('Confirm'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: selectedReason == null
-                  ? null
-                  : () => Navigator.pop(context, true),
-              child: const Text('Confirm'),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
 
     if (confirmed != true || selectedReason == null || !mounted) return;
@@ -444,6 +513,27 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          SizedBox(
+                            height: 48,
+                            child: TextButton(
+                              onPressed: () async {
+                                await context.pushNamed(
+                                  'edit-item',
+                                  pathParameters: {'id': widget.itemId},
+                                );
+                                _loadItem();
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                side: const BorderSide(
+                                  color: AppColors.primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: const Text('Edit Item'),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
                           AppButton(
                             text: '✓ Mark as Consumed',
                             onPressed: _markItemUsed,

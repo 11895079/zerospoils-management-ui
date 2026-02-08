@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/data/services/backup_restore_service.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/data/adapters/item_adapter.dart';
@@ -19,6 +20,8 @@ void main() {
     tempDir = await Directory.systemTemp.createTemp('zerospoils_test_');
     hive = Hive;
     Hive.init(tempDir.path);
+
+    SharedPreferences.setMockInitialValues({});
 
     // Register Hive adapters
     if (!Hive.isAdapterRegistered(0)) {
@@ -53,6 +56,11 @@ void main() {
 
   group('BackupRestoreService - Export', () {
     test('export produces valid JSON with metadata header', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notifications_enabled', false);
+      await prefs.setInt('expiry_lead_time_days', 7);
+      await prefs.setString('date_format', 'YYYY-MM-DD');
+
       final itemsBox = await hive.openBox<Item>('items');
 
       // Add test items
@@ -97,6 +105,10 @@ void main() {
       expect(items[0]['id'], 'item-1');
       expect(items[0]['name'], 'Milk');
       expect(data['categories'], isA<List>());
+      expect(data['settings'], isA<Map<String, dynamic>>());
+      expect(data['settings']['notifications_enabled'], false);
+      expect(data['settings']['expiry_lead_time_days'], 7);
+      expect(data['settings']['date_format'], 'YYYY-MM-DD');
     });
 
     test('export handles empty database', () async {
@@ -210,6 +222,9 @@ void main() {
 
   group('BackupRestoreService - Import', () {
     test('import restores data correctly', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notifications_enabled', true);
+
       final itemsBox = await hive.openBox<Item>('items');
 
       // Create backup file
@@ -237,6 +252,10 @@ void main() {
               'updated_at': DateTime.now().toIso8601String(),
             },
           ],
+          'settings': {
+            'notifications_enabled': false,
+            'expiry_lead_time_days': 5,
+          },
         },
       };
 
@@ -255,6 +274,10 @@ void main() {
       expect(items.length, 1);
       expect(items[0].id, 'item-1');
       expect(items[0].name, 'Milk');
+
+      final updatedPrefs = await SharedPreferences.getInstance();
+      expect(updatedPrefs.getBool('notifications_enabled'), false);
+      expect(updatedPrefs.getInt('expiry_lead_time_days'), 5);
     });
 
     test('import rejects backward incompatible backup', () async {

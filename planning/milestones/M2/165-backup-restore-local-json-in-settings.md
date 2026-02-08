@@ -14,15 +14,15 @@ Add Backup & Restore actions to Settings → Data Management: export inventory d
 - Works offline
 
 ## Acceptance criteria (DoD)
-- [ ] Backup/Restore available from Settings (not a separate tab)
-- [ ] JSON schema versioned; includes items, categories, storage locations, batches, settings, schema_version, app_version, exported_at
-- [ ] Export succeeds offline; user chooses path (share sheet / file picker); includes backup metadata header
-- [ ] Import validates JSON and compares schema_version with app's current schema_version
-- [ ] Forward migration (old backup → new app): auto-run migrations on imported data to current schema (e.g., v1.0.0 backup into v1.1.0 app)
-- [ ] Backward migration (new backup → old app): reject with user-friendly message (require app update or restore to compatible version)
-- [ ] Dry-run validation before restore: preview data counts (items, categories, etc.) and prompt for confirmation
-- [ ] Rollback on failure: if restore errors at any step, local DB unchanged; show clear error message
-- [ ] Telemetry: `backup_started`, `backup_succeeded` (size, item_count), `backup_failed` (reason), `restore_started`, `restore_succeeded` (item_count_imported, migrations_applied), `restore_failed` (reason, schema_mismatch)
+- [x] Backup/Restore available from Settings (not a separate tab)
+- [x] JSON schema versioned; includes items, categories, storage locations, batches, settings, schema_version, app_version, exported_at
+- [x] Export succeeds offline; user chooses path (share sheet / file picker); includes backup metadata header
+- [x] Import validates JSON and compares schema_version with app's current schema_version
+- [x] Forward migration (old backup → new app): auto-run migrations on imported data to current schema (e.g., v1.0.0 backup into v1.1.0 app)
+- [x] Backward migration (new backup → old app): reject with user-friendly message (require app update or restore to compatible version)
+- [x] Dry-run validation before restore: preview data counts (items, categories, etc.) and prompt for confirmation
+- [x] Rollback on failure: if restore errors at any step, local DB unchanged; show clear error message
+- [x] Telemetry: `backup_started`, `backup_succeeded` (size, item_count), `backup_failed` (reason), `restore_started`, `restore_succeeded` (item_count_imported, migrations_applied), `restore_failed` (reason, schema_mismatch)
 - [ ] Accessibility basics (labels, contrast, tap targets)
 
 ## Out of scope

@@ -38,10 +38,12 @@ void main() {
 
       await repository.saveShoppingListItem(item);
 
-      expect(
-        telemetry.events.any((e) => e['name'] == 'shopping_list_item_added'),
-        isTrue,
+      final event = telemetry.events.firstWhere(
+        (e) => e['name'] == 'shopping_list_item_added',
       );
+      final properties = event['properties'] as Map<String, dynamic>;
+      expect(properties['item_id'], 's1');
+      expect(properties['source'], 'manual');
     });
 
     test('emits shopping_list_item_purchased with days_to_purchase', () async {

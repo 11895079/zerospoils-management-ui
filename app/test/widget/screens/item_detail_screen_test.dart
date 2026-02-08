@@ -152,6 +152,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
+      final editButton = find.widgetWithText(TextButton, 'Edit Item');
+      expect(editButton, findsOneWidget);
       expect(find.text('✓ Mark as Consumed'), findsOneWidget);
       expect(find.text('🗑️ Mark as Wasted'), findsOneWidget);
     });
