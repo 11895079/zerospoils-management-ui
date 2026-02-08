@@ -38,8 +38,14 @@ void main() {
 
     test('getAllItems returns all shopping list items', () async {
       final now = DateTime.now();
+      final earlier = now.subtract(const Duration(days: 1));
       final items = [
-        ShoppingListItem(id: '1', name: 'Milk', createdAt: now, updatedAt: now),
+        ShoppingListItem(
+          id: '1',
+          name: 'Milk',
+          createdAt: earlier,
+          updatedAt: earlier,
+        ),
         ShoppingListItem(id: '2', name: 'Eggs', createdAt: now, updatedAt: now),
       ];
       for (final item in items) {
@@ -48,6 +54,20 @@ void main() {
       final all = await repository.getAllItems();
       expect(all.length, 2);
       expect(all, containsAll(items));
+      expect(all.first.id, '2');
+    });
+
+    test('getItem returns item by id', () async {
+      final now = DateTime.now();
+      final item = ShoppingListItem(
+        id: '1',
+        name: 'Milk',
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repository.saveShoppingListItem(item);
+      final result = await repository.getItem('1');
+      expect(result, item);
     });
 
     test('getPurchased filters correctly', () async {
@@ -146,14 +166,30 @@ void main() {
     });
 
     test('Data persists across app restarts', () async {
-      // Skipped: hive_test uses in-memory storage, so persistence across restarts cannot be validated in this environment.
-      // This test should be run as an integration test with real Hive storage.
-      expect(
-        true,
-        true,
-        reason: 'Persistence test skipped in hive_test environment.',
+      final now = DateTime.now();
+      final item = ShoppingListItem(
+        id: 'persist-1',
+        name: 'Yogurt',
+        createdAt: now,
+        updatedAt: now,
       );
-    }, skip: true);
+
+      await repository.saveShoppingListItem(item);
+      await Hive.close();
+
+      final restartedRepository = HiveShoppingListRepository();
+      await restartedRepository.init();
+
+      final all = await restartedRepository.getAllItems();
+      expect(all.length, 1);
+      final restored = all.first;
+      expect(restored.id, item.id);
+      expect(restored.name, item.name);
+      expect(
+        restored.createdAt.difference(item.createdAt).inMilliseconds.abs(),
+        lessThan(1000),
+      );
+    });
 
     tearDown(() async {
       await Hive.close();

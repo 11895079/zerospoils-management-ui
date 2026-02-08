@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/presentation/screens/home_shell.dart';
-import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/item_model.dart' show Item;
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
+import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
+import 'package:zerospoils/domain/models/shopping_list_item.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 
 /// Lightweight in-memory mock to avoid Hive I/O during widget tests
@@ -42,12 +44,31 @@ class MockItemRepository extends HiveItemRepository {
   }
 }
 
+class MockShoppingListRepository extends HiveShoppingListRepository {
+  bool _initialized = false;
+  final Map<String, ShoppingListItem> _items = {};
+
+  @override
+  Future<void> init() async {
+    _initialized = true;
+  }
+
+  @override
+  Future<List<ShoppingListItem>> getAllItems() async {
+    if (!_initialized) throw Exception('Repository not initialized');
+    return _items.values.toList();
+  }
+}
+
 void main() {
   late MockItemRepository mockRepo;
+  late MockShoppingListRepository mockShoppingRepo;
 
   setUp(() {
     mockRepo = MockItemRepository();
     mockRepo.init();
+    mockShoppingRepo = MockShoppingListRepository();
+    mockShoppingRepo.init();
   });
 
   testWidgets('Tab navigation switches between screens', (
@@ -56,7 +77,10 @@ void main() {
     // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        ],
         child: const MaterialApp(home: HomeShell()),
       ),
     );
@@ -98,7 +122,10 @@ void main() {
     // Build the HomeShell widget with mock repository
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [itemRepositoryProvider.overrideWithValue(mockRepo)],
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        ],
         child: const MaterialApp(home: HomeShell()),
       ),
     );

@@ -34,11 +34,6 @@ final router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'add-item',
-          name: 'add-item',
-          builder: (context, state) => const ItemFormScreen(),
-        ),
-        GoRoute(
           path: 'edit-item/:id',
           name: 'edit-item',
           builder: (context, state) {

@@ -46,7 +46,10 @@ void main() {
     mockRepository = MockItemRepository();
   });
 
-  Future<void> pumpInventoryScreen(WidgetTester tester) async {
+  Future<void> pumpInventoryScreen(
+    WidgetTester tester, {
+    InventoryFilterState? filterState,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -55,6 +58,8 @@ void main() {
             // Bypass Hive init - return mock items directly
             return mockRepository.items;
           }),
+          if (filterState != null)
+            inventoryFilterProvider.overrideWith((ref) => filterState),
           telemetryClientProvider.overrideWithValue(MockTelemetryClient()),
         ],
         child: const MaterialApp(home: InventoryScreen()),
@@ -197,7 +202,9 @@ void main() {
     // Select Dairy category and apply
     await tester.tap(find.text('Dairy'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Apply'));
+    final applyButton = find.text('Apply');
+    await tester.ensureVisible(applyButton);
+    await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
@@ -242,7 +249,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Apply filters
-    await tester.tap(find.text('Apply'));
+    final applyButton = find.text('Apply');
+    await tester.ensureVisible(applyButton);
+    await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
@@ -285,17 +294,114 @@ void main() {
     await tester.tap(find.byIcon(Icons.tune));
     await tester.pumpAndSettle();
 
-    // Enable expiring soon filter (first switch is "Expiring soon only", second is "Hide consumed")
-    await tester.tap(find.byType(SwitchListTile).first);
+    // Enable expiring soon filter
+    await tester.tap(find.byKey(const Key('inventory_filter_expiring_soon')));
     await tester.pumpAndSettle();
 
     // Apply filters
-    await tester.tap(find.text('Apply'));
+    final applyButton = find.text('Apply');
+    await tester.ensureVisible(applyButton);
+    await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
     expect(find.text('Milk'), findsOneWidget);
     expect(find.text('Cheese'), findsNothing);
+  });
+
+  testWidgets('prepared filter works', (tester) async {
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Salad',
+        category: ItemCategory.produce,
+        type: ItemType.prepared,
+        preparedDate: now,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      Item(
+        id: '2',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        type: ItemType.raw,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byIcon(Icons.tune));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('inventory_filter_prepared_only')));
+    await tester.pumpAndSettle();
+
+    final applyButton = find.text('Apply');
+    await tester.ensureVisible(applyButton);
+    await tester.tap(applyButton);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is ItemCard && widget.item.id == '1',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is ItemCard && widget.item.id == '2',
+      ),
+      findsNothing,
+    );
+  });
+
+  testWidgets('created date range filter works', (tester) async {
+    final now = DateTime(2026, 2, 7);
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Old Item',
+        category: ItemCategory.pantry,
+        location: StorageLocation.pantry,
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 1, 1),
+        updatedAt: now,
+      ),
+      Item(
+        id: '2',
+        name: 'New Item',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 2, 1),
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(
+      tester,
+      filterState: InventoryFilterState(createdAfter: DateTime(2026, 1, 15)),
+    );
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is ItemCard && widget.item.id == '2',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is ItemCard && widget.item.id == '1',
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('FAB is present', (tester) async {

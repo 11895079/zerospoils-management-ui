@@ -13,8 +13,10 @@ import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/item_entry_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Provider to persist filter state across tab switches
@@ -27,6 +29,9 @@ class InventoryFilterState {
   final StorageLocation? location;
   final bool expiringSoonOnly;
   final bool hideConsumed;
+  final bool preparedOnly;
+  final DateTime? createdAfter;
+  final DateTime? createdBefore;
   final String searchQuery;
 
   const InventoryFilterState({
@@ -34,6 +39,9 @@ class InventoryFilterState {
     this.location,
     this.expiringSoonOnly = false,
     this.hideConsumed = true,
+    this.preparedOnly = false,
+    this.createdAfter,
+    this.createdBefore,
     this.searchQuery = '',
   });
 
@@ -42,6 +50,9 @@ class InventoryFilterState {
     StorageLocation? location,
     bool? expiringSoonOnly,
     bool? hideConsumed,
+    bool? preparedOnly,
+    DateTime? createdAfter,
+    DateTime? createdBefore,
     String? searchQuery,
   }) {
     return InventoryFilterState(
@@ -49,6 +60,9 @@ class InventoryFilterState {
       location: location ?? this.location,
       expiringSoonOnly: expiringSoonOnly ?? this.expiringSoonOnly,
       hideConsumed: hideConsumed ?? this.hideConsumed,
+      preparedOnly: preparedOnly ?? this.preparedOnly,
+      createdAfter: createdAfter ?? this.createdAfter,
+      createdBefore: createdBefore ?? this.createdBefore,
       searchQuery: searchQuery ?? this.searchQuery,
     );
   }
@@ -59,6 +73,9 @@ class InventoryFilterState {
     if (location != null) count++;
     if (expiringSoonOnly) count++;
     if (!hideConsumed) count++; // Count if showing consumed items
+    if (preparedOnly) count++;
+    if (createdAfter != null) count++;
+    if (createdBefore != null) count++;
     return count;
   }
 
@@ -120,6 +137,78 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     await ref.read(itemRepositoryProvider).init();
   }
 
+  Future<void> _openAddItemSheet({bool emitOpenedTelemetry = true}) async {
+    if (emitOpenedTelemetry) {
+      ref.read(telemetryClientProvider).enqueue({
+        'name': 'item_add_opened',
+        'properties': {},
+      });
+    }
+    ItemEntrySeed? seed;
+    var keepAdding = true;
+
+    while (keepAdding && mounted) {
+      final result = await showModalBottomSheet<ItemEntryResult>(
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppSpacing.radiusLg),
+          ),
+        ),
+        builder: (_) => ItemEntrySheet(
+          requireExpiry: false,
+          seed: seed,
+          showAddAnother: true,
+        ),
+      );
+
+      if (result == null || result.skipped) break;
+
+      final repo = ref.read(itemRepositoryProvider);
+      await repo.init();
+      final now = DateTime.now();
+      final item = Item(
+        id: now.microsecondsSinceEpoch.toString(),
+        name: result.name,
+        category: result.category,
+        type: result.type,
+        preparedDate: result.preparedDate,
+        location: result.location,
+        quantity: result.quantity,
+        unit: result.unit,
+        expiryDate: result.expiryDate,
+        purchasePrice: result.purchasePrice,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      );
+      await repo.saveItem(item);
+      ref.invalidate(itemsFutureProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${item.name} added to inventory'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      keepAdding = result.addAnother;
+      if (keepAdding) {
+        seed = ItemEntrySeed(
+          name: '',
+          category: result.category,
+          quantity: result.quantity,
+          unit: result.unit,
+          purchasePrice: result.purchasePrice,
+          type: result.type,
+          preparedDate: result.preparedDate,
+        );
+      }
+    }
+  }
+
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
     var filtered = items;
 
@@ -149,8 +238,40 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           .toList();
     }
 
+    if (filterState.preparedOnly) {
+      filtered = filtered
+          .where((item) => item.type == ItemType.prepared)
+          .toList();
+    }
+
     if (filterState.expiringSoonOnly) {
       filtered = filtered.where((item) => item.isExpiringSoon).toList();
+    }
+
+    if (filterState.createdAfter != null) {
+      final start = DateTime(
+        filterState.createdAfter!.year,
+        filterState.createdAfter!.month,
+        filterState.createdAfter!.day,
+      );
+      filtered = filtered
+          .where((item) => !item.createdAt.isBefore(start))
+          .toList();
+    }
+
+    if (filterState.createdBefore != null) {
+      final end = DateTime(
+        filterState.createdBefore!.year,
+        filterState.createdBefore!.month,
+        filterState.createdBefore!.day,
+        23,
+        59,
+        59,
+        999,
+      );
+      filtered = filtered
+          .where((item) => !item.createdAt.isAfter(end))
+          .toList();
     }
 
     // Sort: available items first, then consumed/wasted at bottom
@@ -189,6 +310,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         var tempLocation = currentState.location;
         var tempExpiringSoonOnly = currentState.expiringSoonOnly;
         var tempHideConsumed = currentState.hideConsumed;
+        var tempPreparedOnly = currentState.preparedOnly;
+        DateTime? tempCreatedAfter = currentState.createdAfter;
+        DateTime? tempCreatedBefore = currentState.createdBefore;
 
         return StatefulBuilder(
           builder: (context, setSheetState) {
@@ -279,7 +403,81 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                             }).toList(),
                       ),
                       const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        'Added date',
+                        style: AppTextStyles.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              key: const Key('inventory_filter_created_from'),
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate:
+                                      tempCreatedAfter ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked == null) return;
+                                setSheetState(() {
+                                  tempCreatedAfter = picked;
+                                });
+                              },
+                              child: Text(
+                                tempCreatedAfter == null
+                                    ? 'From'
+                                    : _formatShortDate(tempCreatedAfter!),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: OutlinedButton(
+                              key: const Key('inventory_filter_created_to'),
+                              onPressed: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate:
+                                      tempCreatedBefore ?? DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked == null) return;
+                                setSheetState(() {
+                                  tempCreatedBefore = picked;
+                                });
+                              },
+                              child: Text(
+                                tempCreatedBefore == null
+                                    ? 'To'
+                                    : _formatShortDate(tempCreatedBefore!),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
                       SwitchListTile(
+                        key: const Key('inventory_filter_prepared_only'),
+                        value: tempPreparedOnly,
+                        onChanged: (value) {
+                          setSheetState(() {
+                            tempPreparedOnly = value;
+                          });
+                        },
+                        activeTrackColor: AppColors.primary,
+                        title: const Text('Prepared only'),
+                        subtitle: const Text('Show prepared items only'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SwitchListTile(
+                        key: const Key('inventory_filter_expiring_soon'),
                         value: tempExpiringSoonOnly,
                         onChanged: (value) {
                           setSheetState(() {
@@ -295,6 +493,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       SwitchListTile(
+                        key: const Key('inventory_filter_hide_consumed'),
                         value: tempHideConsumed,
                         onChanged: (value) {
                           setSheetState(() {
@@ -318,6 +517,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 tempLocation = null;
                                 tempExpiringSoonOnly = false;
                                 tempHideConsumed = true;
+                                tempPreparedOnly = false;
+                                tempCreatedAfter = null;
+                                tempCreatedBefore = null;
                               });
                             },
                             child: const Text('Reset'),
@@ -345,6 +547,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 location: tempLocation,
                                 expiringSoonOnly: tempExpiringSoonOnly,
                                 hideConsumed: tempHideConsumed,
+                                preparedOnly: tempPreparedOnly,
+                                createdAfter: tempCreatedAfter,
+                                createdBefore: tempCreatedBefore,
                                 searchQuery: _searchController.text,
                               );
                               ref.read(telemetryClientProvider).enqueue({
@@ -354,6 +559,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'location': tempLocation?.name ?? 'all',
                                   'expiringSoonOnly': tempExpiringSoonOnly,
                                   'hideConsumed': tempHideConsumed,
+                                  'preparedOnly': tempPreparedOnly,
+                                  'createdAfter': tempCreatedAfter
+                                      ?.toIso8601String(),
+                                  'createdBefore': tempCreatedBefore
+                                      ?.toIso8601String(),
                                   'searchQuery': _searchController.text,
                                 },
                               });
@@ -593,15 +803,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          ref.read(telemetryClientProvider).enqueue({
-            'name': 'item_add_opened',
-            'properties': {},
-          });
-          await context.pushNamed('add-item');
-          await _refreshItems();
-          setState(() {});
-        },
+        onPressed: _openAddItemSheet,
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         elevation: 4,
@@ -752,6 +954,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
+  String _formatShortDate(DateTime date) {
+    return DateFormat('MMM d, yyyy').format(date);
+  }
+
   Widget _buildActiveFilters(InventoryFilterState filterState) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -802,6 +1008,35 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(expiringSoonOnly: false);
+                      setState(() {});
+                    },
+                  ),
+                if (filterState.preparedOnly)
+                  _buildFilterChip(
+                    label: 'Prepared',
+                    onRemove: () {
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(preparedOnly: false);
+                      setState(() {});
+                    },
+                  ),
+                if (filterState.createdAfter != null)
+                  _buildFilterChip(
+                    label:
+                        'Added from ${_formatShortDate(filterState.createdAfter!)}',
+                    onRemove: () {
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(createdAfter: null);
+                      setState(() {});
+                    },
+                  ),
+                if (filterState.createdBefore != null)
+                  _buildFilterChip(
+                    label:
+                        'Added to ${_formatShortDate(filterState.createdBefore!)}',
+                    onRemove: () {
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(createdBefore: null);
                       setState(() {});
                     },
                   ),
@@ -935,7 +1170,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   'name': 'add_item_from_empty_state',
                   'properties': {},
                 });
-                context.pushNamed('add-item');
+                _openAddItemSheet(emitOpenedTelemetry: false);
               },
               child: const Text('Add your first item'),
             ),

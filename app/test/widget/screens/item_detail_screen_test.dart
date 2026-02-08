@@ -110,6 +110,7 @@ void main() {
       expect(find.textContaining('Produce'), findsOneWidget);
       expect(find.textContaining('Fridge'), findsOneWidget);
       expect(find.text('5 Count'), findsOneWidget);
+      expect(find.text('Added'), findsOneWidget);
     });
 
     testWidgets('shows "Item not found" when item does not exist', (
@@ -151,6 +152,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
+      final editButton = find.widgetWithText(TextButton, 'Edit Item');
+      expect(editButton, findsOneWidget);
       expect(find.text('✓ Mark as Consumed'), findsOneWidget);
       expect(find.text('🗑️ Mark as Wasted'), findsOneWidget);
     });

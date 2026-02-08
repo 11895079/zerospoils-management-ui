@@ -4,6 +4,7 @@ library;
 /// Matches prototype design with icon, name, location, expiry
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -32,6 +33,8 @@ class ItemCard extends StatelessWidget {
     final isExpired = daysLeft != null && daysLeft < 0;
     final isUrgent = daysLeft != null && daysLeft <= 1 && !isExpired;
     final isConsumedOrWasted = item.status != ItemStatus.available;
+    final hasWasteBadge =
+        item.wastePercentage != null && item.wastePercentage! > 0;
 
     // Calculate progress percentage (0-1)
     double? expiryProgress;
@@ -127,7 +130,64 @@ class ItemCard extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.name, style: AppTextStyles.h4),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          item.name,
+                                          style: AppTextStyles.h4,
+                                        ),
+                                      ),
+                                      if (item.type == ItemType.prepared)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpacing.sm,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.1,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Prepared',
+                                            style: AppTextStyles.caption
+                                                .copyWith(
+                                                  color: AppColors.primary,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ),
+                                      if (hasWasteBadge) ...[
+                                        const SizedBox(width: AppSpacing.sm),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpacing.sm,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.danger.withValues(
+                                              alpha: 0.12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Wasted ${item.wastePercentage}%',
+                                            style: AppTextStyles.caption
+                                                .copyWith(
+                                                  color: AppColors.danger,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                   const SizedBox(height: 2),
                                   Row(
                                     children: [
@@ -203,6 +263,13 @@ class ItemCard extends StatelessWidget {
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Added ${DateFormat('MMM d').format(item.createdAt)}',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ],
                     ],
@@ -351,16 +418,28 @@ class ItemCard extends StatelessWidget {
   }
 
   String _getLocationDisplay(StorageLocation location) {
+    String locationLabel;
     switch (location) {
       case StorageLocation.fridge:
-        return '❄️ Fridge';
+        locationLabel = '❄️ Fridge';
+        break;
       case StorageLocation.freezer:
-        return '🧊 Freezer';
+        locationLabel = '🧊 Freezer';
+        break;
       case StorageLocation.pantry:
-        return '🗄️ Pantry';
+        locationLabel = '🗄️ Pantry';
+        break;
       case StorageLocation.other:
-        return '🏠 Other';
+        locationLabel = '🏠 Other';
+        break;
     }
+
+    if (item.type == ItemType.prepared && item.preparedDate != null) {
+      final formatted = DateFormat('MMM d').format(item.preparedDate!);
+      return '$locationLabel • Prepared $formatted';
+    }
+
+    return locationLabel;
   }
 
   String _getExpiryDisplay() {

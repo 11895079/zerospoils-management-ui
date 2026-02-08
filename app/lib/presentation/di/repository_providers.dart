@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/hive_item_repository.dart';
+import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/demo_item_repository.dart';
 import '../../data/repositories/item_repository_base.dart';
 import '../../domain/models/item_model.dart';
@@ -33,6 +34,13 @@ final itemsFutureProvider = FutureProvider<List<Item>>((ref) async {
   final repository = ref.watch(itemRepositoryProvider);
   await repository.init();
   return repository.getAllItems();
+});
+
+/// Shopping list repository provider
+final shoppingListRepositoryProvider = Provider<HiveShoppingListRepository>((
+  ref,
+) {
+  return HiveShoppingListRepository();
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)

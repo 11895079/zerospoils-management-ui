@@ -71,6 +71,14 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
     }
   }
 
+  Future<void> _refreshItems() async {
+    await _loadItems();
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'pull_to_refresh',
+      'properties': {'screen_name': 'expiring_soon'},
+    });
+  }
+
   Map<ExpiryBucket, List<Item>> _groupItemsByBucket() {
     final grouped = <ExpiryBucket, List<Item>>{
       ExpiryBucket.today: [],
@@ -133,7 +141,8 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
     }
 
     return RefreshIndicator(
-      onRefresh: _loadItems,
+      key: const ValueKey('expiring_refresh_indicator'),
+      onRefresh: _refreshItems,
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -159,6 +168,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
 
   Widget _buildEmptyState() {
     return Center(
+      key: const ValueKey('expiring_empty_state'),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -173,6 +183,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppButton(
+            key: const ValueKey('expiring_review_inventory_button'),
             text: 'Review Inventory',
             onPressed: () {
               context.go('/');
@@ -185,47 +196,52 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   }
 
   Widget _buildBucketSection(ExpiryBucket bucket, List<Item> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-          child: Row(
-            children: [
-              Text(bucket.displayName.toUpperCase(), style: AppTextStyles.h3),
-              const SizedBox(width: AppSpacing.sm),
-              Text(bucket.emoji, style: const TextStyle(fontSize: 20)),
-              const Spacer(),
-              Text(
-                '(${items.length})',
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
+    return Semantics(
+      label: 'Expiring ${bucket.displayName} section',
+      child: Column(
+        key: ValueKey('expiring_section_${bucket.name}'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Row(
+              children: [
+                Text(bucket.displayName.toUpperCase(), style: AppTextStyles.h3),
+                const SizedBox(width: AppSpacing.sm),
+                Text(bucket.emoji, style: const TextStyle(fontSize: 20)),
+                const Spacer(),
+                Text(
+                  '(${items.length})',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        ...items.map((item) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: GestureDetector(
-              onTap: () {
-                // Track telemetry
-                ref.read(telemetryClientProvider).enqueue({
-                  'name': 'item_tapped_from_expiring_soon',
-                  'properties': {'item_id': item.id, 'bucket': bucket.name},
-                });
-                context.pushNamed(
-                  'item-detail',
-                  pathParameters: {'id': item.id},
-                );
-              },
-              child: ItemCard(item: item),
+              ],
             ),
-          );
-        }),
-        const SizedBox(height: AppSpacing.lg),
-      ],
+          ),
+          ...items.map((item) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: GestureDetector(
+                key: ValueKey('expiring_item_${item.id}'),
+                onTap: () {
+                  // Track telemetry
+                  ref.read(telemetryClientProvider).enqueue({
+                    'name': 'item_tapped_from_expiring_soon',
+                    'properties': {'item_id': item.id, 'bucket': bucket.name},
+                  });
+                  context.pushNamed(
+                    'item-detail',
+                    pathParameters: {'id': item.id},
+                  );
+                },
+                child: ItemCard(item: item),
+              ),
+            );
+          }),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
     );
   }
 }

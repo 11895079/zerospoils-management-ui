@@ -11,13 +11,13 @@ Implement local persistence for ShoppingListItem with CRUD and query operations.
 - Data persists across app restarts
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Repository layer abstracts storage (HiveShoppingListRepository)
-- [ ] CRUD operations implemented (add, get, delete, clear, list all)
-- [ ] Query operations (getPurchased, getUnpurchased)
-- [ ] Unit tests added or updated (8+ tests)
-- [ ] Offline-first behavior verified
-- [ ] Telemetry added (tracking purchase actions)
-- [ ] Data persists across restarts
+- [x] Repository layer abstracts storage (HiveShoppingListRepository)
+- [x] CRUD operations implemented (add, get, delete, clear, list all)
+- [x] Query operations (getPurchased, getUnpurchased)
+- [x] Unit tests added or updated (10+ tests, include telemetry and persistence)
+- [x] Offline-first behavior verified
+- [x] Telemetry added (add/purchase/delete with required properties)
+- [x] Data persists across restarts
 - [ ] Accessibility basics (labels, contrast, tap targets)
 
 ## Out of scope
@@ -33,6 +33,11 @@ Implement local persistence for ShoppingListItem with CRUD and query operations.
 - Indexes: (id), (is_purchased), (created_at desc) for sorting
 - No encryption needed for MVP
 - Use TypeAdapter pattern like ItemAdapter for serialization
+- Repository interface should live in domain/data layer structure matching ItemRepository
+- Default ordering: newest first (created_at desc) for getAll
+- Ensure markAsPurchased sets purchased_at to DateTime.now(), markAsUnpurchased clears it
+- Use stable IDs (uuid) for new items; do not regenerate on updates
+- Telemetry should be emitted from repository methods (not UI) for consistency
 
 ## Test plan
 **Automated:**
@@ -44,20 +49,23 @@ Implement local persistence for ShoppingListItem with CRUD and query operations.
 - Unit test: markAsPurchased updates purchased_at timestamp
 - Unit test: markAsUnpurchased clears purchased_at
 - Unit test: Data persists across app restarts
+- Unit test: Telemetry emits shopping_list_item_added with required properties
+- Unit test: Telemetry emits shopping_list_item_purchased with days_to_purchase
+- Unit test: Telemetry emits shopping_list_item_deleted on delete
 
 **Manual:**
-1. Add 5 items to shopping list \u2192 close app \u2192 reopen \u2192 verify all present
-2. Mark 2 items as purchased \u2192 verify badge count updates
-3. Delete item \u2192 verify removed after restart
-4. Force crash \u2192 reopen \u2192 verify all data intact
+1. Add 5 items to shopping list -> close app -> reopen -> verify all present
+2. Mark 2 items as purchased -> verify badge count updates
+3. Delete item -> verify removed after restart
+4. Force crash -> reopen -> verify all data intact
 5. Test on both iOS and Android emulators
 
 ## Dependencies
 - M2/100 (HiveDatabase infrastructure)
-- Must complete before M2/140 (Add Item screen needs shopping list integration)
+- Must complete before shopping list UI work in M3
 
 ## Telemetry
 Log events:
-- `shopping_list_item_added`: {item_id, category, quantity, unit}
+- `shopping_list_item_added`: {item_id, category, quantity, unit, source: "manual"}
 - `shopping_list_item_purchased`: {item_id, days_to_purchase}
 - `shopping_list_item_deleted`: {item_id}

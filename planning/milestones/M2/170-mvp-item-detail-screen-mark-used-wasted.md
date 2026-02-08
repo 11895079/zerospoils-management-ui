@@ -18,7 +18,7 @@ Deliver Item detail screen + mark used/wasted with tests and telemetry.
 - [x] Telemetry added/updated (event names + key properties)
 - [x] Offline-first behavior verified (where applicable)
 - [x] Accessibility basics (labels, contrast, tap targets)
-- [ ] Mark As Wasted dialog enhanced: wider dialog (80-90% screen width on mobile), larger tap targets (min 48pt), improved visual hierarchy with clear section labels and spacing
+- [x] Mark As Wasted dialog enhanced: wider dialog (80-90% screen width on mobile), larger tap targets (min 48pt), improved visual hierarchy with clear section labels and spacing
 
 ## Implementation Notes (Completed)
 **Implemented Features:**

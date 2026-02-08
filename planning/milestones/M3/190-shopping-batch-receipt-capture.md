@@ -11,6 +11,8 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - Support non-perishable items in batches (e.g., toothpaste, detergent, supplies without expiry_date); items without expiry still link to batch for shopping history tracking
 - After batch created, user adds items and optionally links to batch; batch selector appears in add-item form
 - Items can be linked to batch at add-time (batch dropdown in add-item form) or retroactively (multi-select items → "Link to Batch")
+- Each inventory item shows purchase date (from batch purchase date or manual entry if not batched)
+- Each inventory item shows batch association (batch name/date) and allows navigating to batch detail
 - Shopping tab integrates batch history: shows shopping list + past batches (expandable sections)
 - Batch detail view: receipt photo, metadata, list of items linked to batch, aggregate stats (total cost, item count, category distribution)
 - Inventory filters include "Batch" filter; selecting batch shows only items from that shopping session
@@ -25,10 +27,13 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - [ ] "Add Shopping Batch" form: fields for store name, purchase date, total cost, payment method (cash/card/mobile), receipt photo picker
 - [ ] Receipt photo stored locally; max 1 per batch; checksum for dedupe; display in batch detail view
 - [ ] Add optional `batch_id` field to Item entity (nullable UUID foreign key)
+- [ ] Add `purchase_date` field to Item entity (required; uses batch purchase date when linked)
 - [ ] Add-item form includes batch dropdown (show batches from last 30 days; searchable by store/date)
+- [ ] Add-item form sets purchase date: auto-populate from batch when selected; allow manual override when no batch
 - [ ] Retroactive linking: multi-select items in inventory → "Link to Batch" action → batch selector
 - [ ] Shopping tab redesign: tabs/sections for "Shopping List" and "Shopping History" (batches chronological, most recent first)
 - [ ] Batch detail view: receipt photo preview (tap to enlarge), metadata, linked items list, aggregate stats (cost, count, category pie chart)
+- [ ] Inventory item detail shows purchase date and batch info (with link to batch detail)
 - [ ] Inventory filter: add "Batch" filter showing all batches; selecting batch filters items to that batch only
 - [ ] Update M2/165 backup/restore: include `shopping_batches` in JSON; embed receipt photo as base64 data URI
 - [ ] Telemetry events: `batch_created {store, total_cost, items_count}`, `batch_item_linked {batch_id, item_count}`, `batch_viewed {batch_id}`
@@ -51,6 +56,9 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - Shopping tab layout: Material TabBar or ExpansionTile sections; "Shopping List" + "Shopping History"
 - Batch detail stats: total cost (from batch metadata), item count (count linked items), category distribution (group by item.category)
 - Retroactive linking: use multi-select mode in inventory (long-press to enter selection mode); show "Link to Batch" in app bar actions
+- Purchase date rules:
+	- If linked to batch, item.purchase_date = batch.purchase_date
+	- If not linked, item.purchase_date is required and set during item creation
 - Backup format: `shopping_batches: [{id, store_name, purchase_date, total_cost, payment_method, receipt_photo_base64, created_at}]`
 - Receipt photo base64: prefix with `data:image/jpeg;base64,` for re-import compatibility
 - Telemetry: emit `batch_created` on save; include `items_count: 0` initially (updated when items linked)
@@ -63,6 +71,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - Widget test: attach receipt photo; verify stored locally and displayed in batch detail
 - Unit test: ShoppingBatch repository CRUD operations (create, read, update, delete)
 - Widget test: add-item form with batch selected; verify `item.batch_id` set correctly
+- Widget test: add-item form sets purchase date from batch when selected
 - Widget test: multi-select items in inventory; "Link to Batch" updates all selected items
 - Widget test: Shopping tab shows "Shopping List" and "Shopping History" sections
 - Widget test: batch detail view shows metadata, receipt photo, linked items, aggregate stats
@@ -77,6 +86,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 4. Tap batch; verify detail view shows receipt photo, metadata, 0 items linked
 5. Add item "Milk"; select batch "Costco - 01/25/2026" from dropdown; save item
 6. Return to batch detail; verify "Milk" now listed; item count = 1
+7. Open item detail; verify purchase date shows 01/25/2026 and batch link points to Costco batch
 7. Add 5 more items without batch; go to inventory; multi-select 3 items; tap "Link to Batch"; choose Costco batch
 8. Verify batch detail now shows 4 items (Milk + 3 retroactive); aggregate stats updated
 9. Inventory filter: select "Batch: Costco 01/25"; verify only 4 items shown

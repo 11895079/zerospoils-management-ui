@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:hive/hive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 
 /// Backup metadata
@@ -142,6 +143,8 @@ class BackupRestoreService {
       itemCount: items.length,
     );
 
+    final settings = await _readSettings();
+
     final backup = {
       'metadata': metadata.toJson(),
       'data': {
@@ -151,6 +154,7 @@ class BackupRestoreService {
         'batches': [],
         'events': [],
         'attachments': [],
+        'settings': settings,
       },
     };
 
@@ -250,6 +254,9 @@ class BackupRestoreService {
 
     final itemsBox = _hive.box<Item>('items');
 
+    // Backup existing settings for rollback
+    final existingSettings = await _readSettings();
+
     // Backup existing data for rollback
     final existingItems = itemsBox.values.toList();
     final existingKeys = itemsBox.keys.toList();
@@ -261,6 +268,7 @@ class BackupRestoreService {
       // Import items
       final data = backup['data'] as Map<String, dynamic>;
       final itemsData = (data['items'] as List?) ?? [];
+      final settingsData = data['settings'] as Map<String, dynamic>?;
 
       int migrationsApplied = 0;
       if (_requiresMigration(metadata.schemaVersion)) {
@@ -274,6 +282,10 @@ class BackupRestoreService {
       for (final itemData in itemsData) {
         final item = _deserializeItem(itemData as Map<String, dynamic>);
         await itemsBox.put(item.id, item);
+      }
+
+      if (settingsData != null) {
+        await _writeSettings(settingsData);
       }
 
       telemetry?.trackRestoreSucceeded(
@@ -299,6 +311,7 @@ class BackupRestoreService {
       for (var i = 0; i < existingItems.length; i++) {
         await itemsBox.put(existingKeys[i], existingItems[i]);
       }
+      await _writeSettings(existingSettings);
 
       return RestoreResult(
         success: false,
@@ -390,6 +403,7 @@ class BackupRestoreService {
       'purchase_price': item.purchasePrice,
       'status': item.status.name,
       'waste_reason': item.wasteReason?.name,
+      'waste_percentage': item.wastePercentage,
       'created_at': item.createdAt.toIso8601String(),
       'updated_at': item.updatedAt.toIso8601String(),
     };
@@ -418,8 +432,77 @@ class BackupRestoreService {
       wasteReason: json['waste_reason'] != null
           ? WasteReason.fromString(json['waste_reason'] as String)
           : null,
+      wastePercentage: json['waste_percentage'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
+  }
+
+  Future<Map<String, dynamic>> _readSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'notifications_enabled': prefs.getBool('notifications_enabled') ?? true,
+      'sound_enabled': prefs.getBool('sound_enabled') ?? true,
+      'vibration_enabled': prefs.getBool('vibration_enabled') ?? true,
+      'dark_mode_enabled': prefs.getBool('dark_mode_enabled') ?? false,
+      'meal_planning_enabled': prefs.getBool('meal_planning_enabled') ?? false,
+      'data_sync_enabled': prefs.getBool('data_sync_enabled') ?? false,
+      'expiry_lead_time_days': prefs.getInt('expiry_lead_time_days') ?? 3,
+      'date_format': prefs.getString('date_format') ?? 'MM/DD/YYYY',
+      'demo_mode_enabled': prefs.getBool('demo_mode_enabled') ?? true,
+    };
+  }
+
+  Future<void> _writeSettings(Map<String, dynamic> settings) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (settings.containsKey('notifications_enabled')) {
+      await prefs.setBool(
+        'notifications_enabled',
+        settings['notifications_enabled'] as bool,
+      );
+    }
+    if (settings.containsKey('sound_enabled')) {
+      await prefs.setBool('sound_enabled', settings['sound_enabled'] as bool);
+    }
+    if (settings.containsKey('vibration_enabled')) {
+      await prefs.setBool(
+        'vibration_enabled',
+        settings['vibration_enabled'] as bool,
+      );
+    }
+    if (settings.containsKey('dark_mode_enabled')) {
+      await prefs.setBool(
+        'dark_mode_enabled',
+        settings['dark_mode_enabled'] as bool,
+      );
+    }
+    if (settings.containsKey('meal_planning_enabled')) {
+      await prefs.setBool(
+        'meal_planning_enabled',
+        settings['meal_planning_enabled'] as bool,
+      );
+    }
+    if (settings.containsKey('data_sync_enabled')) {
+      await prefs.setBool(
+        'data_sync_enabled',
+        settings['data_sync_enabled'] as bool,
+      );
+    }
+    if (settings.containsKey('expiry_lead_time_days')) {
+      await prefs.setInt(
+        'expiry_lead_time_days',
+        settings['expiry_lead_time_days'] as int,
+      );
+    }
+    if (settings.containsKey('date_format')) {
+      await prefs.setString('date_format', settings['date_format'] as String);
+    }
+    if (settings.containsKey('demo_mode_enabled')) {
+      await prefs.setBool(
+        'demo_mode_enabled',
+        settings['demo_mode_enabled'] as bool,
+      );
+    }
   }
 }
