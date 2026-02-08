@@ -112,11 +112,16 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         },
       });
 
+      ref.invalidate(itemsFutureProvider);
+
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Item marked as used')));
-        context.pop(); // Return to inventory
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          Navigator.of(context).maybePop();
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -132,8 +137,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
 
     // Show waste reason selection dialog
     WasteReason? selectedReason;
-    double wastePercentage = 50.0; // Default to 50%
-    final notesController = TextEditingController();
+    double wastePercentage = 100.0; // Default to 100%
+    String notesText = '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -245,8 +250,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     TextField(
-                      controller: notesController,
                       maxLines: 3,
+                      onChanged: (value) => notesText = value,
                       decoration: InputDecoration(
                         hintText: 'e.g., half the pot burned',
                         hintStyle: TextStyle(color: AppColors.textSecondary),
@@ -312,9 +317,17 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
 
     try {
       final repository = ref.read(itemRepositoryProvider);
+      final percentageInt = wastePercentage.round().clamp(0, 100);
+      final remainingQuantity = percentageInt >= 100
+          ? 0
+          : (_item!.quantity * (1 - (percentageInt / 100))).ceil();
+      final isFullyWasted = remainingQuantity <= 0;
+
       final updatedItem = _item!.copyWith(
-        status: ItemStatus.wasted,
+        status: isFullyWasted ? ItemStatus.wasted : ItemStatus.available,
         wasteReason: selectedReason,
+        wastePercentage: percentageInt,
+        quantity: remainingQuantity.clamp(0, _item!.quantity),
         updatedAt: DateTime.now(),
       );
       await repository.saveItem(updatedItem);
@@ -327,18 +340,21 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
           'category': _item!.category.name,
           'location': _item!.location.name,
           'waste_reason': selectedReason?.name ?? 'unknown',
-          'waste_percentage': wastePercentage.toInt(),
-          'has_notes': notesController.text.isNotEmpty,
+          'waste_percentage': percentageInt,
+          'has_notes': notesText.isNotEmpty,
         },
       });
 
-      notesController.dispose();
+      ref.invalidate(itemsFutureProvider);
 
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Item marked as wasted')));
-        context.pop(); // Return to inventory
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          Navigator.of(context).maybePop();
+        });
       }
     } catch (e) {
       if (mounted) {

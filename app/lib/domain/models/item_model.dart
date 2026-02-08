@@ -180,6 +180,8 @@ class Item extends Equatable {
   final ItemStatus status;
   @HiveField(11)
   final WasteReason? wasteReason;
+  @HiveField(14)
+  final int? wastePercentage;
   @HiveField(12)
   final DateTime createdAt;
   @HiveField(13)
@@ -198,6 +200,7 @@ class Item extends Equatable {
     this.purchasePrice,
     this.status = ItemStatus.available,
     this.wasteReason,
+    this.wastePercentage,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -216,6 +219,7 @@ class Item extends Equatable {
     double? purchasePrice,
     ItemStatus? status,
     WasteReason? wasteReason,
+    int? wastePercentage,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -232,6 +236,7 @@ class Item extends Equatable {
       purchasePrice: purchasePrice ?? this.purchasePrice,
       status: status ?? this.status,
       wasteReason: wasteReason ?? this.wasteReason,
+      wastePercentage: wastePercentage ?? this.wastePercentage,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -276,6 +281,7 @@ class Item extends Equatable {
     purchasePrice,
     status,
     wasteReason,
+    wastePercentage,
     createdAt,
     updatedAt,
   ];

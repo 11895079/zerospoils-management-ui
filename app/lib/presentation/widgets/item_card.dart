@@ -33,6 +33,8 @@ class ItemCard extends StatelessWidget {
     final isExpired = daysLeft != null && daysLeft < 0;
     final isUrgent = daysLeft != null && daysLeft <= 1 && !isExpired;
     final isConsumedOrWasted = item.status != ItemStatus.available;
+    final hasWasteBadge =
+        item.wastePercentage != null && item.wastePercentage! > 0;
 
     // Calculate progress percentage (0-1)
     double? expiryProgress;
@@ -159,6 +161,31 @@ class ItemCard extends StatelessWidget {
                                                 ),
                                           ),
                                         ),
+                                      if (hasWasteBadge) ...[
+                                        const SizedBox(width: AppSpacing.sm),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: AppSpacing.sm,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.danger.withValues(
+                                              alpha: 0.12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Wasted ${item.wastePercentage}%',
+                                            style: AppTextStyles.caption
+                                                .copyWith(
+                                                  color: AppColors.danger,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                   const SizedBox(height: 2),

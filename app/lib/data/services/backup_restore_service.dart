@@ -403,6 +403,7 @@ class BackupRestoreService {
       'purchase_price': item.purchasePrice,
       'status': item.status.name,
       'waste_reason': item.wasteReason?.name,
+      'waste_percentage': item.wastePercentage,
       'created_at': item.createdAt.toIso8601String(),
       'updated_at': item.updatedAt.toIso8601String(),
     };
@@ -431,6 +432,7 @@ class BackupRestoreService {
       wasteReason: json['waste_reason'] != null
           ? WasteReason.fromString(json['waste_reason'] as String)
           : null,
+      wastePercentage: json['waste_percentage'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
     );
