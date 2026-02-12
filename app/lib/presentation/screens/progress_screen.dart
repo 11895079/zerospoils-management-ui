@@ -2,10 +2,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
+import '../../data/adapters/receipt_batch_adapter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import 'package:hive/hive.dart';
 import '../../domain/models/badge_model.dart';
 import '../../domain/models/receipt_batch.dart';
 import '../../domain/repositories/progress_stats_service.dart';
@@ -203,7 +204,7 @@ class ProgressScreen extends ConsumerWidget {
   }
 
   Future<ReceiptBatch?> _loadRecentBatch(WidgetRef ref) async {
-    if (!Hive.isAdapterRegistered(30)) {
+    if (!Hive.isAdapterRegistered(receiptBatchAdapterTypeId)) {
       return null;
     }
     try {

@@ -145,6 +145,8 @@ class _ReceiptBatchReviewScreenState
       },
     });
 
+    ref.invalidate(receiptBatchesProvider);
+
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const ReceiptBatchesScreen()),

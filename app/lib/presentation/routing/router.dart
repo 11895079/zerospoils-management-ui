@@ -5,6 +5,10 @@ import '../screens/home_shell.dart';
 import '../screens/item_detail_screen.dart';
 import '../screens/item_form_screen.dart';
 import '../screens/onboarding_screen.dart';
+import '../screens/receipt_batch_capture_screen.dart';
+import '../screens/receipt_batch_detail_screen.dart';
+import '../screens/receipt_batches_screen.dart';
+import '../../domain/models/receipt_batch.dart';
 
 /// Determine initial location based on onboarding completion status
 Future<String> getInitialLocation() async {
@@ -40,6 +44,28 @@ final router = GoRouter(
             final itemId = state.pathParameters['id'] ?? '';
             return ItemFormScreen(itemId: itemId);
           },
+        ),
+        GoRoute(
+          path: 'receipt-batches',
+          name: 'receipt-batches',
+          builder: (context, state) => const ReceiptBatchesScreen(),
+          routes: [
+            GoRoute(
+              path: 'capture',
+              name: 'receipt-batch-capture',
+              builder: (context, state) => const ReceiptBatchCaptureScreen(
+                source: ReceiptBatchSource.inventory,
+              ),
+            ),
+            GoRoute(
+              path: ':id',
+              name: 'receipt-batch-detail',
+              builder: (context, state) {
+                final batchId = state.pathParameters['id'] ?? '';
+                return ReceiptBatchDetailScreen(batchId: batchId);
+              },
+            ),
+          ],
         ),
       ],
     ),

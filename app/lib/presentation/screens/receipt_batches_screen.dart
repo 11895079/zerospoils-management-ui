@@ -18,19 +18,27 @@ final receiptBatchesProvider = FutureProvider<List<ReceiptBatch>>((ref) async {
   return repo.getAllBatches();
 });
 
-class ReceiptBatchesScreen extends ConsumerWidget {
+class ReceiptBatchesScreen extends ConsumerStatefulWidget {
   const ReceiptBatchesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final batchesAsync = ref.watch(receiptBatchesProvider);
+  ConsumerState<ReceiptBatchesScreen> createState() =>
+      _ReceiptBatchesScreenState();
+}
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(telemetryClientProvider).enqueue({
-        'name': 'receipt_batch_list_viewed',
-        'properties': {'source_screen': 'receipt_batches'},
-      });
+class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'receipt_batch_list_viewed',
+      'properties': {'source_screen': 'receipt_batches'},
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final batchesAsync = ref.watch(receiptBatchesProvider);
 
     return Scaffold(
       drawer: const AppDrawer(),

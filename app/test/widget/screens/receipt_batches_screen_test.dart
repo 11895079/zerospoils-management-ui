@@ -21,7 +21,12 @@ class MockReceiptBatchRepository implements ReceiptBatchRepository {
 
   @override
   Future<ReceiptBatch?> getBatch(String id) async {
-    return _batches.firstWhere((b) => b.id == id);
+    for (final batch in _batches) {
+      if (batch.id == id) {
+        return batch;
+      }
+    }
+    return null;
   }
 }
 

@@ -29,14 +29,16 @@ class _ReceiptBatchCaptureScreenState
     extends ConsumerState<ReceiptBatchCaptureScreen> {
   final ImagePicker _picker = ImagePicker();
   final List<XFile> _photos = [];
+  late final String _batchId;
   bool _processing = false;
 
   @override
   void initState() {
     super.initState();
+    _batchId = _buildBatchId();
     ref.read(telemetryClientProvider).enqueue({
       'name': 'receipt_batch_started',
-      'properties': {'source_screen': widget.source.name},
+      'properties': {'source_screen': widget.source.name, 'batch_id': _batchId},
     });
   }
 
@@ -56,7 +58,7 @@ class _ReceiptBatchCaptureScreenState
     setState(() => _photos.add(photo));
     ref.read(telemetryClientProvider).enqueue({
       'name': 'receipt_photo_added',
-      'properties': {'photo_index': _photos.length},
+      'properties': {'batch_id': _batchId, 'photo_index': _photos.length},
     });
   }
 
@@ -84,11 +86,13 @@ class _ReceiptBatchCaptureScreenState
         allItems.add(result.text);
       }
 
-      final parsed = <String, double>{};
+      final parsedItems = <ParsedReceiptItem>[];
       for (final block in allItems) {
         final items = parser.parse(block);
         for (final item in items) {
-          parsed[item.name] = item.price;
+          parsedItems.add(
+            ParsedReceiptItem(name: item.name, price: item.price),
+          );
         }
       }
 
@@ -96,7 +100,8 @@ class _ReceiptBatchCaptureScreenState
       ref.read(telemetryClientProvider).enqueue({
         'name': 'receipt_batch_processed',
         'properties': {
-          'items_detected': parsed.length,
+          'batch_id': _batchId,
+          'items_detected': parsedItems.length,
           'duration_ms': duration,
         },
       });
@@ -107,17 +112,15 @@ class _ReceiptBatchCaptureScreenState
           builder: (_) => ReceiptBatchReviewScreen(
             source: widget.source,
             photoPaths: _photos.map((e) => e.path).toList(),
-            parsedItems: parsed.entries
-                .map((e) => ParsedReceiptItem(name: e.key, price: e.value))
-                .toList(),
-            batchId: _buildBatchId(),
+            parsedItems: parsedItems,
+            batchId: _batchId,
           ),
         ),
       );
     } catch (e) {
       ref.read(telemetryClientProvider).enqueue({
         'name': 'receipt_batch_failed',
-        'properties': {'reason': e.toString()},
+        'properties': {'batch_id': _batchId, 'reason': e.toString()},
       });
       _showSnack('Unable to process receipts');
     } finally {

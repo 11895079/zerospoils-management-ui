@@ -13,12 +13,27 @@ import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
 
-class ReceiptBatchDetailScreen extends ConsumerWidget {
+class ReceiptBatchDetailScreen extends ConsumerStatefulWidget {
   final String batchId;
   const ReceiptBatchDetailScreen({super.key, required this.batchId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReceiptBatchDetailScreen> createState() =>
+      _ReceiptBatchDetailScreenState();
+}
+
+class _ReceiptBatchDetailScreenState
+    extends ConsumerState<ReceiptBatchDetailScreen> {
+  late final Future<_BatchDetailData> _batchFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _batchFuture = _loadData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AppDrawer(),
       appBar: AppBar(
@@ -28,7 +43,7 @@ class ReceiptBatchDetailScreen extends ConsumerWidget {
         elevation: 1,
       ),
       body: FutureBuilder<_BatchDetailData>(
-        future: _loadData(ref),
+        future: _batchFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -124,12 +139,12 @@ class ReceiptBatchDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<_BatchDetailData> _loadData(WidgetRef ref) async {
+  Future<_BatchDetailData> _loadData() async {
     final batchRepo = ref.read(receiptBatchRepositoryProvider);
     final itemRepo = ref.read(itemRepositoryProvider);
     await batchRepo.init();
     await itemRepo.init();
-    final batch = await batchRepo.getBatch(batchId);
+    final batch = await batchRepo.getBatch(widget.batchId);
     if (batch == null) throw Exception('Batch not found');
     final items = await itemRepo.getAllItems();
     final itemMap = {for (final item in items) item.id: item};

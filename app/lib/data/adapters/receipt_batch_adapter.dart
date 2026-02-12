@@ -1,9 +1,12 @@
 import 'package:hive/hive.dart';
 import '../../domain/models/receipt_batch.dart';
 
+const receiptBatchAdapterTypeId = 30;
+const receiptBatchItemAdapterTypeId = 31;
+
 class ReceiptBatchItemAdapter extends TypeAdapter<ReceiptBatchItem> {
   @override
-  final int typeId = 31;
+  final int typeId = receiptBatchItemAdapterTypeId;
 
   @override
   ReceiptBatchItem read(BinaryReader reader) {
@@ -48,7 +51,7 @@ class ReceiptBatchItemAdapter extends TypeAdapter<ReceiptBatchItem> {
 
 class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   @override
-  final int typeId = 30;
+  final int typeId = receiptBatchAdapterTypeId;
 
   @override
   ReceiptBatch read(BinaryReader reader) {
