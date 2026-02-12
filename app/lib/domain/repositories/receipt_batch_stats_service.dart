@@ -27,9 +27,12 @@ class ReceiptBatchStatsService {
     double remaining = 0;
 
     for (final batchItem in batch.items) {
-      if (batchItem.destination != ReceiptBatchDestination.inventory) continue;
-      final inventoryItem = inventoryMap[batchItem.inventoryItemId];
       final value = batchItem.price * batchItem.quantity;
+      if (batchItem.destination != ReceiptBatchDestination.inventory) {
+        remaining += value;
+        continue;
+      }
+      final inventoryItem = inventoryMap[batchItem.inventoryItemId];
 
       if (inventoryItem == null) {
         remaining += value;

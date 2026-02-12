@@ -65,13 +65,19 @@ class _ReceiptBatchReviewScreenState
     }
 
     final now = DateTime.now();
+    var itemCounter = 0;
+    String buildItemId(String name) {
+      final counter = itemCounter++;
+      return '${now.microsecondsSinceEpoch}_${counter}_${name.hashCode}';
+    }
+
     final batchItems = <ReceiptBatchItem>[];
 
     if (destination == ReceiptBatchDestination.shoppingList) {
       final shoppingRepo = ref.read(shoppingListRepositoryProvider);
       await shoppingRepo.init();
       for (final item in selected) {
-        final id = '${now.microsecondsSinceEpoch}_${item.name.hashCode}';
+        final id = buildItemId(item.name);
         final shoppingItem = ShoppingListItem(
           id: id,
           name: item.name,
@@ -97,7 +103,7 @@ class _ReceiptBatchReviewScreenState
       final itemRepo = ref.read(itemRepositoryProvider);
       await itemRepo.init();
       for (final item in selected) {
-        final id = '${now.microsecondsSinceEpoch}_${item.name.hashCode}';
+        final id = buildItemId(item.name);
         final inventoryItem = Item(
           id: id,
           name: item.name,

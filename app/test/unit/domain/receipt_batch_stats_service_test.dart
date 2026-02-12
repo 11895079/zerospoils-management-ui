@@ -79,5 +79,31 @@ void main() {
       expect(stats.wastedValue, 3.49);
       expect(stats.remainingValue, 2.50);
     });
+
+    test('treats shopping list items as remaining value', () {
+      final batch = ReceiptBatch(
+        id: 'batch-2',
+        createdAt: DateTime(2026, 2, 10),
+        source: ReceiptBatchSource.shoppingList,
+        items: [
+          ReceiptBatchItem(
+            id: 'r1',
+            name: 'Eggs',
+            price: 5.25,
+            quantity: 1,
+            destination: ReceiptBatchDestination.shoppingList,
+            shoppingListItemId: 's1',
+          ),
+        ],
+      );
+
+      final service = ReceiptBatchStatsService();
+      final stats = service.build(batch: batch, inventoryItems: const []);
+
+      expect(stats.totalSpend, 5.25);
+      expect(stats.consumedValue, 0);
+      expect(stats.wastedValue, 0);
+      expect(stats.remainingValue, 5.25);
+    });
   });
 }
