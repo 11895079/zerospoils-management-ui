@@ -7,6 +7,7 @@ import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart';
 import 'presentation/di/repository_providers.dart';
 import 'data/adapters/item_adapter.dart';
+import 'data/adapters/receipt_batch_adapter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/notifications/notification_service.dart';
 
@@ -24,6 +25,8 @@ void main() async {
   Hive.registerAdapter(WasteReasonAdapter());
   Hive.registerAdapter(ItemTypeAdapter());
   Hive.registerAdapter(UnitAdapter());
+  Hive.registerAdapter(ReceiptBatchItemAdapter());
+  Hive.registerAdapter(ReceiptBatchAdapter());
 
   // Initialize notifications
   await NotificationService().initialize();

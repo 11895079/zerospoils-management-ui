@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Batch Receipt Capture</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <header class="app-header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1>Batch Receipt Capture</h1>
+      </div>
+    </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="expiring-soon.html">⏰ Expiring Soon</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="receipt-batches.html">🧾 Receipt Batches</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="settings.html">⚙️ Settings</a>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="section-label">Photos (3/5)</div>
+      <div class="capture-grid">
+        <div class="capture-slot filled">📷 1</div>
+        <div class="capture-slot filled">📷 2</div>
+        <div class="capture-slot filled">📷 3</div>
+        <div class="capture-slot">＋</div>
+        <div class="capture-slot">＋</div>
+      </div>
+      <p class="help-text">Capture clear photos of each receipt section. Max 5 photos.</p>
+
+      <a class="btn btn-primary" href="receipt-batch-detail.html">Process Receipts</a>
+      <a class="btn btn-secondary" href="receipt-batches.html">Cancel</a>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
+  </script>
+</body>
+</html>

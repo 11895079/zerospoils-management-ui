@@ -2,10 +2,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
+import '../../data/adapters/receipt_batch_adapter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/badge_model.dart';
+import '../../domain/models/receipt_batch.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
 import '../widgets/app_drawer.dart';
@@ -27,7 +30,7 @@ class ProgressScreen extends ConsumerWidget {
         elevation: 1,
       ),
       body: statsAsync.when(
-        data: (stats) => _buildContent(context, stats),
+        data: (stats) => _buildContent(context, ref, stats),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: Padding(
@@ -43,7 +46,11 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, ProgressStats stats) {
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    ProgressStats stats,
+  ) {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
@@ -132,9 +139,83 @@ class ProgressScreen extends ConsumerWidget {
         _buildSectionTitle('Telemetry (Local Aggregation)'),
         const SizedBox(height: AppSpacing.sm),
         _buildTelemetrySection(stats),
+        const SizedBox(height: AppSpacing.lg),
+        _buildSectionTitle('Recent Receipt Batch'),
+        const SizedBox(height: AppSpacing.sm),
+        _buildRecentBatchSection(ref),
         const SizedBox(height: AppSpacing.xl),
       ],
     );
+  }
+
+  Widget _buildRecentBatchSection(WidgetRef ref) {
+    return FutureBuilder<ReceiptBatch?>(
+      future: _loadRecentBatch(ref),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Text(
+            'Unable to load recent batch',
+            style: AppTextStyles.body.copyWith(color: AppColors.danger),
+          );
+        }
+
+        final batch = snapshot.data;
+        if (batch == null) {
+          return Text(
+            'No recent receipt batches yet.',
+            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+          );
+        }
+
+        final total = batch.items.fold<double>(
+          0,
+          (sum, item) => sum + (item.price * item.quantity),
+        );
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${batch.items.length} items · ${_currency(total)} total',
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                'Source: ${batch.source.name}',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<ReceiptBatch?> _loadRecentBatch(WidgetRef ref) async {
+    if (!Hive.isAdapterRegistered(receiptBatchAdapterTypeId)) {
+      return null;
+    }
+    try {
+      final repo = ref.read(receiptBatchRepositoryProvider);
+      await repo.init();
+      final batches = await repo.getAllBatches();
+      if (batches.isEmpty) return null;
+      return batches.first;
+    } catch (_) {
+      return null;
+    }
   }
 
   Widget _buildStreakCard(ProgressStats stats) {
