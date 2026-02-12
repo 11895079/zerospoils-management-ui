@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/receipt_batch.dart';
+import 'package:zerospoils/data/repositories/item_repository_base.dart';
+import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
+import 'package:zerospoils/domain/models/badge_model.dart';
+import 'package:zerospoils/domain/repositories/progress_stats_service.dart';
+import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/screens/progress_screen.dart';
+
+class MockItemRepository implements ItemRepositoryBase {
+  final List<Item> _items;
+  MockItemRepository(this._items);
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> clear() async {}
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  Future<void> deleteItem(String id) async {}
+
+  @override
+  Future<List<Item>> getAllItems() async => _items;
+
+  @override
+  Future<Item?> getItem(String id) async {
+    return _items.firstWhere((item) => item.id == id);
+  }
+
+  @override
+  Future<void> saveItem(Item item) async {}
+}
+
+class MockReceiptBatchRepository implements ReceiptBatchRepository {
+  final List<ReceiptBatch> _batches;
+  MockReceiptBatchRepository(this._batches);
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<void> saveBatch(ReceiptBatch batch) async {}
+
+  @override
+  Future<List<ReceiptBatch>> getAllBatches() async => _batches;
+
+  @override
+  Future<ReceiptBatch?> getBatch(String id) async =>
+      _batches.firstWhere((b) => b.id == id);
+}
+
+void main() {
+  testWidgets('Progress shows recent receipt batch stats', (
+    WidgetTester tester,
+  ) async {
+    final batch = ReceiptBatch(
+      id: 'batch-1',
+      createdAt: DateTime(2026, 2, 9),
+      source: ReceiptBatchSource.inventory,
+      items: [
+        ReceiptBatchItem(
+          id: 'r1',
+          name: 'Milk',
+          price: 4.99,
+          quantity: 1,
+          destination: ReceiptBatchDestination.inventory,
+          inventoryItemId: 'i1',
+        ),
+      ],
+    );
+
+    final items = [
+      Item(
+        id: 'i1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        purchasePrice: 4.99,
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 2, 9),
+        updatedAt: DateTime(2026, 2, 9),
+      ),
+    ];
+
+    final fakeStats = ProgressStats(
+      totalItems: 1,
+      availableItems: 1,
+      consumedItems: 0,
+      wastedItems: 0,
+      categoryCounts: {ItemCategory.dairy: 1},
+      locationCounts: {StorageLocation.fridge: 1},
+      typeCounts: {ItemType.raw: 1},
+      expiringTodayCount: 0,
+      expiringThisWeekCount: 0,
+      expiringSoonCount: 0,
+      expiredCount: 0,
+      noExpiryCount: 1,
+      totalValue: 4.99,
+      consumedValue: 0,
+      wastedValue: 0,
+      savedValue: 0,
+      addedLast7Days: 1,
+      addedLast30Days: 1,
+      updatedLast7Days: 0,
+      updatedLast30Days: 0,
+      noWasteStreak: StreakData(
+        badgeType: BadgeType.noWasteWeek,
+        streakDays: 1,
+        streakStartDate: DateTime(2026, 2, 8),
+        lastActivityDate: DateTime(2026, 2, 9),
+        isActive: false,
+      ),
+      badgeProgress: const {},
+      telemetry: TelemetryAggregates.empty(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(MockItemRepository(items)),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            MockReceiptBatchRepository([batch]),
+          ),
+          progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+        ],
+        child: const MaterialApp(home: ProgressScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Progress'), findsOneWidget);
+  });
+}

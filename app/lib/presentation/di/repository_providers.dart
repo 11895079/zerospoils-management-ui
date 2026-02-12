@@ -6,6 +6,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/hive_shopping_list_repository.dart';
+import '../../data/repositories/receipt_batch_repository.dart';
 import '../../data/repositories/demo_item_repository.dart';
 import '../../data/repositories/item_repository_base.dart';
 import '../../domain/models/item_model.dart';
@@ -41,6 +42,11 @@ final shoppingListRepositoryProvider = Provider<HiveShoppingListRepository>((
   ref,
 ) {
   return HiveShoppingListRepository();
+});
+
+/// Receipt batch repository provider
+final receiptBatchRepositoryProvider = Provider<ReceiptBatchRepository>((ref) {
+  return HiveReceiptBatchRepository();
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)

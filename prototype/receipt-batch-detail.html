@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - Batch Detail</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <header class="app-header">
+      <div class="header-left">
+        <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
+        <h1>Batch Detail</h1>
+      </div>
+      <div class="header-right">
+        <a href="receipt-batch-capture.html" class="filter-btn" style="text-decoration:none;">New Batch</a>
+      </div>
+    </header>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" onclick="toggleDrawer(false)"></div>
+    <aside id="sideDrawer" class="side-drawer" aria-label="Menu">
+      <div class="drawer-header">
+        <div class="drawer-title">Menu</div>
+        <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+      </div>
+      <div class="drawer-links">
+        <a href="onboarding/welcome.html">ℹ️ Onboarding</a>
+        <a href="index.html">📦 Inventory</a>
+        <a href="expiring-soon.html">⏰ Expiring Soon</a>
+        <a href="shopping-list.html">🛒 Shopping List</a>
+        <a href="receipt-batches.html">🧾 Receipt Batches</a>
+        <a href="progress.html">📊 Progress</a>
+        <a href="settings.html">⚙️ Settings</a>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="batch-summary-card">
+        <div class="batch-title">Feb 9 · 5 receipts</div>
+        <div class="batch-meta">18 items · $112.40 total</div>
+        <div class="batch-stats">
+          <span>Consumed $64</span>
+          <span>Wasted $8</span>
+          <span>Remaining $40.40</span>
+        </div>
+      </div>
+
+      <div class="section-label">Items</div>
+      <div class="batch-item-row">
+        <div class="item-icon">🥛</div>
+        <div class="item-info">
+          <h3>Milk</h3>
+          <p class="expiry">Consumed</p>
+        </div>
+        <div class="batch-price">$4.99</div>
+      </div>
+      <div class="batch-item-row">
+        <div class="item-icon">🍎</div>
+        <div class="item-info">
+          <h3>Apples</h3>
+          <p class="expiry">Available</p>
+        </div>
+        <div class="batch-price">$3.49</div>
+      </div>
+      <div class="batch-item-row">
+        <div class="item-icon">🍗</div>
+        <div class="item-info">
+          <h3>Chicken Breast</h3>
+          <p class="expiry">Wasted</p>
+        </div>
+        <div class="batch-price">$11.20</div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    function toggleDrawer(open) {
+      const drawer = document.getElementById('sideDrawer');
+      const backdrop = document.getElementById('drawerBackdrop');
+      if (open) {
+        drawer.classList.add('open');
+        backdrop.classList.add('show');
+      } else {
+        drawer.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+    }
+  </script>
+</body>
+</html>
