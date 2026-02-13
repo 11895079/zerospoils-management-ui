@@ -8,6 +8,7 @@ import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/screens/inventory_screen.dart';
 import 'package:zerospoils/presentation/widgets/item_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Mock repositories and telemetry client for testing
 class MockItemRepository extends HiveItemRepository {
@@ -32,18 +33,29 @@ class MockItemRepository extends HiveItemRepository {
 
 class MockTelemetryClient extends TelemetryClient {
   @override
-  void enqueue(Map<String, dynamic> event) {}
-
-  void trackEvent(String eventName, {Map<String, dynamic>? properties}) {}
-
-  void trackScreen(String screenName, {Map<String, dynamic>? properties}) {}
+  void enqueue(Map<String, dynamic> event) {
+    events.add(event);
+  }
 }
 
 void main() {
   late MockItemRepository mockRepository;
+  Item buildTestItem() {
+    final now = DateTime.now();
+    return Item(
+      id: 'test-item',
+      name: 'Apples',
+      category: ItemCategory.produce,
+      location: StorageLocation.pantry,
+      status: ItemStatus.available,
+      createdAt: now,
+      updatedAt: now,
+    );
+  }
 
   setUp(() {
     mockRepository = MockItemRepository();
+    SharedPreferences.setMockInitialValues({});
   });
 
   Future<void> pumpInventoryScreen(
@@ -164,6 +176,151 @@ void main() {
       ),
       findsNothing,
     );
+  });
+
+  testWidgets('defaults to list view mode', (tester) async {
+    mockRepository.items = [buildTestItem()];
+
+    await pumpInventoryScreen(tester);
+
+    expect(find.byKey(const Key('inventory_view_mode_list')), findsOneWidget);
+  });
+
+  testWidgets('toggles to grid and table view modes', (tester) async {
+    mockRepository.items = [buildTestItem()];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byKey(const Key('inventory_view_mode_grid_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('inventory_view_mode_grid')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('inventory_view_mode_table_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('inventory_view_mode_table')), findsOneWidget);
+  });
+
+  testWidgets('emits telemetry when view mode changes', (tester) async {
+    final telemetry = MockTelemetryClient();
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        expiryDate: now.add(const Duration(days: 4)),
+        createdAt: now,
+        updatedAt: now,
+      ),
+      Item(
+        id: '2',
+        name: 'Chicken',
+        category: ItemCategory.meat,
+        location: StorageLocation.freezer,
+        status: ItemStatus.available,
+        expiryDate: now.add(const Duration(days: 2)),
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepository),
+          itemsFutureProvider.overrideWith((ref) async {
+            return mockRepository.items;
+          }),
+          telemetryClientProvider.overrideWithValue(telemetry),
+        ],
+        child: const MaterialApp(home: InventoryScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('inventory_view_mode_grid_button')));
+    await tester.pumpAndSettle();
+
+    expect(telemetry.events, isNotEmpty);
+    final event = telemetry.events.last;
+    expect(event['name'], 'inventory_view_mode_changed');
+    final properties = event['properties'] as Map<String, dynamic>;
+    expect(properties['from'], 'list');
+    expect(properties['to'], 'grid');
+    expect(properties['filters_applied'], 0);
+    expect(properties['sort_key'], isNotNull);
+    expect(properties['result_count'], 2);
+  });
+
+  testWidgets('table header sorting toggles and persists across modes', (
+    tester,
+  ) async {
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Bananas',
+        category: ItemCategory.produce,
+        location: StorageLocation.pantry,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+      Item(
+        id: '2',
+        name: 'Apples',
+        category: ItemCategory.produce,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byKey(const Key('inventory_view_mode_table_button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('inventory_table_header_name')));
+    await tester.pumpAndSettle();
+
+    var table = tester.widget<DataTable>(find.byType(DataTable));
+    expect(table.sortColumnIndex, 0);
+    expect(table.sortAscending, true);
+    var firstCell = table.rows.first.cells.first.child as Text;
+    expect(firstCell.data, 'Apples');
+
+    await tester.tap(find.byKey(const Key('inventory_table_header_name')));
+    await tester.pumpAndSettle();
+
+    table = tester.widget<DataTable>(find.byType(DataTable));
+    expect(table.sortColumnIndex, 0);
+    expect(table.sortAscending, false);
+    firstCell = table.rows.first.cells.first.child as Text;
+    expect(firstCell.data, 'Bananas');
+
+    await tester.tap(find.byKey(const Key('inventory_view_mode_grid_button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('inventory_view_mode_table_button')));
+    await tester.pumpAndSettle();
+
+    table = tester.widget<DataTable>(find.byType(DataTable));
+    expect(table.sortColumnIndex, 0);
+    expect(table.sortAscending, false);
+  });
+
+  testWidgets('persists view mode across restarts', (tester) async {
+    SharedPreferences.setMockInitialValues({'inventory_view_mode': 'grid'});
+    mockRepository.items = [buildTestItem()];
+
+    await pumpInventoryScreen(tester);
+
+    expect(find.byKey(const Key('inventory_view_mode_grid')), findsOneWidget);
   });
 
   testWidgets('category filter works', (tester) async {
