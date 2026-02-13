@@ -24,6 +24,35 @@ final inventoryFilterProvider = StateProvider<InventoryFilterState>((ref) {
   return const InventoryFilterState();
 });
 
+enum InventoryViewMode { list, table, grid }
+
+enum InventorySortKey { name, category, location, expiry, quantity, status }
+
+extension InventorySortKeyExtension on InventorySortKey {
+  String get telemetryKey {
+    switch (this) {
+      case InventorySortKey.name:
+        return 'name';
+      case InventorySortKey.category:
+        return 'category';
+      case InventorySortKey.location:
+        return 'location';
+      case InventorySortKey.expiry:
+        return 'expiry';
+      case InventorySortKey.quantity:
+        return 'quantity';
+      case InventorySortKey.status:
+        return 'status';
+    }
+  }
+}
+
+const _viewModePrefsKey = 'inventory_view_mode';
+
+final inventoryViewModeProvider = StateProvider<InventoryViewMode>((ref) {
+  return InventoryViewMode.list;
+});
+
 class InventoryFilterState {
   final ItemCategory? category;
   final StorageLocation? location;
@@ -93,6 +122,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _listController = ScrollController();
   late final ProviderSubscription<AsyncValue<List<Item>>> _itemsSubscription;
+  InventorySortKey _sortKey = InventorySortKey.expiry;
+  bool _sortAscending = true;
+  int _sortColumnIndex = 3;
 
   @override
   void initState() {
@@ -100,6 +132,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     // Restore search query from persisted state
     final filterState = ref.read(inventoryFilterProvider);
     _searchController.text = filterState.searchQuery;
+
+    _loadViewMode();
 
     _itemsSubscription = ref.listenManual<AsyncValue<List<Item>>>(
       itemsFutureProvider,
@@ -122,6 +156,43 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       },
       fireImmediately: true,
     );
+  }
+
+  Future<void> _loadViewMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final stored = prefs.getString(_viewModePrefsKey);
+      if (stored == null) return;
+      final parsed = InventoryViewMode.values.firstWhere(
+        (mode) => mode.name == stored,
+        orElse: () => InventoryViewMode.list,
+      );
+      ref.read(inventoryViewModeProvider.notifier).state = parsed;
+    } catch (_) {}
+  }
+
+  Future<void> _setViewMode(
+    InventoryViewMode mode,
+    InventoryFilterState filterState,
+    int resultCount,
+  ) async {
+    final previous = ref.read(inventoryViewModeProvider);
+    if (previous == mode) return;
+    ref.read(inventoryViewModeProvider.notifier).state = mode;
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'inventory_view_mode_changed',
+      'properties': {
+        'from': previous.name,
+        'to': mode.name,
+        'filters_applied': filterState.activeFilterCount,
+        'sort_key': _sortKey.telemetryKey,
+        'result_count': resultCount,
+      },
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_viewModePrefsKey, mode.name);
+    } catch (_) {}
   }
 
   @override
@@ -274,24 +345,75 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           .toList();
     }
 
-    // Sort: available items first, then consumed/wasted at bottom
-    filtered.sort((a, b) {
-      if (a.status == ItemStatus.available &&
-          b.status != ItemStatus.available) {
-        return -1;
-      }
-      if (a.status != ItemStatus.available &&
-          b.status == ItemStatus.available) {
-        return 1;
-      }
-      // Within same status group, sort by expiry (items expiring soonest first)
-      if (a.expiryDate == null && b.expiryDate == null) return 0;
-      if (a.expiryDate == null) return 1;
-      if (b.expiryDate == null) return -1;
-      return a.expiryDate!.compareTo(b.expiryDate!);
-    });
+    return _sortItems(filtered);
+  }
 
-    return filtered;
+  List<Item> _sortItems(List<Item> items) {
+    final sorted = List<Item>.from(items);
+    sorted.sort((a, b) {
+      final statusCompare = _statusRank(
+        a.status,
+      ).compareTo(_statusRank(b.status));
+      if (statusCompare != 0) {
+        return statusCompare;
+      }
+
+      var primary = _compareBySortKey(a, b, _sortKey);
+      if (!_sortAscending) {
+        primary = -primary;
+      }
+      if (primary != 0) {
+        return primary;
+      }
+
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
+    return sorted;
+  }
+
+  int _compareBySortKey(Item a, Item b, InventorySortKey sortKey) {
+    switch (sortKey) {
+      case InventorySortKey.name:
+        return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      case InventorySortKey.category:
+        return a.category.displayName.compareTo(b.category.displayName);
+      case InventorySortKey.location:
+        return a.location.displayName.compareTo(b.location.displayName);
+      case InventorySortKey.expiry:
+        if (a.expiryDate == null && b.expiryDate == null) return 0;
+        if (a.expiryDate == null) return 1;
+        if (b.expiryDate == null) return -1;
+        return a.expiryDate!.compareTo(b.expiryDate!);
+      case InventorySortKey.quantity:
+        final quantityCompare = a.quantity.compareTo(b.quantity);
+        if (quantityCompare != 0) return quantityCompare;
+        return a.unit.displayName.compareTo(b.unit.displayName);
+      case InventorySortKey.status:
+        return _statusRank(a.status).compareTo(_statusRank(b.status));
+    }
+  }
+
+  int _statusRank(ItemStatus status) {
+    switch (status) {
+      case ItemStatus.available:
+        return 0;
+      case ItemStatus.consumed:
+        return 1;
+      case ItemStatus.wasted:
+        return 2;
+    }
+  }
+
+  void _onSort(InventorySortKey key, int columnIndex) {
+    setState(() {
+      if (_sortKey == key) {
+        _sortAscending = !_sortAscending;
+      } else {
+        _sortKey = key;
+        _sortAscending = true;
+      }
+      _sortColumnIndex = columnIndex;
+    });
   }
 
   void _showFilterOptions() {
@@ -590,6 +712,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final itemsAsync = ref.watch(itemsFutureProvider);
     final filterState = ref.watch(inventoryFilterProvider);
     final progressStatsAsync = ref.watch(progressStatsProvider);
+    final viewMode = ref.watch(inventoryViewModeProvider);
+    final filteredCount = itemsAsync.maybeWhen(
+      data: (items) => _applyFilters(items, filterState).length,
+      orElse: () => 0,
+    );
 
     return Scaffold(
       drawer: const AppDrawer(),
@@ -600,6 +727,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: const Text('Inventory', style: AppTextStyles.h3),
         elevation: 1,
         actions: [
+          _buildViewModeToggle(viewMode, filterState, filteredCount),
           Stack(
             alignment: Alignment.center,
             children: [
@@ -656,120 +784,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Expanded(
                 child: filteredItems.isEmpty
                     ? _buildEmptyState()
-                    : ListView.builder(
-                        key: const PageStorageKey('inventory_list'),
-                        padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
-                        controller: _listController,
-                        itemCount: filteredItems.length,
-                        itemBuilder: (context, index) {
-                          final item = filteredItems[index];
-                          return ItemCard(
-                            item: item,
-                            onTap: () {
-                              ref.read(telemetryClientProvider).enqueue({
-                                'name': 'item_detail_opened',
-                                'properties': {
-                                  'item_id': item.id,
-                                  'category': item.category.name,
-                                  'location': item.location.name,
-                                },
-                              });
-                              context.goNamed(
-                                'item-detail',
-                                pathParameters: {'id': item.id},
-                              );
-                            },
-                            onEdit: () async {
-                              ref.read(telemetryClientProvider).enqueue({
-                                'name': 'item_edit_opened',
-                                'properties': {
-                                  'item_id': item.id,
-                                  'category': item.category.name,
-                                  'location': item.location.name,
-                                },
-                              });
-                              await context.pushNamed(
-                                'edit-item',
-                                pathParameters: {'id': item.id},
-                              );
-                              await _refreshItems();
-                              setState(() {});
-                            },
-                            onDelete: () async {
-                              final confirmed = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) {
-                                  return AlertDialog(
-                                    title: const Text('Delete Item?'),
-                                    content: Text(
-                                      'Are you sure you want to delete "${item.name}" from your inventory?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(ctx).pop(false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(ctx).pop(true),
-                                        child: const Text(
-                                          'Delete',
-                                          style: TextStyle(
-                                            color: AppColors.danger,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-
-                              if (confirmed == true) {
-                                final repo = ref.read(itemRepositoryProvider);
-                                await repo.init();
-                                await repo.deleteItem(item.id);
-
-                                // Check if this was the last item; if so, allow demo mode again
-                                final remainingItems = await repo.getAllItems();
-                                if (remainingItems.isEmpty) {
-                                  // Reset manual items flag to allow demo mode again
-                                  ref
-                                          .read(hasManualItemsProvider.notifier)
-                                          .state =
-                                      false;
-                                  try {
-                                    final prefs =
-                                        await SharedPreferences.getInstance();
-                                    await prefs.setBool(
-                                      'has_manual_items',
-                                      false,
-                                    );
-                                  } catch (_) {}
-                                }
-
-                                ref.read(telemetryClientProvider).enqueue({
-                                  'name': 'item_deleted',
-                                  'properties': {
-                                    'item_id': item.id,
-                                    'category': item.category.name,
-                                    'location': item.location.name,
-                                  },
-                                });
-                                await _refreshItems();
-                                setState(() {});
-                              }
-                            },
-                            onQuantityChanged: (newQty) async {
-                              final repo = ref.read(itemRepositoryProvider);
-                              await repo.init();
-                              final updated = item.copyWith(quantity: newQty);
-                              await repo.saveItem(updated);
-                              await _refreshItems();
-                              setState(() {});
-                            },
-                          );
-                        },
+                    : _buildInventoryModeView(
+                        viewMode,
+                        filterState,
+                        filteredItems,
                       ),
               ),
             ],
@@ -956,6 +974,489 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   String _formatShortDate(DateTime date) {
     return DateFormat('MMM d, yyyy').format(date);
+  }
+
+  Widget _buildViewModeToggle(
+    InventoryViewMode current,
+    InventoryFilterState filterState,
+    int resultCount,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(right: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            key: const Key('inventory_view_mode_list_button'),
+            tooltip: 'List view',
+            icon: Icon(
+              Icons.view_list,
+              color: current == InventoryViewMode.list
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
+            ),
+            onPressed: () =>
+                _setViewMode(InventoryViewMode.list, filterState, resultCount),
+          ),
+          IconButton(
+            key: const Key('inventory_view_mode_table_button'),
+            tooltip: 'Table view',
+            icon: Icon(
+              Icons.table_chart,
+              color: current == InventoryViewMode.table
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
+            ),
+            onPressed: () =>
+                _setViewMode(InventoryViewMode.table, filterState, resultCount),
+          ),
+          IconButton(
+            key: const Key('inventory_view_mode_grid_button'),
+            tooltip: 'Grid view',
+            icon: Icon(
+              Icons.grid_view,
+              color: current == InventoryViewMode.grid
+                  ? AppColors.primary
+                  : AppColors.textSecondary,
+            ),
+            onPressed: () =>
+                _setViewMode(InventoryViewMode.grid, filterState, resultCount),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInventoryModeView(
+    InventoryViewMode mode,
+    InventoryFilterState filterState,
+    List<Item> filteredItems,
+  ) {
+    switch (mode) {
+      case InventoryViewMode.table:
+        return _buildInventoryTableView(filteredItems);
+      case InventoryViewMode.grid:
+        return _buildInventoryGridView(filteredItems);
+      case InventoryViewMode.list:
+        return _buildInventoryListView(filteredItems);
+    }
+  }
+
+  Widget _buildInventoryListView(List<Item> items) {
+    return ListView.builder(
+      key: const Key('inventory_view_mode_list'),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
+      controller: _listController,
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ItemCard(
+          item: item,
+          onTap: () => _openItemDetail(item),
+          onEdit: () => _editItem(item),
+          onDelete: () => _deleteItem(item),
+          onQuantityChanged: (newQty) => _updateQuantity(item, newQty),
+        );
+      },
+    );
+  }
+
+  Widget _buildInventoryGridView(List<Item> items) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= 900 ? 3 : 2;
+
+        return GridView.builder(
+          key: const Key('inventory_view_mode_grid'),
+          padding: const EdgeInsets.only(
+            left: AppSpacing.md,
+            right: AppSpacing.md,
+            bottom: AppSpacing.xxl,
+          ),
+          controller: _listController,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            mainAxisSpacing: AppSpacing.md,
+            crossAxisSpacing: AppSpacing.md,
+            childAspectRatio: 0.9,
+          ),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return _buildGridCard(item);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildInventoryTableView(List<Item> items) {
+    return SingleChildScrollView(
+      key: const Key('inventory_view_mode_table'),
+      padding: const EdgeInsets.only(
+        left: AppSpacing.md,
+        right: AppSpacing.md,
+        bottom: AppSpacing.xxl,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          sortColumnIndex: _sortColumnIndex,
+          sortAscending: _sortAscending,
+          columns: [
+            DataColumn(
+              label: const Text(
+                'Name',
+                key: Key('inventory_table_header_name'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.name, columnIndex),
+            ),
+            DataColumn(
+              label: const Text(
+                'Category',
+                key: Key('inventory_table_header_category'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.category, columnIndex),
+            ),
+            DataColumn(
+              label: const Text(
+                'Location',
+                key: Key('inventory_table_header_location'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.location, columnIndex),
+            ),
+            DataColumn(
+              label: const Text(
+                'Expiry',
+                key: Key('inventory_table_header_expiry'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.expiry, columnIndex),
+            ),
+            DataColumn(
+              label: const Text(
+                'Qty',
+                key: Key('inventory_table_header_quantity'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.quantity, columnIndex),
+            ),
+            DataColumn(
+              label: const Text(
+                'Status',
+                key: Key('inventory_table_header_status'),
+              ),
+              onSort: (columnIndex, _) =>
+                  _onSort(InventorySortKey.status, columnIndex),
+            ),
+          ],
+          rows: items
+              .map(
+                (item) => DataRow(
+                  onSelectChanged: (_) => _openItemDetail(item),
+                  cells: [
+                    DataCell(Text(item.name)),
+                    DataCell(Text(item.category.displayName)),
+                    DataCell(Text(item.location.displayName)),
+                    DataCell(
+                      Text(
+                        item.expiryDate == null
+                            ? '—'
+                            : DateFormat('MMM d').format(item.expiryDate!),
+                      ),
+                    ),
+                    DataCell(Text('${item.quantity} ${item.unit.name}')),
+                    DataCell(Text(item.status.displayName)),
+                  ],
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridCard(Item item) {
+    final emoji = _getItemEmoji(item);
+    return Semantics(
+      button: true,
+      label: '${item.name}, ${item.status.displayName}',
+      child: InkWell(
+        onTap: () => _openItemDetail(item),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                  ),
+                  const Spacer(),
+                  _buildStatusPill(item.status),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                item.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              _buildExpiryChip(item),
+              const SizedBox(height: AppSpacing.xs),
+              _buildLocationChip(item),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusPill(ItemStatus status) {
+    final color = _statusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+      ),
+      child: Text(
+        status.displayName,
+        style: AppTextStyles.caption.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Color _statusColor(ItemStatus status) {
+    switch (status) {
+      case ItemStatus.available:
+        return AppColors.success;
+      case ItemStatus.consumed:
+        return AppColors.textSecondary;
+      case ItemStatus.wasted:
+        return AppColors.danger;
+    }
+  }
+
+  Widget _buildExpiryChip(Item item) {
+    final label = item.expiryDate == null
+        ? 'No expiry'
+        : 'Exp ${DateFormat('MMM d').format(item.expiryDate!)}';
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationChip(Item item) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+      ),
+      child: Text(
+        item.location.displayName,
+        style: AppTextStyles.caption.copyWith(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  String _getItemEmoji(Item item) {
+    final name = item.name.toLowerCase();
+    if (name.contains('milk')) return '🥛';
+    if (name.contains('egg')) return '🥚';
+    if (name.contains('cheese')) return '🧀';
+    if (name.contains('yogurt')) return '🥣';
+    if (name.contains('butter')) return '🧈';
+    if (name.contains('bread')) return '🍞';
+    if (name.contains('apple')) return '🍏';
+    if (name.contains('banana')) return '🍌';
+    if (name.contains('orange')) return '🍊';
+    if (name.contains('carrot')) return '🥕';
+    if (name.contains('potato')) return '🥔';
+    if (name.contains('onion')) return '🧅';
+    if (name.contains('chicken')) return '🍗';
+    if (name.contains('beef')) return '🥩';
+    if (name.contains('fish')) return '🐟';
+    if (name.contains('rice')) return '🍚';
+    if (name.contains('pasta')) return '🍝';
+    if (name.contains('tomato')) return '🍅';
+    if (name.contains('lettuce')) return '🥬';
+    if (name.contains('cucumber')) return '🥒';
+    if (name.contains('grape')) return '🍇';
+    if (name.contains('berry')) return '🫐';
+    if (name.contains('lemon')) return '🍋';
+    if (name.contains('lime')) return '🍈';
+    if (name.contains('corn')) return '🌽';
+    if (name.contains('avocado')) return '🥑';
+    if (name.contains('mushroom')) return '🍄';
+    if (name.contains('pepper')) return '🫑';
+    if (name.contains('garlic')) return '🧄';
+    if (name.contains('sausage')) return '🌭';
+    if (name.contains('bacon')) return '🥓';
+    if (name.contains('shrimp')) return '🦐';
+    if (name.contains('crab')) return '🦀';
+    if (name.contains('lobster')) return '🦞';
+    if (name.contains('ice cream')) return '🍨';
+    if (name.contains('cake')) return '🍰';
+    if (name.contains('cookie')) return '🍪';
+    if (name.contains('chocolate')) return '🍫';
+    if (name.contains('juice')) return '🧃';
+    if (name.contains('water')) return '💧';
+    if (name.contains('soda')) return '🥤';
+    if (name.contains('beer')) return '🍺';
+    if (name.contains('wine')) return '🍷';
+    return _getCategoryEmoji(item.category);
+  }
+
+  String _getCategoryEmoji(ItemCategory category) {
+    switch (category) {
+      case ItemCategory.dairy:
+        return '🥛';
+      case ItemCategory.produce:
+        return '🍎';
+      case ItemCategory.meat:
+        return '🍗';
+      case ItemCategory.grains:
+        return '🌾';
+      case ItemCategory.pantry:
+        return '🗄️';
+      case ItemCategory.other:
+        return '📦';
+    }
+  }
+
+  void _openItemDetail(Item item) {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'item_detail_opened',
+      'properties': {
+        'item_id': item.id,
+        'category': item.category.name,
+        'location': item.location.name,
+      },
+    });
+    context.goNamed('item-detail', pathParameters: {'id': item.id});
+  }
+
+  Future<void> _editItem(Item item) async {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'item_edit_opened',
+      'properties': {
+        'item_id': item.id,
+        'category': item.category.name,
+        'location': item.location.name,
+      },
+    });
+    await context.pushNamed('edit-item', pathParameters: {'id': item.id});
+    await _refreshItems();
+    setState(() {});
+  }
+
+  Future<void> _deleteItem(Item item) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Delete Item?'),
+          content: Text(
+            'Are you sure you want to delete "${item.name}" from your inventory?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text(
+                'Delete',
+                style: TextStyle(color: AppColors.danger),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      final repo = ref.read(itemRepositoryProvider);
+      await repo.init();
+      await repo.deleteItem(item.id);
+
+      final remainingItems = await repo.getAllItems();
+      if (remainingItems.isEmpty) {
+        ref.read(hasManualItemsProvider.notifier).state = false;
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('has_manual_items', false);
+        } catch (_) {}
+      }
+
+      ref.read(telemetryClientProvider).enqueue({
+        'name': 'item_deleted',
+        'properties': {
+          'item_id': item.id,
+          'category': item.category.name,
+          'location': item.location.name,
+        },
+      });
+      await _refreshItems();
+      setState(() {});
+    }
+  }
+
+  Future<void> _updateQuantity(Item item, int newQty) async {
+    final repo = ref.read(itemRepositoryProvider);
+    await repo.init();
+    final updated = item.copyWith(quantity: newQty);
+    await repo.saveItem(updated);
+    await _refreshItems();
+    setState(() {});
   }
 
   Widget _buildActiveFilters(InventoryFilterState filterState) {

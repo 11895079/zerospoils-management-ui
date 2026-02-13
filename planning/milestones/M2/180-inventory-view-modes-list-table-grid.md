@@ -34,13 +34,14 @@ Deliver switchable inventory view modes (list, table, grid/cards) with persisten
 
 ## Implementation notes
 - Reuse shared Inventory state (filters/search/sort) across modes; avoid re-querying on mode switch
-- Persist preference via local settings store (e.g., Hive key). Scope to household profile if available; otherwise device-level
+- Persist preference via local settings store (SharedPreferences key: `inventory_view_mode`). Default to `list` if unset
 - Table view: clickable row opens detail (M2/170); header tap toggles sort; show sort indicators
 - Grid view: use cached image if available; otherwise show colored initial avatar with checksum-based color; constrain image size
 - List view: add location and expiry chips for parity with other modes
 - Ensure empty states render consistently across modes and preserve current filters/search context
 - Telemetry: emit once per mode change; include `result_count` from current filtered dataset
 - Performance: debounce rapid toggles; avoid rebuilding heavy image widgets unnecessarily
+- Add stable widget keys for toggle buttons and mode containers (tests should use keys/icons, not text)
 
 ## Test plan
 **Automated:**
@@ -49,6 +50,7 @@ Deliver switchable inventory view modes (list, table, grid/cards) with persisten
 - Widget test: filters/search applied, switch modes, items set remains filtered
 - Widget test: telemetry event fired with correct `{from, to, filters_applied, sort_key, result_count}`
 - Widget test: table headers toggle sort and reflect indicator; row tap opens detail intent
+- Note: prefer `find.byKey`/`find.byIcon` over text matchers to avoid brittle copy dependencies
 
 **Manual:**
 1. Open Inventory: verify default list mode with expiry + location chips
