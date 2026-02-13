@@ -38,7 +38,7 @@ echo.
 echo Git hooks installed successfully!
 echo.
 echo The following checks will run before each commit:
-echo   * Dart formatting (dart format)
+echo   * Dart formatting (dart format lib test integration_test)
 echo   * Flutter analyzer (flutter analyze)
 echo.
 echo The following check will run before each push:
