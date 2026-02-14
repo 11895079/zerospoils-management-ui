@@ -6,9 +6,8 @@ Flutter mobile app for household food waste reduction.
 
 This repository is the proprietary intellectual property of 11895079 Canada Inc.
 No permission is granted to use, copy, modify, publish, distribute, sublicense,
-or create derivative works from any part of this repository outside of official
-channels explicitly authorized in writing by 11895079 Canada Inc. See
-[LICENSE](LICENSE) for full terms.
+or create derivative works from any part of this repository. 
+See [LICENSE](LICENSE) for full terms.
 
 ## Folder Structure
 
