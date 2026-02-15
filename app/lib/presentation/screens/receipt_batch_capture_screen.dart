@@ -201,7 +201,16 @@ class _ReceiptBatchCaptureScreenState
                   child: ElevatedButton(
                     onPressed: _processing ? null : _processReceipts,
                     child: _processing
-                        ? const CircularProgressIndicator()
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
                         : const Text('Process Receipts'),
                   ),
                 ),
