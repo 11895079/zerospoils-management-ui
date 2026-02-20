@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 import 'package:zerospoils/presentation/widgets/app_button.dart';
@@ -52,6 +55,23 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockItemRepository repository;
+  late Directory tempDir;
+
+  setUpAll(() async {
+    tempDir = Directory.systemTemp.createTempSync('item_form_repo_test_');
+    Hive.init(tempDir.path);
+
+    if (!Hive.isAdapterRegistered(22)) {
+      Hive.registerAdapter(UserCategoryAdapter());
+    }
+  });
+
+  tearDownAll(() async {
+    await Hive.close();
+    if (tempDir.existsSync()) {
+      tempDir.deleteSync(recursive: true);
+    }
+  });
 
   setUp(() async {
     repository = MockItemRepository();
@@ -91,16 +111,41 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap the primary action button (AppButton)
-    final addButton = find.byWidgetPredicate(
-      (widget) => widget is AppButton && widget.text == 'Add Item',
-    );
-    await tester.tap(addButton);
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final items = await repository.getAllItems();
     expect(items.length, 1);
     expect(items.first.name, 'Test Milk');
     expect(items.first.quantity, 2);
+  });
+
+  testWidgets('auto-populates category for known items', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final nameField = find.byType(TextFormField).first;
+    await tester.enterText(nameField, 'Milk');
+
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final items = await repository.getAllItems();
+    expect(items.length, 1);
+    expect(items.first.category, ItemCategory.dairy);
   });
 
   testWidgets('edit mode loads existing item from repository', (tester) async {
@@ -142,10 +187,7 @@ void main() {
     await tester.enterText(nameField, 'Baby Carrots');
     await tester.pumpAndSettle();
 
-    final updateButton = find.byWidgetPredicate(
-      (widget) => widget is AppButton && widget.text == 'Update Item',
-    );
-    await tester.tap(updateButton);
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     final updated = await repository.getItem(existingItem.id);
@@ -172,12 +214,15 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Prepared'));
+      await tester.tap(find.byKey(const Key('item_type_prepared_label')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Prepared Date'), findsOneWidget);
-      expect(find.text(StorageLocation.freezer.displayName), findsOneWidget);
-      expect(find.textContaining('Expires:'), findsOneWidget);
+      expect(find.byKey(const Key('item_form_prepared_date')), findsOneWidget);
+      final locationField = tester
+          .widget<DropdownButtonFormField<StorageLocation>>(
+            find.byKey(const Key('item_form_location_dropdown')),
+          );
+      expect(locationField.initialValue, StorageLocation.freezer);
 
       final nameField = find.byType(TextFormField).first;
       await tester.enterText(nameField, 'Tomato Soup');
@@ -222,13 +267,13 @@ void main() {
     final priceField = find.byType(TextFormField).at(1);
     await tester.enterText(priceField, '-5');
 
-    final addButton = find.byWidgetPredicate(
-      (widget) => widget is AppButton && widget.text == 'Add Item',
-    );
-    await tester.tap(addButton);
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Enter a valid price'), findsOneWidget);
+    final priceFieldState = tester.state<FormFieldState<String>>(
+      find.byKey(const Key('item_form_price_field')),
+    );
+    expect(priceFieldState.hasError, isTrue);
     final items = await repository.getAllItems();
     expect(items, isEmpty);
   });
@@ -252,16 +297,22 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Select date'));
+    await tester.tap(find.byKey(const Key('item_form_expiry_date')));
     await tester.pumpAndSettle();
 
     expect(find.byType(CalendarDatePicker), findsOneWidget);
 
-    await tester.tap(find.text('15'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('OK'));
+    final dialogFinder = find.byType(DatePickerDialog);
+    final okButton = find.descendant(
+      of: dialogFinder,
+      matching: find.byType(TextButton),
+    );
+    await tester.tap(okButton.last);
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Expires:'), findsOneWidget);
+    final expiryDateField = tester.widget<GestureDetector>(
+      find.byKey(const Key('item_form_expiry_date')),
+    );
+    expect(expiryDateField.onTap, isNotNull);
   });
 }

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "category_deleted Event",
+  "description": "User deletes a custom category",
+  "type": "object",
+  "required": ["id", "name", "timestamp", "app_version", "platform", "session_id", "properties"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "name": {"const": "category_deleted"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "app_version": {"type": "string"},
+    "platform": {"type": "string", "enum": ["ios", "android"]},
+    "session_id": {"type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "properties": {
+      "type": "object",
+      "required": ["name", "items_affected"],
+      "properties": {
+        "name": {"type": "string", "description": "Category name"},
+        "items_affected": {"type": "integer", "minimum": 0, "description": "Number of items reassigned or affected"}
+      }
+    }
+  }
+}

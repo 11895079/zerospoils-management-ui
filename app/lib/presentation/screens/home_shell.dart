@@ -25,6 +25,7 @@ class HomeShell extends ConsumerWidget {
       body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
       bottomNavigationBar: BottomNavigationBar(
+        key: const Key('home_bottom_nav'),
         currentIndex: selectedIndex,
         onTap: (index) {
           ref.read(homeTabIndexProvider.notifier).state = index;
@@ -35,19 +36,35 @@ class HomeShell extends ConsumerWidget {
         unselectedItemColor: AppColors.textSecondary,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2, color: Color(0xFF2E7D32)),
+            icon: Icon(
+              Icons.inventory_2,
+              key: Key('nav_inventory'),
+              color: Color(0xFF2E7D32),
+            ),
             label: 'Inventory',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.schedule, color: Color(0xFFEF6C00)),
+            icon: Icon(
+              Icons.schedule,
+              key: Key('nav_expiring'),
+              color: Color(0xFFEF6C00),
+            ),
             label: 'Expiring',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart, color: Color(0xFF1565C0)),
+            icon: Icon(
+              Icons.shopping_cart,
+              key: Key('nav_shopping'),
+              color: Color(0xFF1565C0),
+            ),
             label: 'Shopping',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.insights, color: Color(0xFF6A1B9A)),
+            icon: Icon(
+              Icons.insights,
+              key: Key('nav_progress'),
+              color: Color(0xFF6A1B9A),
+            ),
             label: 'Progress',
           ),
         ],

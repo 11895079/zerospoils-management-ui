@@ -41,6 +41,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
     final batchesAsync = ref.watch(receiptBatchesProvider);
 
     return Scaffold(
+      key: const Key('screen_receipt_batches'),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -49,6 +50,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
         elevation: 1,
         actions: [
           TextButton(
+            key: const Key('receipt_batches_new_batch'),
             onPressed: () => context.pushNamed('receipt-batch-capture'),
             child: const Text('New Batch'),
           ),
@@ -58,6 +60,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
           child: Text(
+            key: const Key('receipt_batches_error'),
             'Unable to load batches',
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
@@ -66,6 +69,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
           if (batches.isEmpty) {
             return Center(
               child: Text(
+                key: const Key('receipt_batches_empty_state'),
                 'No receipt batches yet',
                 style: AppTextStyles.body.copyWith(
                   color: AppColors.textSecondary,

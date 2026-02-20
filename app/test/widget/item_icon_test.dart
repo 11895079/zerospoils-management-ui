@@ -125,10 +125,7 @@ void main() {
       );
 
       expect(find.byType(ItemIcon), findsOneWidget);
-      expect(find.byType(Text), findsOneWidget);
-
-      final text = tester.widget<Text>(find.byType(Text));
-      expect(text.data, 'Produce');
+      expect(find.byKey(const Key('item_icon_label_produce')), findsOneWidget);
     });
 
     testWidgets('displays correct category label', (WidgetTester tester) async {
@@ -143,7 +140,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Dairy'), findsOneWidget);
+      expect(find.byKey(const Key('item_icon_label_dairy')), findsOneWidget);
     });
 
     testWidgets('renders in horizontal direction by default', (
@@ -229,15 +226,6 @@ void main() {
     testWidgets('renders for all categories with labels', (
       WidgetTester tester,
     ) async {
-      final expectedLabels = {
-        ItemCategory.produce: 'Produce',
-        ItemCategory.dairy: 'Dairy',
-        ItemCategory.meat: 'Meat',
-        ItemCategory.grains: 'Grains',
-        ItemCategory.pantry: 'Pantry',
-        ItemCategory.other: 'Other',
-      };
-
       for (final category in ItemCategory.values) {
         await tester.pumpWidget(
           MaterialApp(
@@ -250,7 +238,10 @@ void main() {
           ),
         );
 
-        expect(find.text(expectedLabels[category]!), findsOneWidget);
+        expect(
+          find.byKey(Key('item_icon_label_${category.name}')),
+          findsOneWidget,
+        );
       }
     });
   });

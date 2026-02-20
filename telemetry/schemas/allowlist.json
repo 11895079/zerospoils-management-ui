@@ -19,6 +19,18 @@
     "inventory_viewed": {
       "allowed_properties": ["filter_applied", "sort_by"],
       "description": "User opens inventory screen"
+    },
+    "category_created": {
+      "allowed_properties": ["name", "is_custom"],
+      "description": "User creates a custom category"
+    },
+    "category_deleted": {
+      "allowed_properties": ["name", "items_affected"],
+      "description": "User deletes a custom category"
+    },
+    "category_assigned": {
+      "allowed_properties": ["category", "is_custom"],
+      "description": "User assigns a category to an item"
     }
   }
 }

@@ -9,6 +9,7 @@ import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/receipt_batch_repository.dart';
 import '../../data/repositories/demo_item_repository.dart';
 import '../../data/repositories/item_repository_base.dart';
+import '../../data/repositories/user_category_repository.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import 'service_locator.dart'
@@ -16,6 +17,12 @@ import 'service_locator.dart'
 
 /// Demo mode flag (enabled by default for prototyping)
 final demoModeProvider = StateProvider<bool>((ref) => true);
+
+/// Pro entitlement flag (defaults to false until subscriptions are wired)
+final proEntitlementProvider = StateProvider<bool>((ref) => false);
+
+/// Feature flag for expiry date OCR (Pro-only)
+final expiryDateOcrFeatureProvider = StateProvider<bool>((ref) => false);
 
 /// Home tab index for bottom navigation (Inventory, Expiring, Shopping, Progress)
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
@@ -47,6 +54,11 @@ final shoppingListRepositoryProvider = Provider<HiveShoppingListRepository>((
 /// Receipt batch repository provider
 final receiptBatchRepositoryProvider = Provider<ReceiptBatchRepository>((ref) {
   return HiveReceiptBatchRepository();
+});
+
+/// User-defined category repository provider
+final userCategoryRepositoryProvider = Provider<UserCategoryRepository>((ref) {
+  return UserCategoryRepository();
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)

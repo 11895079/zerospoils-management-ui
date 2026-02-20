@@ -14,6 +14,7 @@ import '../../domain/models/item_model.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/app_button.dart';
+import '../widgets/item_icon.dart';
 import 'package:go_router/go_router.dart';
 
 class ItemDetailScreen extends ConsumerStatefulWidget {
@@ -73,51 +74,111 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
   Future<void> _markItemUsed() async {
     if (_item == null) return;
 
+    final currentQty = _item!.quantity <= 0 ? 1 : _item!.quantity;
+    var consumePercent = 100.0;
+
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Mark as Used?'),
-        content: Text('Mark "${_item!.name}" as consumed?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Mark Used'),
-          ),
-        ],
-      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final consumedQty = ((currentQty * consumePercent / 100).clamp(
+              1,
+              currentQty,
+            )).round();
+            return AlertDialog(
+              title: const Text('Mark as Consumed'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('How much did you consume?'),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    '${consumePercent.round()}% ($consumedQty of $currentQty)',
+                    key: const Key('consume_percentage_value'),
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Slider(
+                    key: const Key('consume_percentage_slider'),
+                    value: consumePercent,
+                    min: 1,
+                    max: 100,
+                    divisions: 99,
+                    label: '${consumePercent.round()}%',
+                    onChanged: (value) =>
+                        setDialogState(() => consumePercent = value),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  key: const Key('consume_cancel_button'),
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  key: const Key('consume_confirm_button'),
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
 
     if (confirmed != true || !mounted) return;
 
     try {
       final repository = ref.read(itemRepositoryProvider);
+      final consumedQty = ((_item!.quantity * consumePercent / 100).clamp(
+        1,
+        _item!.quantity,
+      )).round();
+      final remaining = (_item!.quantity - consumedQty)
+          .clamp(0, _item!.quantity)
+          .toInt();
+      final isFullyConsumed = remaining == 0;
       final updatedItem = _item!.copyWith(
-        status: ItemStatus.consumed,
+        status: isFullyConsumed ? ItemStatus.consumed : ItemStatus.available,
+        quantity: remaining,
         updatedAt: DateTime.now(),
       );
       await repository.saveItem(updatedItem);
 
       // Track telemetry
       ref.read(telemetryClientProvider).enqueue({
-        'name': 'item_marked_used',
+        'name': isFullyConsumed
+            ? 'item_marked_used'
+            : 'item_partially_consumed',
         'properties': {
           'item_id': widget.itemId,
           'category': _item!.category.name,
           'location': _item!.location.name,
+          'consumed_quantity': consumedQty,
+          'remaining_quantity': remaining,
+          'consumed_percentage': consumePercent.round(),
         },
       });
 
       ref.invalidate(itemsFutureProvider);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Item marked as used')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isFullyConsumed
+                  ? 'Item marked as consumed'
+                  : 'Item updated with remaining quantity',
+            ),
+          ),
+        );
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           Navigator.of(context).maybePop();
@@ -145,6 +206,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         final dialogWidth = MediaQuery.of(context).size.width * 0.9;
         return StatefulBuilder(
           builder: (context, setDialogState) => AlertDialog(
+            key: const Key('waste_dialog'),
             insetPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.lg,
@@ -189,6 +251,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     const SizedBox(height: AppSpacing.sm),
                     ...WasteReason.values.map(
                       (reason) => RadioListTile<WasteReason>(
+                        key: Key('waste_reason_${reason.name}'),
                         title: Text(reason.displayName),
                         value: reason,
                         groupValue: selectedReason,
@@ -279,6 +342,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     SizedBox(
                       height: 48,
                       child: TextButton(
+                        key: const Key('waste_cancel_button'),
                         style: TextButton.styleFrom(
                           foregroundColor: AppColors.primary,
                           side: const BorderSide(
@@ -294,6 +358,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     SizedBox(
                       height: 48,
                       child: TextButton(
+                        key: const Key('waste_confirm_button'),
                         style: TextButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -397,6 +462,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
+                    key: const Key('item_detail_error_message'),
                     _errorMessage!,
                     style: AppTextStyles.body.copyWith(color: AppColors.danger),
                     textAlign: TextAlign.center,
@@ -405,6 +471,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   AppButton(
                     text: 'Retry',
                     onPressed: _loadItem,
+                    key: const Key('item_detail_retry_button'),
                     secondary: true,
                   ),
                 ],
@@ -416,6 +483,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
+                    key: const Key('item_detail_not_found'),
                     'Item not found',
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.textSecondary,
@@ -425,6 +493,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   AppButton(
                     text: 'Go Back',
                     onPressed: () => context.pop(),
+                    key: const Key('item_detail_go_back'),
                     secondary: true,
                   ),
                 ],
@@ -434,7 +503,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Item hero section (large emoji + name)
+                  // Item hero section (large icon + name)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       vertical: AppSpacing.xl,
@@ -443,12 +512,18 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     decoration: BoxDecoration(color: AppColors.cardBackground),
                     child: Column(
                       children: [
-                        Text(
-                          _item!.category.emoji,
-                          style: const TextStyle(fontSize: 64),
+                        ItemIcon(
+                          itemName: _item!.name,
+                          category: _item!.category,
+                          size: 64,
+                          showBackground: true,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusLg,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
+                          key: const Key('item_detail_name'),
                           _item!.name,
                           style: AppTextStyles.h1,
                           textAlign: TextAlign.center,
@@ -472,15 +547,23 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                           children: [
                             _buildInfoRow(
                               'Category',
-                              '${_item!.category.emoji} ${_item!.category.displayName}',
+                              '${_item!.customCategoryName != null ? '🏷️' : _item!.category.emoji} ${_item!.categoryLabel}',
+                              valueKey: const Key('item_detail_category'),
                             ),
                             const Divider(height: 1),
-                            _buildInfoRow('Type', _item!.type.displayName),
+                            _buildInfoRow(
+                              'Type',
+                              _item!.type.displayName,
+                              valueKey: const Key('item_detail_type'),
+                            ),
                             const Divider(height: 1),
                             if (_item!.preparedDate != null) ...[
                               _buildInfoRow(
                                 'Prepared Date',
                                 DateFormat.yMMMd().format(_item!.preparedDate!),
+                                valueKey: const Key(
+                                  'item_detail_prepared_date',
+                                ),
                               ),
                               const Divider(height: 1),
                             ] else ...[
@@ -490,22 +573,26 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             _buildInfoRow(
                               'Location',
                               '${_item!.location.emoji} ${_item!.location.displayName}',
+                              valueKey: const Key('item_detail_location'),
                             ),
                             const Divider(height: 1),
                             _buildInfoRow(
                               'Quantity',
                               '${_item!.quantity} ${_item!.unit.displayName}',
+                              valueKey: const Key('item_detail_quantity'),
                             ),
                             const Divider(height: 1),
                             _buildInfoRow(
                               'Added',
                               DateFormat.yMMMd().format(_item!.createdAt),
+                              valueKey: const Key('item_detail_added'),
                             ),
                             const Divider(height: 1),
                             if (_item!.expiryDate != null) ...[
                               _buildInfoRow(
                                 'Expiry Date',
                                 DateFormat.yMMMd().format(_item!.expiryDate!),
+                                valueKey: const Key('item_detail_expiry'),
                               ),
                               const Divider(height: 1),
                             ],
@@ -513,6 +600,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                               'Status',
                               _getStatusText(),
                               valueColor: _getStatusColor(),
+                              valueKey: const Key('item_detail_status'),
                             ),
                           ],
                         ),
@@ -532,6 +620,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                           SizedBox(
                             height: 48,
                             child: TextButton(
+                              key: const Key('item_edit_button'),
                               onPressed: () async {
                                 await context.pushNamed(
                                   'edit-item',
@@ -554,12 +643,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             text: '✓ Mark as Consumed',
                             onPressed: _markItemUsed,
                             secondary: false,
+                            key: const Key('item_mark_consumed_button'),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           AppButton(
                             text: '🗑️ Mark as Wasted',
                             onPressed: _markItemWasted,
                             secondary: true,
+                            key: const Key('item_mark_wasted_button'),
                           ),
                         ],
                       ),
@@ -572,7 +663,12 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {Color? valueColor}) {
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    Key? valueKey,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Row(
@@ -583,6 +679,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
             style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
           ),
           Text(
+            key: valueKey,
             value,
             style: AppTextStyles.body.copyWith(
               fontWeight: FontWeight.w500,

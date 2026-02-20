@@ -94,6 +94,7 @@ class AppDrawer extends ConsumerWidget {
               icon: Icons.settings,
               iconColor: const Color(0xFF455A64),
               label: 'Settings',
+              tileKey: const Key('drawer_settings_item'),
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -115,8 +116,10 @@ class AppDrawer extends ConsumerWidget {
     required String label,
     required VoidCallback onTap,
     bool selected = false,
+    Key? tileKey,
   }) {
     return ListTile(
+      key: tileKey,
       leading: Icon(icon, color: iconColor ?? AppColors.textPrimary),
       title: Text(label),
       selected: selected,

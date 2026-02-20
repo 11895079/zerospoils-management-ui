@@ -29,6 +29,8 @@ class ItemAdapter extends TypeAdapter<Item> {
       purchasePrice: fields[9] as double?,
       status: fields[10] as ItemStatus,
       wasteReason: fields[11] as WasteReason?,
+      customCategoryId: fields[15] as String?,
+      customCategoryName: fields[16] as String?,
       createdAt: fields[12] as DateTime,
       updatedAt: fields[13] as DateTime,
       wastePercentage: fields[14] as int?,
@@ -38,7 +40,7 @@ class ItemAdapter extends TypeAdapter<Item> {
   @override
   void write(BinaryWriter writer, Item obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +70,11 @@ class ItemAdapter extends TypeAdapter<Item> {
       ..writeByte(13)
       ..write(obj.updatedAt)
       ..writeByte(14)
-      ..write(obj.wastePercentage);
+      ..write(obj.wastePercentage)
+      ..writeByte(15)
+      ..write(obj.customCategoryId)
+      ..writeByte(16)
+      ..write(obj.customCategoryName);
   }
 
   @override

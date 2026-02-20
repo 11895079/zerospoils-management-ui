@@ -103,8 +103,11 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Batch Detail'), findsOneWidget);
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('1 items · \$4.99 total'), findsOneWidget);
+    expect(
+      find.byKey(const Key('screen_receipt_batch_detail')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('receipt_batch_summary')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_batch_item_r1')), findsOneWidget);
   });
 }

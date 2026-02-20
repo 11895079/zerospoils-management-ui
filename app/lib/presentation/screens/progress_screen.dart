@@ -8,10 +8,12 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/badge_model.dart';
+import '../../domain/models/item_model.dart';
 import '../../domain/models/receipt_batch.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
 import '../widgets/app_drawer.dart';
+import 'inventory_screen.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -21,6 +23,7 @@ class ProgressScreen extends ConsumerWidget {
     final statsAsync = ref.watch(progressStatsProvider);
 
     return Scaffold(
+      key: const Key('screen_progress'),
       drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -59,10 +62,26 @@ class ProgressScreen extends ConsumerWidget {
         _buildSectionTitle('Summary'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
-          _StatTile(label: 'Total Items', value: '${stats.totalItems}'),
-          _StatTile(label: 'Available', value: '${stats.availableItems}'),
-          _StatTile(label: 'Consumed', value: '${stats.consumedItems}'),
-          _StatTile(label: 'Wasted', value: '${stats.wastedItems}'),
+          _StatTile(
+            label: 'Total Items',
+            value: '${stats.totalItems}',
+            onTap: () => _openInventoryWithStatus(ref, null),
+          ),
+          _StatTile(
+            label: 'Available',
+            value: '${stats.availableItems}',
+            onTap: () => _openInventoryWithStatus(ref, ItemStatus.available),
+          ),
+          _StatTile(
+            label: 'Consumed',
+            value: '${stats.consumedItems}',
+            onTap: () => _openInventoryWithStatus(ref, ItemStatus.consumed),
+          ),
+          _StatTile(
+            label: 'Wasted',
+            value: '${stats.wastedItems}',
+            onTap: () => _openInventoryWithStatus(ref, ItemStatus.wasted),
+          ),
         ]),
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle('Expiry Health'),
@@ -146,6 +165,19 @@ class ProgressScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.xl),
       ],
     );
+  }
+
+  void _openInventoryWithStatus(WidgetRef ref, ItemStatus? status) {
+    ref.read(inventoryFilterProvider.notifier).state = InventoryFilterState(
+      status: status,
+      hideConsumed: status == null,
+      expiringSoonOnly: false,
+      preparedOnly: false,
+      createdAfter: null,
+      createdBefore: null,
+      searchQuery: '',
+    );
+    ref.read(homeTabIndexProvider.notifier).state = 0;
   }
 
   Widget _buildRecentBatchSection(WidgetRef ref) {
@@ -506,8 +538,9 @@ class ProgressScreen extends ConsumerWidget {
 class _StatTile {
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
-  const _StatTile({required this.label, required this.value});
+  const _StatTile({required this.label, required this.value, this.onTap});
 }
 
 class _StatCard extends StatelessWidget {
@@ -517,7 +550,7 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final content = Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -539,6 +572,13 @@ class _StatCard extends StatelessWidget {
           Text(tile.value, style: AppTextStyles.h3),
         ],
       ),
+    );
+
+    if (tile.onTap == null) return content;
+    return InkWell(
+      onTap: tile.onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: content,
     );
   }
 }

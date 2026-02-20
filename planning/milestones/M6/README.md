@@ -9,6 +9,7 @@
 - OCR integration spike (accuracy, cost, latency) (440)
 - Receipt parsing with normalized line items and confidence scoring (450)
 - Receipt review UI: add to inventory with mapping rules (460)
+- AI category inference for Pro item entry (510)
 - Household accounts: auth + shared household model (470)
 - Data sync settings toggle + status (475)
 - Sync rules and conflict resolution (inventory + shopping list) (480)
@@ -21,6 +22,6 @@
 
 **Out of Scope:** IoT integrations (deferred to M7).
 
-**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500
+**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500, 510
 
 **Dependencies:** M5 complete (public launch successful, user base established).

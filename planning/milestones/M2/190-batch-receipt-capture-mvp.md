@@ -10,6 +10,7 @@ Enable batch receipt capture (up to 5 photos) with on-device text extraction and
 - Shopping List includes a visible “Batch Receipt Capture” CTA.
 - Capture up to 5 receipt photos; show thumbnail stack and count.
 - On-device text recognition extracts candidate line items.
+- Android/iOS: OCR runs on-device; Web: show “not available on web yet” and allow review flow to be skipped.
 - Review screen lets users edit item name, quantity, category, and price.
 - Users can select which items to save and choose destination: Shopping List or Inventory.
 - Receipt Batches screen lists batches by date with total spend and item count.
@@ -26,6 +27,7 @@ Enable batch receipt capture (up to 5 photos) with on-device text extraction and
 - [ ] Batch capture UI supports up to 5 photos with clear progress and count
 - [ ] 6th photo attempt shows inline limit message and blocks capture
 - [ ] On-device text recognition processes all photos and merges line items
+- [ ] Platform behavior: Android/iOS OCR enabled; Web shows friendly unsupported message
 - [ ] Review UI supports edit (name, quantity, price), select/deselect, and batch save
 - [ ] Items can be saved to Shopping List or Inventory in one action
 - [ ] Shopping List save preserves price as estimated cost; Inventory save sets purchase price
@@ -69,6 +71,8 @@ Enable batch receipt capture (up to 5 photos) with on-device text extraction and
 - Introduce a ReceiptBatch model with fields: id, createdAt, source, totalSpend, itemIds, receiptImagePaths.
 - Compute batch stats by joining Inventory items to batch itemIds and aggregating by status.
 - Add drawer entry: “Receipt Batches”.
+- Add explicit permission gating for camera/photos on iOS/Android and a “retry permission” CTA.
+- Ensure OCR is skipped with clear messaging on Web (kIsWeb guard).
 
 ## Test plan
 **Automated:**
@@ -77,6 +81,7 @@ Enable batch receipt capture (up to 5 photos) with on-device text extraction and
 - Unit test: text parsing converts sample receipt text into candidate items (name + price).
 - Unit test: parser drops totals/taxes lines and ignores empty/invalid rows.
 - Widget test: permission denied state shows correct guidance and retry action.
+- Widget test: web unsupported state shows "not available" message and disables processing.
 - Widget test: save-to-inventory persists purchase price and navigates back with success state.
 - Widget test: save-to-shopping-list persists estimated cost and shows confirmation.
 - Widget test: batch list renders totals and navigates to detail view.

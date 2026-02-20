@@ -11,19 +11,22 @@ Enable users (Pro tier) to scan product labels with device camera and auto-extra
 - Pre-fill expiry date field with extracted date (user can edit if incorrect)
 - Graceful fallback to manual entry if OCR fails or unavailable
 
-- [ ] Google ML Kit Text Recognition integrated (iOS + Android) for Pro tier only; feature flag `expiry_date_ocr`
-- [ ] Free tier: camera/OCR controls hidden; manual entry + basic photos remain
-- [ ] Camera permission added to onboarding flow (145)
-- [ ] Camera button appears next to expiry date field when flag enabled and user is Pro
+## Acceptance criteria (Definition of Done)
+- [ ] Pro gating: OCR only runs for Pro users with feature flag `expiry_date_ocr` enabled
+- [ ] Free tier: camera/OCR controls hidden; manual entry remains
+- [ ] Camera permission requested on first tap; denial shows guidance and allows retry
+- [ ] Camera button appears next to expiry date field when Pro + flag enabled
 - [ ] Camera capture UI with focus guidance ("Point camera at expiry date")
-- [ ] Date parsing logic supports common formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, "Best By", "Use By", "Exp", etc.
-- [ ] Extracted date pre-fills expiry field (editable)
-- [ ] Error handling: OCR fails → show error toast → manual entry
-- [ ] Fallback: ML Kit unavailable (old devices) → hide camera button
+- [ ] Date parsing supports formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, and labels ("Best By", "Use By", "Exp")
+- [ ] Extracted date pre-fills expiry field and remains editable
+- [ ] OCR failure shows toast and returns to manual entry
+- [ ] ML Kit unavailable → camera button hidden (no crash)
+- [ ] Telemetry event `expiry_date_scanned` emitted with properties { success, format_detected }
+- [ ] Offline-first verified (no network required)
+- [ ] Accessibility basics (camera button labeled; OCR result announced)
+
+- [ ] Google ML Kit Text Recognition integrated (iOS + Android) and gated by Pro
 - [ ] Unit/widget/integration tests added or updated
-- [ ] Telemetry added/updated (event: `expiry_date_scanned`, properties: `success`, `format_detected`)
-- [ ] Offline-first behavior verified (ML Kit works offline)
-- [ ] Accessibility basics (camera button labeled, screen reader announces OCR result)
 
 ## Out of scope
 - Full receipt OCR (deferred to M6 Pro tier)

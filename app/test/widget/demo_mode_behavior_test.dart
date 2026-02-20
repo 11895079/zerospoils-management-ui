@@ -116,13 +116,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap delete icon, confirm dialog
-      await tester.tap(find.text('🗑️').first);
+      await tester.tap(find.byKey(const Key('item_card_delete_1')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Delete'));
+      await tester.tap(find.byKey(const Key('inventory_delete_confirm')));
       await tester.pumpAndSettle();
 
       // Inventory should show empty state
-      expect(find.textContaining('Your inventory is empty'), findsOneWidget);
+      expect(find.byKey(const Key('inventory_empty_state')), findsOneWidget);
 
       // Manual items flag should be reset
       expect(container.read(hasManualItemsProvider), isFalse);
@@ -210,7 +210,7 @@ void main() {
       container.invalidate(itemsFutureProvider);
       await tester.pumpAndSettle();
 
-      expect(find.text('Eggs'), findsOneWidget);
+      expect(find.byKey(const Key('inventory_item_card_2')), findsOneWidget);
       expect(container.read(hasManualItemsProvider), isTrue);
     },
   );

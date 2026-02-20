@@ -25,19 +25,35 @@ Deliver Shopping list UI (Next Shop) with tests and telemetry.
 - Household sharing
 
 ## Implementation notes
-- Follow design tokens in theme.
-- Keep domain/data/ui separation.
-- Add widget tests where feasible.
+- Follow design tokens in theme; reuse `AppTextStyles`, `AppSpacing`, and `AppColors`.
+- Keep domain/data/ui separation; UI reads from repository provider and delegates writes.
+- Sections: "Next Shop" (unpurchased) and "Purchased" with clear headers.
+- Add quick actions: toggle purchased, delete item, and add new item (bottom sheet or inline form).
+- Telemetry events (document properties):
+  - `shopping_list_viewed` {source_screen}
+  - `shopping_item_added` {item_id}
+  - `shopping_item_toggled` {item_id, is_purchased}
+  - `shopping_item_deleted` {item_id}
+  - `shopping_items_converted` {count}
+- Accessibility: ensure checkboxes and action buttons have labels and 44pt tap targets.
 
 ## Test plan
-- Steps:
-  1. Fresh install.
-  2. Use the feature.
-  3. Restart app; confirm persistence.
-- Scenarios:
-  - Airplane mode.
-  - Invalid inputs.
-  - Date edge cases.
+**Automated:**
+- Widget test: empty state renders with add action
+- Widget test: add item creates entry and persists to repository
+- Widget test: toggle purchased moves item between sections
+- Widget test: delete removes item from list
+- Widget test: convert purchased triggers conversion flow and clears purchased section
+- Unit test: repository CRUD for shopping list items
+- Telemetry test: events emitted for view/add/toggle/delete/convert
+
+**Manual:**
+1. Fresh install; open Shopping List; verify empty state
+2. Add 2 items; verify they appear in "Next Shop"
+3. Toggle one as purchased; verify it moves to "Purchased"
+4. Convert purchased items; verify inventory updated and purchased list cleared
+5. Restart app; verify list persists
+6. Airplane mode; repeat add/toggle/delete flows
 
 ## Dependencies
 - None

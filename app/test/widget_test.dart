@@ -65,13 +65,13 @@ void main() {
     // Verify that the bottom navigation bar is rendered
     expect(find.byType(BottomNavigationBar), findsOneWidget);
 
-    // Verify all 4 tab labels are present (using short labels from BottomNavigationBar)
-    expect(find.text('Inventory'), findsWidgets);
-    expect(find.text('Expiring'), findsWidgets);
-    expect(find.text('Shopping'), findsWidgets);
-    expect(find.text('Progress'), findsWidgets);
+    // Verify all 4 tab icons are present
+    expect(find.byKey(const Key('nav_inventory')), findsOneWidget);
+    expect(find.byKey(const Key('nav_expiring')), findsOneWidget);
+    expect(find.byKey(const Key('nav_shopping')), findsOneWidget);
+    expect(find.byKey(const Key('nav_progress')), findsOneWidget);
 
     // Verify floating action button is present on inventory tab
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
   });
 }
