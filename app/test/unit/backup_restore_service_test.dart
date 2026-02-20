@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/data/services/backup_restore_service.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/data/adapters/item_adapter.dart';
+import 'package:zerospoils/domain/models/user_category.dart';
 
 void main() {
   late Directory tempDir;
@@ -45,6 +46,9 @@ void main() {
     if (!Hive.isAdapterRegistered(6)) {
       Hive.registerAdapter(UnitAdapter());
     }
+    if (!Hive.isAdapterRegistered(22)) {
+      Hive.registerAdapter(UserCategoryAdapter());
+    }
   });
 
   tearDown(() async {
@@ -62,12 +66,15 @@ void main() {
       await prefs.setString('date_format', 'YYYY-MM-DD');
 
       final itemsBox = await hive.openBox<Item>('items');
+      final categoriesBox = await hive.openBox<UserCategory>('user_categories');
 
       // Add test items
       final item1 = Item(
         id: 'item-1',
         name: 'Milk',
-        category: ItemCategory.dairy,
+        category: ItemCategory.other,
+        customCategoryId: 'cat-1',
+        customCategoryName: 'School Snacks',
         location: StorageLocation.fridge,
         quantity: 1,
         unit: Unit.liter,
@@ -76,6 +83,15 @@ void main() {
         updatedAt: DateTime.now(),
       );
       await itemsBox.put(item1.id, item1);
+
+      await categoriesBox.put(
+        'cat-1',
+        UserCategory(
+          id: 'cat-1',
+          name: 'School Snacks',
+          createdAt: DateTime.now(),
+        ),
+      );
 
       final service = BackupRestoreService(hive: hive);
       final exportPath = '${tempDir.path}/backup.json';
@@ -98,13 +114,18 @@ void main() {
       expect(metadata['backup_version'], '1.0');
       expect(metadata['schema_version'], '1.0.0');
       expect(metadata['item_count'], 1);
+      expect(metadata['category_count'], 1);
 
       final data = backup['data'] as Map<String, dynamic>;
       final items = data['items'] as List;
       expect(items.length, 1);
       expect(items[0]['id'], 'item-1');
       expect(items[0]['name'], 'Milk');
+      expect(items[0]['custom_category_id'], 'cat-1');
+      expect(items[0]['custom_category_name'], 'School Snacks');
       expect(data['categories'], isA<List>());
+      expect((data['categories'] as List).length, 1);
+      expect((data['categories'] as List).first['name'], 'School Snacks');
       expect(data['settings'], isA<Map<String, dynamic>>());
       expect(data['settings']['notifications_enabled'], false);
       expect(data['settings']['expiry_lead_time_days'], 7);
@@ -113,6 +134,7 @@ void main() {
 
     test('export handles empty database', () async {
       await hive.openBox<Item>('items');
+      await hive.openBox<UserCategory>('user_categories');
 
       final service = BackupRestoreService(hive: hive);
       final exportPath = '${tempDir.path}/empty_backup.json';
@@ -131,6 +153,7 @@ void main() {
   group('BackupRestoreService - Preview', () {
     test('preview shows correct item counts', () async {
       await hive.openBox<Item>('items');
+      await hive.openBox<UserCategory>('user_categories');
 
       // Create backup file
       final backupData = {
@@ -140,7 +163,7 @@ void main() {
           'app_version': '1.0.0',
           'exported_at': DateTime.now().toIso8601String(),
           'item_count': 2,
-          'category_count': 0,
+          'category_count': 1,
           'batch_count': 0,
         },
         'data': {
@@ -168,6 +191,13 @@ void main() {
               'updated_at': DateTime.now().toIso8601String(),
             },
           ],
+          'categories': [
+            {
+              'id': 'cat-1',
+              'name': 'School Snacks',
+              'created_at': DateTime.now().toIso8601String(),
+            },
+          ],
         },
       };
 
@@ -178,6 +208,7 @@ void main() {
       final preview = await service.previewRestore(backupPath);
 
       expect(preview.itemCount, 2);
+      expect(preview.categoryCount, 1);
       expect(preview.schemaVersionFrom, '1.0.0');
       expect(preview.requiresMigration, false);
     });
@@ -186,6 +217,7 @@ void main() {
       'preview detects version mismatch for backward incompatibility',
       () async {
         await hive.openBox<Item>('items');
+        await hive.openBox<UserCategory>('user_categories');
 
         // Backup from future version (1.1.0)
         final backupData = {
@@ -226,6 +258,7 @@ void main() {
       await prefs.setBool('notifications_enabled', true);
 
       final itemsBox = await hive.openBox<Item>('items');
+      final categoriesBox = await hive.openBox<UserCategory>('user_categories');
 
       // Create backup file
       final backupData = {
@@ -235,7 +268,7 @@ void main() {
           'app_version': '1.0.0',
           'exported_at': DateTime.now().toIso8601String(),
           'item_count': 1,
-          'category_count': 0,
+          'category_count': 1,
           'batch_count': 0,
         },
         'data': {
@@ -243,13 +276,22 @@ void main() {
             {
               'id': 'item-1',
               'name': 'Milk',
-              'category': 'dairy',
+              'category': 'other',
+              'custom_category_id': 'cat-1',
+              'custom_category_name': 'School Snacks',
               'location': 'fridge',
               'quantity': 1,
               'unit': 'liter',
               'status': 'available',
               'created_at': DateTime.now().toIso8601String(),
               'updated_at': DateTime.now().toIso8601String(),
+            },
+          ],
+          'categories': [
+            {
+              'id': 'cat-1',
+              'name': 'School Snacks',
+              'created_at': DateTime.now().toIso8601String(),
             },
           ],
           'settings': {
@@ -274,6 +316,12 @@ void main() {
       expect(items.length, 1);
       expect(items[0].id, 'item-1');
       expect(items[0].name, 'Milk');
+      expect(items[0].customCategoryId, 'cat-1');
+      expect(items[0].customCategoryName, 'School Snacks');
+
+      final categories = categoriesBox.values.toList();
+      expect(categories.length, 1);
+      expect(categories.first.name, 'School Snacks');
 
       final updatedPrefs = await SharedPreferences.getInstance();
       expect(updatedPrefs.getBool('notifications_enabled'), false);
@@ -282,6 +330,7 @@ void main() {
 
     test('import rejects backward incompatible backup', () async {
       await hive.openBox<Item>('items');
+      await hive.openBox<UserCategory>('user_categories');
 
       // Backup from future version
       final backupData = {
@@ -309,6 +358,7 @@ void main() {
 
     test('import rolls back on error', () async {
       final itemsBox = await hive.openBox<Item>('items');
+      await hive.openBox<UserCategory>('user_categories');
 
       // Add existing item
       final existingItem = Item(
@@ -363,13 +413,25 @@ void main() {
   group('BackupRestoreService - Round Trip', () {
     test('export then import preserves all data', () async {
       final itemsBox = await hive.openBox<Item>('items');
+      final categoriesBox = await hive.openBox<UserCategory>('user_categories');
+
+      await categoriesBox.put(
+        'cat-1',
+        UserCategory(
+          id: 'cat-1',
+          name: 'School Snacks',
+          createdAt: DateTime.now(),
+        ),
+      );
 
       // Add multiple items with various fields
       final items = [
         Item(
           id: 'item-1',
           name: 'Milk',
-          category: ItemCategory.dairy,
+          category: ItemCategory.other,
+          customCategoryId: 'cat-1',
+          customCategoryName: 'School Snacks',
           location: StorageLocation.fridge,
           quantity: 2,
           unit: Unit.liter,
@@ -420,6 +482,8 @@ void main() {
       expect(restoredMilk.quantity, 2);
       expect(restoredMilk.purchasePrice, 4.99);
       expect(restoredMilk.expiryDate, isNotNull);
+      expect(restoredMilk.customCategoryId, 'cat-1');
+      expect(restoredMilk.customCategoryName, 'School Snacks');
     });
   });
 }

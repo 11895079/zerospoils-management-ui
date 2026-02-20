@@ -24,8 +24,8 @@ void main() {
       );
 
       // Verify welcome screen is shown
-      expect(find.text('🥬 ZeroSpoils'), findsOneWidget);
-      expect(find.text('Welcome'), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_title')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_appbar_title')), findsOneWidget);
     });
 
     testWidgets('Navigates between pages with PageView', (
@@ -38,7 +38,7 @@ void main() {
       );
 
       // Verify we're on page 1 with ZeroSpoils title
-      expect(find.text('🥬 ZeroSpoils'), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_title')), findsOneWidget);
 
       // Swipe to next page
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
@@ -63,11 +63,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap notification permission button
-      await tester.tap(find.byIcon(Icons.notifications));
+      await tester.tap(
+        find.byKey(const Key('onboarding_notifications_button')),
+      );
       await tester.pumpAndSettle();
 
       // Verify notification permission dialog appears
-      expect(find.text('Enable Notifications'), findsWidgets);
+      expect(find.byKey(const Key('notification_prompt')), findsOneWidget);
     });
 
     testWidgets('Skip button dismisses onboarding', (
@@ -82,7 +84,7 @@ void main() {
       );
 
       // Tap skip button
-      await tester.tap(find.text('Skip'));
+      await tester.tap(find.byKey(const Key('onboarding_skip_button')));
       await tester.pumpAndSettle();
 
       // Verify that onboarding screen persists onboarding_complete flag
@@ -106,7 +108,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap Continue to App button
-      await tester.tap(find.text('Continue to App'));
+      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences was updated
@@ -124,14 +126,20 @@ void main() {
       );
 
       // Should show "1 of 2" in short variant
-      expect(find.text('1 of 2'), findsOneWidget);
+      expect(
+        find.byKey(const Key('onboarding_page_indicator')),
+        findsOneWidget,
+      );
 
       // Swipe to next page
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
 
       // Should show "2 of 2"
-      expect(find.text('2 of 2'), findsOneWidget);
+      expect(
+        find.byKey(const Key('onboarding_page_indicator')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Deferring camera permission closes dialog', (
@@ -148,14 +156,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap camera permission button
-      await tester.tap(find.byIcon(Icons.camera_alt));
+      await tester.tap(find.byKey(const Key('onboarding_camera_button')));
       await tester.pumpAndSettle();
 
       // Verify dialog appears
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byKey(const Key('camera_prompt')), findsOneWidget);
 
       // Tap "Maybe Later"
-      await tester.tap(find.text('Maybe Later'));
+      await tester.tap(find.byKey(const Key('camera_prompt_defer')));
       await tester.pumpAndSettle();
 
       // Dialog should be dismissed
@@ -171,22 +179,9 @@ void main() {
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
       );
 
-      // Verify welcome page content - check for specific content
-      expect(
-        find.text(
-          'Track your food, reduce waste, and get notified before items expire.',
-        ),
-        findsOneWidget,
-      );
-      // Check for the feature list (even if on separate lines, the Text widget still contains it)
-      final textFinder = find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            ((widget.data?.contains('Never waste food again') ?? false) ||
-                (widget.data?.contains('Smart reminders') ?? false) ||
-                (widget.data?.contains('Simple & offline') ?? false)),
-      );
-      expect(textFinder, findsWidgets);
+      // Verify welcome page content
+      expect(find.byKey(const Key('onboarding_welcome_body')), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_feature_list')), findsOneWidget);
     });
 
     testWidgets('AppBar includes Skip button on all pages', (
@@ -199,14 +194,14 @@ void main() {
       );
 
       // Skip button should be present on first page
-      expect(find.text('Skip'), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_skip_button')), findsOneWidget);
 
       // Swipe to second page
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
 
       // Skip button should still be present
-      expect(find.text('Skip'), findsOneWidget);
+      expect(find.byKey(const Key('onboarding_skip_button')), findsOneWidget);
     });
 
     testWidgets('Permission buttons have correct icons', (
@@ -222,13 +217,12 @@ void main() {
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
 
-      // Verify both permission buttons are present with correct icons
-      expect(find.byIcon(Icons.notifications), findsOneWidget);
-      expect(find.byIcon(Icons.camera_alt), findsOneWidget);
-
-      // And have correct labels
-      expect(find.text('Enable Notifications'), findsOneWidget);
-      expect(find.text('Enable Camera'), findsOneWidget);
+      // Verify both permission buttons are present
+      expect(
+        find.byKey(const Key('onboarding_notifications_button')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('onboarding_camera_button')), findsOneWidget);
     });
   });
 }

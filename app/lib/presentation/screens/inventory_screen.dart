@@ -14,6 +14,7 @@ import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/item_entry_sheet.dart';
+import '../widgets/item_icon.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -56,6 +57,7 @@ final inventoryViewModeProvider = StateProvider<InventoryViewMode>((ref) {
 class InventoryFilterState {
   final ItemCategory? category;
   final StorageLocation? location;
+  final ItemStatus? status;
   final bool expiringSoonOnly;
   final bool hideConsumed;
   final bool preparedOnly;
@@ -66,6 +68,7 @@ class InventoryFilterState {
   const InventoryFilterState({
     this.category,
     this.location,
+    this.status,
     this.expiringSoonOnly = false,
     this.hideConsumed = true,
     this.preparedOnly = false,
@@ -77,6 +80,7 @@ class InventoryFilterState {
   InventoryFilterState copyWith({
     ItemCategory? category,
     StorageLocation? location,
+    ItemStatus? status,
     bool? expiringSoonOnly,
     bool? hideConsumed,
     bool? preparedOnly,
@@ -87,6 +91,7 @@ class InventoryFilterState {
     return InventoryFilterState(
       category: category ?? this.category,
       location: location ?? this.location,
+      status: status ?? this.status,
       expiringSoonOnly: expiringSoonOnly ?? this.expiringSoonOnly,
       hideConsumed: hideConsumed ?? this.hideConsumed,
       preparedOnly: preparedOnly ?? this.preparedOnly,
@@ -100,8 +105,9 @@ class InventoryFilterState {
     int count = 0;
     if (category != null) count++;
     if (location != null) count++;
+    if (status != null) count++;
     if (expiringSoonOnly) count++;
-    if (!hideConsumed) count++; // Count if showing consumed items
+    if (status == null && !hideConsumed) count++;
     if (preparedOnly) count++;
     if (createdAfter != null) count++;
     if (createdBefore != null) count++;
@@ -283,8 +289,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
     var filtered = items;
 
+    if (filterState.status != null) {
+      filtered = filtered
+          .where((item) => item.status == filterState.status)
+          .toList();
+    }
+
     // Filter out consumed/wasted if hideConsumed is true
-    if (filterState.hideConsumed) {
+    if (filterState.status == null && filterState.hideConsumed) {
       filtered = filtered
           .where((item) => item.status == ItemStatus.available)
           .toList();
@@ -376,7 +388,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       case InventorySortKey.name:
         return a.name.toLowerCase().compareTo(b.name.toLowerCase());
       case InventorySortKey.category:
-        return a.category.displayName.compareTo(b.category.displayName);
+        return a.categoryLabel.compareTo(b.categoryLabel);
       case InventorySortKey.location:
         return a.location.displayName.compareTo(b.location.displayName);
       case InventorySortKey.expiry:
@@ -483,6 +495,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   tempCategory == category ||
                                   (category == null && tempCategory == null);
                               return ChoiceChip(
+                                key: Key(
+                                  'inventory_filter_category_${category?.name ?? 'all'}',
+                                ),
                                 label: Text(category?.displayName ?? 'All'),
                                 selected: isSelected,
                                 onSelected: (_) {
@@ -514,6 +529,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   tempLocation == location ||
                                   (location == null && tempLocation == null);
                               return ChoiceChip(
+                                key: Key(
+                                  'inventory_filter_location_${location?.name ?? 'all'}',
+                                ),
                                 label: Text(location?.displayName ?? 'All'),
                                 selected: isSelected,
                                 onSelected: (_) {
@@ -648,6 +666,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           ),
                           const Spacer(),
                           ElevatedButton(
+                            key: const Key('inventory_filter_apply'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
@@ -719,6 +738,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
 
     return Scaffold(
+      key: const Key('screen_inventory'),
       drawer: const AppDrawer(),
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -732,6 +752,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             alignment: Alignment.center,
             children: [
               IconButton(
+                key: const Key('inventory_filter_button'),
                 onPressed: _showFilterOptions,
                 icon: const Icon(Icons.tune, color: AppColors.textPrimary),
               ),
@@ -821,7 +842,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _openAddItemSheet,
+        key: const Key('inventory_add_fab'),
+        onPressed: _openAddMenu,
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         elevation: 4,
@@ -834,6 +856,68 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Future<void> _openAddMenu() async {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'inventory_add_menu_opened',
+      'properties': {},
+    });
+
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: AppSpacing.md),
+              Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ListTile(
+                leading: const Icon(Icons.add_circle_outline),
+                title: const Text('Add item manually'),
+                subtitle: const Text('Enter a single item with details'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  ref.read(telemetryClientProvider).enqueue({
+                    'name': 'inventory_add_menu_selected',
+                    'properties': {'action': 'manual_item'},
+                  });
+                  _openAddItemSheet();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.receipt_long),
+                title: const Text('Batch entry (receipts)'),
+                subtitle: const Text('Capture receipts and add many items'),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  ref.read(telemetryClientProvider).enqueue({
+                    'name': 'inventory_add_menu_selected',
+                    'properties': {'action': 'receipt_batch'},
+                  });
+                  context.pushNamed('receipt-batch-capture');
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1056,6 +1140,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       itemBuilder: (context, index) {
         final item = items[index];
         return ItemCard(
+          key: Key('inventory_item_card_${item.id}'),
           item: item,
           onTap: () => _openItemDetail(item),
           onEdit: () => _editItem(item),
@@ -1070,7 +1155,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = width >= 900 ? 3 : 2;
+        final columns = width >= 900
+            ? 4
+            : width >= 390
+            ? 3
+            : 2;
+        final childAspectRatio = columns >= 3 ? 0.95 : 0.9;
 
         return GridView.builder(
           key: const Key('inventory_view_mode_grid'),
@@ -1084,7 +1174,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             crossAxisCount: columns,
             mainAxisSpacing: AppSpacing.md,
             crossAxisSpacing: AppSpacing.md,
-            childAspectRatio: 0.9,
+            childAspectRatio: childAspectRatio,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -1165,7 +1255,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   onSelectChanged: (_) => _openItemDetail(item),
                   cells: [
                     DataCell(Text(item.name)),
-                    DataCell(Text(item.category.displayName)),
+                    DataCell(Text(item.categoryLabel)),
                     DataCell(Text(item.location.displayName)),
                     DataCell(
                       Text(
@@ -1186,7 +1276,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildGridCard(Item item) {
-    final emoji = _getItemEmoji(item);
     return Semantics(
       button: true,
       label: '${item.name}, ${item.status.displayName}',
@@ -1205,9 +1294,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    child: Text(emoji, style: const TextStyle(fontSize: 20)),
+                  ItemIcon(
+                    itemName: item.name,
+                    category: item.category,
+                    size: 24,
+                    showBackground: true,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   const Spacer(),
                   _buildStatusPill(item.status),
@@ -1306,71 +1398,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     );
   }
 
-  String _getItemEmoji(Item item) {
-    final name = item.name.toLowerCase();
-    if (name.contains('milk')) return '🥛';
-    if (name.contains('egg')) return '🥚';
-    if (name.contains('cheese')) return '🧀';
-    if (name.contains('yogurt')) return '🥣';
-    if (name.contains('butter')) return '🧈';
-    if (name.contains('bread')) return '🍞';
-    if (name.contains('apple')) return '🍏';
-    if (name.contains('banana')) return '🍌';
-    if (name.contains('orange')) return '🍊';
-    if (name.contains('carrot')) return '🥕';
-    if (name.contains('potato')) return '🥔';
-    if (name.contains('onion')) return '🧅';
-    if (name.contains('chicken')) return '🍗';
-    if (name.contains('beef')) return '🥩';
-    if (name.contains('fish')) return '🐟';
-    if (name.contains('rice')) return '🍚';
-    if (name.contains('pasta')) return '🍝';
-    if (name.contains('tomato')) return '🍅';
-    if (name.contains('lettuce')) return '🥬';
-    if (name.contains('cucumber')) return '🥒';
-    if (name.contains('grape')) return '🍇';
-    if (name.contains('berry')) return '🫐';
-    if (name.contains('lemon')) return '🍋';
-    if (name.contains('lime')) return '🍈';
-    if (name.contains('corn')) return '🌽';
-    if (name.contains('avocado')) return '🥑';
-    if (name.contains('mushroom')) return '🍄';
-    if (name.contains('pepper')) return '🫑';
-    if (name.contains('garlic')) return '🧄';
-    if (name.contains('sausage')) return '🌭';
-    if (name.contains('bacon')) return '🥓';
-    if (name.contains('shrimp')) return '🦐';
-    if (name.contains('crab')) return '🦀';
-    if (name.contains('lobster')) return '🦞';
-    if (name.contains('ice cream')) return '🍨';
-    if (name.contains('cake')) return '🍰';
-    if (name.contains('cookie')) return '🍪';
-    if (name.contains('chocolate')) return '🍫';
-    if (name.contains('juice')) return '🧃';
-    if (name.contains('water')) return '💧';
-    if (name.contains('soda')) return '🥤';
-    if (name.contains('beer')) return '🍺';
-    if (name.contains('wine')) return '🍷';
-    return _getCategoryEmoji(item.category);
-  }
-
-  String _getCategoryEmoji(ItemCategory category) {
-    switch (category) {
-      case ItemCategory.dairy:
-        return '🥛';
-      case ItemCategory.produce:
-        return '🍎';
-      case ItemCategory.meat:
-        return '🍗';
-      case ItemCategory.grains:
-        return '🌾';
-      case ItemCategory.pantry:
-        return '🗄️';
-      case ItemCategory.other:
-        return '📦';
-    }
-  }
-
   void _openItemDetail(Item item) {
     ref.read(telemetryClientProvider).enqueue({
       'name': 'item_detail_opened',
@@ -1402,6 +1429,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
+          key: const Key('inventory_delete_dialog'),
           title: const Text('Delete Item?'),
           content: Text(
             'Are you sure you want to delete "${item.name}" from your inventory?',
@@ -1409,10 +1437,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
+              key: const Key('inventory_delete_cancel'),
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
+              key: const Key('inventory_delete_confirm'),
               child: const Text(
                 'Delete',
                 style: TextStyle(color: AppColors.danger),
@@ -1491,6 +1521,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(category: null);
+                      setState(() {});
+                    },
+                  ),
+                if (filterState.status != null)
+                  _buildFilterChip(
+                    label: 'Status: ${filterState.status!.displayName}',
+                    onRemove: () {
+                      ref.read(inventoryFilterProvider.notifier).state =
+                          filterState.copyWith(status: null);
                       setState(() {});
                     },
                   ),
@@ -1636,6 +1675,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   Widget _buildEmptyState() {
     return SingleChildScrollView(
+      key: const Key('inventory_empty_state'),
       padding: const EdgeInsets.all(AppSpacing.xxxl),
       child: Center(
         child: Column(
@@ -1658,6 +1698,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ),
             const SizedBox(height: AppSpacing.xxl),
             ElevatedButton(
+              key: const Key('inventory_empty_cta'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,

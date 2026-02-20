@@ -136,6 +136,6 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Progress'), findsOneWidget);
+    expect(find.byKey(const Key('screen_progress')), findsOneWidget);
   });
 }

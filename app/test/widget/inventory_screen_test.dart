@@ -85,8 +85,8 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    expect(find.textContaining('Your inventory is empty'), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byKey(const Key('inventory_empty_state')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
   });
 
   testWidgets('displays list of items', (tester) async {
@@ -116,8 +116,8 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Chicken'), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsOneWidget);
   });
 
   testWidgets('search filters items by name', (tester) async {
@@ -349,24 +349,24 @@ void main() {
     await pumpInventoryScreen(tester);
 
     // Initially both items visible
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Chicken'), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsOneWidget);
 
     // Open filter dialog
-    await tester.tap(find.byIcon(Icons.tune));
+    await tester.tap(find.byKey(const Key('inventory_filter_button')));
     await tester.pumpAndSettle();
 
     // Select Dairy category and apply
-    await tester.tap(find.text('Dairy'));
+    await tester.tap(find.byKey(const Key('inventory_filter_category_dairy')));
     await tester.pumpAndSettle();
-    final applyButton = find.text('Apply');
+    final applyButton = find.byKey(const Key('inventory_filter_apply'));
     await tester.ensureVisible(applyButton);
     await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Chicken'), findsNothing);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
   });
 
   testWidgets('location filter dialog works', (tester) async {
@@ -395,25 +395,24 @@ void main() {
     await pumpInventoryScreen(tester);
 
     // Open filter dialog
-    await tester.tap(find.byIcon(Icons.tune));
+    await tester.tap(find.byKey(const Key('inventory_filter_button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Filters'), findsOneWidget);
-    expect(find.textContaining('Location'), findsOneWidget);
+    expect(find.byKey(const Key('inventory_filter_apply')), findsOneWidget);
 
     // Select Fridge location
-    await tester.tap(find.text('Fridge'));
+    await tester.tap(find.byKey(const Key('inventory_filter_location_fridge')));
     await tester.pumpAndSettle();
 
     // Apply filters
-    final applyButton = find.text('Apply');
+    final applyButton = find.byKey(const Key('inventory_filter_apply'));
     await tester.ensureVisible(applyButton);
     await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Ice Cream'), findsNothing);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
   });
 
   testWidgets('expiring soon filter works', (tester) async {
@@ -444,11 +443,11 @@ void main() {
     await pumpInventoryScreen(tester);
 
     // Initially both items visible
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Cheese'), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsOneWidget);
 
     // Open filter dialog
-    await tester.tap(find.byIcon(Icons.tune));
+    await tester.tap(find.byKey(const Key('inventory_filter_button')));
     await tester.pumpAndSettle();
 
     // Enable expiring soon filter
@@ -456,14 +455,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Apply filters
-    final applyButton = find.text('Apply');
+    final applyButton = find.byKey(const Key('inventory_filter_apply'));
     await tester.ensureVisible(applyButton);
     await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
     // Only Milk should be visible
-    expect(find.text('Milk'), findsOneWidget);
-    expect(find.text('Cheese'), findsNothing);
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
   });
 
   testWidgets('prepared filter works', (tester) async {
@@ -494,29 +493,19 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    await tester.tap(find.byIcon(Icons.tune));
+    await tester.tap(find.byKey(const Key('inventory_filter_button')));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('inventory_filter_prepared_only')));
     await tester.pumpAndSettle();
 
-    final applyButton = find.text('Apply');
+    final applyButton = find.byKey(const Key('inventory_filter_apply'));
     await tester.ensureVisible(applyButton);
     await tester.tap(applyButton);
     await tester.pumpAndSettle();
 
-    expect(
-      find.byWidgetPredicate(
-        (widget) => widget is ItemCard && widget.item.id == '1',
-      ),
-      findsOneWidget,
-    );
-    expect(
-      find.byWidgetPredicate(
-        (widget) => widget is ItemCard && widget.item.id == '2',
-      ),
-      findsNothing,
-    );
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
   });
 
   testWidgets('created date range filter works', (tester) async {

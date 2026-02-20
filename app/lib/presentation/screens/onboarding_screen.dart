@@ -118,10 +118,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome'),
+        title: const Text('Welcome', key: Key('onboarding_appbar_title')),
         actions: [
           TextButton(
             onPressed: _skipOnboarding,
+            key: const Key('onboarding_skip_button'),
             child: const Text('Skip', style: TextStyle(color: Colors.white)),
           ),
         ],
@@ -152,12 +153,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         children: [
           Text(
             '🥬 ZeroSpoils',
+            key: const Key('onboarding_title'),
             style: Theme.of(context).textTheme.headlineLarge,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           Text(
             'Track your food, reduce waste, and get notified before items expire.',
+            key: const Key('onboarding_welcome_body'),
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
@@ -170,6 +173,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             'Never waste food again\n'
             'Smart reminders\n'
             'Simple & offline',
+            key: const Key('onboarding_feature_list'),
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -247,6 +251,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
+            key: const Key('onboarding_notifications_button'),
             icon: const Icon(Icons.notifications),
             label: const Text('Enable Notifications'),
             onPressed: () {
@@ -265,6 +270,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
+            key: const Key('onboarding_camera_button'),
             icon: const Icon(Icons.camera_alt),
             label: const Text('Enable Camera'),
             onPressed: () {
@@ -282,6 +288,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 32),
           OutlinedButton(
+            key: const Key('onboarding_continue_button'),
             onPressed: _completeOnboarding,
             child: const Text('Continue to App'),
           ),
@@ -296,7 +303,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('${_currentPage + 1} of $numPages'),
+          Text(
+            '${_currentPage + 1} of $numPages',
+            key: const Key('onboarding_page_indicator'),
+          ),
           Row(
             children: List.generate(
               numPages,

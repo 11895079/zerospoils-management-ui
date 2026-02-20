@@ -180,6 +180,10 @@ class Item extends Equatable {
   final ItemStatus status;
   @HiveField(11)
   final WasteReason? wasteReason;
+  @HiveField(15)
+  final String? customCategoryId;
+  @HiveField(16)
+  final String? customCategoryName;
   @HiveField(14)
   final int? wastePercentage;
   @HiveField(12)
@@ -200,6 +204,8 @@ class Item extends Equatable {
     this.purchasePrice,
     this.status = ItemStatus.available,
     this.wasteReason,
+    this.customCategoryId,
+    this.customCategoryName,
     this.wastePercentage,
     required this.createdAt,
     required this.updatedAt,
@@ -219,6 +225,8 @@ class Item extends Equatable {
     double? purchasePrice,
     ItemStatus? status,
     WasteReason? wasteReason,
+    String? customCategoryId,
+    String? customCategoryName,
     int? wastePercentage,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -236,11 +244,15 @@ class Item extends Equatable {
       purchasePrice: purchasePrice ?? this.purchasePrice,
       status: status ?? this.status,
       wasteReason: wasteReason ?? this.wasteReason,
+      customCategoryId: customCategoryId ?? this.customCategoryId,
+      customCategoryName: customCategoryName ?? this.customCategoryName,
       wastePercentage: wastePercentage ?? this.wastePercentage,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  String get categoryLabel => customCategoryName ?? category.displayName;
 
   /// Check if item is expired
   bool get isExpired {

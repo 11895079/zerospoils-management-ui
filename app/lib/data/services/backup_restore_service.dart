@@ -11,6 +11,7 @@ import 'package:hive/hive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/user_category.dart';
 
 /// Backup metadata
 class BackupMetadata {
@@ -117,6 +118,13 @@ class BackupRestoreService {
   BackupRestoreService({HiveInterface? hive, this.telemetry})
     : _hive = hive ?? Hive;
 
+  Future<Box<T>> _openBoxIfNeeded<T>(String name) async {
+    if (!_hive.isBoxOpen(name)) {
+      return _hive.openBox<T>(name);
+    }
+    return _hive.box<T>(name);
+  }
+
   /// Get current app version from package info (fallback: '1.0.0')
   Future<String> _getAppVersion() async {
     try {
@@ -131,8 +139,12 @@ class BackupRestoreService {
   Future<BackupResult> exportToJson(String filePath) async {
     telemetry?.trackBackupStarted();
 
-    final itemsBox = _hive.box<Item>('items');
+    final itemsBox = await _openBoxIfNeeded<Item>('items');
+    final categoriesBox = await _openBoxIfNeeded<UserCategory>(
+      'user_categories',
+    );
     final items = itemsBox.values.toList();
+    final categories = categoriesBox.values.toList();
     final appVersion = await _getAppVersion();
 
     final metadata = BackupMetadata(
@@ -141,6 +153,7 @@ class BackupRestoreService {
       appVersion: appVersion,
       exportedAt: DateTime.now(),
       itemCount: items.length,
+      categoryCount: categories.length,
     );
 
     final settings = await _readSettings();
@@ -149,7 +162,9 @@ class BackupRestoreService {
       'metadata': metadata.toJson(),
       'data': {
         'items': items.map((item) => _serializeItem(item)).toList(),
-        'categories': [],
+        'categories': categories
+            .map((category) => _serializeUserCategory(category))
+            .toList(),
         'locations': [],
         'batches': [],
         'events': [],
@@ -252,7 +267,10 @@ class BackupRestoreService {
       appVersion: metadata.appVersion,
     );
 
-    final itemsBox = _hive.box<Item>('items');
+    final itemsBox = await _openBoxIfNeeded<Item>('items');
+    final categoriesBox = await _openBoxIfNeeded<UserCategory>(
+      'user_categories',
+    );
 
     // Backup existing settings for rollback
     final existingSettings = await _readSettings();
@@ -260,15 +278,19 @@ class BackupRestoreService {
     // Backup existing data for rollback
     final existingItems = itemsBox.values.toList();
     final existingKeys = itemsBox.keys.toList();
+    final existingCategories = categoriesBox.values.toList();
+    final existingCategoryKeys = categoriesBox.keys.toList();
 
     try {
       // Clear existing data
       await itemsBox.clear();
+      await categoriesBox.clear();
 
       // Import items
       final data = backup['data'] as Map<String, dynamic>;
       final itemsData = (data['items'] as List?) ?? [];
       final settingsData = data['settings'] as Map<String, dynamic>?;
+      final categoriesData = (data['categories'] as List?) ?? [];
 
       int migrationsApplied = 0;
       if (_requiresMigration(metadata.schemaVersion)) {
@@ -278,9 +300,47 @@ class BackupRestoreService {
         );
       }
 
+      final restoredCategories = <UserCategory>[];
+      final categoryNameMap = <String, UserCategory>{};
+      for (final categoryData in categoriesData) {
+        final category = _deserializeUserCategory(
+          categoryData as Map<String, dynamic>,
+        );
+        final key = category.name.trim().toLowerCase();
+        if (categoryNameMap.containsKey(key)) {
+          continue;
+        }
+        categoryNameMap[key] = category;
+        restoredCategories.add(category);
+      }
+
+      for (final category in restoredCategories) {
+        await categoriesBox.put(category.id, category);
+      }
+
+      final categoryIds = restoredCategories.map((c) => c.id).toSet();
+
       // Deserialize and store items
       for (final itemData in itemsData) {
-        final item = _deserializeItem(itemData as Map<String, dynamic>);
+        var item = _deserializeItem(itemData as Map<String, dynamic>);
+        if (item.customCategoryId != null &&
+            !categoryIds.contains(item.customCategoryId)) {
+          final nameKey = item.customCategoryName?.trim().toLowerCase();
+          final mapped = nameKey != null ? categoryNameMap[nameKey] : null;
+          if (mapped != null) {
+            item = item.copyWith(
+              customCategoryId: mapped.id,
+              customCategoryName: mapped.name,
+              category: ItemCategory.other,
+            );
+          } else {
+            item = item.copyWith(
+              customCategoryId: null,
+              customCategoryName: null,
+              category: ItemCategory.other,
+            );
+          }
+        }
         await itemsBox.put(item.id, item);
       }
 
@@ -310,6 +370,10 @@ class BackupRestoreService {
       await itemsBox.clear();
       for (var i = 0; i < existingItems.length; i++) {
         await itemsBox.put(existingKeys[i], existingItems[i]);
+      }
+      await categoriesBox.clear();
+      for (var i = 0; i < existingCategories.length; i++) {
+        await categoriesBox.put(existingCategoryKeys[i], existingCategories[i]);
       }
       await _writeSettings(existingSettings);
 
@@ -394,6 +458,8 @@ class BackupRestoreService {
       'id': item.id,
       'name': item.name,
       'category': item.category.name,
+      'custom_category_id': item.customCategoryId,
+      'custom_category_name': item.customCategoryName,
       'type': item.type.name,
       'prepared_date': item.preparedDate?.toIso8601String(),
       'location': item.location.name,
@@ -415,6 +481,8 @@ class BackupRestoreService {
       id: json['id'] as String,
       name: json['name'] as String,
       category: ItemCategory.fromString(json['category'] as String),
+      customCategoryId: json['custom_category_id'] as String?,
+      customCategoryName: json['custom_category_name'] as String?,
       type: json['type'] != null
           ? ItemType.fromString(json['type'] as String)
           : ItemType.raw,
@@ -435,6 +503,26 @@ class BackupRestoreService {
       wastePercentage: json['waste_percentage'] as int?,
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
+
+  Map<String, dynamic> _serializeUserCategory(UserCategory category) {
+    return {
+      'id': category.id,
+      'name': category.name,
+      'icon': category.icon,
+      'color': category.color,
+      'created_at': category.createdAt.toIso8601String(),
+    };
+  }
+
+  UserCategory _deserializeUserCategory(Map<String, dynamic> json) {
+    return UserCategory(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      icon: json['icon'] as String?,
+      color: json['color'] as int?,
+      createdAt: DateTime.parse(json['created_at'] as String),
     );
   }
 

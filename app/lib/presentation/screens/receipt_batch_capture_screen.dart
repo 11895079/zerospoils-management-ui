@@ -31,6 +31,7 @@ class _ReceiptBatchCaptureScreenState
   final List<XFile> _photos = [];
   late final String _batchId;
   bool _processing = false;
+  bool _pickingPhoto = false;
 
   @override
   void initState() {
@@ -43,23 +44,30 @@ class _ReceiptBatchCaptureScreenState
   }
 
   Future<void> _addPhoto() async {
+    if (_processing || _pickingPhoto) return;
     if (_photos.length >= 5) {
       _showSnack('Batch limit reached (5 photos max)');
       return;
     }
 
-    final photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
+    setState(() => _pickingPhoto = true);
+    try {
+      final photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 85,
+      );
 
-    if (photo == null) return;
+      if (photo == null) return;
 
-    setState(() => _photos.add(photo));
-    ref.read(telemetryClientProvider).enqueue({
-      'name': 'receipt_photo_added',
-      'properties': {'batch_id': _batchId, 'photo_index': _photos.length},
-    });
+      if (!mounted) return;
+      setState(() => _photos.add(photo));
+      ref.read(telemetryClientProvider).enqueue({
+        'name': 'receipt_photo_added',
+        'properties': {'batch_id': _batchId, 'photo_index': _photos.length},
+      });
+    } finally {
+      if (mounted) setState(() => _pickingPhoto = false);
+    }
   }
 
   Future<void> _processReceipts() async {
@@ -199,7 +207,9 @@ class _ReceiptBatchCaptureScreenState
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _processing ? null : _processReceipts,
+                    onPressed: _processing || _pickingPhoto
+                        ? null
+                        : _processReceipts,
                     child: _processing
                         ? const SizedBox(
                             height: 20,
@@ -218,9 +228,18 @@ class _ReceiptBatchCaptureScreenState
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: _processing ? null : _addPhoto,
+            onPressed: _processing || _pickingPhoto ? null : _addPhoto,
             backgroundColor: AppColors.primary,
-            child: const Icon(Icons.camera_alt, color: Colors.white),
+            child: _processing || _pickingPhoto
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Icon(Icons.camera_alt, color: Colors.white),
           ),
         ),
       ),
@@ -242,7 +261,7 @@ class _ReceiptBatchCaptureScreenState
 
   Widget _buildAddTile() {
     return GestureDetector(
-      onTap: _addPhoto,
+      onTap: _processing || _pickingPhoto ? null : _addPhoto,
       child: Container(
         width: 90,
         height: 90,

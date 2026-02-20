@@ -10,6 +10,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import 'quantity_toggle.dart';
+import 'item_icon.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
@@ -108,9 +109,11 @@ class ItemCard extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Opacity(
                     opacity: isConsumedOrWasted ? 0.4 : 1.0,
-                    child: Text(
-                      _getItemEmoji(item),
-                      style: const TextStyle(fontSize: 28),
+                    child: ItemIcon(
+                      itemName: item.name,
+                      category: item.category,
+                      size: 28,
+                      showBackground: false,
                     ),
                   ),
                 ),
@@ -300,17 +303,19 @@ class ItemCard extends StatelessWidget {
                 if (onEdit != null && !isConsumedOrWasted)
                   GestureDetector(
                     onTap: onEdit,
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('✏️', style: TextStyle(fontSize: 18)),
+                    child: Padding(
+                      key: Key('item_card_edit_${item.id}'),
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text('✏️', style: TextStyle(fontSize: 18)),
                     ),
                   ),
                 if (onDelete != null && !isConsumedOrWasted)
                   GestureDetector(
                     onTap: onDelete,
-                    child: const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('🗑️', style: TextStyle(fontSize: 18)),
+                    child: Padding(
+                      key: Key('item_card_delete_${item.id}'),
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text('🗑️', style: TextStyle(fontSize: 18)),
                     ),
                   ),
               ],
@@ -348,73 +353,6 @@ class ItemCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Returns a specific emoji for common items, else falls back to category emoji
-  String _getItemEmoji(Item item) {
-    final name = item.name.toLowerCase();
-    if (name.contains('milk')) return '🥛';
-    if (name.contains('egg')) return '🥚';
-    if (name.contains('cheese')) return '🧀';
-    if (name.contains('yogurt')) return '🥣';
-    if (name.contains('butter')) return '🧈';
-    if (name.contains('bread')) return '🍞';
-    if (name.contains('apple')) return '🍏';
-    if (name.contains('banana')) return '🍌';
-    if (name.contains('orange')) return '🍊';
-    if (name.contains('carrot')) return '🥕';
-    if (name.contains('potato')) return '🥔';
-    if (name.contains('onion')) return '🧅';
-    if (name.contains('chicken')) return '🍗';
-    if (name.contains('beef')) return '🥩';
-    if (name.contains('fish')) return '🐟';
-    if (name.contains('rice')) return '🍚';
-    if (name.contains('pasta')) return '🍝';
-    if (name.contains('tomato')) return '🍅';
-    if (name.contains('lettuce')) return '🥬';
-    if (name.contains('cucumber')) return '🥒';
-    if (name.contains('grape')) return '🍇';
-    if (name.contains('berry')) return '🫐';
-    if (name.contains('lemon')) return '🍋';
-    if (name.contains('lime')) return '🍈';
-    if (name.contains('corn')) return '🌽';
-    if (name.contains('avocado')) return '🥑';
-    if (name.contains('mushroom')) return '🍄';
-    if (name.contains('pepper')) return '🫑';
-    if (name.contains('garlic')) return '🧄';
-    if (name.contains('sausage')) return '🌭';
-    if (name.contains('bacon')) return '🥓';
-    if (name.contains('shrimp')) return '🦐';
-    if (name.contains('crab')) return '🦀';
-    if (name.contains('lobster')) return '🦞';
-    if (name.contains('ice cream')) return '🍨';
-    if (name.contains('cake')) return '🍰';
-    if (name.contains('cookie')) return '🍪';
-    if (name.contains('chocolate')) return '🍫';
-    if (name.contains('juice')) return '🧃';
-    if (name.contains('water')) return '💧';
-    if (name.contains('soda')) return '🥤';
-    if (name.contains('beer')) return '🍺';
-    if (name.contains('wine')) return '🍷';
-    // fallback to category emoji
-    return _getCategoryEmoji(item.category);
-  }
-
-  String _getCategoryEmoji(ItemCategory category) {
-    switch (category) {
-      case ItemCategory.dairy:
-        return '🥛';
-      case ItemCategory.produce:
-        return '🍎';
-      case ItemCategory.meat:
-        return '🍗';
-      case ItemCategory.grains:
-        return '🌾';
-      case ItemCategory.pantry:
-        return '🗄️';
-      case ItemCategory.other:
-        return '📦';
-    }
   }
 
   String _getLocationDisplay(StorageLocation location) {

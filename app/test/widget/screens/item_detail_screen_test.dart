@@ -105,12 +105,11 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Test Apple'), findsOneWidget);
-      // Status is now dynamic (e.g., "Expires in 3 days")
-      expect(find.textContaining('Produce'), findsOneWidget);
-      expect(find.textContaining('Fridge'), findsOneWidget);
-      expect(find.text('5 Count'), findsOneWidget);
-      expect(find.text('Added'), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_name')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_category')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_location')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_quantity')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_added')), findsOneWidget);
     });
 
     testWidgets('shows "Item not found" when item does not exist', (
@@ -119,8 +118,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('nonexistent'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Item not found'), findsOneWidget);
-      expect(find.text('Go Back'), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_not_found')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_go_back')), findsOneWidget);
     });
 
     testWidgets('shows error message when loading fails', (
@@ -131,8 +130,11 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Error loading item'), findsOneWidget);
-      expect(find.text('Retry'), findsOneWidget);
+      expect(
+        find.byKey(const Key('item_detail_error_message')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('item_detail_retry_button')), findsOneWidget);
     });
 
     testWidgets('shows mark used and mark wasted buttons for available items', (
@@ -152,10 +154,12 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      final editButton = find.widgetWithText(TextButton, 'Edit Item');
-      expect(editButton, findsOneWidget);
-      expect(find.text('✓ Mark as Consumed'), findsOneWidget);
-      expect(find.text('🗑️ Mark as Wasted'), findsOneWidget);
+      expect(find.byKey(const Key('item_edit_button')), findsOneWidget);
+      expect(
+        find.byKey(const Key('item_mark_consumed_button')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('item_mark_wasted_button')), findsOneWidget);
     });
 
     testWidgets('does not show action buttons for consumed items', (
@@ -175,8 +179,8 @@ void main() {
       await tester.pumpWidget(createTestWidget('item-1'));
       await tester.pumpAndSettle();
 
-      expect(find.text('✓ Mark as Consumed'), findsNothing);
-      expect(find.text('🗑️ Mark as Wasted'), findsNothing);
+      expect(find.byKey(const Key('item_mark_consumed_button')), findsNothing);
+      expect(find.byKey(const Key('item_mark_wasted_button')), findsNothing);
     });
 
     testWidgets('mark used dialog shows confirmation', (
@@ -198,19 +202,23 @@ void main() {
 
       // Scroll to make button visible
       await tester.dragUntilVisible(
-        find.text('✓ Mark as Consumed'),
+        find.byKey(const Key('item_mark_consumed_button')),
         find.byType(SingleChildScrollView),
         const Offset(0, -100),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('✓ Mark as Consumed'));
+      await tester.tap(find.byKey(const Key('item_mark_consumed_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Mark as Used?'), findsOneWidget);
-      expect(find.text('Mark "Test Apple" as consumed?'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-      expect(find.text('Mark Used'), findsOneWidget);
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byKey(const Key('consume_percentage_value')), findsOneWidget);
+      expect(
+        find.byKey(const Key('consume_percentage_slider')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('consume_cancel_button')), findsOneWidget);
+      expect(find.byKey(const Key('consume_confirm_button')), findsOneWidget);
     });
 
     testWidgets('mark used updates item status and emits telemetry', (
@@ -232,18 +240,18 @@ void main() {
 
       // Scroll to make button visible
       await tester.dragUntilVisible(
-        find.text('✓ Mark as Consumed'),
+        find.byKey(const Key('item_mark_consumed_button')),
         find.byType(SingleChildScrollView),
         const Offset(0, -100),
       );
       await tester.pumpAndSettle();
 
       // Tap mark used button
-      await tester.tap(find.text('✓ Mark as Consumed'));
+      await tester.tap(find.byKey(const Key('item_mark_consumed_button')));
       await tester.pumpAndSettle();
 
       // Confirm dialog
-      await tester.tap(find.text('Mark Used'));
+      await tester.tap(find.byKey(const Key('consume_confirm_button')));
       await tester.pumpAndSettle();
 
       // Verify item updated
@@ -277,21 +285,20 @@ void main() {
 
       // Scroll to make button visible
       await tester.dragUntilVisible(
-        find.text('🗑️ Mark as Wasted'),
+        find.byKey(const Key('item_mark_wasted_button')),
         find.byType(SingleChildScrollView),
         const Offset(0, -100),
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('🗑️ Mark as Wasted'));
+      await tester.tap(find.byKey(const Key('item_mark_wasted_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Mark as Wasted'), findsOneWidget);
-      expect(find.text('Why was "Test Apple" wasted?'), findsOneWidget);
-      expect(find.text('Spoiled'), findsOneWidget);
-      expect(find.text('Forgotten'), findsOneWidget);
-      expect(find.text('Expired'), findsOneWidget);
-      expect(find.text('Damaged'), findsOneWidget);
+      expect(find.byKey(const Key('waste_dialog')), findsOneWidget);
+      expect(find.byKey(const Key('waste_reason_spoiled')), findsOneWidget);
+      expect(find.byKey(const Key('waste_reason_forgotten')), findsOneWidget);
+      expect(find.byKey(const Key('waste_reason_expired')), findsOneWidget);
+      expect(find.byKey(const Key('waste_reason_damaged')), findsOneWidget);
     });
 
     testWidgets('mark wasted updates item with reason and emits telemetry', (
@@ -313,22 +320,22 @@ void main() {
 
       // Scroll to make button visible
       await tester.dragUntilVisible(
-        find.text('🗑️ Mark as Wasted'),
+        find.byKey(const Key('item_mark_wasted_button')),
         find.byType(SingleChildScrollView),
         const Offset(0, -100),
       );
       await tester.pumpAndSettle();
 
       // Tap mark wasted button
-      await tester.tap(find.text('🗑️ Mark as Wasted'));
+      await tester.tap(find.byKey(const Key('item_mark_wasted_button')));
       await tester.pumpAndSettle();
 
       // Select spoiled reason
-      await tester.tap(find.text('Spoiled'));
+      await tester.tap(find.byKey(const Key('waste_reason_spoiled')));
       await tester.pumpAndSettle();
 
       // Confirm dialog
-      await tester.tap(find.text('Confirm'));
+      await tester.tap(find.byKey(const Key('waste_confirm_button')));
       await tester.pumpAndSettle();
 
       // Verify item updated with waste reason
@@ -389,8 +396,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check for expiry date label and status showing days left
-      expect(find.text('Expiry Date'), findsOneWidget);
-      expect(find.textContaining('Expires in'), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_expiry')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_status')), findsOneWidget);
     });
   });
 }

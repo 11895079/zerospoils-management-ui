@@ -61,16 +61,19 @@ class _CameraPermissionPromptState extends State<CameraPermissionPrompt> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      key: const Key('camera_prompt'),
       title: const Text('Enable Camera'),
       content: const Text(
         'Camera access allows you to scan expiry dates from product labels and take photos of receipts. You can grant this later in Settings.',
       ),
       actions: [
         TextButton(
+          key: const Key('camera_prompt_defer'),
           onPressed: _deferPermission,
           child: const Text('Maybe Later'),
         ),
         ElevatedButton(
+          key: const Key('camera_prompt_confirm'),
           onPressed: _requesting ? null : _requestCameraPermission,
           child: _requesting
               ? const SizedBox(

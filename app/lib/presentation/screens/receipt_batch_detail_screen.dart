@@ -35,6 +35,7 @@ class _ReceiptBatchDetailScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('screen_receipt_batch_detail'),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -72,6 +73,7 @@ class _ReceiptBatchDetailScreenState
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             children: [
               Container(
+                key: const Key('receipt_batch_summary'),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -103,6 +105,7 @@ class _ReceiptBatchDetailScreenState
                 final inventoryItem = data.inventoryItems[item.inventoryItemId];
                 final status = _statusLabel(item, inventoryItem);
                 return Container(
+                  key: Key('receipt_batch_item_${item.id}'),
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(

@@ -88,31 +88,31 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify we start on Inventory tab
-    expect(find.text('Inventory'), findsWidgets);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byKey(const Key('screen_inventory')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
 
     // Tap on Expiring tab
-    await tester.tap(find.text('Expiring'));
+    await tester.tap(find.byKey(const Key('nav_expiring')));
     await tester.pumpAndSettle();
 
-    // Verify Expiring screen is shown (allow multiple matches for title + tab label)
-    expect(find.text('Expiring Soon'), findsWidgets);
+    // Verify Expiring screen is shown
+    expect(find.byKey(const Key('screen_expiring_today')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Tap on Shopping tab
-    await tester.tap(find.text('Shopping'));
+    await tester.tap(find.byKey(const Key('nav_shopping')));
     await tester.pumpAndSettle();
 
     // Verify Shopping List screen is shown
-    expect(find.text('Shopping List'), findsWidgets);
+    expect(find.byKey(const Key('screen_shopping_list')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Tap on Progress tab
-    await tester.tap(find.text('Progress'));
+    await tester.tap(find.byKey(const Key('nav_progress')));
     await tester.pumpAndSettle();
 
     // Verify Progress screen is shown
-    expect(find.text('Progress'), findsWidgets);
+    expect(find.byKey(const Key('screen_progress')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
   });
 
@@ -133,36 +133,34 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Inventory screen (tab 0) is visible with FAB
-    expect(find.text('Inventory'), findsWidgets);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(find.text('+'), findsOneWidget);
+    expect(find.byKey(const Key('screen_inventory')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
 
     // Switch to Progress tab (tab 3)
-    await tester.tap(find.text('Progress'));
+    await tester.tap(find.byKey(const Key('nav_progress')));
     await tester.pumpAndSettle();
 
     // Verify Progress screen is shown without FAB
-    expect(find.text('Progress'), findsWidgets);
+    expect(find.byKey(const Key('screen_progress')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Open drawer and navigate to Settings
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.byKey(const Key('drawer_settings_item')));
     await tester.pumpAndSettle();
 
     // Verify Settings screen is shown
-    expect(find.text('Settings'), findsWidgets);
+    expect(find.byKey(const Key('screen_settings')), findsOneWidget);
     expect(find.byType(FloatingActionButton), findsNothing);
 
     // Switch back to Inventory tab (tab 0)
     await tester.pageBack();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Inventory'));
+    await tester.tap(find.byKey(const Key('nav_inventory')));
     await tester.pumpAndSettle();
 
     // Verify FAB is back
-    expect(find.byType(FloatingActionButton), findsOneWidget);
-    expect(find.text('+'), findsOneWidget);
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
   });
 }

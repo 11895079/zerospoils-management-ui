@@ -211,6 +211,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final demoEnabled = ref.watch(demoModeProvider);
 
     return Scaffold(
+      key: const Key('screen_settings'),
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,

@@ -101,6 +101,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('screen_expiring_today'),
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -115,6 +116,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
+                    key: const Key('expiring_error_message'),
                     _errorMessage!,
                     style: AppTextStyles.body.copyWith(color: AppColors.danger),
                     textAlign: TextAlign.center,
@@ -124,6 +126,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
                     text: 'Retry',
                     onPressed: _loadItems,
                     secondary: true,
+                    key: const Key('expiring_retry_button'),
                   ),
                 ],
               ),

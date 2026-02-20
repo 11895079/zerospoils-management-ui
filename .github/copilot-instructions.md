@@ -217,6 +217,61 @@ gh api -X PATCH "repos/:owner/:repo/pulls/<NUMBER>" -F title="New title"
 2. Use `gh api -X PATCH` with `-F body=@file.txt`
 3. Verify with `gh pr view <NUMBER> --json body` or `gh issue view <NUMBER> --json body`
 
+## Executive Briefings (Data-Driven Reports)
+
+When generating executive briefings under `docs/executive-briefings/`, follow these rules so the reports are accurate, defensible, and stakeholder-ready.
+
+### Commit Attribution (Human vs Copilot Agent)
+- **Human commits**: authors that do not include bot identifiers (e.g., `copilot`, `swe-agent[bot]`, `github-actions[bot]`).
+- **Copilot agent commits**: authors containing `copilot` or `swe-agent[bot]` (case-insensitive).
+- Report the split explicitly (counts + percent). Treat bot commits as *assisted* work, not manual effort.
+
+### Effort Score Definition
+Effort score is a **0–100 index** derived from objective signals (commit volume, net lines changed, test coverage, and change density). Interpret it as:
+- **0–39**: Low (light activity or narrow scope)
+- **40–69**: Moderate (steady progress)
+- **70–84**: Strong (high delivery pace + breadth)
+- **85–100**: Exceptional (sustained, high-impact delivery)
+
+### Time Investment (Must Include Specific Values)
+Always include **explicit time values** in the report:
+- **Calendar span**: total days and total hours in the reporting range (e.g., “14 days / 336 hours”).
+- **Active development days**: count of unique days with commits.
+- **Average commits per active day**.
+Do **not** infer “human hours worked” unless a declared hours-per-day assumption is provided by the user.
+
+### “Production-Ready” Clarification
+When stating “production-ready,” explicitly clarify:
+- **Meaning**: code quality, architecture, test coverage, CI/lint, and build stability are release-grade.
+- **Not implied**: product launch readiness, go-to-market readiness, or operational readiness.
+Use language like: “production-ready code quality, not a declaration to launch today.”
+
+### Milestone Progress (Never Empty)
+- Use **status files in `planning/milestones/`** (e.g., milestone `README.md` and issue status tables) as the source of truth.
+- If progress appears empty or stale, **review actual code vs. milestone acceptance criteria** and **attempt to update milestone status first**, then generate the report.
+- Do not report milestone progress without reconciling status.
+
+### MVP Overview (Required in Executive Briefings)
+- Include an **MVP overview** summarizing milestones **M1–M3**.
+- Provide **completed items per milestone** in the summary (e.g., `M1: Foundations — 10/10 complete (100%)`).
+- Use milestone themes from milestone README headers/objectives when available.
+
+### Lines of Code by Category — Definitions
+Clarify the meaning of each metric:
+- **Production Code**: total lines across `app/lib/**/*.dart`.
+- **Net Addition**: cumulative insertions minus deletions from git history in the reporting range.
+- **Refactoring Effort**: count of commits labeled `refactor` (quality improvements, not feature expansion).
+Include a short definition block in the report whenever this section appears.
+
+### Executive Briefing Filename Convention
+All reports saved under `docs/executive-briefings/` must use this filename format:
+
+`executive-report-<period>-YYYYMMDD-HHMMSS.md`
+
+Examples:
+- `executive-report-cumulative-20260215-163557.md`
+- `executive-report-20260201-to-20260215-20260215-163557.md`
+
 ## When Working in This Codebase
 
 ### DO

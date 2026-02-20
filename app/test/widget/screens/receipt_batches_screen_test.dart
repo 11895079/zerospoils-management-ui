@@ -56,7 +56,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Receipt Batches'), findsOneWidget);
+    expect(find.byKey(const Key('screen_receipt_batches')), findsOneWidget);
     expect(
       find.byKey(const ValueKey('receipt_batch_card_batch-1')),
       findsOneWidget,

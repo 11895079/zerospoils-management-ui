@@ -74,6 +74,7 @@ class ItemIconWithLabel extends StatelessWidget {
     );
 
     final label = Text(
+      key: Key('item_icon_label_${category.name}'),
       category.displayName,
       style: labelStyle ?? Theme.of(context).textTheme.labelSmall,
     );

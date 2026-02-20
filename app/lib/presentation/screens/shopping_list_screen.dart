@@ -29,6 +29,7 @@ class ShoppingListScreen extends ConsumerWidget {
     final itemsAsync = ref.watch(shoppingListItemsProvider);
 
     return Scaffold(
+      key: const Key('screen_shopping_list'),
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
@@ -505,11 +506,13 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
         bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
       ),
       child: Column(
+        key: const Key('shopping_add_sheet'),
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Add Item', style: AppTextStyles.h4),
           const SizedBox(height: AppSpacing.md),
           TextField(
+            key: const Key('shopping_add_field'),
             controller: _controller,
             decoration: const InputDecoration(labelText: 'Item name'),
             textInputAction: TextInputAction.done,
@@ -523,6 +526,7 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
             children: [
               Expanded(
                 child: OutlinedButton(
+                  key: const Key('shopping_add_cancel'),
                   onPressed: () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
@@ -530,6 +534,7 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: ElevatedButton(
+                  key: const Key('shopping_add_confirm'),
                   onPressed: () {
                     final value = _controller.text.trim();
                     if (value.isEmpty) return;

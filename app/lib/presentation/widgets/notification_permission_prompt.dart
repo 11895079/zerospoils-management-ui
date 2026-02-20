@@ -49,12 +49,14 @@ class NotificationPermissionPrompt extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AlertDialog(
+      key: const Key('notification_prompt'),
       title: const Text('Enable Notifications'),
       content: const Text(
         'To get reminders for expiring items, please enable notifications.',
       ),
       actions: [
         TextButton(
+          key: const Key('notification_prompt_cancel'),
           onPressed: () {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (context.mounted) Navigator.of(context).pop();
@@ -63,6 +65,7 @@ class NotificationPermissionPrompt extends ConsumerWidget {
           child: const Text('Not now'),
         ),
         ElevatedButton(
+          key: const Key('notification_prompt_confirm'),
           onPressed: () async {
             await _requestPermissions(context);
             WidgetsBinding.instance.addPostFrameCallback((_) {

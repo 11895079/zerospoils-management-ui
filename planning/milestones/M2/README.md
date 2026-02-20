@@ -20,7 +20,7 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** In Progress (10/17 completed) — Last Updated: Feb 12, 2026
+**Status:** In Progress (14/17 completed) — Last Updated: Feb 20, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
@@ -29,36 +29,33 @@
 | [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ✅ DONE | Implemented locally | Feb 12, 2026 |
 | [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ✅ DONE | [#66](https://github.com/11895079/zerospoils/pull/66) | Feb 3, 2026 |
 | [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ✅ DONE | Implemented locally | Jan 27, 2026 |
-| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ⚠️ PARTIAL | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 28, 2026 (Permissions flow pending) |
+| [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 28, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
-| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⏳ TODO | — | — |
+| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ✅ DONE | Implemented locally | Feb 20, 2026 |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ✅ DONE | [commit 7264c7d](https://github.com/bakintunde/zerospoils/commit/7264c7d) | Feb 3, 2026 |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
-| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⚠️ PARTIAL | Implemented locally | Feb 12, 2026 (Telemetry/offline/accessibility pending) |
-| [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ✅ DONE | Implemented locally | Feb 12, 2026 (Offline/accessibility pending) |
+| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⚠️ PARTIAL | Implemented locally | Feb 12, 2026 (Telemetry + accessibility pending) |
+| [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ✅ DONE | Implemented locally | Feb 12, 2026 (Accessibility pending) |
 | [M2/165](165-backup-restore-local-json-in-settings.md) | Backup/restore (local JSON) in Settings | ✅ DONE | Implemented locally | Feb 12, 2026 (Accessibility pending) |
 | [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen (mark used/wasted) | ✅ DONE | Implemented locally | Jan 24, 2026 |
-| [M2/180](180-inventory-view-modes-list-table-grid.md) | Inventory view modes (list/table/grid) | ⏳ TODO | — | — |
-| [M2/185](185-user-defined-category-management-crud.md) | User-defined category management | ⏳ TODO | — | — |
-| [M2/190](190-batch-receipt-capture-mvp.md) | Batch receipt capture MVP | ⚠️ IN REVIEW | [#71](https://github.com/11895079/zerospoils/pull/71) | — |
+| [M2/180](180-inventory-view-modes-list-table-grid.md) | Inventory view modes (list/table/grid) | ✅ DONE | Implemented locally | Feb 15, 2026 (Accessibility pending) |
+| [M2/185](185-user-defined-category-management-crud.md) | User-defined category management | ✅ DONE | Implemented locally | Feb 20, 2026 |
+| [M2/190](190-batch-receipt-capture-mvp.md) | Batch receipt capture MVP | ⚠️ PARTIAL | [#71](https://github.com/11895079/zerospoils/pull/71) | Entry points + permissions gaps |
 
 ## Next Priorities
 
 **Recommended next issue: M2/155 - Demo Mode DB Isolation Toggle**
-- Close telemetry/offline/accessibility gaps in the toggle experience
-- Important for UX stability and analytics baseline
+- Add `demo_mode_toggled` telemetry + accessibility polish
+- Important for analytics baseline and UX clarity
 - Estimated effort: 2-3 hours
 
-**Secondary: M2/180 - Inventory View Modes**
-- User-facing upgrade with low dependency risk
-- Builds on current inventory list and filters
-- Estimated effort: 4-6 hours
+**Secondary: M2/190 - Batch Receipt Capture MVP**
+- Add Shopping List CTA entry point + permission recovery messaging
+- Validate OCR error states and Web fallback
+- Estimated effort: 3-5 hours
 
-**Backlog (strategic priorities for M2):**
-1. **M2/155** - Demo mode telemetry/offline/accessibility polish
-2. **M2/180** - Inventory view modes (list/table/grid)
-3. **M2/185** - User-defined category management (CRUD)
-4. **M2/142** - Expiry date OCR (optional enhancement)
-5. **M2/030** - Build pipelines (currently in review)
-6. **M2/190** - Batch receipt capture (currently in review)
+**Backlog (remaining M2 gaps):**
+1. **M2/155** - Demo mode telemetry + accessibility polish
+2. **M2/190** - Batch receipt capture entry points + permissions
+3. **M2/030** - Build pipelines (currently in review)
 
