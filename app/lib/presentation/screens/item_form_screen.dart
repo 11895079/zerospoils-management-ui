@@ -1423,3 +1423,13 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     }
   }
 }
+
+/// Extension to convert Color to int32 for Hive storage
+extension ColorExtension on Color {
+  int toARGB32() {
+    return ((a * 255).round() << 24) |
+        ((r * 255).round() << 16) |
+        ((g * 255).round() << 8) |
+        ((b * 255).round());
+  }
+}

@@ -104,6 +104,7 @@ class ExpiryDateParser {
   }
 
   int? _monthFromName(String name) {
+    if (name.length < 3) return null;
     switch (name.substring(0, 3)) {
       case 'jan':
         return 1;
