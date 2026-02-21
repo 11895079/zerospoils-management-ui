@@ -418,4 +418,98 @@ void main() {
     final inventoryItems = await itemRepository.getAllItems();
     expect(inventoryItems.length, 2);
   });
+
+  testWidgets('Add item creates entry and persists to repository', (
+    WidgetTester tester,
+  ) async {
+    final repository = MockShoppingListRepository();
+    final itemRepository = MockItemRepository();
+    await repository.init();
+    await itemRepository.init();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(repository),
+          itemRepositoryProvider.overrideWithValue(itemRepository),
+        ],
+        child: const MaterialApp(home: ShoppingListScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('shopping_empty_state')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('shopping_empty_cta')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('shopping_add_field')), 'Milk');
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shopping_add_confirm')));
+    await tester.pumpAndSettle();
+
+    // Verify item appears in unpurchased section
+    expect(
+      find.byKey(const Key('shopping_unpurchased_section')),
+      findsOneWidget,
+    );
+    final items = await repository.getAllItems();
+    expect(items.length, 1);
+    expect(items.first.name, 'Milk');
+    // Verify the item tile exists (key generated from actual item ID)
+    expect(find.byType(CheckboxListTile), findsOneWidget);
+  });
+
+  testWidgets('Toggle purchased moves item between sections', (
+    WidgetTester tester,
+  ) async {
+    final repository = MockShoppingListRepository();
+    final itemRepository = MockItemRepository();
+    await repository.init();
+    await itemRepository.init();
+    final now = DateTime.now();
+
+    await repository.saveShoppingListItem(
+      ShoppingListItem(id: '1', name: 'Bread', createdAt: now, updatedAt: now),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(repository),
+          itemRepositoryProvider.overrideWithValue(itemRepository),
+        ],
+        child: const MaterialApp(home: ShoppingListScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('shopping_unpurchased_section')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('shopping_item_checkbox_1')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
+
+    final skipButton = find.byKey(const Key('item_entry_skip'));
+    await tester.ensureVisible(skipButton);
+    await tester.tap(skipButton);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('shopping_purchased_section')), findsOneWidget);
+    final item = await repository.getItem('1');
+    expect(item?.isPurchased, true);
+
+    await tester.tap(find.byKey(const Key('shopping_item_checkbox_1')));
+    await tester.pumpAndSettle();
+
+    final updatedItem = await repository.getItem('1');
+    expect(updatedItem?.isPurchased, false);
+  });
 }

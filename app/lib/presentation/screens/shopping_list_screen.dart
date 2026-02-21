@@ -26,6 +26,9 @@ class ShoppingListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Track screen view
+    _trackScreenViewed(ref);
+
     final itemsAsync = ref.watch(shoppingListItemsProvider);
 
     return Scaffold(
@@ -78,6 +81,7 @@ class ShoppingListScreen extends ConsumerWidget {
                   onDelete: () async {
                     final repository = ref.read(shoppingListRepositoryProvider);
                     await repository.deleteItem(item.id);
+                    _trackItemDeleted(ref, item.id);
                     ref.invalidate(shoppingListItemsProvider);
                   },
                 ),
@@ -105,6 +109,7 @@ class ShoppingListScreen extends ConsumerWidget {
                   onDelete: () async {
                     final repository = ref.read(shoppingListRepositoryProvider);
                     await repository.deleteItem(item.id);
+                    _trackItemDeleted(ref, item.id);
                     ref.invalidate(shoppingListItemsProvider);
                   },
                 ),
@@ -165,6 +170,7 @@ class ShoppingListScreen extends ConsumerWidget {
             updatedAt: now,
           );
           await repository.saveShoppingListItem(item);
+          _trackItemAdded(ref, item.id);
           ref.invalidate(shoppingListItemsProvider);
           if (sheetContext.mounted) Navigator.of(sheetContext).pop();
         },
@@ -183,6 +189,7 @@ class ShoppingListScreen extends ConsumerWidget {
     if (value == true) {
       if (!item.isPurchased) {
         await repository.markAsPurchased(item.id);
+        _trackItemToggled(ref, item.id, true);
       }
       ref.invalidate(shoppingListItemsProvider);
 
@@ -235,6 +242,7 @@ class ShoppingListScreen extends ConsumerWidget {
 
     if (value == false && (item.isPurchased || isPurchasedSection)) {
       await repository.markAsUnpurchased(item.id);
+      _trackItemToggled(ref, item.id, false);
       ref.invalidate(shoppingListItemsProvider);
     }
   }
@@ -360,6 +368,38 @@ class ShoppingListScreen extends ConsumerWidget {
     final telemetry = ref.read(telemetryClientProvider);
     telemetry.enqueue({
       'name': 'shopping_convert_skipped',
+      'properties': {'item_id': itemId},
+    });
+  }
+
+  void _trackScreenViewed(WidgetRef ref) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'shopping_list_viewed',
+      'properties': {'source_screen': 'shopping_list'},
+    });
+  }
+
+  void _trackItemAdded(WidgetRef ref, String itemId) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'shopping_item_added',
+      'properties': {'item_id': itemId},
+    });
+  }
+
+  void _trackItemToggled(WidgetRef ref, String itemId, bool isPurchased) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'shopping_item_toggled',
+      'properties': {'item_id': itemId, 'is_purchased': isPurchased},
+    });
+  }
+
+  void _trackItemDeleted(WidgetRef ref, String itemId) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'shopping_item_deleted',
       'properties': {'item_id': itemId},
     });
   }
