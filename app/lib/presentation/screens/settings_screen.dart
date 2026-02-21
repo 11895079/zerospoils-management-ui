@@ -321,6 +321,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: 'notifications_enabled',
                 value: value,
                 onUpdate: () => _notificationsEnabled = value,
+                onchange: () => _trackNotificationToggle(ref, value),
               ),
             ),
             _buildDropdownTile<int>(
@@ -333,6 +334,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: 'expiry_lead_time_days',
                 value: value,
                 onUpdate: () => _leadTimeDays = value,
+                onchange: () => _trackExpiryWarningChange(ref, value),
               ),
             ),
             _buildToggleTile(
@@ -343,6 +345,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: 'sound_enabled',
                 value: value,
                 onUpdate: () => _soundEnabled = value,
+                onchange: () => _trackSoundToggle(ref, value),
               ),
             ),
             _buildToggleTile(
@@ -353,6 +356,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: 'vibration_enabled',
                 value: value,
                 onUpdate: () => _vibrationEnabled = value,
+                onchange: () => _trackVibrationToggle(ref, value),
               ),
             ),
           ]),
@@ -587,9 +591,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String key,
     required bool value,
     required VoidCallback onUpdate,
+    VoidCallback? onchange,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+    onchange?.call();
     if (!mounted) return;
     setState(onUpdate);
   }
@@ -598,9 +604,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String key,
     required int value,
     required VoidCallback onUpdate,
+    VoidCallback? onchange,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
+    onchange?.call();
     if (!mounted) return;
     setState(onUpdate);
   }
@@ -751,6 +759,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     telemetry.enqueue({
       'name': 'date_format_changed',
       'properties': {'format': format},
+    });
+  }
+
+  void _trackNotificationToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'notification_toggle_changed',
+      'properties': {'notifications_enabled': enabled},
+    });
+  }
+
+  void _trackExpiryWarningChange(WidgetRef ref, int leadTimeDays) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'expiry_warning_changed',
+      'properties': {'lead_time_days': leadTimeDays},
+    });
+  }
+
+  void _trackSoundToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'sound_toggle_changed',
+      'properties': {'sound_enabled': enabled},
+    });
+  }
+
+  void _trackVibrationToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'vibration_toggle_changed',
+      'properties': {'vibration_enabled': enabled},
     });
   }
 }
