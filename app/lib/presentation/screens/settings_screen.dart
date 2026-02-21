@@ -57,15 +57,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    // Show export format selector
+    final format = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Format'),
+        content: const Text('Choose export format:'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'json'),
+            child: const Text('JSON (Complete Backup)'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'csv'),
+            child: const Text('CSV (Inventory Only)'),
+          ),
+        ],
+      ),
+    );
+
+    if (format == null) return;
+
     try {
       final telemetry = ref.read(telemetryClientProvider);
 
-      // Let user choose destination (fallback to app documents if canceled)
+      // Let user choose destination
+      final extension = format == 'json' ? 'json' : 'csv';
       final savePath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save backup as',
-        fileName: 'zerospoils_backup.json',
+        dialogTitle: 'Save $format export as',
+        fileName: 'zerospoils_export.$extension',
         type: FileType.custom,
-        allowedExtensions: ['json'],
+        allowedExtensions: [extension],
       );
 
       String resolvedPath;
@@ -74,27 +96,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       } else {
         final directory = await getApplicationDocumentsDirectory();
         final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-        resolvedPath = '${directory.path}/zerospoils_backup_$timestamp.json';
+        resolvedPath =
+            '${directory.path}/zerospoils_export_$timestamp.$extension';
       }
 
       final service = BackupRestoreService(telemetry: telemetry);
-      final result = await service.exportToJson(resolvedPath);
+      final result = format == 'json'
+          ? await service.exportToJson(resolvedPath)
+          : await service.exportToCsv(resolvedPath);
 
-      // Persist last backup metadata
+      // Persist export metadata
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('last_backup_path', result.filePath);
+      await prefs.setString('last_export_path', result.filePath);
+      await prefs.setString('last_export_format', format);
       if (result.metadata != null) {
         await prefs.setString(
-          'last_backup_at',
+          'last_export_at',
           result.metadata!.exportedAt.toIso8601String(),
         );
       }
-      await prefs.setInt('last_backup_size', result.sizeBytes);
+      await prefs.setInt('last_export_size', result.sizeBytes);
+
+      // Emit telemetry
+      telemetry.enqueue({
+        'name': 'privacy_data_exported',
+        'properties': {
+          'export_format': format,
+          'file_size_kb': result.sizeBytes / 1024,
+          'items_count': result.metadata?.itemCount ?? 0,
+        },
+      });
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backup saved to: ${result.filePath}'),
+            content: Text('$format export saved to: ${result.filePath}'),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -103,7 +139,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backup failed: ${e.toString()}'),
+            content: Text('Export failed: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -251,10 +287,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
+          ]),
+          const SizedBox(height: AppSpacing.xl),
+          _buildSectionHeader('PRIVACY & DATA'),
+          _buildCard([
             _buildLinkTile(
               icon: Icons.backup,
-              label: 'Backup Data',
-              subtitle: 'Export a local backup file',
+              label: 'Export My Data',
+              subtitle: 'Download your inventory and settings',
               onTap: () => _exportBackup(context, ref),
             ),
             _buildLinkTile(
@@ -265,7 +305,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildDangerTile(
               icon: Icons.delete_forever,
-              label: 'Clear All Data',
+              label: 'Delete All Data',
+              subtitle: 'Permanently remove all data (irreversible)',
               onTap: () => _confirmClearAllData(context),
             ),
           ]),
@@ -521,6 +562,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildDangerTile({
     required IconData icon,
     required String label,
+    String? subtitle,
     required VoidCallback onTap,
   }) {
     return ListTile(
@@ -530,6 +572,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         label,
         style: AppTextStyles.body.copyWith(color: AppColors.danger),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: AppTextStyles.caption.copyWith(color: AppColors.danger),
+            )
+          : null,
       trailing: const Icon(Icons.chevron_right, color: AppColors.danger),
       onTap: onTap,
     );
@@ -569,34 +617,127 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _confirmClearAllData(BuildContext context) async {
+    // Show confirmation dialog that requires typing "DELETE"
+    final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear all data?'),
-        content: const Text(
-          'This will delete all items and settings on this device. This cannot be undone.',
+        title: const Text('Delete All Data?'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This will permanently delete ALL your data including:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text('• Inventory items'),
+              const Text('• Shopping lists'),
+              const Text('• Waste tracking data'),
+              const Text('• All settings and preferences'),
+              const SizedBox(height: 16),
+              const Text(
+                'This action cannot be undone.',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text('Type "DELETE" to confirm:'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: 'Type DELETE',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () {
+              controller.dispose();
+              Navigator.pop(context, false);
+            },
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, child) {
+              final isConfirmed = value.text == 'DELETE';
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isConfirmed ? AppColors.danger : Colors.grey,
+                ),
+                onPressed: isConfirmed
+                    ? () {
+                        controller.dispose();
+                        Navigator.pop(context, true);
+                      }
+                    : null,
+                child: const Text('Delete Permanently'),
+              );
+            },
           ),
         ],
       ),
     );
 
+    controller.dispose();
+
     if (confirmed != true || !context.mounted) return;
-    final repo = ref.read(itemRepositoryProvider);
-    await repo.init();
-    await repo.clear();
-    ref.invalidate(itemsFutureProvider);
-    if (!context.mounted) return;
-    _showSnack(context, 'All data cleared');
+
+    try {
+      final repo = ref.read(itemRepositoryProvider);
+      await repo.init();
+
+      // Get item count for telemetry BEFORE deletion
+      final itemCount = (await repo.getAllItems()).length;
+      final userTier = 'free'; // TODO: Get from auth provider
+
+      // Delete via service (emits telemetry before deletion)
+      final service = BackupRestoreService();
+      await service.clearAllData(userTier: userTier, itemCount: itemCount);
+
+      // Clear repository
+      await repo.clear();
+      ref.invalidate(itemsFutureProvider);
+
+      if (!context.mounted) return;
+
+      // Show success feedback
+      _showSnack(context, 'All data permanently deleted');
+
+      // Redirect to onboarding after short delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!context.mounted) return;
+
+      // Navigate to onboarding (home_shell will handle this)
+      Navigator.of(
+        context,
+        rootNavigator: true,
+      ).pushReplacementNamed('/onboarding');
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Deletion failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showSnack(BuildContext context, String message) {
