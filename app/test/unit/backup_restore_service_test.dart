@@ -486,4 +486,131 @@ void main() {
       expect(restoredMilk.customCategoryName, 'School Snacks');
     });
   });
+
+  group('BackupRestoreService - CSV Export', () {
+    test('export to CSV generates human-readable format', () async {
+      final itemsBox = await hive.openBox<Item>('items');
+
+      // Add test item
+      final item = Item(
+        id: 'item-1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        quantity: 2,
+        unit: Unit.liter,
+        purchasePrice: 4.99,
+        expiryDate: DateTime(2026, 3, 15),
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 2, 15, 10, 0),
+        updatedAt: DateTime(2026, 2, 15, 10, 0),
+      );
+      await itemsBox.put(item.id, item);
+
+      final service = BackupRestoreService(hive: hive);
+      final exportPath = '${tempDir.path}/export.csv';
+
+      final result = await service.exportToCsv(exportPath);
+
+      expect(result.success, true);
+      expect(result.filePath, exportPath);
+      expect(result.sizeBytes, greaterThan(0));
+      expect(result.metadata?.itemCount, 1);
+
+      // Verify CSV content
+      final csv = await File(exportPath).readAsString();
+      expect(csv.contains('ID,Name,Category'), true);
+      expect(csv.contains('item-1'), true);
+      expect(csv.contains('Milk'), true);
+      expect(csv.contains('Dairy'), true);
+      expect(csv.contains('2026-03-15'), true);
+      expect(csv.contains('fridge'), true);
+    });
+
+    test('CSV export handles empty database', () async {
+      final service = BackupRestoreService(hive: hive);
+      final exportPath = '${tempDir.path}/empty.csv';
+
+      final result = await service.exportToCsv(exportPath);
+
+      expect(result.success, true);
+      expect(result.metadata?.itemCount, 0);
+
+      final csv = await File(exportPath).readAsString();
+      expect(csv.contains('ID,Name,Category'), true);
+      // Should only have header, no data rows
+      expect(csv.split('\n').length, 2); // Header + empty line
+    });
+
+    test('CSV export escapes special characters', () async {
+      final itemsBox = await hive.openBox<Item>('items');
+
+      final item = Item(
+        id: 'item-1',
+        name: 'Milk "Premium"',
+        category: ItemCategory.dairy,
+        customCategoryName: 'Store, Fridge',
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await itemsBox.put(item.id, item);
+
+      final service = BackupRestoreService(hive: hive);
+      final exportPath = '${tempDir.path}/special.csv';
+
+      final result = await service.exportToCsv(exportPath);
+      expect(result.success, true);
+
+      final csv = await File(exportPath).readAsString();
+      // Name with quotes should be escaped
+      expect(csv.contains('"Milk ""Premium"""'), true);
+      // Category with comma should be quoted
+      expect(csv.contains('"Store, Fridge"'), true);
+    });
+  });
+
+  group('BackupRestoreService - Clear Data', () {
+    test('clearAllData wipes all database and settings', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notifications_enabled', true);
+      await prefs.setInt('expiry_lead_time_days', 3);
+
+      final itemsBox = await hive.openBox<Item>('items');
+      final categoriesBox = await hive.openBox<UserCategory>('user_categories');
+
+      final item = Item(
+        id: 'item-1',
+        name: 'Test Item',
+        category: ItemCategory.other,
+        location: StorageLocation.other,
+        status: ItemStatus.available,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      await itemsBox.put(item.id, item);
+
+      final category = UserCategory(
+        id: 'cat-1',
+        name: 'Test',
+        createdAt: DateTime.now(),
+      );
+      await categoriesBox.put(category.id, category);
+
+      // Verify data exists
+      expect(itemsBox.length, 1);
+      expect(categoriesBox.length, 1);
+      expect(prefs.getBool('notifications_enabled'), true);
+
+      final service = BackupRestoreService(hive: hive);
+      await service.clearAllData(userTier: 'free', itemCount: 1);
+
+      // Verify all data cleared
+      expect(itemsBox.length, 0);
+      expect(categoriesBox.length, 0);
+      expect(prefs.getBool('notifications_enabled'), null);
+      expect(prefs.getInt('expiry_lead_time_days'), null);
+    });
+  });
 }
