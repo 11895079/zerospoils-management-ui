@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
@@ -1057,7 +1058,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   String _formatShortDate(DateTime date) {
-    return DateFormat('MMM d, yyyy').format(date);
+    return AppDateFormatter.formatDateWithYear(date, 'MMM d, yyyy');
   }
 
   Widget _buildViewModeToggle(
