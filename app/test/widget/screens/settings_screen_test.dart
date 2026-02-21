@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
 
 void main() {
@@ -18,6 +19,15 @@ void main() {
   Widget buildTestHarness() {
     return MaterialApp(
       home: ProviderScope(child: Scaffold(body: SettingsScreen())),
+    );
+  }
+
+  Widget buildTestHarnessWithTelemetry(TelemetryClient client) {
+    return MaterialApp(
+      home: ProviderScope(
+        overrides: [telemetryClientProvider.overrideWithValue(client)],
+        child: Scaffold(body: SettingsScreen()),
+      ),
     );
   }
 
@@ -176,6 +186,97 @@ void main() {
       expect(soundSwitch.value, false);
       expect(vibrationSwitch.value, false);
       expect(dropdown.value, 7);
+    });
+
+    testWidgets('Notification toggle emits telemetry event', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+      });
+
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.notifications_active);
+
+      await tester.tap(switchForIcon(Icons.notifications_active));
+      await tester.pumpAndSettle();
+
+      final event = telemetry.events.last;
+      expect(event['name'], 'notification_toggle_changed');
+      expect(event['properties']['notifications_enabled'], false);
+    });
+
+    testWidgets('Lead time change emits telemetry event', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+      });
+
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.timer);
+
+      await tester.tap(dropdownForIcon(Icons.timer));
+      await tester.pumpAndSettle();
+
+      final option7days = find.byWidgetPredicate(
+        (widget) => widget is DropdownMenuItem<int> && widget.value == 7,
+      );
+      await tester.tap(option7days.last);
+      await tester.pumpAndSettle();
+
+      final event = telemetry.events.last;
+      expect(event['name'], 'expiry_warning_changed');
+      expect(event['properties']['lead_time_days'], 7);
+    });
+
+    testWidgets('Sound and vibration toggles emit telemetry events', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+      });
+
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.music_note);
+
+      await tester.tap(switchForIcon(Icons.music_note));
+      await tester.pumpAndSettle();
+
+      final soundEvent = telemetry.events.last;
+      expect(soundEvent['name'], 'sound_toggle_changed');
+      expect(soundEvent['properties']['sound_enabled'], false);
+
+      await tester.tap(switchForIcon(Icons.vibration));
+      await tester.pumpAndSettle();
+
+      final vibrationEvent = telemetry.events.last;
+      expect(vibrationEvent['name'], 'vibration_toggle_changed');
+      expect(vibrationEvent['properties']['vibration_enabled'], false);
     });
   });
 }

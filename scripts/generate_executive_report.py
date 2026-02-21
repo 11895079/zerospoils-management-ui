@@ -298,6 +298,168 @@ class ExecutiveReportGenerator:
 
         return features[:10]  # Top 10 features
 
+    def get_recent_completions(self, limit: int = 10) -> List[Dict]:
+        """Extract recently completed features from milestone status files."""
+        completions = []
+        milestones_path = self.planning_path / "milestones"
+
+        milestone_dirs = sorted(milestones_path.glob("M[0-9]"))
+        if self.roadmap_scope:
+            milestone_dirs = [m for m in milestone_dirs if m.name.upper() in self.roadmap_scope]
+
+        for milestone_dir in milestone_dirs:
+            readme_file = milestone_dir / "README.md"
+            if not readme_file.exists():
+                continue
+
+            with open(readme_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # Parse status table to find completed items
+            # Pattern: | **205** | Settings date format preference | ✅ Complete | [#77](...) | ...
+            table_rows = re.finditer(
+                r'\|\s*\*\*(?P<issue>\d+)\*\*\s*\|\s*(?P<title>[^|]+?)\s*\|\s*✅\s*Complete[^|]*\|\s*(?P<pr>\[#\d+\][^|]*)?\s*\|\s*(?P<notes>[^|]*)\s*\|',
+                content,
+                re.MULTILINE
+            )
+
+            for match in table_rows:
+                issue_num = match.group('issue').strip()
+                title = match.group('title').strip()
+                pr_text = match.group('pr').strip() if match.group('pr') else '—'
+                notes = match.group('notes').strip()
+
+                # Extract PR number and link
+                pr_link = '—'
+                pr_date = None
+                if pr_text != '—':
+                    pr_match = re.search(r'\[#(\d+)\]\(([^)]+)\)', pr_text)
+                    if pr_match:
+                        pr_num = pr_match.group(1)
+                        pr_url = pr_match.group(2)
+                        pr_link = f"[#{pr_num}]({pr_url})"
+                        # Try to extract date from notes or git commits
+                        pr_date = self._get_pr_merge_date(pr_num)
+
+                # Read issue file to extract impact/goal
+                impact = self._extract_issue_impact(milestone_dir, issue_num)
+
+                completions.append({
+                    'milestone': milestone_dir.name,
+                    'issue': issue_num,
+                    'title': title,
+                    'completed_date': pr_date,
+                    'impact': impact,
+                    'pr_link': pr_link,
+                    'notes': notes
+                })
+
+        # Sort by completion date (most recent first)
+        # Use timezone-aware min datetime for comparison
+        min_datetime = datetime.min.replace(tzinfo=datetime.now().astimezone().tzinfo)
+        completions.sort(key=lambda x: x['completed_date'] or min_datetime, reverse=True)
+        return completions[:limit]
+
+    def _get_pr_merge_date(self, pr_number: str) -> Optional[datetime]:
+        """Get PR merge date from git commit messages."""
+        # Search commit messages for PR merge pattern
+        log_output = self.run_git_command(
+            "log", "--grep", f"#{pr_number}", "--format=%ad", "--date=iso", "-1"
+        )
+        if log_output.strip():
+            try:
+                return datetime.strptime(log_output.strip(), "%Y-%m-%d %H:%M:%S %z")
+            except ValueError:
+                pass
+        return None
+
+    def _extract_issue_impact(self, milestone_dir: Path, issue_num: str) -> str:
+        """Extract impact/goal from issue markdown file."""
+        # Find issue file matching the number
+        issue_files = list(milestone_dir.glob(f"{issue_num}-*.md"))
+        if not issue_files:
+            return "Impact not specified"
+
+        with open(issue_files[0], 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Extract from Goal section (first priority)
+        goal_match = re.search(r'^##\s*Goal\s*$\s*([^#]+)', content, re.MULTILINE)
+        if goal_match:
+            goal_text = goal_match.group(1).strip()
+            # Take first sentence or first line
+            first_sentence = re.split(r'[.\n]', goal_text)[0].strip()
+            if first_sentence and len(first_sentence) > 10:
+                return first_sentence
+
+        # Fallback to Context section
+        context_match = re.search(r'^##\s*Context\s*$\s*([^#]+)', content, re.MULTILINE)
+        if context_match:
+            context_text = context_match.group(1).strip()
+            first_sentence = re.split(r'[.\n]', context_text)[0].strip()
+            if first_sentence and len(first_sentence) > 10:
+                return first_sentence
+
+        return "Impact not specified"
+
+    def _generate_progress_commentary(self, completions: List[Dict], milestone_data: Dict, commit_stats: Dict) -> str:
+        """Generate LLM-style data-driven commentary on progress."""
+        commentary = []
+        milestones = milestone_data['milestones']
+        commits = commit_stats['commits']
+
+        # Calculate velocity metrics
+        total_complete = sum(m['complete'] for m in milestones.values())
+        total_issues = sum(m['total'] for m in milestones.values())
+        overall_progress = (total_complete / total_issues * 100) if total_issues > 0 else 0
+
+        active_days = len(set(c['date'].date() for c in commits))
+        recent_completions = len([c for c in completions if c['completed_date'] and
+                                  (datetime.now().astimezone() - c['completed_date']).days <= 7])
+
+        # Overall progress assessment
+        commentary.append(f"**Overall Progress:** {total_complete}/{total_issues} issues complete across all milestones ({overall_progress:.0f}%).")
+
+        # Analyze milestone health
+        current_milestone = None
+        for milestone in ['M3', 'M2', 'M1']:
+            if milestone in milestones:
+                current_milestone = milestone
+                break
+
+        if current_milestone and current_milestone in milestones:
+            m = milestones[current_milestone]
+            commentary.append(f"**Current Milestone ({current_milestone}):** {m['complete']}/{m['total']} issues complete ({m['percent']:.0f}%). "
+                            f"{'On track for completion' if m['percent'] >= 50 else 'Requires acceleration to meet timeline'}.")
+
+        # Velocity trend
+        if active_days > 0:
+            avg_completions_per_week = (recent_completions / min(active_days, 7)) * 7
+            commentary.append(f"**Recent Velocity:** {recent_completions} features delivered in last 7 days "
+                            f"(~{avg_completions_per_week:.1f} completions/week).")
+
+        # Focus area analysis
+        if completions:
+            recent_milestones = Counter(c['milestone'] for c in completions[:5])
+            top_milestone = recent_milestones.most_common(1)[0][0]
+            commentary.append(f"**Recent Focus:** {top_milestone} activities dominate recent completions, "
+                            f"indicating {'MVP feature delivery' if top_milestone in ['M2', 'M3'] else 'foundation work'}.")
+
+        # Risk identification
+        risks = []
+        for milestone_name, m in milestones.items():
+            if m['percent'] < 30 and milestone_name in ['M1', 'M2', 'M3']:
+                risks.append(f"{milestone_name} ({m['percent']:.0f}% complete)")
+
+        if risks:
+            commentary.append(f"**Risk Alert:** Milestones {', '.join(risks)} require attention to avoid delivery delays.")
+
+        # Quality signals
+        if 'test' in str(completions).lower() or 'coverage' in str(completions).lower():
+            commentary.append("**Quality Focus:** Recent work includes testing and coverage improvements, supporting production readiness.")
+
+        return "\n\n".join(f"- {item}" for item in commentary)
+
     def generate_report(self) -> str:
         """Generate the executive report."""
         commit_stats = self.get_commit_stats()
@@ -308,6 +470,7 @@ class ExecutiveReportGenerator:
         missing_milestones = milestone_data['missing_status']
         milestone_themes = milestone_data['themes']
         features = self.get_features_implemented()
+        recent_completions = self.get_recent_completions(limit=10)
         attribution = self._get_commit_attribution(commit_stats['commits'])
         dora_metrics = self._get_dora_metrics(commit_stats['commits'])
 
@@ -455,6 +618,27 @@ The MVP roadmap spans **M1–M3**. Below is the current summary based on milesto
                     report += f"- **{milestone}:** {theme} — {status} ({percent:.0f}%)\n"
                 else:
                     report += f"- **{milestone}:** {theme} — Status missing (update milestone README)\n"
+
+        # Add Recent Completions section
+        if recent_completions:
+            report += "\n### Recent Completions\n\n"
+            report += "| Milestone | Issue | Feature | Completed | Impact | PR |\n"
+            report += "|-----------|-------|---------|-----------|--------|-----|\n"
+
+            for completion in recent_completions:
+                milestone = completion['milestone']
+                issue = completion['issue']
+                title = completion['title'][:50] + '...' if len(completion['title']) > 50 else completion['title']
+                completed = completion['completed_date'].strftime('%b %d') if completion['completed_date'] else '—'
+                impact = completion['impact'][:80] + '...' if len(completion['impact']) > 80 else completion['impact']
+                pr = completion['pr_link']
+
+                report += f"| {milestone} | {issue} | {title} | {completed} | {impact} | {pr} |\n"
+
+        # Add Progress Commentary
+        report += "\n### Progress Commentary\n\n"
+        commentary = self._generate_progress_commentary(recent_completions, milestone_data, commit_stats)
+        report += commentary + "\n"
 
         report += f"""
 
