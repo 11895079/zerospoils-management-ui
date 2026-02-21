@@ -316,6 +316,7 @@ Examples:
 - Create high-fidelity designs in M1 (wireframes only, defer polish to launch milestone)
 - Mix issue planning with actual Flutter code (planning in `planning/`, implementation in `app/`)
 - Commit Flutter app code to `planning/` folder or vice versa
+- **NEVER bypass commit verification using `--no-verify`** — Pre-commit hooks enforce code quality (formatting, linting, analysis). If hooks fail, fix the underlying issues. Only a human can override verification if needed.
 - **Search for text strings in widget tests** — Tests that rely on finding UI text are brittle and break when copy changes. Instead, verify behavior through:
   - **Object inspection**: Check state/model changes (`expect(item.quantity, 2)`)
   - **Widget properties**: Verify widget presence and state (`expect(find.byType(QuantityToggle), findsOneWidget)`)
