@@ -4,6 +4,7 @@ library;
 /// Riverpod-based dependency injection for data layer
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/receipt_batch_repository.dart';
@@ -71,4 +72,11 @@ final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {
   final items = await repository.getAllItems();
 
   return statsService.build(items: items, telemetryEvents: telemetry.events);
+});
+
+/// Date format preference provider (reads from SharedPreferences)
+/// Returns format string: 'MM/DD/YYYY', 'DD/MM/YYYY', or 'YYYY-MM-DD'
+final dateFormatPreferenceProvider = FutureProvider<String>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('date_format') ?? 'MM/DD/YYYY';
 });

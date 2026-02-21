@@ -331,11 +331,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               value: _dateFormat,
               items: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
               itemLabel: (val) => val,
-              onChanged: (value) => _setString(
-                key: 'date_format',
-                value: value,
-                onUpdate: () => _dateFormat = value,
-              ),
+              onChanged: (value) {
+                _trackDateFormatChange(ref, value);
+                _setString(
+                  key: 'date_format',
+                  value: value,
+                  onUpdate: () => _dateFormat = value,
+                );
+              },
             ),
             _buildToggleTile(
               icon: Icons.restaurant,
@@ -600,5 +603,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _trackDateFormatChange(WidgetRef ref, String format) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'date_format_changed',
+      'properties': {'format': format},
+    });
   }
 }

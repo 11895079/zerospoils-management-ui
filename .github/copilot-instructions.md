@@ -263,14 +263,41 @@ Clarify the meaning of each metric:
 - **Refactoring Effort**: count of commits labeled `refactor` (quality improvements, not feature expansion).
 Include a short definition block in the report whenever this section appears.
 
-### Executive Briefing Filename Convention
-All reports saved under `docs/executive-briefings/` must use this filename format:
+### Executive Briefing Format & Generation
 
-`executive-report-<period>-YYYYMMDD-HHMMSS.md`
+**CRITICAL: Always generate BOTH markdown and PDF versions**
+
+Every executive report must be generated in both formats simultaneously using the `--pdf` flag:
+
+```bash
+# Cumulative report (all time)
+python scripts/generate_executive_report.py --pdf
+
+# Date range report
+python scripts/generate_executive_report.py --from 2026-01-15 --to 2026-02-14 --pdf
+
+# Last 7 days
+python scripts/generate_executive_report.py --latest --pdf
+
+# Windows batch wrapper
+scripts\generate_executive_report.bat --pdf
+```
+
+**Generated Files:**
+- **Markdown**: `executive-report-<period>-YYYYMMDD-HHMMSS.md` (editable, version control friendly)
+- **PDF**: `executive-report-<period>-YYYYMMDD-HHMMSS.pdf` (print-ready, shareable)
+
+Both files are saved to `docs/executive-briefings/` with matching timestamps.
+
+### Executive Briefing Filename Convention
+
+Filenames follow this format (generated automatically):
+
+`executive-report-<period>-YYYYMMDD-HHMMSS.{md|pdf}`
 
 Examples:
-- `executive-report-cumulative-20260215-163557.md`
-- `executive-report-20260201-to-20260215-20260215-163557.md`
+- `executive-report-cumulative-20260215-163557.md` + `.pdf`
+- `executive-report-20260201-to-20260215-20260215-163557.md` + `.pdf`
 
 ## When Working in This Codebase
 
@@ -282,6 +309,7 @@ Examples:
 - Use 10-step numbering for easy reordering of planning issues
 - **When implementing features**: Create code in `app/` folder, link PRs to planning issues
 - **When modifying app code**: Follow Flutter/Dart best practices, maintain test coverage ≥80%
+- **When generating executive reports**: Always use the `--pdf` flag to generate both markdown + PDF versions together (e.g., `python scripts/generate_executive_report.py --pdf`)
 
 ### DON'T
 - Leave empty test plan stubs (every issue needs at least one automated + one manual test). Leave it up to the developer to determine if the automated test will be eventually implemented

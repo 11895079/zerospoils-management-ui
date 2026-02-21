@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
@@ -431,7 +432,11 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    // Watch date format preference
+    final dateFormatAsync = ref.watch(dateFormatPreferenceProvider);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -560,7 +565,17 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             if (_item!.preparedDate != null) ...[
                               _buildInfoRow(
                                 'Prepared Date',
-                                DateFormat.yMMMd().format(_item!.preparedDate!),
+                                dateFormatAsync.when(
+                                  data: (format) =>
+                                      AppDateFormatter.formatDateWithYear(
+                                        _item!.preparedDate!,
+                                        format,
+                                      ),
+                                  loading: () => '...',
+                                  error: (_, _) => DateFormat.yMMMd().format(
+                                    _item!.preparedDate!,
+                                  ),
+                                ),
                                 valueKey: const Key(
                                   'item_detail_prepared_date',
                                 ),
@@ -584,14 +599,33 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             const Divider(height: 1),
                             _buildInfoRow(
                               'Added',
-                              DateFormat.yMMMd().format(_item!.createdAt),
+                              dateFormatAsync.when(
+                                data: (format) =>
+                                    AppDateFormatter.formatDateWithYear(
+                                      _item!.createdAt,
+                                      format,
+                                    ),
+                                loading: () => '...',
+                                error: (_, _) =>
+                                    DateFormat.yMMMd().format(_item!.createdAt),
+                              ),
                               valueKey: const Key('item_detail_added'),
                             ),
                             const Divider(height: 1),
                             if (_item!.expiryDate != null) ...[
                               _buildInfoRow(
                                 'Expiry Date',
-                                DateFormat.yMMMd().format(_item!.expiryDate!),
+                                dateFormatAsync.when(
+                                  data: (format) =>
+                                      AppDateFormatter.formatDateWithYear(
+                                        _item!.expiryDate!,
+                                        format,
+                                      ),
+                                  loading: () => '...',
+                                  error: (_, _) => DateFormat.yMMMd().format(
+                                    _item!.expiryDate!,
+                                  ),
+                                ),
                                 valueKey: const Key('item_detail_expiry'),
                               ),
                               const Divider(height: 1),
