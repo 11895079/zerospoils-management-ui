@@ -28,7 +28,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** February 15, 2026 (14:45 UTC) — **Progress:** 3/13 issues complete (23%)
+**Last Updated:** February 21, 2026 (15:30 UTC) — **Progress:** 4/13 issues complete (31%)
 
 ### Issues & Completion
 
@@ -43,7 +43,7 @@
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |
 | **220** | Convert purchased list items → inventory | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | Convert dialog with expiry date + optional location; telemetry tracking |
 | **230** | Offline-first verification suite | ⏳ Not Started | — | No verification suite in `app/test` |
-| **240** | Data export/delete (privacy baseline) | ⏳ Not Started | — | No export/delete tooling detected |
+| **240** | Data export/delete (privacy baseline) | ✅ Complete | [#78](https://github.com/11895079/zerospoils/pull/78) | JSON + CSV export, DELETE confirmation typing, telemetry audit trail (13/13 tests) |
 | **250** | Telemetry instrumentation for core funnel | ⏳ Not Started | — | M1 telemetry baseline exists; M3 funnel not yet implemented |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
 | **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
