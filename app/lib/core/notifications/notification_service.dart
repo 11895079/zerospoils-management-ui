@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:zerospoils/core/notifications/notification_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -11,8 +12,11 @@ typedef TelemetryCallback =
 
 /// Basic notifications scaffolding for M2/120: schedule/reschedule/cancel.
 class NotificationService {
-  NotificationService._internal({FlutterLocalNotificationsPlugin? plugin})
-    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  NotificationService._internal({
+    FlutterLocalNotificationsPlugin? plugin,
+    NotificationPreferencesStore? preferencesStore,
+  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
+       _preferencesStore = preferencesStore ?? NotificationPreferencesStore();
 
   static final NotificationService _instance = NotificationService._internal();
 
@@ -24,15 +28,22 @@ class NotificationService {
   /// Note: Providing a plugin creates a new instance that bypasses the singleton.
   /// This is primarily intended for unit tests where you need to mock the
   /// notification plugin behavior.
-  factory NotificationService({FlutterLocalNotificationsPlugin? plugin}) {
-    // If a plugin is provided, create a new instance for testing
-    if (plugin != null) {
-      return NotificationService._internal(plugin: plugin);
+  factory NotificationService({
+    FlutterLocalNotificationsPlugin? plugin,
+    NotificationPreferencesStore? preferencesStore,
+  }) {
+    // If a plugin or preferences store is provided, create a new instance
+    if (plugin != null || preferencesStore != null) {
+      return NotificationService._internal(
+        plugin: plugin,
+        preferencesStore: preferencesStore,
+      );
     }
     return _instance;
   }
 
   final FlutterLocalNotificationsPlugin _plugin;
+  final NotificationPreferencesStore _preferencesStore;
   bool _initialized = false;
   TelemetryCallback? _telemetryCallback;
 
@@ -98,14 +109,17 @@ class NotificationService {
     _initialized = true;
   }
 
-  /// Derive a schedule time based on expiry date (default: 9am local on day-before-expiry).
-  tz.TZDateTime computeScheduleTime(DateTime expiryDate) {
+  /// Derive a schedule time based on expiry date and lead time.
+  tz.TZDateTime computeScheduleTime(
+    DateTime expiryDate, {
+    int leadTimeDays = 1,
+  }) {
     final local = tz.local;
     final preExpiry = DateTime(
       expiryDate.year,
       expiryDate.month,
       expiryDate.day,
-    ).subtract(const Duration(days: 1));
+    ).subtract(Duration(days: leadTimeDays));
     // Use TZDateTime constructor to create time directly in local timezone
     return tz.TZDateTime(
       local,
@@ -124,21 +138,31 @@ class NotificationService {
     String? title,
     String? body,
   }) async {
-    final when = computeScheduleTime(expiryDate);
+    final preferences = await _preferencesStore.load();
+    if (!preferences.notificationsEnabled) {
+      return;
+    }
+
+    final when = computeScheduleTime(
+      expiryDate,
+      leadTimeDays: preferences.leadTimeDays,
+    );
     await _plugin.zonedSchedule(
       id: itemId,
       title: title ?? 'Upcoming expiry',
       body: body ?? 'An item is nearing expiry',
       scheduledDate: when,
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'zerospoils_default',
           'ZeroSpoils Notifications',
           channelDescription: 'General notifications for expiring items',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
+          playSound: preferences.soundEnabled,
+          enableVibration: preferences.vibrationEnabled,
         ),
-        iOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(presentSound: preferences.soundEnabled),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -160,6 +184,11 @@ class NotificationService {
     // (to avoid double-counting; reschedule is a single operation)
     await _plugin.cancel(id: itemId);
 
+    final preferences = await _preferencesStore.load();
+    if (!preferences.notificationsEnabled) {
+      return;
+    }
+
     await scheduleForItem(
       itemId: itemId,
       expiryDate: newExpiryDate,
@@ -167,7 +196,10 @@ class NotificationService {
       body: body,
     );
 
-    final when = computeScheduleTime(newExpiryDate);
+    final when = computeScheduleTime(
+      newExpiryDate,
+      leadTimeDays: preferences.leadTimeDays,
+    );
     _telemetryCallback?.call('notification_rescheduled', {
       'item_id': itemId.toString(),
       'new_schedule_time': when.toIso8601String(),

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 // import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz show TZDateTime;
 import 'package:zerospoils/core/notifications/notification_service.dart';
@@ -97,6 +98,12 @@ void main() {
   });
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({
+      'notifications_enabled': true,
+      'expiry_lead_time_days': 3,
+      'sound_enabled': true,
+      'vibration_enabled': true,
+    });
     mockPlugin = MockFlutterLocalNotificationsPlugin();
     notificationService = NotificationService(plugin: mockPlugin);
     telemetryEvents.clear();
@@ -185,8 +192,82 @@ void main() {
     );
   });
 
+  group('NotificationService - scheduling preferences', () {
+    test('scheduleForItem respects lead time preference', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final expiryDate = DateTime(2026, 2, 15);
+      await notificationService.scheduleForItem(
+        itemId: 42,
+        expiryDate: expiryDate,
+      );
+
+      expect(mockPlugin.scheduledNotifications.length, 1);
+      final scheduledDate =
+          mockPlugin.scheduledNotifications[0]['scheduledDate']
+              as tz.TZDateTime;
+      expect(scheduledDate.year, 2026);
+      expect(scheduledDate.month, 2);
+      expect(scheduledDate.day, 12);
+      expect(scheduledDate.hour, 9);
+    });
+
+    test('scheduleForItem skips when notifications are disabled', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': false,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      await notificationService.scheduleForItem(
+        itemId: 43,
+        expiryDate: DateTime(2026, 2, 15),
+      );
+
+      expect(mockPlugin.scheduledNotifications, isEmpty);
+    });
+
+    test('scheduleForItem applies sound and vibration preferences', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': false,
+        'vibration_enabled': false,
+      });
+
+      await notificationService.scheduleForItem(
+        itemId: 44,
+        expiryDate: DateTime(2026, 2, 15),
+      );
+
+      expect(mockPlugin.scheduledNotifications.length, 1);
+      final details =
+          mockPlugin.scheduledNotifications[0]['notificationDetails']
+              as NotificationDetails;
+      final androidDetails = details.android;
+      final iosDetails = details.iOS;
+
+      expect(androidDetails?.playSound, false);
+      expect(androidDetails?.enableVibration, false);
+      expect(iosDetails?.presentSound, false);
+    });
+  });
+
   group('NotificationService - telemetry integration', () {
     test('scheduleForItem emits notification_scheduled event', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 1,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
       // Skip this test on web/desktop platforms where notification logic is disabled
       // (see NotificationService.initialize)
       bool isWeb = false;
