@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/notifications/notification_preferences.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../di/repository_providers.dart';
 import '../../data/services/backup_restore_service.dart';
@@ -40,13 +41,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
-      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
-      _soundEnabled = prefs.getBool('sound_enabled') ?? true;
-      _vibrationEnabled = prefs.getBool('vibration_enabled') ?? true;
+      _notificationsEnabled =
+          prefs.getBool(NotificationPreferencesStore.notificationsEnabledKey) ??
+          true;
+      _soundEnabled =
+          prefs.getBool(NotificationPreferencesStore.soundEnabledKey) ?? true;
+      _vibrationEnabled =
+          prefs.getBool(NotificationPreferencesStore.vibrationEnabledKey) ??
+          true;
       _darkModeEnabled = prefs.getBool('dark_mode_enabled') ?? false;
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
-      _leadTimeDays = prefs.getInt('expiry_lead_time_days') ?? 3;
+      _leadTimeDays =
+          prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
     });
   }
@@ -318,9 +325,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Notifications',
               value: _notificationsEnabled,
               onChanged: (value) => _setBool(
-                key: 'notifications_enabled',
+                key: NotificationPreferencesStore.notificationsEnabledKey,
                 value: value,
                 onUpdate: () => _notificationsEnabled = value,
+                onChange: () => _trackNotificationToggle(ref, value),
               ),
             ),
             _buildDropdownTile<int>(
@@ -330,9 +338,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               items: const [1, 3, 7],
               itemLabel: (val) => '$val days',
               onChanged: (value) => _setInt(
-                key: 'expiry_lead_time_days',
+                key: NotificationPreferencesStore.leadTimeDaysKey,
                 value: value,
                 onUpdate: () => _leadTimeDays = value,
+                onChange: () => _trackExpiryWarningChange(ref, value),
               ),
             ),
             _buildToggleTile(
@@ -340,9 +349,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Sound',
               value: _soundEnabled,
               onChanged: (value) => _setBool(
-                key: 'sound_enabled',
+                key: NotificationPreferencesStore.soundEnabledKey,
                 value: value,
                 onUpdate: () => _soundEnabled = value,
+                onChange: () => _trackSoundToggle(ref, value),
               ),
             ),
             _buildToggleTile(
@@ -350,9 +360,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Vibration',
               value: _vibrationEnabled,
               onChanged: (value) => _setBool(
-                key: 'vibration_enabled',
+                key: NotificationPreferencesStore.vibrationEnabledKey,
                 value: value,
                 onUpdate: () => _vibrationEnabled = value,
+                onChange: () => _trackVibrationToggle(ref, value),
               ),
             ),
           ]),
@@ -587,9 +598,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String key,
     required bool value,
     required VoidCallback onUpdate,
+    VoidCallback? onChange,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(key, value);
+    onChange?.call();
     if (!mounted) return;
     setState(onUpdate);
   }
@@ -598,9 +611,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String key,
     required int value,
     required VoidCallback onUpdate,
+    VoidCallback? onChange,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
+    onChange?.call();
     if (!mounted) return;
     setState(onUpdate);
   }
@@ -751,6 +766,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     telemetry.enqueue({
       'name': 'date_format_changed',
       'properties': {'format': format},
+    });
+  }
+
+  void _trackNotificationToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'notification_toggle_changed',
+      'properties': {'notifications_enabled': enabled},
+    });
+  }
+
+  void _trackExpiryWarningChange(WidgetRef ref, int leadTimeDays) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'expiry_warning_changed',
+      'properties': {'lead_time_days': leadTimeDays},
+    });
+  }
+
+  void _trackSoundToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'sound_toggle_changed',
+      'properties': {'sound_enabled': enabled},
+    });
+  }
+
+  void _trackVibrationToggle(WidgetRef ref, bool enabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'vibration_toggle_changed',
+      'properties': {'vibration_enabled': enabled},
     });
   }
 }
