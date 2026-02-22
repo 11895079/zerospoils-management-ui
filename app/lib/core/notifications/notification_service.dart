@@ -143,6 +143,22 @@ class NotificationService {
       return;
     }
 
+    await _scheduleForItemWithPreferences(
+      itemId: itemId,
+      expiryDate: expiryDate,
+      title: title,
+      body: body,
+      preferences: preferences,
+    );
+  }
+
+  Future<void> _scheduleForItemWithPreferences({
+    required int itemId,
+    required DateTime expiryDate,
+    required NotificationPreferences preferences,
+    String? title,
+    String? body,
+  }) async {
     final when = computeScheduleTime(
       expiryDate,
       leadTimeDays: preferences.leadTimeDays,
@@ -189,11 +205,12 @@ class NotificationService {
       return;
     }
 
-    await scheduleForItem(
+    await _scheduleForItemWithPreferences(
       itemId: itemId,
       expiryDate: newExpiryDate,
       title: title,
       body: body,
+      preferences: preferences,
     );
 
     final when = computeScheduleTime(

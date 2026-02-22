@@ -307,6 +307,10 @@ class ExecutiveReportGenerator:
         if self.roadmap_scope:
             milestone_dirs = [m for m in milestone_dirs if m.name.upper() in self.roadmap_scope]
 
+        # First pass: collect all completed items with PR numbers
+        all_pr_numbers = []
+        completion_items = []
+
         for milestone_dir in milestone_dirs:
             readme_file = milestone_dir / "README.md"
             if not readme_file.exists():
@@ -331,28 +335,42 @@ class ExecutiveReportGenerator:
 
                 # Extract PR number and link
                 pr_link = '—'
-                pr_date = None
+                pr_num = None
                 if pr_text != '—':
                     pr_match = re.search(r'\[#(\d+)\]\(([^)]+)\)', pr_text)
                     if pr_match:
                         pr_num = pr_match.group(1)
                         pr_url = pr_match.group(2)
                         pr_link = f"[#{pr_num}]({pr_url})"
-                        # Try to extract date from notes or git commits
-                        pr_date = self._get_pr_merge_date(pr_num)
+                        all_pr_numbers.append(pr_num)
 
-                # Read issue file to extract impact/goal
-                impact = self._extract_issue_impact(milestone_dir, issue_num)
-
-                completions.append({
+                completion_items.append({
                     'milestone': milestone_dir.name,
                     'issue': issue_num,
                     'title': title,
-                    'completed_date': pr_date,
-                    'impact': impact,
+                    'pr_num': pr_num,
                     'pr_link': pr_link,
-                    'notes': notes
+                    'notes': notes,
+                    'milestone_dir': milestone_dir
                 })
+
+        # Batch fetch all PR merge dates
+        pr_dates = self._get_pr_merge_dates_batch(all_pr_numbers) if all_pr_numbers else {}
+
+        # Second pass: build final completion objects with dates
+        for item in completion_items:
+            pr_date = pr_dates.get(item['pr_num']) if item['pr_num'] else None
+            impact = self._extract_issue_impact(item['milestone_dir'], item['issue'])
+
+            completions.append({
+                'milestone': item['milestone'],
+                'issue': item['issue'],
+                'title': item['title'],
+                'completed_date': pr_date,
+                'impact': impact,
+                'pr_link': item['pr_link'],
+                'notes': item['notes']
+            })
 
         # Sort by completion date (most recent first)
         # Use timezone-aware min datetime for comparison
@@ -372,6 +390,35 @@ class ExecutiveReportGenerator:
             except ValueError:
                 pass
         return None
+
+    def _get_pr_merge_dates_batch(self, pr_numbers: List[str]) -> Dict[str, Optional[datetime]]:
+        """Get PR merge dates for multiple PRs in a single git operation."""
+        if not pr_numbers:
+            return {}
+
+        # Get all commit messages with dates in one go
+        pr_pattern = '|'.join(f'#{num}' for num in pr_numbers)
+        log_output = self.run_git_command(
+            "log", "--grep", pr_pattern, "--format=%ad|%s", "--date=iso", "--all"
+        )
+
+        # Parse results into a dict
+        pr_dates = {num: None for num in pr_numbers}
+        for line in log_output.strip().split('\n'):
+            if '|' not in line:
+                continue
+            date_str, message = line.split('|', 1)
+            # Extract PR number from commit message
+            pr_match = re.search(r'#(\d+)', message)
+            if pr_match:
+                pr_num = pr_match.group(1)
+                if pr_num in pr_dates and pr_dates[pr_num] is None:
+                    try:
+                        pr_dates[pr_num] = datetime.strptime(date_str.strip(), "%Y-%m-%d %H:%M:%S %z")
+                    except ValueError:
+                        pass
+
+        return pr_dates
 
     def _extract_issue_impact(self, milestone_dir: Path, issue_num: str) -> str:
         """Extract impact/goal from issue markdown file."""

@@ -6,16 +6,6 @@ import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
 
 void main() {
-  setUpAll(() async {
-    SharedPreferences.setMockInitialValues({
-      'notifications_enabled': true,
-      'expiry_lead_time_days': 3,
-      'sound_enabled': true,
-      'vibration_enabled': true,
-      'date_format': 'MM/DD/YYYY',
-    });
-  });
-
   Widget buildTestHarness() {
     return MaterialApp(
       home: ProviderScope(child: Scaffold(body: SettingsScreen())),
@@ -61,6 +51,16 @@ void main() {
   }
 
   group('SettingsScreen - Notification Preferences & Telemetry', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+      });
+    });
+
     testWidgets('Renders notification preference controls', (
       WidgetTester tester,
     ) async {
@@ -96,14 +96,6 @@ void main() {
     testWidgets('Changing expiry lead time persists preference', (
       WidgetTester tester,
     ) async {
-      SharedPreferences.setMockInitialValues({
-        'notifications_enabled': true,
-        'expiry_lead_time_days': 3,
-        'sound_enabled': true,
-        'vibration_enabled': true,
-        'date_format': 'MM/DD/YYYY',
-      });
-
       await tester.pumpWidget(buildTestHarness());
       await tester.pumpAndSettle();
 
@@ -127,14 +119,6 @@ void main() {
     testWidgets(
       'Sound and vibration toggles persist preferences independently',
       (WidgetTester tester) async {
-        SharedPreferences.setMockInitialValues({
-          'notifications_enabled': true,
-          'expiry_lead_time_days': 3,
-          'sound_enabled': true,
-          'vibration_enabled': true,
-          'date_format': 'MM/DD/YYYY',
-        });
-
         await tester.pumpWidget(buildTestHarness());
         await tester.pumpAndSettle();
 
@@ -156,6 +140,7 @@ void main() {
     testWidgets('Preferences are loaded from SharedPreferences on build', (
       WidgetTester tester,
     ) async {
+      // Override defaults for this specific test
       SharedPreferences.setMockInitialValues({
         'notifications_enabled': false,
         'expiry_lead_time_days': 7,
@@ -191,14 +176,6 @@ void main() {
     testWidgets('Notification toggle emits telemetry event', (
       WidgetTester tester,
     ) async {
-      SharedPreferences.setMockInitialValues({
-        'notifications_enabled': true,
-        'expiry_lead_time_days': 3,
-        'sound_enabled': true,
-        'vibration_enabled': true,
-        'date_format': 'MM/DD/YYYY',
-      });
-
       final telemetry = TelemetryClient();
 
       await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
@@ -217,14 +194,6 @@ void main() {
     testWidgets('Lead time change emits telemetry event', (
       WidgetTester tester,
     ) async {
-      SharedPreferences.setMockInitialValues({
-        'notifications_enabled': true,
-        'expiry_lead_time_days': 3,
-        'sound_enabled': true,
-        'vibration_enabled': true,
-        'date_format': 'MM/DD/YYYY',
-      });
-
       final telemetry = TelemetryClient();
 
       await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
@@ -249,14 +218,6 @@ void main() {
     testWidgets('Sound and vibration toggles emit telemetry events', (
       WidgetTester tester,
     ) async {
-      SharedPreferences.setMockInitialValues({
-        'notifications_enabled': true,
-        'expiry_lead_time_days': 3,
-        'sound_enabled': true,
-        'vibration_enabled': true,
-        'date_format': 'MM/DD/YYYY',
-      });
-
       final telemetry = TelemetryClient();
 
       await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
