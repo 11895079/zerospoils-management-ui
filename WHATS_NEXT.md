@@ -1,367 +1,201 @@
 # What's Next to Build - ZeroSpoils Priority Roadmap
 
-**Generated:** January 30, 2026  
-**Status:** M1 Complete ✅ | M2 75% Complete 🟡 | M3 30% Complete 🟡
+**Generated:** January 30, 2026 | **Last Updated:** February 21, 2026  
+**Status:** M1 Complete ✅ | M2 82% Complete 🟡 | M3 38% Complete 🟡
 
 ---
 
 ## Executive Summary
 
-ZeroSpoils has a **solid foundation** with app skeleton, data models, storage, and basic UI screens. The next phase focuses on completing the **MVP feature set** and adding **engagement features** (Zesto mascot, badges, notifications) to drive user retention.
+ZeroSpoils has a **solid and growing foundation**: all core screens are implemented, data persistence (Hive), OCR, badge engine, shopping list, shopping-to-inventory conversion, date preferences, and privacy baseline (data export/delete) are all shipped. The next phase focuses on **completing MVP quality gates** — telemetry consent + instrumentation, offline verification, feature flags, and notification integration — to reach beta-launch readiness.
 
-### Current State
-- ✅ **M1 Complete:** App skeleton, routing, theming, DI, CI/CD, telemetry infrastructure
-- 🟡 **M2 75% Complete:** Local storage (Hive), Add Item screen, Inventory List (partial)
-- 🟡 **M3 30% Complete:** Badge system foundation (models + service logic)
+### Current State (Feb 21, 2026)
+- ✅ **M1 Complete (10/10):** App skeleton, routing, theming, DI, CI/CD, telemetry infrastructure, docs
+- 🟡 **M2 82% Complete (14/17):** Hive storage, Add Item, Inventory List, Item Detail, Expiring Soon, Notifications, OCR, Backup/Restore, Demo Mode (partial), Batch Receipt (partial); M2/030 build pipelines in review
+- 🟡 **M3 38% Complete (5/13):** Shopping List (210, 220), Date Preference (205), Badge Foundation (300), **Data Export/Delete (240) ← just shipped**
 
-### Critical Path Forward
-**Priority 1 (Next 2-4 weeks):**
-1. Complete M2 core screens (Inventory List verification, Item Detail, Expiring Soon)
-2. Implement M3/300 Badge UI (Progress tab, share dialogs)
-3. Implement M3/350 Zesto Phase 1 (mascot triggers)
+### Recommended Next Issue: M3/250 — Telemetry Instrumentation for Core Funnel ⭐
+The telemetry client, event schemas, and local sink already exist from M1. Most screens are already partially wired. What's missing is the **consent toggle** in Settings, **schema validation** in debug builds, and ensuring all core funnel events (`app_installed`, `onboarding_completed`, `item_added`, `item_consumed`, `item_wasted`, `inventory_viewed`, `expiring_viewed`, `shopping_item_added`, `shopping_converted`) fire with correct properties.
 
-**Priority 2 (4-8 weeks):**
-4. Complete M2 notifications service
-5. Implement M3 shopping list features
-6. Add M3 reminders and telemetry instrumentation
+**Why this is the best next step:**
+- Unblocks data-driven decisions for launch
+- Infrastructure is 80% ready — effort is 6-8 hours (lowest effort, high value)
+- No dependencies on incomplete features
+- Directly enables measuring whether the MVP is solving the food waste problem
 
----
-
-## Priority 1: MVP Core Loop Completion (2-4 weeks)
-
-These tasks complete the essential user flow: **Add Item → View in Inventory → See Details → Mark Used/Wasted → View Progress**
-
-### 1.1 M2/150: Inventory List Screen Verification ⚠️ HIGH PRIORITY
-**Status:** Implemented but needs verification  
-**Effort:** 2-4 hours  
-**Why:** Core screen that shows all items; search/filter crucial for usability
-
-**Tasks:**
-- [ ] Verify search functionality works correctly
-- [ ] Verify filter by category/location/status works
-- [ ] Test empty states and error handling
-- [ ] Verify sorting (by expiry, by name, by date added)
-- [ ] Add widget tests for search/filter
-- [ ] Test performance with 100+ items
-
-**Blocking:** Nothing (file exists: `app/lib/presentation/screens/inventory/inventory_list_screen.dart`)
-
-**File Locations:**
-- `app/lib/presentation/screens/inventory/inventory_list_screen.dart`
-- `test/widget/inventory_list_screen_test.dart` (create)
+### After M3/250: Recommended Sequence
+1. **M3/130 — Feature Flags** (6-8h): Gate Pro/cloud features; prerequisite for clean Pro upsell path; no dependencies
+2. **M3/230 — Offline-First Verification Suite** (8-10h): Critical quality gate before beta; ensure all flows work without network
+3. **M3/190 — Notification Scheduling Integration** (8-10h): Wire expiry-based reminders using the M2/120 service; depends on M2/120 being complete
+4. **M3/180 + M3/200 — Reminder Preferences + Logging** (6-8h combined): UI for reminder prefs + tap-through logging; depends on M3/190
+5. **M3/350 — Zesto Phase 1** (12-16h): Mascot triggers; depends on M3/300 badge UI
 
 ---
 
-### 1.2 M2/170: Item Detail Screen ⚠️ HIGH PRIORITY
-**Status:** Partially implemented, needs completion  
+## Priority 1: Complete M3 Quality Gates (Current Focus)
+
+These tasks close the remaining MVP quality gaps and unlock beta launch readiness.
+
+### 1.1 M3/250: Telemetry Instrumentation for Core Funnel ⭐ NEXT BEST ISSUE
+**Status:** Infrastructure ready (TelemetryClient + local Hive sink exist from M1); most screens partially wired; consent toggle + schema validation missing  
 **Effort:** 6-8 hours  
-**Why:** Critical for mark-as-used/wasted workflow; completes core MVP loop
+**Why:** Enables data-driven product decisions; required for measuring user retention and funnel drop-off at launch
 
 **Tasks:**
-- [ ] Display full item details (all fields from Item model)
-- [ ] "Mark as Used" button with confirmation
-- [ ] "Mark as Wasted" button with waste reason selector
-- [ ] Edit button → navigate to Edit Item screen
-- [ ] Delete button with confirmation dialog
-- [ ] Deep link integration test (zerospoils://item/{id})
-- [ ] Telemetry: item_viewed, item_consumed, item_wasted events
-- [ ] Widget tests for all actions
+- [ ] Add "Share anonymous usage data" consent toggle to Settings → Privacy & Data
+- [ ] Add `AnalyticsConsentProvider` (Riverpod) that gates all event emission
+- [ ] Add schema validation in debug builds (reject events missing required fields, block PII keys)
+- [ ] Wire `app_installed` + `onboarding_completed` events in `onboarding_screen.dart`
+- [ ] Wire `tab_switched` event in `home_shell.dart` (currently missing telemetry)
+- [ ] Confirm `item_added`, `item_edited`, `item_consumed`, `item_wasted` events fire with correct properties
+- [ ] Confirm `inventory_viewed`, `expiring_viewed` screen events fire on navigation
+- [ ] Confirm `shopping_item_added`, `shopping_item_purchased`, `shopping_converted` fire correctly
+- [ ] Unit tests: each event emits required properties; PII keys are rejected
+- [ ] Widget test: consent OFF → no events queued; consent ON → events queued
 
-**Blocking:** Nothing (HiveItemRepository complete)
+**Blocking:** Nothing (TelemetryClient, HiveEventRepository, and event schemas all exist)
 
 **File Locations:**
-- `app/lib/presentation/screens/inventory/item_detail_screen.dart`
-- `app/lib/presentation/screens/inventory/edit_item_screen.dart` (reuse Add Item form)
-- `test/widget/item_detail_screen_test.dart` (create)
-- `test/integration/deep_link_test.dart` (create)
+- `app/lib/presentation/screens/settings_screen.dart` (add consent toggle)
+- `app/lib/presentation/screens/home_shell.dart` (add tab_switched event)
+- `app/lib/presentation/screens/onboarding_screen.dart` (add app_installed + onboarding_completed)
+- `app/lib/presentation/di/service_locator.dart` (add AnalyticsConsentProvider)
+- `app/test/unit/telemetry_instrumentation_test.dart` (create)
 
 ---
 
-### 1.3 M2/160: Expiring Soon Screen 🔵 MEDIUM PRIORITY
+### 1.2 M3/130: Feature Flags Framework 🟢 READY TO START
 **Status:** Not started  
+**Effort:** 6-8 hours  
+**Why:** Required to gate Pro/cloud features cleanly; prevents ad-hoc `if` checks from scattering through the codebase
+
+**Tasks:**
+- [ ] Define `FeatureFlagKey` enum with flags: `cloudSync`, `cloudAnalyticsExport`, `receiptOcr`, `batchPhotoCapture`, `householdSync`, `iotHooks`, `expiryDateOcr`
+- [ ] Implement `FeatureFlags` service with precedence: local override > code default
+- [ ] Persist local overrides via SharedPreferences
+- [ ] Add Developer Settings screen (debug builds only) listing all flags with toggle UI
+- [ ] Gate existing OCR entry method behind `expiryDateOcr` flag
+- [ ] Gate cloud analytics export toggle behind `cloudAnalyticsExport` flag
+- [ ] Create `docs/flags.md` with flag registry table
+- [ ] Unit tests: precedence rules, default values, override persistence, reset behavior
+- [ ] Widget test: Developer Settings renders all flags; reset restores defaults
+
+**Blocking:** Nothing
+
+---
+
+### 1.3 M3/230: Offline-First Verification Suite 🟢 READY TO START
+**Status:** Not started (no integration test suite for connectivity scenarios)  
 **Effort:** 8-10 hours  
-**Why:** Key feature for waste prevention; helps users prioritize what to consume first
+**Why:** Critical quality gate; must verify all core flows work without network before beta launch
 
 **Tasks:**
-- [ ] Implement expiry bucketing logic (Today, 1-3 days, 4-7 days, Expired)
-- [ ] Create bucket view UI (grouped list or tabs)
-- [ ] Display items with days until expiry badge
-- [ ] Quick actions: Mark as Used, Add to Shopping List
-- [ ] Empty state when no expiring items
-- [ ] Unit tests for bucketing algorithm
-- [ ] Widget tests for bucket UI
+- [ ] Create `test/integration/offline_suite_test.dart` with mock connectivity service
+- [ ] Verify Add Item → persist to Hive → appears in Inventory List with no network
+- [ ] Verify Expiring Soon screen loads from local DB offline
+- [ ] Verify Shopping List CRUD works offline
+- [ ] Verify Backup/Restore export works offline
+- [ ] Verify telemetry events queue locally when offline (no crash)
+- [ ] Verify app restores state correctly after simulated connectivity loss and restore
+- [ ] Document results in planning/milestones/M3/README.md
 
-**Blocking:** M2/110 (Expiry bucketing algorithm) - can implement inline or as separate service
-
-**File Locations:**
-- `app/lib/domain/services/expiry_service.dart` (create - bucketing logic)
-- `app/lib/presentation/screens/expiring/expiring_soon_screen.dart`
-- `test/unit/expiry_service_test.dart` (create)
-- `test/widget/expiring_soon_screen_test.dart` (create)
+**Blocking:** Nothing (ConnectivityService already wired via Riverpod)
 
 ---
 
-### 1.4 M3/300: Badge UI Implementation 🟢 READY TO START
-**Status:** Foundation complete (models + service + persistence), UI needs implementation  
-**Effort:** 10-12 hours  
-**Why:** Engagement feature; motivates users; prerequisite for Zesto mascot integration
+## Priority 2: Notifications & Engagement (Next 4-6 weeks)
+
+### 2.1 M3/190: Notification Scheduling Integration
+**Status:** M2/120 notifications service shipped; M3 integration (expiry-based scheduling) pending  
+**Effort:** 8-10 hours  
+**Blocking:** M2/120 (complete ✅)
 
 **Tasks:**
-- [ ] Create BadgeWidget (single badge display with earned/locked states)
-- [ ] Create BadgesGridWidget (all 5 badges on Progress tab)
-- [ ] Create BadgeDetailSheet (modal with description + share button)
-- [ ] Create ShareBadgeDialog (copy text or generate shareable image)
-- [ ] Add Progress tab to home navigation (5th tab)
-- [ ] Implement badge check on item state changes (auto-earn)
-- [ ] Toast notification when badge earned
-- [ ] Wire BadgeRepository into Riverpod providers
-- [ ] Add widget tests for all components
-- [ ] Add telemetry: badge_earned, badge_shared events
-
-**Blocking:** Nothing (M3/300 foundation complete)
-
-**File Locations:**
-- `app/lib/presentation/widgets/badge_widget.dart` (create)
-- `app/lib/presentation/widgets/badges_grid_widget.dart` (create)
-- `app/lib/presentation/screens/progress/progress_screen.dart` (create)
-- `app/lib/presentation/providers/badge_provider.dart` (create - Riverpod state)
-- `test/widget/badge_widget_test.dart` (create)
-- `test/widget/progress_screen_test.dart` (create)
+- [ ] Wire `NotificationsService.scheduleExpiryReminder()` when items are added/edited
+- [ ] Cancel notifications when items are deleted or marked used/wasted
+- [ ] Reschedule notifications on item expiry date change
+- [ ] Integration test: add item → verify notification scheduled in Hive
 
 ---
 
-### 1.5 M3/350: Zesto Phase 1 (Mascot Triggers) 🟢 READY TO START
-**Status:** Models complete, trigger logic needs implementation  
+### 2.2 M3/180 + M3/200: Reminder Preferences + Interaction Logging
+**Status:** Not started; depends on M3/190  
+**Effort:** 6-8 hours combined  
+**Blocking:** M3/190
+
+**Tasks:**
+- [ ] Settings UI: "Remind me X days before expiry" (1/2/3/7 days selector per item or globally)
+- [ ] Persist reminder preference via SharedPreferences
+- [ ] Log notification tap-through events (`reminder_opened`) to HiveEventRepository
+
+---
+
+### 2.3 M3/350: Zesto Phase 1 (Mascot Triggers)
+**Status:** Models + ZestoService exist; trigger logic and UI widget not implemented  
 **Effort:** 12-16 hours  
-**Why:** Differentiation feature; educational content; user engagement
+**Blocking:** M3/300 Badge foundation (✅ complete — domain models, BadgeService)
 
 **Tasks:**
-- [ ] Implement ZestoTriggerService (10 core triggers)
-- [ ] Wire badge unlock trigger (badgeUnlocked → show mascot)
-- [ ] Implement itemAdded, itemExpiringSoon, itemWasted triggers
-- [ ] Load storage tips from JSON (prototype/data/storage_tips.json)
-- [ ] Show random storage tip based on item category
-- [ ] Message deduplication logic (anti-spam, once per session)
-- [ ] Create ZestoWidget (bottom sheet or overlay with mascot + message)
-- [ ] Animations: idle, speaking, celebrating, encouraging (basic states)
-- [ ] Unit tests for trigger conditions
-- [ ] Widget tests for mascot UI
-
-**Blocking:** M3/300 Badge UI (badge unlock trigger depends on badges)
-
-**File Locations:**
-- `app/lib/domain/services/zesto_trigger_service.dart` (create)
-- `app/lib/presentation/widgets/zesto_widget.dart` (create)
-- `app/lib/domain/repositories/zesto_service.dart` (already exists - enhance)
-- `prototype/data/storage_tips.json` (already exists)
-- `test/unit/zesto_trigger_service_test.dart` (create)
-- `test/widget/zesto_widget_test.dart` (create)
+- [ ] Implement ZestoTriggerService (10 core triggers: itemAdded, itemExpiringSoon, itemWasted, badgeUnlocked, etc.)
+- [ ] Load storage tips from `prototype/data/storage_tips.json` (already exists)
+- [ ] Message deduplication (anti-spam: once per session per trigger type)
+- [ ] Create ZestoWidget (bottom sheet with mascot image + message + dismiss)
+- [ ] Wire triggers into item state change callbacks (Riverpod notifiers)
+- [ ] Unit tests for trigger conditions and deduplication logic
+- [ ] Widget tests for ZestoWidget display
 
 ---
 
-## Priority 2: Feature Completeness (4-8 weeks)
+## Priority 3: Polish & Remaining M2 Gaps
 
-These tasks complete the MVP feature set for beta launch.
+### 3.1 M2/030: Build Pipelines (iOS/Android) — ⚠️ IN REVIEW
+**Status:** PR #46 in review  
+**Why:** Required for distributing builds to testers; blocks beta distribution
 
-### 2.1 M2/120: Local Notifications Service 🟡 PARTIAL
-**Status:** Permissions flow pending  
-**Effort:** 6-8 hours remaining  
-**Why:** Critical for reminders; user retention feature
+### 3.2 M2/155: Demo Mode Telemetry + Accessibility Polish
+**Status:** Partial (UI implemented; `demo_mode_toggled` telemetry event missing; accessibility labels incomplete)  
+**Effort:** 2-3 hours
 
-**Tasks:**
-- [ ] Complete permissions request flow (iOS + Android)
-- [ ] Test notification scheduling on device
-- [ ] Implement reschedule on item update/delete
-- [ ] Add notification settings in Settings screen
-- [ ] Test notification behavior across app restarts
-- [ ] Integration tests for notification flows
+### 3.3 M2/190: Batch Receipt Capture — Remaining Gaps
+**Status:** Partial (core OCR and review flow implemented; Shopping List CTA entry point missing; permission recovery messaging incomplete)  
+**Effort:** 3-5 hours
 
-**Blocking:** Nothing (PR #57 merged, permissions pending)
-
----
-
-### 2.2 M2/110: Expiry Bucketing Algorithm 🔵 MEDIUM
-**Status:** Not started  
-**Effort:** 4-6 hours  
-**Why:** Foundation for Expiring Soon screen
-
-**Tasks:**
-- [ ] Create ExpiryService with bucket logic
-- [ ] Define buckets: Today, 1-3 days, 4-7 days, Expired
-- [ ] Unit tests for edge cases (no expiry date, past dates, null dates)
-- [ ] Integration with Item model (isExpired, isExpiringSoon methods)
-
-**Blocking:** Nothing (can implement standalone)
+### 3.4 M3/195: Localization / i18n Strategy (Optional)
+**Status:** Not started; optional for M3  
+**Effort:** 8-12 hours  
+**Why:** Deferred — English-only is acceptable for MVP beta
 
 ---
 
-### 2.3 M3/210-220: Shopping List Features 🟢 MODELS READY
-**Status:** ShoppingListItem model exists, UI not implemented  
-**Effort:** 10-12 hours  
-**Why:** MVP feature; user convenience
-
-**Tasks:**
-- [ ] Implement Shopping List screen (CRUD)
-- [ ] Add "Add to Shopping List" from Inventory screen
-- [ ] Implement "Convert to Inventory" flow (purchased items)
-- [ ] Shopping list persistence (HiveShoppingListRepository)
-- [ ] Share shopping list (read-only snapshot as text)
-- [ ] Unit + widget tests
-
-**Blocking:** M2/101 (ShoppingList repository) - can implement inline
-
----
-
-### 2.4 M3/180-200: Reminders & Notification Integration 🟡 PARTIAL
-**Status:** Notification service partially complete  
-**Effort:** 8-10 hours  
-**Why:** User retention feature; reduces waste
-
-**Tasks:**
-- [ ] Settings screen with notification preferences
-- [ ] Reminder scheduling based on expiry dates
-- [ ] "Remind me 1 day before expiry" toggle per item
-- [ ] Notification interaction logging (opened, dismissed)
-- [ ] Integration tests
-
-**Blocking:** M2/120 (Notifications service) must be complete
-
----
-
-### 2.5 M3/250: Telemetry Instrumentation 🔵 FOUNDATION READY
-**Status:** Telemetry infrastructure complete, events need wiring  
-**Effort:** 6-8 hours  
-**Why:** Analytics; user behavior insights; product decisions
-
-**Tasks:**
-- [ ] Wire all screens to telemetry client
-- [ ] Instrument core funnel: app_installed → item_added → item_viewed → item_consumed
-- [ ] Add screen_viewed events for all screens
-- [ ] Add interaction events (button_tapped, tab_switched, filter_applied)
-- [ ] Verify events in local queue (Hive)
-- [ ] Add tests for telemetry calls
-
-**Blocking:** Nothing (telemetry client exists, schemas complete)
-
----
-
-## Priority 3: Polish & Launch Prep (8-12 weeks)
-
-### 3.1 M2/145: Onboarding + First-Run Flow 🟡 NOT STARTED
-**Effort:** 6-8 hours  
-**Tasks:** Welcome screens, permission requests, demo mode toggle
-
----
-
-### 3.2 M2/155: Demo Mode Data Isolation 🟡 NOT STARTED
-**Effort:** 4-6 hours  
-**Tasks:** Toggle in Settings, separate Hive boxes, clear demo data
-
----
-
-### 3.3 M2/165: Backup/Restore (Local JSON) 🟡 NOT STARTED
-**Effort:** 6-8 hours  
-**Tasks:** Export all data to JSON, import from JSON, settings UI
-
----
-
-### 3.4 M3/130: Feature Flags Framework 🟡 NOT STARTED
-**Effort:** 6-8 hours  
-**Tasks:** FeatureFlag enum, toggle in Settings, gate Pro features
-
----
-
-### 3.5 M3/230: Offline-First Verification Suite 🟡 NOT STARTED
-**Effort:** 8-10 hours  
-**Tasks:** Integration tests with mock connectivity, verify all flows work offline
-
----
-
-### 3.6 M3/240: Data Export/Delete (Privacy) 🟡 NOT STARTED
-**Effort:** 8-10 hours  
-**Tasks:** GDPR/PIPEDA compliance, export all data, delete account + data
-
----
-
-### 3.7 M4/165: Accessibility Audit 🟡 NOT STARTED
-**Effort:** 10-12 hours  
-**Tasks:** TalkBack/VoiceOver testing, contrast audit, keyboard navigation, WCAG 2.1 AA
-
----
-
-## Recommended Implementation Sequence
-
-### Week 1-2: Core Screens
-1. **M2/150 Verification** (2-4h) - Verify inventory list works correctly
-2. **M2/170 Item Detail** (6-8h) - Complete mark-as-used/wasted flows
-3. **M2/160 Expiring Soon** (8-10h) - Implement bucket view
-
-**Result:** Users can add items, view inventory, see expiring items, mark as used/wasted
-
----
-
-### Week 3-4: Engagement Features
-1. **M3/300 Badge UI** (10-12h) - Progress tab, badge widgets, share dialogs
-2. **M3/350 Zesto Phase 1** (12-16h) - Mascot triggers, storage tips
-
-**Result:** Gamification + educational features drive user engagement
-
----
-
-### Week 5-6: Notifications & Shopping
-1. **M2/120 Notifications** (6-8h) - Complete permissions flow
-2. **M3/210-220 Shopping List** (10-12h) - CRUD + conversion workflow
-3. **M3/180-200 Reminders** (8-10h) - Schedule notifications based on expiry
-
-**Result:** Full reminder system + shopping list convenience
-
----
-
-### Week 7-8: Telemetry & Polish
-1. **M3/250 Telemetry** (6-8h) - Instrument all events
-2. **M2/145 Onboarding** (6-8h) - First-run flow
-3. **M2/155 Demo Mode** (4-6h) - Data isolation
-4. **M2/165 Backup/Restore** (6-8h) - Export/import
-
-**Result:** Analytics in place, onboarding ready, data portability
-
----
-
-### Week 9-10: Quality & Compliance
-1. **M3/130 Feature Flags** (6-8h) - Gate Pro features
-2. **M3/230 Offline Suite** (8-10h) - Verify offline-first
-3. **M3/240 Privacy** (8-10h) - Data export/delete
-4. **M4/165 Accessibility** (10-12h) - Audit + fixes
-
-**Result:** Production-ready for beta launch
-
----
-
-## Blocking Dependencies Map
+## Blocking Dependencies Map (Updated Feb 21, 2026)
 
 ```
 M1/090 (App Skeleton) ✅
     ├─> M2/100 (Hive Storage) ✅
     │       ├─> M2/140 (Add Item) ✅
-    │       ├─> M2/150 (Inventory List) ⚠️ NEEDS VERIFICATION
-    │       ├─> M2/170 (Item Detail) 🔴 BLOCKED BY VERIFICATION
-    │       └─> M2/160 (Expiring Soon) 🔴 NEEDS M2/110
+    │       ├─> M2/150 (Inventory List) ✅
+    │       ├─> M2/170 (Item Detail) ✅
+    │       └─> M2/160 (Expiring Soon) ✅
     │
     ├─> M3/300 (Badge Foundation) ✅
-    │       ├─> M3/300 UI (Badge Widgets) 🟢 READY
-    │       └─> M3/350 (Zesto Phase 1) 🟡 BLOCKED BY M3/300 UI
+    │       └─> M3/350 (Zesto Phase 1) 🟢 READY (domain layer done)
     │
-    ├─> M2/120 (Notifications) 🟡 PARTIAL
-    │       └─> M3/180-200 (Reminders) 🔴 BLOCKED
+    ├─> M2/120 (Notifications) ✅
+    │       └─> M3/190 (Notification Scheduling) 🟢 READY
+    │               └─> M3/180+200 (Reminder Prefs + Logging) 🟡 BLOCKED by M3/190
     │
-    └─> M2/101 (Shopping Repo) 🔴 NOT STARTED
-            └─> M3/210-220 (Shopping UI) 🔴 BLOCKED
+    ├─> M2/101 (Shopping Repo) ✅
+    │       └─> M3/210+220 (Shopping List UI + Convert) ✅
+    │
+    ├─> M3/240 (Privacy: Export/Delete) ✅
+    │       └─> M3/250 (Telemetry Consent) 🟢 READY (infrastructure complete)
+    │
+    └─> M3/130 (Feature Flags) 🟢 READY (no dependencies)
 
 Legend:
 ✅ Complete
 🟢 Ready to start (no blockers)
 🟡 Partial or in progress
-⚠️ Needs review
 🔴 Blocked by dependencies
 ```
 
@@ -369,91 +203,98 @@ Legend:
 
 ## Risk Assessment
 
-### High Risk (Address Immediately)
-1. **M2/150 Inventory List** - Core screen, needs verification
-2. **M2/170 Item Detail** - Completes MVP loop, high priority
+### High Risk (Address Soon)
+1. **M2/030 Build Pipelines** (in review) — blocks beta distribution to testers
+2. **M3/190 Notification Scheduling** — platform-specific quirks (iOS/Android); must test on device
 
 ### Medium Risk (Plan Carefully)
-1. **M2/120 Notifications** - Platform-specific quirks (iOS/Android permissions)
-2. **M3/350 Zesto** - Complex feature, needs careful UX testing
-3. **M4/165 Accessibility** - Can uncover deep issues, plan buffer time
+1. **M3/350 Zesto** — complex trigger logic; needs careful anti-spam UX testing
+2. **M4 Accessibility Audit** — can uncover deep issues; plan buffer time
 
 ### Low Risk (Safe to Start)
-1. **M3/300 Badge UI** - Models complete, UI is straightforward
-2. **M3/250 Telemetry** - Infrastructure ready, just wiring needed
-3. **M2/165 Backup/Restore** - Self-contained feature
+1. **M3/250 Telemetry** — infrastructure ready, consent toggle + schema validation is straightforward
+2. **M3/130 Feature Flags** — clean enum + SharedPreferences, well-scoped
+3. **M3/230 Offline Suite** — integration tests with mock connectivity service; no production risk
 
 ---
 
-## Effort Estimates Summary
+## Effort Estimates Summary (Feb 21, 2026)
 
-| Phase | Total Hours | Priority | Status |
-|-------|-------------|----------|--------|
-| **Priority 1** (MVP Core) | 50-60h | P0 | Next 2-4 weeks |
-| **Priority 2** (Features) | 40-50h | P1 | 4-8 weeks |
-| **Priority 3** (Polish) | 48-64h | P2 | 8-12 weeks |
-| **Total Remaining** | **138-174h** | — | ~12 weeks |
+| Phase | Remaining Issues | Est. Hours | Priority |
+|-------|-----------------|-----------|---------|
+| **M3 Quality Gates** (250, 130, 230) | 3 issues | 20-26h | P0 — Next |
+| **M3 Notifications** (190, 180, 200) | 3 issues | 22-28h | P1 |
+| **M3 Engagement** (350) | 1 issue | 12-16h | P1 |
+| **M2 Gaps** (030, 155, 190) | 3 issues | 8-13h | P1 |
+| **M3 Optional** (195) | 1 issue | 8-12h | P2 |
+| **M4 Accessibility** | 1 issue | 10-12h | P2 |
+| **Total Remaining** | **~12 items** | **~80-107h** | ~6-8 weeks |
 
 ### Cumulative Hours Invested So Far
 - Planning & Docs: ~40h ✅
 - M1/090 Skeleton: ~20h ✅
 - M2/100 Hive Storage: ~14h ✅
 - M2/140 Add Item: ~8h ✅
+- M2 Core Screens + Notifications + OCR + Shopping: ~50h ✅
+- M3/205 Date Preference: ~4h ✅
+- M3/210+220 Shopping List + Convert: ~12h ✅
+- M3/240 Data Export/Delete: ~10h ✅
 - M3/300 Badge Foundation: ~8h ✅
-- **Total to Date: ~90h**
+- **Total to Date: ~166h**
 
 ### Total to MVP Beta Launch
-- **Invested:** ~90h
-- **Remaining:** ~138-174h
-- **Total:** ~228-264h (11-13 weeks at 20h/week)
+- **Invested:** ~166h
+- **Remaining:** ~80-107h
+- **Total:** ~246-273h (4-6 weeks at 20h/week)
 
 ---
 
 ## Success Metrics (What Done Looks Like)
 
-### MVP Core Loop (Priority 1)
-- ✅ User can add item with all fields
+### MVP Core Loop ✅ All Complete
+- ✅ User can add item with all fields (including OCR)
 - ✅ User can view inventory list with search/filter
-- ✅ User can view item details
-- ✅ User can mark item as used or wasted with reason
+- ✅ User can view item details and mark as used/wasted
 - ✅ User can see expiring items bucketed by days
+- ✅ User can manage shopping list and convert items to inventory
 - ✅ User can earn badges and see progress
-- ✅ Zesto mascot appears with helpful tips
+- ✅ User can export and delete their data (privacy baseline)
 
-### Feature Completeness (Priority 2)
-- ✅ Notifications scheduled for expiring items
-- ✅ Shopping list with add/convert workflow
-- ✅ Telemetry events firing on all screens
-- ✅ Onboarding flow with permissions
-- ✅ Backup/restore data to JSON
+### Quality Gates (M3 Remaining)
+- [ ] Telemetry events fire on all core screens with consent controls (M3/250)
+- [ ] Feature flags gate Pro/cloud features cleanly (M3/130)
+- [ ] All flows verified working offline with integration tests (M3/230)
+- [ ] Notifications scheduled based on expiry dates (M3/190)
+- [ ] Reminder preferences UI in Settings (M3/180)
 
-### Launch Ready (Priority 3)
-- ✅ Feature flags gate Pro features
-- ✅ All flows work offline
-- ✅ Data export/delete implemented
-- ✅ Accessibility audit complete (WCAG 2.1 AA)
-- ✅ Zero critical bugs, minimal warnings
+### Launch Ready
+- [ ] Feature flags gate Pro features (M3/130)
+- [ ] All flows work offline (M3/230)
+- [ ] Accessibility audit complete — WCAG 2.1 AA (M4)
+- ✅ Data export/delete implemented (M3/240)
+- [ ] iOS/Android build pipelines green (M2/030)
 
 ---
 
-## Next Steps (This Week)
+## Next Steps (This Week, Feb 21, 2026)
 
-1. **Verify M2/150 Inventory List** (2-4 hours)
-   - Run app, test search/filter/sort
-   - Add widget tests if missing
-   - Document any issues
+1. **Implement M3/250 — Telemetry Instrumentation** ⭐ (6-8 hours)
+   - Add consent toggle in Settings → Privacy & Data
+   - Add schema validation in debug builds
+   - Wire `app_installed`, `onboarding_completed`, `tab_switched` events (currently missing)
+   - Confirm all core funnel events fire with required properties
 
-2. **Implement M2/170 Item Detail** (6-8 hours)
-   - Create ItemDetailScreen with all actions
-   - Wire telemetry events
-   - Add tests
+2. **Implement M3/130 — Feature Flags** (6-8 hours)
+   - Define `FeatureFlagKey` enum
+   - Add `FeatureFlags` service with SharedPreferences persistence
+   - Add Developer Settings screen (debug builds)
+   - Gate existing `expiryDateOcr` and `cloudAnalyticsExport` features
 
-3. **Start M3/300 Badge UI** (10-12 hours)
-   - Create BadgeWidget and BadgesGrid
-   - Add Progress tab to navigation
-   - Wire badge checks to item changes
+3. **Implement M3/230 — Offline-First Verification Suite** (8-10 hours)
+   - Create integration test suite with mock connectivity
+   - Verify all core flows (Add Item, Inventory, Shopping, Export) work offline
 
-**Total: ~18-24 hours this week**
+**Total: ~20-26 hours**
 
 ---
 
@@ -462,8 +303,6 @@ Legend:
 - **M1 Status:** [planning/milestones/M1/README.md](planning/milestones/M1/README.md)
 - **M2 Status:** [planning/milestones/M2/README.md](planning/milestones/M2/README.md)
 - **M3 Status:** [planning/milestones/M3/README.md](planning/milestones/M3/README.md)
-- **M1/090 Completion:** [planning/M1_090_COMPLETION.md](planning/M1_090_COMPLETION.md)
-- **M3/300 Completion:** [planning/M3_300_COMPLETION.md](planning/M3_300_COMPLETION.md)
 - **Architecture:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
@@ -473,12 +312,11 @@ Legend:
 
 If you encounter blockers or have questions about priorities:
 1. Check issue files in `planning/milestones/M2/` and `planning/milestones/M3/`
-2. Review completion reports (M1_090_COMPLETION.md, M3_300_COMPLETION.md)
-3. Check ARCHITECTURE.md for design patterns
-4. See docs/code-patterns.md for practical examples
+2. Check ARCHITECTURE.md for design patterns
+3. See docs/code-patterns.md for practical examples
 
 ---
 
-**Generated:** January 30, 2026  
+**Generated:** January 30, 2026 | **Last Updated:** February 21, 2026  
 **Status:** Living document, update as progress is made  
-**Next Review:** After Priority 1 tasks complete (~2-4 weeks)
+**Next Review:** After M3 quality gates complete (M3/250, M3/130, M3/230)
