@@ -821,12 +821,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _trackAnalyticsConsentChange(WidgetRef ref, bool consented) {
+    // Invalidate providers first so the consent-change event is not dropped
+    // due to a stale telemetry client still seeing consent as disabled
+    ref.invalidate(analyticsConsentProvider);
+    ref.invalidate(telemetryClientProvider);
+
     final telemetry = ref.read(telemetryClientProvider);
     telemetry.enqueue({
       'name': 'analytics_consent_changed',
       'properties': {'consent_enabled': consented},
     });
-    // Invalidate provider to update consent state immediately
-    ref.invalidate(analyticsConsentProvider);
   }
 }

@@ -28,7 +28,7 @@ final telemetryClientProvider = Provider((ref) {
   final consentAsync = ref.watch(analyticsConsentProvider);
   final consent = consentAsync.maybeWhen(
     data: (value) => value,
-    orElse: () => true, // Default to consent during loading
+    orElse: () => false, // Default to no consent during loading
   );
   return TelemetryClient(consentEnabled: consent);
 });
@@ -80,8 +80,8 @@ class TelemetryClient {
       'Event must have a "properties" field (Map)',
     );
 
-    // Schema validation in debug mode
-    if (const bool.fromEnvironment('dart.vm.product') == false) {
+    // Schema validation in debug mode only (not profile builds)
+    if (kDebugMode) {
       _validateEvent(event);
     }
 

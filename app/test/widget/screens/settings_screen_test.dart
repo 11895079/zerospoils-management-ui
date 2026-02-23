@@ -48,7 +48,7 @@ void main() {
       500, // Increased from 300 to ensure dropdowns fit on screen
       scrollable: find.byType(Scrollable),
     );
-    // Extra scroll to ensure dropdown menus fit on screen
+    // Extra settle to ensure dropdown menus have space to render fully
     await tester.pumpAndSettle();
   }
 
