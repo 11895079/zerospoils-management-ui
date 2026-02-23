@@ -45,9 +45,11 @@ void main() {
   Future<void> scrollToIcon(WidgetTester tester, IconData icon) async {
     await tester.scrollUntilVisible(
       find.byIcon(icon),
-      300,
+      500, // Increased from 300 to ensure dropdowns fit on screen
       scrollable: find.byType(Scrollable),
     );
+    // Extra scroll to ensure dropdown menus fit on screen
+    await tester.pumpAndSettle();
   }
 
   group('SettingsScreen - Notification Preferences & Telemetry', () {

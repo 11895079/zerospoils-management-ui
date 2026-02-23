@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../di/repository_providers.dart';
+import '../di/service_locator.dart' show telemetryClientProvider;
 import 'inventory_screen.dart';
 import 'expiring_today_screen.dart';
 import 'shopping_list_screen.dart';
@@ -21,6 +22,8 @@ class HomeShell extends ConsumerWidget {
       const ProgressScreen(),
     ];
 
+    const tabNames = ['inventory', 'expiring', 'shopping', 'progress'];
+
     return Scaffold(
       body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
@@ -29,6 +32,11 @@ class HomeShell extends ConsumerWidget {
         currentIndex: selectedIndex,
         onTap: (index) {
           ref.read(homeTabIndexProvider.notifier).state = index;
+          // Track tab switch
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'tab_switched',
+            'properties': {'tab_name': tabNames[index]},
+          });
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,

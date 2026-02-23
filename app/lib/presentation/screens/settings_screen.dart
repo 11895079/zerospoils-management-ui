@@ -9,7 +9,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/notifications/notification_preferences.dart';
-import '../di/service_locator.dart' show telemetryClientProvider;
+import '../di/service_locator.dart'
+    show telemetryClientProvider, analyticsConsentProvider;
 import '../di/repository_providers.dart';
 import '../../data/services/backup_restore_service.dart';
 import 'onboarding_screen.dart';
@@ -28,6 +29,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _darkModeEnabled = false;
   bool _mealPlanningEnabled = false;
   bool _dataSyncEnabled = false;
+  bool _analyticsConsent = true;
   int _leadTimeDays = 3;
   String _dateFormat = 'MM/DD/YYYY';
 
@@ -52,6 +54,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _darkModeEnabled = prefs.getBool('dark_mode_enabled') ?? false;
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
+      _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
       _leadTimeDays =
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
@@ -298,6 +301,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: AppSpacing.xl),
           _buildSectionHeader('PRIVACY & DATA'),
           _buildCard([
+            _buildToggleTile(
+              icon: Icons.analytics_outlined,
+              label: 'Share Anonymous Usage Data',
+              subtitle: 'Help improve ZeroSpoils (local only, no cloud export)',
+              value: _analyticsConsent,
+              onChanged: (value) => _setBool(
+                key: 'analytics_consent',
+                value: value,
+                onUpdate: () => _analyticsConsent = value,
+                onChange: () => _trackAnalyticsConsentChange(ref, value),
+              ),
+            ),
             _buildLinkTile(
               icon: Icons.backup,
               label: 'Export My Data',
@@ -518,6 +533,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildToggleTile({
     required IconData icon,
     required String label,
+    String? subtitle,
     required bool value,
     required ValueChanged<bool>? onChanged,
     String? trailingLabel,
@@ -526,6 +542,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: AppColors.textPrimary),
       title: Text(label, style: AppTextStyles.body),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle, style: AppTextStyles.bodySmall),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -799,5 +818,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       'name': 'vibration_toggle_changed',
       'properties': {'vibration_enabled': enabled},
     });
+  }
+
+  void _trackAnalyticsConsentChange(WidgetRef ref, bool consented) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'analytics_consent_changed',
+      'properties': {'consent_enabled': consented},
+    });
+    // Invalidate provider to update consent state immediately
+    ref.invalidate(analyticsConsentProvider);
   }
 }
