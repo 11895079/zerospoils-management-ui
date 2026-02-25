@@ -10,17 +10,19 @@
 - Data export/delete for privacy baseline (240)
 - Telemetry instrumentation for core funnel (250)
 - Feature flags framework (130)
+- Firebase integration for mobile tooling (360)
 - Localization/i18n strategy (195 - optional)
 
-**Acceptance:** All MVP screens complete; shopping list functional; offline suite passes; telemetry events logging; privacy baseline met; ready for beta distribution.
+**Acceptance:** All MVP screens complete; shopping list functional; offline suite passes; telemetry events logging; privacy baseline met; Firebase integrated for crashlytics/feature flags; ready for beta distribution.
 
-**Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations, full recipe feature.
+**Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations, full recipe feature. Firebase Firestore/Cloud Functions (using local Hive/sqflite for M3; Supabase for Pro tier in M6).
 
-**Issues:** 130, 180, 190, 195, 200, 205, 210, 220, 230, 240, 250, 300, 350
+**Issues:** 130, 180, 190, 195, 200, 205, 210, 220, 230, 240, 250, 300, 350, 360
 
-**New M3 Features (Zesto Mascot - Phase 1):**
+**New M3 Features:**
 - **Issue 300:** Badge system (20 badges) — prerequisite for mascot unlocks
 - **Issue 350:** Zesto Phase 1 (10 triggers, anti-spam, storage tips) — interactive mascot companion with educational content
+- **Issue 360:** Firebase integration (Crashlytics, Remote Config, FCM) — mobile tooling for crash reporting, feature flags, push notifications (Spark Plan free tier only)
 
 **Dependencies:** M2 complete (core screens functional, build pipelines working).
 
@@ -28,7 +30,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** February 21, 2026 — **Progress:** 5/13 issues complete (38%)
+**Last Updated:** February 22, 2026 — **Progress:** 5/14 issues complete (36%)
 
 ### Issues & Completion
 
@@ -44,6 +46,7 @@
 | **220** | Convert purchased list items → inventory | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | Convert dialog with expiry date + optional location; telemetry tracking |
 | **230** | Offline-first verification suite | ⏳ Not Started | — | No verification suite in `app/test` |
 | **240** | Data export/delete (privacy baseline) | ✅ Complete | [#78](https://github.com/11895079/zerospoils/pull/78) | CSV/JSON export + delete-all with confirmation; BackupRestoreService; Settings → Privacy & Data section; telemetry events |
-| **250** | Telemetry instrumentation for core funnel | ⏳ Not Started | — | M1 telemetry baseline exists; M3 funnel not yet implemented |
+| **250** | Telemetry instrumentation for core funnel | ⏳ In Review | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing) |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
 | **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
+| **360** | Firebase integration (mobile tooling) | ⏳ Not Started | — | Crashlytics + Remote Config + FCM; implements M3/130 feature flags; Spark Plan (free tier) only |

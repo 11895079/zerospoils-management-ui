@@ -301,10 +301,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: AppSpacing.xl),
           _buildSectionHeader('PRIVACY & DATA'),
           _buildCard([
+            // TODO(M6): Remove "(not yet available)" when cloud sync launches
             _buildToggleTile(
               icon: Icons.analytics_outlined,
               label: 'Share Anonymous Usage Data',
-              subtitle: 'Help improve ZeroSpoils (local only, no cloud export)',
+              subtitle:
+                  'Grants permission for cloud export when available (not yet available)',
               value: _analyticsConsent,
               onChanged: (value) => _setBool(
                 key: 'analytics_consent',
