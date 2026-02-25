@@ -142,6 +142,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
     _loadViewMode();
 
+    // Track screen view
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(telemetryClientProvider).enqueue({
+        'name': 'screen_viewed',
+        'properties': {'screen_name': 'inventory'},
+      });
+    });
+
     _itemsSubscription = ref.listenManual<AsyncValue<List<Item>>>(
       itemsFutureProvider,
       (previous, next) {

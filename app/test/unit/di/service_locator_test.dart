@@ -42,7 +42,14 @@ void main() {
     });
 
     test('Telemetry client tracks helper events into memory sink', () {
-      final container = ProviderContainer();
+      // Override with consent enabled, since default is false during loading
+      final container = ProviderContainer(
+        overrides: [
+          telemetryClientProvider.overrideWithValue(
+            TelemetryClient(consentEnabled: true),
+          ),
+        ],
+      );
       addTearDown(container.dispose);
 
       final telemetryClient = container.read(telemetryClientProvider);

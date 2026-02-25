@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/item_model.dart' show Item;
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart'
+    show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/screens/shopping_list_screen.dart';
 
 class MockShoppingListRepository extends HiveShoppingListRepository {
@@ -106,6 +109,11 @@ class MockItemRepository extends HiveItemRepository {
 }
 
 void main() {
+  setUp(() {
+    // Initialize SharedPreferences for telemetry consent provider
+    SharedPreferences.setMockInitialValues({'analytics_consent': true});
+  });
+
   testWidgets('Shopping list shows empty state when no items', (
     WidgetTester tester,
   ) async {
@@ -364,6 +372,7 @@ void main() {
   ) async {
     final repository = MockShoppingListRepository();
     final itemRepository = MockItemRepository();
+    final telemetryClient = TelemetryClient(consentEnabled: true);
     await repository.init();
     await itemRepository.init();
     final now = DateTime.now();
@@ -394,6 +403,7 @@ void main() {
         overrides: [
           shoppingListRepositoryProvider.overrideWithValue(repository),
           itemRepositoryProvider.overrideWithValue(itemRepository),
+          telemetryClientProvider.overrideWith((ref) => telemetryClient),
         ],
         child: const MaterialApp(home: ShoppingListScreen()),
       ),

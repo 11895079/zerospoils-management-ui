@@ -1,6 +1,8 @@
 // Service locator and dependency injection setup using Riverpod
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/badge_service.dart';
 import '../../domain/repositories/progress_stats_service.dart';
@@ -14,9 +16,21 @@ final connectivityProvider = StreamProvider<bool>((ref) {
   });
 });
 
+/// Analytics consent provider - tracks whether user has opted into telemetry
+final analyticsConsentProvider = FutureProvider<bool>((ref) async {
+  final prefs = await SharedPreferences.getInstance();
+  // Default: opt-in to local telemetry (privacy-first, no cloud export)
+  return prefs.getBool('analytics_consent') ?? true;
+});
+
 /// Telemetry client provider
 final telemetryClientProvider = Provider((ref) {
-  return TelemetryClient();
+  final consentAsync = ref.watch(analyticsConsentProvider);
+  final consent = consentAsync.maybeWhen(
+    data: (value) => value,
+    orElse: () => false, // Default to no consent during loading
+  );
+  return TelemetryClient(consentEnabled: consent);
 });
 
 /// Notification service provider
@@ -48,9 +62,29 @@ class TelemetryClient {
   /// In-memory event sink to aid testing before Hive queue lands
   final List<Map<String, dynamic>> events = [];
   void Function(String, Map<String, dynamic>)? _emitCallback;
+  final bool consentEnabled;
+
+  TelemetryClient({this.consentEnabled = true});
 
   /// Enqueue an event locally (no upload yet)
   void enqueue(Map<String, dynamic> event) {
+    // Respect consent: skip if user opted out
+    if (!consentEnabled) {
+      return;
+    }
+
+    // Validate event structure in debug builds
+    assert(event['name'] is String, 'Event must have a "name" field (String)');
+    assert(
+      event['properties'] is Map<String, dynamic>,
+      'Event must have a "properties" field (Map)',
+    );
+
+    // Schema validation in debug mode only (not profile builds)
+    if (kDebugMode) {
+      _validateEvent(event);
+    }
+
     events.add(event);
     if (_emitCallback != null &&
         event['name'] is String &&
@@ -61,8 +95,48 @@ class TelemetryClient {
     // - Apply redaction rules from telemetry/policies/redaction.yaml
     // - Apply sampling from telemetry/policies/sampling.yaml
     // - Store in Hive queue for later batch upload
-    // ignore: avoid_print
-    print('Telemetry event enqueued: ${event['name']}');
+    if (kDebugMode) {
+      debugPrint('Telemetry event enqueued: ${event['name']}');
+    }
+  }
+
+  /// Validate event schema (debug builds only)
+  void _validateEvent(Map<String, dynamic> event) {
+    final name = event['name'] as String?;
+    final properties = event['properties'] as Map<String, dynamic>?;
+
+    if (name == null || properties == null) {
+      throw ArgumentError('Event must have "name" and "properties" fields');
+    }
+
+    // Reject PII keys (disallowed per privacy policy)
+    const piiKeys = ['email', 'phone', 'device_id', 'ip_address', 'full_name'];
+    for (final key in piiKeys) {
+      if (properties.containsKey(key)) {
+        throw ArgumentError('Event "$name" contains disallowed PII key: $key');
+      }
+    }
+
+    // Validate required standard properties for core funnel events
+    const coreFunnelEvents = [
+      'app_installed',
+      'onboarding_completed',
+      'item_added',
+      'item_edited',
+      'item_consumed',
+      'item_wasted',
+      'inventory_viewed',
+      'expiring_viewed',
+      'reminder_opened',
+    ];
+
+    if (coreFunnelEvents.contains(name)) {
+      // Core events should have platform, app_version (when available)
+      // For now, just warn if missing - we'll add these systematically
+      if (!properties.containsKey('platform')) {
+        debugPrint('Warning: Core event "$name" missing "platform" property');
+      }
+    }
   }
 
   /// Allow test to inject a callback for event emission

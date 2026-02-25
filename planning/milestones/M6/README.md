@@ -2,6 +2,11 @@
 
 **Objective:** Launch subscription-based Pro tier with household sync, receipt OCR, advanced analytics, and batch photo capture.
 
+**Backend Architecture:**
+- **Supabase:** Pro tier backend database (PostgreSQL for relational queries, auth, RLS, real-time sync)
+- **Firebase:** Mobile tooling only (Crashlytics, Remote Config, FCM — already integrated in M3)
+- **Local DB:** Primary storage for offline-first (Hive/sqflite — continues from M3)
+
 **Scope:**
 - Subscription strategy and feature gating (410)
 - In-app purchases (IAP) and entitlement storage (420)
