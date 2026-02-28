@@ -3,12 +3,18 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:zerospoils/core/notifications/notification_preferences.dart';
+import 'package:zerospoils/core/notifications/reminder_notification_payload.dart';
+import 'package:zerospoils/core/notifications/reminder_time_of_day.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 /// Callback function type for telemetry events
 typedef TelemetryCallback =
     void Function(String eventName, Map<String, dynamic> properties);
+
+/// Callback function type for notification tap handling
+typedef NotificationTapHandler =
+    Future<void> Function(ReminderNotificationPayload? payload);
 
 /// Basic notifications scaffolding for M2/120: schedule/reschedule/cancel.
 class NotificationService {
@@ -41,11 +47,17 @@ class NotificationService {
     }
     return _instance;
   }
+  NotificationTapHandler? _notificationTapHandler;
 
   final FlutterLocalNotificationsPlugin _plugin;
   final NotificationPreferencesStore _preferencesStore;
   bool _initialized = false;
   TelemetryCallback? _telemetryCallback;
+
+  /// Set notification tap handler for navigation and attribution
+  void setNotificationTapHandler(NotificationTapHandler handler) {
+    _notificationTapHandler = handler;
+  }
 
   /// Set telemetry callback for event tracking
   void setTelemetryCallback(TelemetryCallback callback) {
@@ -285,5 +297,29 @@ class NotificationService {
       // If detection fails, default to UTC
       return 'UTC';
     }
+  }
+
+  /// Handle notification tap response and emit telemetry.
+  /// Parses the payload, emits reminder_opened event, and invokes tap handler.
+  Future<void> handleNotificationResponsePayload(
+    String payloadJson, {
+    DateTime? now,
+  }) async {
+    final payload = ReminderNotificationPayload.tryParse(payloadJson);
+    if (payload == null) {
+      return;
+    }
+
+    final timestamp = now ?? DateTime.now();
+    final timeOfDay = timeOfDayFor(timestamp);
+
+    // Emit reminder_opened telemetry
+    _telemetryCallback?.call('reminder_opened', {
+      'lead_time_days': payload.leadTimeDays,
+      'time_of_day': timeOfDay,
+    });
+
+    // Invoke tap handler for navigation and attribution
+    await _notificationTapHandler?.call(payload);
   }
 }
