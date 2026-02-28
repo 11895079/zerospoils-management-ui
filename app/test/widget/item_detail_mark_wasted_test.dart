@@ -8,6 +8,7 @@ import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart' as sl;
 import 'package:zerospoils/data/repositories/item_repository_base.dart';
+import 'package:zerospoils/core/notifications/reminder_attribution_store.dart';
 
 class MockTelemetryClient extends Mock implements sl.TelemetryClient {
   int enqueueCallCount = 0;
@@ -50,6 +51,7 @@ void main() {
     setUp(() {
       mockRepo = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      ReminderAttributionStore().clear();
       testItem = Item(
         id: 'item-1',
         name: 'Milk',
@@ -111,6 +113,57 @@ void main() {
       // Verify telemetry event was emitted
       expect(mockTelemetry.enqueueCallCount, greaterThan(0));
       expect(mockTelemetry.lastEvent?['name'], 'item_marked_wasted');
+    });
+
+    testWidgets('adds reminder source when opened from reminder', (
+      tester,
+    ) async {
+      mockRepo.testItem = testItem;
+
+      ReminderAttributionStore().setContext(
+        ReminderAttribution(
+          itemId: 'item-1',
+          leadTimeDays: 1,
+          openedAt: DateTime(2026, 1, 1, 9),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            itemRepositoryProvider.overrideWithValue(mockRepo),
+            sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+          ],
+          child: MaterialApp.router(
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      ItemDetailScreen(itemId: 'item-1'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final wastedButton = find.byType(ElevatedButton).at(1);
+      await tester.ensureVisible(wastedButton);
+      await tester.tap(wastedButton);
+      await tester.pumpAndSettle();
+
+      final reasonTile = find.byType(RadioListTile<WasteReason>).first;
+      await tester.tap(reasonTile);
+      await tester.pump();
+
+      final confirmBtn = find.byType(TextButton).last;
+      await tester.tap(confirmBtn);
+      await tester.pumpAndSettle();
+
+      expect(mockTelemetry.lastEvent?['name'], 'item_marked_wasted');
+      expect(mockTelemetry.lastEvent?['properties']['source'], 'reminder');
     });
 
     testWidgets('handles save failure gracefully', (tester) async {

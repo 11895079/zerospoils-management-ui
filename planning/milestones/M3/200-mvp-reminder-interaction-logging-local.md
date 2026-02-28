@@ -25,18 +25,32 @@ Log reminder interactions locally (and via the telemetry service) in a privacy-s
 
 ## Implementation notes
 - Use the same event names and property keys defined in `docs/telemetry.md`.
-- Keep attribution simple (single `source` string on event context).
+- Attach reminder attribution to existing events (`item_marked_used`,
+	`item_marked_wasted`) via `source="reminder"` to align with current code.
+- Include a JSON `payload` in notification schedules with `item_id` and
+	`lead_time_days`.
+- Add `onDidReceiveNotificationResponse` handling to parse payload, emit
+	`reminder_opened`, and route via GoRouter to `/item/:id` (fallback to
+	expiring list if missing/invalid `item_id`).
+- Add a small helper for `time_of_day` mapping (morning/afternoon/evening)
+	to keep tests deterministic.
 
 ## Test plan
 **Automated:**
-- Unit test: mapping notification payload → `reminder_opened` properties (including `time_of_day` derivation).
-- Unit test: “opened from reminder” context results in `source="reminder"` on consume/waste events.
-- Integration test: simulate notification tap callback and verify event persisted.
+- Unit test: payload parsing returns `item_id`, `lead_time_days`, and
+	`time_of_day` for `reminder_opened`.
+- Unit test: reminder context adds `source="reminder"` to
+	`item_marked_used` / `item_marked_wasted` events.
+- Integration test: simulate notification tap callback, verify
+	`reminder_opened` enqueued and navigation targets the correct item.
 
 **Manual:**
-1. Add an item with reminders enabled; trigger/tap a reminder; confirm the item detail opens.
-2. Mark item consumed; confirm event attribution is present (via local debug telemetry log).
-3. Edit item expiry and re-trigger reminder; confirm events continue to log correctly offline.
+1. Add an item with reminders enabled; trigger/tap a reminder; confirm the
+	 item detail opens.
+2. Mark item consumed/wasted; confirm `source="reminder"` is present in the
+	 telemetry event (via local debug telemetry log).
+3. Edit item expiry and re-trigger reminder; confirm events continue to log
+	 correctly offline.
 
 ## Dependencies
 - `190-mvp-notification-scheduling-integration.md`
