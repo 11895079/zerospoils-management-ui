@@ -63,8 +63,9 @@ class TelemetryClient {
   final List<Map<String, dynamic>> events = [];
   void Function(String, Map<String, dynamic>)? _emitCallback;
   final bool consentEnabled;
+  final dynamic eventStore; // TelemetryEventStore (optional for persistence)
 
-  TelemetryClient({this.consentEnabled = true});
+  TelemetryClient({this.consentEnabled = true, this.eventStore});
 
   /// Enqueue an event locally (no upload yet)
   void enqueue(Map<String, dynamic> event) {
@@ -91,6 +92,12 @@ class TelemetryClient {
         event['properties'] is Map<String, dynamic>) {
       _emitCallback!(event['name'], event['properties']);
     }
+
+    // Persist to store if available
+    if (eventStore != null) {
+      eventStore.addEvent(event);
+    }
+
     // TODO: M1/090 - Implement local queue with Hive
     // - Apply redaction rules from telemetry/policies/redaction.yaml
     // - Apply sampling from telemetry/policies/sampling.yaml

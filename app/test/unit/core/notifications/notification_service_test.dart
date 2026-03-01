@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz show TZDateTime;
 import 'package:zerospoils/core/notifications/notification_service.dart';
+import 'package:zerospoils/core/notifications/reminder_notification_payload.dart';
 
 /// Mock plugin for testing notification scheduling
 
@@ -322,6 +323,36 @@ void main() {
       expect(scheduleTime.month, 2);
       expect(scheduleTime.year, 2026);
       expect(scheduleTime.hour, 9);
+    });
+  });
+
+  group('NotificationService - reminder tap handling', () {
+    test('handleNotificationResponsePayload emits reminder_opened', () async {
+      final handledPayloads = <ReminderNotificationPayload>[];
+      notificationService.setNotificationTapHandler((payload) async {
+        if (payload != null) {
+          handledPayloads.add(payload);
+        }
+      });
+
+      final payloadJson = ReminderNotificationPayload(
+        itemId: '42',
+        leadTimeDays: 3,
+      ).toJsonString();
+
+      await notificationService.handleNotificationResponsePayload(
+        payloadJson,
+        now: DateTime(2026, 1, 1, 9),
+      );
+
+      expect(telemetryEvents.length, 1);
+      expect(telemetryEvents[0]['name'], 'reminder_opened');
+      expect(telemetryEvents[0]['properties']['lead_time_days'], 3);
+      expect(telemetryEvents[0]['properties']['time_of_day'], 'morning');
+
+      expect(handledPayloads.length, 1);
+      expect(handledPayloads.first.itemId, '42');
+      expect(handledPayloads.first.leadTimeDays, 3);
     });
   });
 

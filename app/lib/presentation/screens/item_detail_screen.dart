@@ -12,6 +12,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
+import '../../core/notifications/reminder_attribution_store.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/app_button.dart';
@@ -154,18 +155,26 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       await repository.saveItem(updatedItem);
 
       // Track telemetry
+      final attribution = ReminderAttributionStore().getContext();
+      final properties = {
+        'item_id': widget.itemId,
+        'category': _item!.category.name,
+        'location': _item!.location.name,
+        'consumed_quantity': consumedQty,
+        'remaining_quantity': remaining,
+        'consumed_percentage': consumePercent.round(),
+      };
+
+      // Add source attribution if opened from reminder
+      if (attribution != null && attribution.itemId == widget.itemId) {
+        properties['source'] = 'reminder';
+      }
+
       ref.read(telemetryClientProvider).enqueue({
         'name': isFullyConsumed
             ? 'item_marked_used'
             : 'item_partially_consumed',
-        'properties': {
-          'item_id': widget.itemId,
-          'category': _item!.category.name,
-          'location': _item!.location.name,
-          'consumed_quantity': consumedQty,
-          'remaining_quantity': remaining,
-          'consumed_percentage': consumePercent.round(),
-        },
+        'properties': properties,
       });
 
       ref.invalidate(itemsFutureProvider);
@@ -399,16 +408,24 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       await repository.saveItem(updatedItem);
 
       // Track telemetry
+      final attribution = ReminderAttributionStore().getContext();
+      final properties = {
+        'item_id': widget.itemId,
+        'category': _item!.category.name,
+        'location': _item!.location.name,
+        'waste_reason': selectedReason?.name ?? 'unknown',
+        'waste_percentage': percentageInt,
+        'has_notes': notesText.isNotEmpty,
+      };
+
+      // Add source attribution if opened from reminder
+      if (attribution != null && attribution.itemId == widget.itemId) {
+        properties['source'] = 'reminder';
+      }
+
       ref.read(telemetryClientProvider).enqueue({
         'name': 'item_marked_wasted',
-        'properties': {
-          'item_id': widget.itemId,
-          'category': _item!.category.name,
-          'location': _item!.location.name,
-          'waste_reason': selectedReason?.name ?? 'unknown',
-          'waste_percentage': percentageInt,
-          'has_notes': notesText.isNotEmpty,
-        },
+        'properties': properties,
       });
 
       ref.invalidate(itemsFutureProvider);

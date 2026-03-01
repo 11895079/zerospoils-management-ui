@@ -8,6 +8,7 @@ import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart' as sl;
 import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
 import 'package:zerospoils/data/repositories/item_repository_base.dart';
+import 'package:zerospoils/core/notifications/reminder_attribution_store.dart';
 
 class MockTelemetryClient extends Mock implements sl.TelemetryClient {
   int enqueueCallCount = 0;
@@ -58,6 +59,7 @@ void main() {
     setUp(() {
       mockRepo = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      ReminderAttributionStore().clear();
     });
 
     testWidgets('reduces quantity when partially consumed', (tester) async {
@@ -166,6 +168,63 @@ void main() {
       expect(mockRepo.lastSavedItem?.status, ItemStatus.consumed);
       expect(mockRepo.lastSavedItem?.quantity, 0);
       expect(mockTelemetry.lastEvent?['name'], 'item_marked_used');
+    });
+
+    testWidgets('adds reminder source when opened from reminder', (
+      tester,
+    ) async {
+      final testItem = Item(
+        id: 'item-3',
+        name: 'Eggs',
+        status: ItemStatus.available,
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        quantity: 1,
+        expiryDate: DateTime.now().add(const Duration(days: 2)),
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+        updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+      );
+      mockRepo.testItem = testItem;
+
+      ReminderAttributionStore().setContext(
+        ReminderAttribution(
+          itemId: 'item-3',
+          leadTimeDays: 3,
+          openedAt: DateTime(2026, 1, 1, 9),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            itemRepositoryProvider.overrideWithValue(mockRepo),
+            sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+          ],
+          child: MaterialApp.router(
+            routerConfig: GoRouter(
+              routes: [
+                GoRoute(
+                  path: '/',
+                  builder: (context, state) =>
+                      ItemDetailScreen(itemId: 'item-3'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final consumeButton = find.byKey(const Key('item_mark_consumed_button'));
+      await tester.ensureVisible(consumeButton);
+      await tester.tap(consumeButton);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('consume_confirm_button')));
+      await tester.pumpAndSettle();
+
+      expect(mockTelemetry.lastEvent?['name'], 'item_marked_used');
+      expect(mockTelemetry.lastEvent?['properties']['source'], 'reminder');
     });
   });
 }
