@@ -247,6 +247,81 @@ class NotificationService {
     });
   }
 
+  /// Cancel all scheduled notifications.
+  /// Called when user disables notifications or clears all data.
+  Future<void> cancelAllNotifications() async {
+    await _plugin.cancelAll();
+  }
+
+  /// Reschedule all notifications based on current preferences and item list.
+  /// Called when user changes notification preferences (master toggle, lead time).
+  /// If notifications are disabled, cancels all. If enabled, reschedules all items.
+  Future<void> rescheduleAllNotifications(
+    List<dynamic> items, {
+    String? itemIdField = 'id',
+    String? expiryDateField = 'expiryDate',
+  }) async {
+    // Cancel all existing notifications first
+    await cancelAllNotifications();
+
+    final preferences = await _preferencesStore.load();
+    if (!preferences.notificationsEnabled) {
+      // Notifications disabled; all already cancelled
+      return;
+    }
+
+    // Reschedule all items with valid expiry dates
+    for (final item in items) {
+      try {
+        // Handle both Item objects and generic dynamic types
+        final itemId = (item is Map ? item[itemIdField] : item.id) as int?;
+        final expiryDate =
+            (item is Map ? item[expiryDateField] : item.expiryDate)
+                as DateTime?;
+
+        if (itemId != null && expiryDate != null) {
+          // Schedule without emitting individual telemetry
+          // (preference change is the higher-level event)
+          final when = computeScheduleTime(
+            expiryDate,
+            leadTimeDays: preferences.leadTimeDays,
+          );
+          await _plugin.zonedSchedule(
+            id: itemId,
+            title: 'Upcoming expiry',
+            body: 'An item is nearing expiry',
+            scheduledDate: when,
+            notificationDetails: NotificationDetails(
+              android: AndroidNotificationDetails(
+                'zerospoils_default',
+                'ZeroSpoils Notifications',
+                channelDescription: 'General notifications for expiring items',
+                importance: Importance.defaultImportance,
+                priority: Priority.defaultPriority,
+                playSound: preferences.soundEnabled,
+                enableVibration: preferences.vibrationEnabled,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentSound: preferences.soundEnabled,
+              ),
+            ),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          );
+        }
+      } catch (e) {
+        // Log but continue with other items
+        // In production, would emit error telemetry here
+      }
+    }
+
+    // Emit single telemetry event for the preference change
+    _telemetryCallback?.call('notifications_rescheduled_bulk', {
+      'item_count': items.length,
+      'notifications_enabled': preferences.notificationsEnabled,
+      'lead_time_days': preferences.leadTimeDays,
+    });
+  }
+
   /// Placeholder: on app startup, rehydrate scheduled notifications if needed.
   Future<void> restoreScheduled() async {
     // In M2 we rely on system persistence of scheduled alarms.
