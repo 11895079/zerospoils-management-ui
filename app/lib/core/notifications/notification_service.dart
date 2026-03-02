@@ -273,8 +273,8 @@ class NotificationService {
     // Reschedule all items with valid expiry dates
     for (final item in items) {
       try {
-        // Handle both Item objects and generic dynamic types
-        final itemId = (item is Map ? item[itemIdField] : item.id) as int?;
+        final rawItemId = item is Map ? item[itemIdField] : item.id;
+        final itemId = _parseNotificationId(rawItemId);
         final expiryDate =
             (item is Map ? item[expiryDateField] : item.expiryDate)
                 as DateTime?;
@@ -322,10 +322,67 @@ class NotificationService {
     });
   }
 
-  /// Placeholder: on app startup, rehydrate scheduled notifications if needed.
-  Future<void> restoreScheduled() async {
-    // In M2 we rely on system persistence of scheduled alarms.
-    // A future enhancement can re-scan items and re-schedule here if required.
+  /// Restore scheduled notifications from persisted items on app startup.
+  /// Reschedules all items with valid expiry dates based on current preferences.
+  Future<void> restoreScheduled({required List<dynamic> items}) async {
+    final preferences = await _preferencesStore.load();
+    if (!preferences.notificationsEnabled) {
+      return;
+    }
+
+    // Schedule all items with expiry dates
+    for (final item in items) {
+      try {
+        final rawItemId = item is Map ? item['id'] : item.id;
+        final itemId = _parseNotificationId(rawItemId);
+        final expiryDate =
+            (item is Map ? item['expiryDate'] : item.expiryDate) as DateTime?;
+
+        if (itemId != null && expiryDate != null) {
+          final when = computeScheduleTime(
+            expiryDate,
+            leadTimeDays: preferences.leadTimeDays,
+          );
+          await _plugin.zonedSchedule(
+            id: itemId,
+            title: 'Upcoming expiry',
+            body: 'An item is nearing expiry',
+            scheduledDate: when,
+            notificationDetails: NotificationDetails(
+              android: AndroidNotificationDetails(
+                'zerospoils_default',
+                'ZeroSpoils Notifications',
+                channelDescription: 'General notifications for expiring items',
+                importance: Importance.defaultImportance,
+                priority: Priority.defaultPriority,
+                playSound: preferences.soundEnabled,
+                enableVibration: preferences.vibrationEnabled,
+              ),
+              iOS: DarwinNotificationDetails(
+                presentSound: preferences.soundEnabled,
+              ),
+            ),
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          );
+        }
+      } catch (e) {
+        // Log but continue with other items
+        // In production, would emit error telemetry here
+      }
+    }
+
+    // Emit telemetry for the restore operation
+    _telemetryCallback?.call('notifications_restored_on_startup', {
+      'item_count': items.length,
+      'notifications_enabled': preferences.notificationsEnabled,
+      'lead_time_days': preferences.leadTimeDays,
+    });
+  }
+
+  int? _parseNotificationId(dynamic rawId) {
+    if (rawId is int) return rawId;
+    if (rawId is String) return int.tryParse(rawId);
+    return null;
   }
 
   /// Get device timezone name for configuration.

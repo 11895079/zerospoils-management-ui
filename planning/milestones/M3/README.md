@@ -30,7 +30,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** March 1, 2026 — **Progress:** 8/14 issues complete (57%)
+**Last Updated:** March 1, 2026 — **Progress:** 9/14 issues complete (64%)
 
 ### Issues & Completion
 
@@ -38,7 +38,7 @@
 |-------|-------|--------|----|----|
 | **130** | Feature flags framework (prepare for Pro) | ⏳ Not Started | — | No implementation detected in `app/` yet |
 | **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
-| **190** | Notification scheduling integration | ⏳ Not Started | — | M2/120 partial; M3 integration pending |
+| **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
 | **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
