@@ -1,5 +1,6 @@
 library;
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +10,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/notifications/notification_preferences.dart';
+import '../../core/notifications/notification_service.dart';
 import '../di/service_locator.dart'
     show telemetryClientProvider, analyticsConsentProvider;
 import '../di/repository_providers.dart';
@@ -345,7 +347,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: NotificationPreferencesStore.notificationsEnabledKey,
                 value: value,
                 onUpdate: () => _notificationsEnabled = value,
-                onChange: () => _trackNotificationToggle(ref, value),
+                onChange: () {
+                  _trackNotificationToggle(ref, value);
+                  unawaited(_rescheduleNotifications());
+                },
               ),
             ),
             _buildDropdownTile<int>(
@@ -358,7 +363,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 key: NotificationPreferencesStore.leadTimeDaysKey,
                 value: value,
                 onUpdate: () => _leadTimeDays = value,
-                onChange: () => _trackExpiryWarningChange(ref, value),
+                onChange: () {
+                  _trackExpiryWarningChange(ref, value);
+                  unawaited(_rescheduleNotifications());
+                },
               ),
             ),
             _buildToggleTile(
@@ -780,6 +788,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Reschedule all notifications when notification preferences change.
+  /// Called after master toggle or lead time changes are persisted.
+  Future<void> _rescheduleNotifications() async {
+    try {
+      final repo = ref.read(itemRepositoryProvider);
+      await repo.init();
+      final items = await repo.getAllItems();
+
+      final notificationService = NotificationService();
+      await notificationService.rescheduleAllNotifications(items);
+    } catch (e) {
+      // Silently fail; notifications will still respect the preference
+      // on next app launch via NotificationService.scheduleForItem
+    }
   }
 
   void _trackDateFormatChange(WidgetRef ref, String format) {

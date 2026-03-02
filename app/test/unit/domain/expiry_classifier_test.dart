@@ -64,17 +64,19 @@ void main() {
     });
 
     test('classify returns THIS_WEEK for items expiring in 7 days', () {
-      final inSevenDays = DateTime.now().add(const Duration(days: 7));
+      final now = DateTime(2026, 1, 28, 12);
+      final inSevenDays = now.add(const Duration(days: 7));
       final item = createItemWithExpiry(inSevenDays);
 
-      expect(ExpiryClassifier.classify(item), ExpiryBucket.thisWeek);
+      expect(ExpiryClassifier.classify(item, now: now), ExpiryBucket.thisWeek);
     });
 
     test('classify returns LATER for items expiring in 8 days', () {
-      final inEightDays = DateTime.now().add(const Duration(days: 8));
+      final now = DateTime(2026, 1, 28, 12);
+      final inEightDays = now.add(const Duration(days: 8));
       final item = createItemWithExpiry(inEightDays);
 
-      expect(ExpiryClassifier.classify(item), ExpiryBucket.later);
+      expect(ExpiryClassifier.classify(item, now: now), ExpiryBucket.later);
     });
 
     test('classify returns LATER for items expiring in 30 days', () {

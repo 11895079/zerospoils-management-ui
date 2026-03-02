@@ -70,6 +70,14 @@ class MockFlutterLocalNotificationsPlugin
   Future<void> cancel({required int id, String? tag}) async {
     cancelledNotifications.add(id);
   }
+
+  @override
+  Future<void> cancelAll() async {
+    // Mark all scheduled as cancelled
+    for (final notification in scheduledNotifications) {
+      cancelledNotifications.add(notification['id'] as int);
+    }
+  }
 }
 
 /// Mock Android-specific implementation
@@ -417,6 +425,300 @@ void main() {
 
       // These should be different instances with independent callbacks
       expect(identical(singleton, testInstance), isFalse);
+    });
+  });
+
+  group('NotificationService - rescheduleAllNotifications', () {
+    test('cancelAllNotifications cancels all scheduled notifications', () async {
+      // First schedule some notifications
+      mockPlugin.scheduledNotifications.clear();
+      mockPlugin.cancelledNotifications.clear();
+
+      final expiryDate1 = DateTime(2026, 2, 15);
+      final expiryDate2 = DateTime(2026, 2, 20);
+
+      await notificationService.scheduleForItem(
+        itemId: 1,
+        expiryDate: expiryDate1,
+      );
+      await notificationService.scheduleForItem(
+        itemId: 2,
+        expiryDate: expiryDate2,
+      );
+
+      expect(mockPlugin.scheduledNotifications.length, 2);
+
+      // Now cancel all
+      await notificationService.cancelAllNotifications();
+
+      // Should have called cancel for each. Note: MockPlugin tracks cancel calls
+      // but Flutter's actual API might use cancelAll() directly instead of per-ID cancels
+      // For testing, we just verify the method completes without error
+      expect(mockPlugin.cancelledNotifications.isNotEmpty, isTrue);
+    });
+
+    test('rescheduleAllNotifications with empty list does nothing', () async {
+      telemetryEvents.clear();
+      mockPlugin.scheduledNotifications.clear();
+
+      await notificationService.rescheduleAllNotifications([]);
+
+      // Should have only the bulk reschedule event
+      final bulkEvent = telemetryEvents.firstWhere(
+        (e) => e['name'] == 'notifications_rescheduled_bulk',
+        orElse: () => {},
+      );
+      expect(bulkEvent.isNotEmpty, isTrue);
+      expect(bulkEvent['properties']['item_count'], 0);
+    });
+
+    test('rescheduleAllNotifications with items when enabled', () async {
+      telemetryEvents.clear();
+      mockPlugin.scheduledNotifications.clear();
+
+      // Setup: notifications are enabled
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      // Create mock items
+      final items = [
+        {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+        {'id': 2, 'expiryDate': DateTime(2026, 2, 20)},
+      ];
+
+      await notificationService.rescheduleAllNotifications(items);
+
+      // Should have scheduled both items
+      expect(mockPlugin.scheduledNotifications.length, 2);
+
+      // Should have bulk telemetry event
+      final bulkEvent = telemetryEvents.firstWhere(
+        (e) => e['name'] == 'notifications_rescheduled_bulk',
+        orElse: () => {},
+      );
+      expect(bulkEvent.isNotEmpty, isTrue);
+      expect(bulkEvent['properties']['item_count'], 2);
+      expect(bulkEvent['properties']['notifications_enabled'], true);
+      expect(bulkEvent['properties']['lead_time_days'], 3);
+    });
+
+    test('rescheduleAllNotifications cancels all when disabled', () async {
+      // Setup: notifications are disabled
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': false,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+
+      final items = [
+        {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+        {'id': 2, 'expiryDate': DateTime(2026, 2, 20)},
+      ];
+
+      await localService.rescheduleAllNotifications(items);
+
+      // Should NOT have scheduled any items when notifications are disabled
+      expect(localMockPlugin.scheduledNotifications.length, 0);
+    });
+
+    test(
+      'rescheduleAllNotifications handles items with null expiry dates',
+      () async {
+        telemetryEvents.clear();
+        mockPlugin.scheduledNotifications.clear();
+
+        // Setup: notifications are enabled
+        SharedPreferences.setMockInitialValues({
+          'notifications_enabled': true,
+          'expiry_lead_time_days': 3,
+          'sound_enabled': true,
+          'vibration_enabled': true,
+        });
+
+        // Items include one with null expiryDate
+        final items = [
+          {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+          {'id': 2, 'expiryDate': null}, // No expiry date
+        ];
+
+        await notificationService.rescheduleAllNotifications(items);
+
+        // Should have scheduled only the item with expiry date
+        expect(mockPlugin.scheduledNotifications.length, 1);
+        expect(mockPlugin.scheduledNotifications[0]['id'], 1);
+      },
+    );
+
+    test('rescheduleAllNotifications respects lead time preference', () async {
+      // Setup: 7-day lead time
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 7,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+
+      final expiryDate = DateTime(2026, 2, 15);
+      final items = [
+        {'id': 1, 'expiryDate': expiryDate},
+      ];
+
+      await localService.rescheduleAllNotifications(items);
+
+      // Should have scheduled with 7-day lead time
+      expect(localMockPlugin.scheduledNotifications.length, 1);
+
+      final scheduled = localMockPlugin.scheduledNotifications[0];
+      final scheduledDate = scheduled['scheduledDate'];
+
+      // Feb 15 - 7 days = Feb 8 (not Feb 14 which is 1-day lead time)
+      expect(scheduledDate.day, 8);
+      expect(scheduledDate.month, 2);
+      expect(scheduledDate.year, 2026);
+    });
+  });
+
+  group('NotificationService - restoreScheduled on app startup', () {
+    test(
+      'restoreScheduled schedules all items when notifications enabled',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'notifications_enabled': true,
+          'expiry_lead_time_days': 3,
+          'sound_enabled': true,
+          'vibration_enabled': true,
+        });
+
+        final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+        final localService = NotificationService(plugin: localMockPlugin);
+        final restoreEvents = <Map<String, dynamic>>[];
+        localService.setTelemetryCallback((eventName, properties) {
+          restoreEvents.add({'name': eventName, 'properties': properties});
+        });
+
+        final items = [
+          {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+          {'id': 2, 'expiryDate': DateTime(2026, 2, 20)},
+          {'id': 3, 'expiryDate': DateTime(2026, 2, 10)},
+        ];
+
+        await localService.restoreScheduled(items: items);
+
+        // All items should be scheduled
+        expect(localMockPlugin.scheduledNotifications.length, 3);
+
+        // Verify telemetry was emitted
+        final restoreEvent = restoreEvents.firstWhere(
+          (e) => e['name'] == 'notifications_restored_on_startup',
+          orElse: () => {},
+        );
+        expect(restoreEvent.isNotEmpty, isTrue);
+        expect(restoreEvent['properties']['item_count'], 3);
+        expect(restoreEvent['properties']['notifications_enabled'], true);
+      },
+    );
+
+    test(
+      'restoreScheduled schedules nothing when notifications disabled',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'notifications_enabled': false,
+          'expiry_lead_time_days': 3,
+          'sound_enabled': true,
+          'vibration_enabled': true,
+        });
+
+        final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+        final localService = NotificationService(plugin: localMockPlugin);
+
+        final items = [
+          {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+          {'id': 2, 'expiryDate': DateTime(2026, 2, 20)},
+        ];
+
+        await localService.restoreScheduled(items: items);
+
+        // No items should be scheduled since notifications are disabled
+        expect(localMockPlugin.scheduledNotifications.length, 0);
+      },
+    );
+
+    test('restoreScheduled skips items without expiry dates', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+
+      final items = [
+        {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+        {'id': 2, 'expiryDate': null}, // No expiry date
+        {'id': 3, 'expiryDate': DateTime(2026, 2, 10)},
+      ];
+
+      await localService.restoreScheduled(items: items);
+
+      // Only 2 items should be scheduled (those with expiry dates)
+      expect(localMockPlugin.scheduledNotifications.length, 2);
+    });
+
+    test('restoreScheduled handles empty item list', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+
+      await localService.restoreScheduled(items: []);
+
+      // No items to schedule
+      expect(localMockPlugin.scheduledNotifications.length, 0);
+    });
+
+    test('restoreScheduled applies current lead time preference', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 7,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+
+      final items = [
+        {'id': 1, 'expiryDate': DateTime(2026, 2, 15)},
+      ];
+
+      await localService.restoreScheduled(items: items);
+
+      // Should be scheduled with 7-day lead time
+      expect(localMockPlugin.scheduledNotifications.length, 1);
+      final scheduled = localMockPlugin.scheduledNotifications[0];
+      final scheduledDate = scheduled['scheduledDate'];
+
+      // Feb 15 - 7 days = Feb 8
+      expect(scheduledDate.day, 8);
+      expect(scheduledDate.month, 2);
     });
   });
 }

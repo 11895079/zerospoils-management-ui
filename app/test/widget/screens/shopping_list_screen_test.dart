@@ -424,6 +424,10 @@ void main() {
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
+    // Give extra time for second item to be processed with applyToAll
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('item_entry_sheet')), findsNothing);
     final inventoryItems = await itemRepository.getAllItems();
     expect(inventoryItems.length, 2);

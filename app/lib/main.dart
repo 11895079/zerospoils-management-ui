@@ -4,7 +4,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
-import 'presentation/di/service_locator.dart';
+import 'presentation/di/service_locator.dart' hide itemRepositoryProvider;
 import 'presentation/di/repository_providers.dart';
 import 'data/adapters/item_adapter.dart';
 import 'data/adapters/receipt_batch_adapter.dart';
@@ -67,6 +67,17 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       telemetry.enqueue({'name': eventName, 'properties': properties});
     });
     telemetry.trackAppInstalled(isFirstInstall: true);
+
+    // Restore scheduled notifications from saved items
+    try {
+      final itemRepository = ref.read(itemRepositoryProvider);
+      await itemRepository.init();
+      final items = await itemRepository.getAllItems();
+      await NotificationService().restoreScheduled(items: items);
+    } catch (e) {
+      // Silently fail; notifications will still be scheduled per item
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getBool('demo_mode_enabled');
     if (saved != null) {
