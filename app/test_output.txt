@@ -1,0 +1,502 @@
+00:00 +0: loading C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart
+00:00 +0: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Export export produces valid JSON with metadata header
+00:01 +1: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Export export handles empty database
+00:01 +2: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Preview preview shows correct item counts
+00:01 +3: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Preview preview detects version mismatch for backward incompatibility
+00:01 +4: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Import import restores data correctly
+00:02 +5: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Import import rejects backward incompatible backup
+00:02 +6: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Import import rolls back on error
+00:02 +7: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/backup_restore_service_test.dart: BackupRestoreService - Round Trip export then import preserves all data
+00:03 +8: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Default values flags return default values when no override set
+00:03 +9: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Default values flags return default values when no override set
+00:03 +10: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Default values flags return default values when no override set
+00:04 +11: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Default values flags return default values when no override set
+00:04 +12: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Default values flags return default values when no override set
+00:05 +13: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Local override precedence local override takes precedence over default
+00:05 +14: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService Local override precedence local override false takes precedence over default
+00:05 +15: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +16: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +17: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +18: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +19: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +20: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore loads defaults when no preferences are set
+00:05 +21: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/feature_flags/feature_flags_service_test.dart: FeatureFlagsService getAllFlags returns all flags with their current values
+00:05 +22: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore persists and reloads notification preferences
+00:05 +23: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore persists and reloads notification preferences
+00:05 +24: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore persists and reloads notification preferences
+00:05 +25: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore persists and reloads notification preferences
+00:05 +26: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_preferences_store_test.dart: NotificationPreferencesStore persists and reloads notification preferences
+00:08 +27: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: (setUpAll)
+00:08 +27: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime schedules notification at 9am on day-before-expiry
+00:09 +28: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime handles expiry on first of month correctly
+00:09 +29: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime handles year boundary correctly
+00:09 +30: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime handles leap year correctly
+00:09 +31: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime timezone consistency - same date across timezones yields local 9am
+00:09 +32: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - computeScheduleTime same day edge case - expiry at midnight should schedule previous day 9am
+00:09 +33: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - scheduling preferences scheduleForItem respects lead time preference
+00:09 +34: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - scheduling preferences scheduleForItem skips when notifications are disabled
+00:09 +35: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - scheduling preferences scheduleForItem applies sound and vibration preferences
+00:09 +36: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - telemetry integration scheduleForItem emits notification_scheduled event
+00:09 +37: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - reminder tap handling handleNotificationResponsePayload emits reminder_opened
+00:09 +38: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - boundary cases expiry date exactly 1 day away schedules notification today
+00:09 +39: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - boundary cases expiry date in past yields past schedule time
+00:09 +40: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - singleton behavior factory returns same instance when no plugin provided
+00:09 +41: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - singleton behavior factory returns new instance when plugin is provided
+00:09 +42: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - singleton behavior singleton instance has independent state from test instances
+00:09 +43: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications cancelAllNotifications cancels all scheduled notifications
+00:09 +44: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications rescheduleAllNotifications with empty list does nothing
+00:09 +45: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications rescheduleAllNotifications with items when enabled
+00:10 +46: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications rescheduleAllNotifications cancels all when disabled
+00:10 +47: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications rescheduleAllNotifications handles items with null expiry dates
+00:10 +48: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - rescheduleAllNotifications rescheduleAllNotifications respects lead time preference
+00:10 +49: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - restoreScheduled on app startup restoreScheduled schedules all items when notifications enabled
+00:11 +50: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - restoreScheduled on app startup restoreScheduled schedules nothing when notifications disabled
+00:12 +51: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - restoreScheduled on app startup restoreScheduled skips items without expiry dates
+00:12 +52: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - restoreScheduled on app startup restoreScheduled handles empty item list
+00:12 +53: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: NotificationService - restoreScheduled on app startup restoreScheduled applies current lead time preference
+00:12 +54: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/notification_service_test.dart: (tearDownAll)
+00:13 +54: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: ReminderNotificationPayload parses valid payload
+00:13 +55: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: ReminderNotificationPayload returns null for invalid payload
+00:13 +56: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: timeOfDayFor maps morning hours
+00:13 +57: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: timeOfDayFor maps afternoon hours
+00:13 +58: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: timeOfDayFor maps evening hours
+00:13 +59: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/notifications/reminder_notification_payload_test.dart: timeOfDayFor maps late night to evening
+00:15 +60: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/telemetry/telemetry_event_store_test.dart: TelemetryEventStore (setUpAll)
+00:15 +60: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/telemetry/telemetry_event_store_test.dart: TelemetryEventStore persists events in order
+00:15 +61: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatDate MM/DD/YYYY format
+00:16 +62: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatDate DD/MM/YYYY format
+00:16 +63: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatDate YYYY-MM-DD format
+00:16 +64: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatMonthDay returns standardized format
+00:16 +65: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatDateWithYear returns standardized format
+00:16 +66: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatTime returns HH:mm format
+00:16 +67: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatRelativeTime returns correct ago format
+00:16 +68: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/date_formatter_test.dart: AppDateFormatter formatRelativeTime returns just now for recent dates
+00:18 +69: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary returns apple icon for apple items
+00:18 +70: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary returns correct icon for common items
+00:18 +71: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary returns international food icons
+00:18 +72: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary handles whitespace in item names
+00:18 +73: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary performs substring matching for partial names
+00:18 +74: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary falls back to category icon when item not found
+00:19 +75: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary falls back to generic icon when no category provided
+00:19 +76: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary returns correct icon for each category
+00:19 +77: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary library has reasonable size
+00:19 +78: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary mappedItems returns all keys
+00:19 +79: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary case insensitive matching works
+00:19 +80: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/core/utils/item_icon_library_test.dart: ItemIconLibrary handles plural and singular forms
+00:20 +81: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/demo_item_repository_test.dart: DemoItemRepository seeds items across expiry buckets
+00:23 +82: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository (setUpAll)
+00:23 +82: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository saveItem persists item
+Telemetry event enqueued: item_created
+00:24 +83: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository getAllItems returns all items
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_created
+00:24 +84: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository getItem returns specific item by id
+Telemetry event enqueued: item_created
+00:24 +85: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository deleteItem removes item
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_deleted
+00:24 +86: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository getItemsByCategory filters by category
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_created
+00:24 +87: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository getItemsExpiringSoon returns items expiring within days
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_created
+00:24 +88: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository clear removes all items
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_created
+00:24 +89: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_database_test.dart: HiveItemRepository persistence across restarts
+Telemetry event enqueued: item_created
+00:24 +90: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: (setUpAll)
+00:25 +90: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository addEvent persists with correct metadata
+00:25 +91: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository getByItemId returns all events for item
+00:25 +92: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository getByType returns correct event type
+00:25 +93: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository getByDateRange filters by timestamp window
+00:25 +94: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Metadata is preserved (JSON round-trip)
+00:25 +95: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Event with null item_id (app-level events) handled correctly
+00:25 +96: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Timestamp ordering maintained
+00:25 +97: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +97: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration saveItem schedules notification for new item with expiry date
+Telemetry event enqueued: item_created
+00:27 +98: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +98: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration saveItem does not schedule notification for item without expiry
+Telemetry event enqueued: item_created
+00:27 +99: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +99: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration saveItem reschedules notification when expiry date changes
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_updated
+00:27 +100: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +100: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration saveItem cancels notification when expiry date is cleared
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_updated
+00:27 +101: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +101: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration deleteItem cancels scheduled notification
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_deleted
+00:27 +102: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +102: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration clear cancels all scheduled notifications
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_created
+00:27 +103: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +103: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration repository works without notification service (nullable)
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_deleted
+00:27 +104: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:27 +104: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_notification_test.dart: HiveItemRepository - notification integration multiple edits to same item reschedule correctly
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_updated
+Telemetry event enqueued: item_updated
+Telemetry event enqueued: item_updated
+00:27 +105: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:28 +105: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_telemetry_test.dart: HiveItemRepository Telemetry emits item_created on saveItem
+Telemetry event enqueued: item_created
+00:28 +106: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:28 +106: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_telemetry_test.dart: HiveItemRepository Telemetry emits item_updated on saveItem for update
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_updated
+00:28 +107: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:28 +107: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_item_repository_telemetry_test.dart: HiveItemRepository Telemetry emits item_deleted on deleteItem
+Telemetry event enqueued: item_created
+Telemetry event enqueued: item_deleted
+00:28 +108: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Large event volumes (1000+) queried efficiently (<200ms)
+00:29 +109: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Data persists across app restarts
+00:29 +110: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:30 +110: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_telemetry_test.dart: HiveShoppingListRepository Telemetry emits shopping_list_item_added on save
+Telemetry event enqueued: shopping_list_item_added
+00:30 +111: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:30 +111: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_telemetry_test.dart: HiveShoppingListRepository Telemetry emits shopping_list_item_purchased with days_to_purchase
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_purchased
+00:30 +112: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:30 +112: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_telemetry_test.dart: HiveShoppingListRepository Telemetry emits shopping_list_item_deleted on delete
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_deleted
+00:30 +113: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:33 +113: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository saveShoppingListItem persists and retrieves
+Telemetry event enqueued: shopping_list_item_added
+00:33 +114: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:33 +114: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository getAllItems returns all shopping list items
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_added
+00:33 +115: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:34 +115: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository getItem returns item by id
+Telemetry event enqueued: shopping_list_item_added
+00:34 +116: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +116: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository getPurchased filters correctly
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_added
+00:35 +117: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +117: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository getUnpurchased filters correctly
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_added
+00:35 +118: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +118: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository deleteItem removes from storage
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_deleted
+00:35 +119: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +119: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository markAsPurchased updates purchased_at timestamp
+Telemetry event enqueued: shopping_list_item_added
+Telemetry event enqueued: shopping_list_item_purchased
+00:35 +120: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +120: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository markAsUnpurchased clears purchased_at
+Telemetry event enqueued: shopping_list_item_added
+00:35 +121: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +121: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/repositories/hive_shopping_list_repository_test.dart: HiveShoppingListRepository Data persists across app restarts
+Telemetry event enqueued: shopping_list_item_added
+00:35 +122: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:35 +123: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:36 +124: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:36 +125: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:36 +126: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:37 +127: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:37 +128: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:37 +129: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:37 +129: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/di/service_locator_test.dart: Service Locator Tests Telemetry client tracks helper events into memory sink
+Warning: Core event "app_installed" missing "platform" property
+Telemetry event enqueued: app_installed
+Telemetry event enqueued: tab_switched
+00:37 +130: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: HiveEventRepository Old events don't impact performance
+00:39 +131: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/data/hive_event_repository_test.dart: (tearDownAll)
+00:43 +131: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify returns EXPIRED for past dates
+00:43 +132: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify returns EXPIRED for far past dates
+00:43 +133: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:43 +134: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:43 +135: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:44 +136: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:44 +137: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:44 +138: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService computes consumed, wasted, remaining totals
+00:44 +139: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify returns LATER for items expiring in 8 days
+00:44 +140: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +141: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +142: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +143: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +144: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +145: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/receipt_batch_stats_service_test.dart: ReceiptBatchStatsService treats shopping list items as remaining value
+00:44 +146: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify handles leap year: Feb 28 to Mar 1
+00:44 +147: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify handles year boundary: Dec 31 to Jan 1
+00:44 +148: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify uses date-only comparison (ignores time component)
+00:44 +149: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/expiry_classifier_test.dart: ExpiryClassifier classify is consistent across multiple calls
+00:44 +150: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/expiry_classifier_test.dart: ExpiryClassifier Today bucket (expiry is today)
+00:44 +151: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +152: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +153: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +154: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +155: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +156: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +157: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +158: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +159: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/progress_stats_service_test.dart: ProgressStatsService aggregates item stats, value stats, streak, and telemetry
+00:44 +160: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/expiry_classifier_test.dart: ExpiryClassifier Same-day edge case (expires at 00:00, check at 23:59)
+00:51 +161: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/expiry_date_parser_test.dart: ExpiryDateParser parses ISO format YYYY-MM-DD
+00:52 +162: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +163: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +164: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +165: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +166: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +167: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/domain/utils/receipt_parser_test.dart: ReceiptParser parses line items and ignores totals/taxes
+00:52 +168: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/presentation/di/telemetry_client_test.dart: TelemetryClient (setUpAll)
+00:52 +169: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/presentation/di/telemetry_client_test.dart: TelemetryClient (setUpAll)
+00:52 +169: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/presentation/di/telemetry_client_test.dart: TelemetryClient persists enqueued events to store
+Warning: Core event "reminder_opened" missing "platform" property
+Telemetry event enqueued: reminder_opened
+00:53 +170: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/presentation/di/telemetry_client_test.dart: TelemetryClient (tearDownAll)
+00:54 +170: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Router is initialized as GoRouter
+00:55 +171: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Item detail route path format is valid
+00:55 +172: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Item ID can be extracted from route
+00:55 +173: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Root path is configured
+00:57 +174: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Named routes are accessible
+00:57 +175: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/routing/router_test.dart: Router Tests Route paths follow expected structure
+01:00 +176: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Consent Gating Events are enqueued when consent is enabled
+Telemetry event enqueued: test_event
+01:00 +177: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Consent Gating Events are NOT enqueued when consent is disabled
+01:00 +178: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Consent Gating Callback is NOT invoked when consent is disabled
+01:00 +179: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Consent Gating Callback is invoked when consent is enabled
+Telemetry event enqueued: test_event
+01:00 +180: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events with missing name field
+01:00 +181: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events with missing properties field
+01:00 +182: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events containing PII keys (email)
+01:00 +183: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events containing PII keys (phone)
+01:00 +184: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events containing PII keys (device_id)
+01:00 +185: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events containing PII keys (ip_address)
+01:01 +186: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Rejects events containing PII keys (full_name)
+01:01 +187: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Schema Validation (Debug Mode) Accepts events without PII keys
+Telemetry event enqueued: test_event
+01:01 +188: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Core Funnel Events app_installed event is allowed
+Warning: Core event "app_installed" missing "platform" property
+Telemetry event enqueued: app_installed
+01:01 +189: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Core Funnel Events onboarding_completed event is allowed
+Warning: Core event "onboarding_completed" missing "platform" property
+Telemetry event enqueued: onboarding_completed
+01:01 +190: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Core Funnel Events item_added event is allowed
+Warning: Core event "item_added" missing "platform" property
+Telemetry event enqueued: item_added
+01:01 +191: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Core Funnel Events inventory_viewed event is allowed
+Warning: Core event "inventory_viewed" missing "platform" property
+Telemetry event enqueued: inventory_viewed
+01:01 +192: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/unit/telemetry/telemetry_consent_test.dart: TelemetryClient - Core Funnel Events expiring_viewed event is allowed
+Warning: Core event "expiring_viewed" missing "platform" property
+Telemetry event enqueued: expiring_viewed
+01:03 +193: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/demo_mode_behavior_test.dart: Deleting last real item clears manual flag and shows empty state
+01:23 +194: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/demo_mode_behavior_test.dart: Deleting last real item clears manual flag and shows empty state
+01:25 +195: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/demo_mode_behavior_test.dart: Deleting last real item clears manual flag and shows empty state
+Telemetry event enqueued: item_deleted
+01:28 +196: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:29 +197: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:29 +198: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:31 +199: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:34 +200: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:35 +201: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:36 +202: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:37 +203: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:40 +204: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted saves item with wasted status and emits telemetry
+01:40 +205: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/inventory_screen_test.dart: emits telemetry when view mode changes
+01:41 +206: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_detail_mark_wasted_test.dart: ItemDetailScreen - Mark as Wasted adds reminder source when opened from reminder
+01:42 +207: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:44 +208: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:44 +209: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:45 +210: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:45 +211: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:48 +212: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:50 +213: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:52 +214: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_expiry_ocr_button_test.dart: expiry OCR button hidden for non-Pro
+01:52 +215: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+01:53 +216: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+01:54 +217: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+01:59 +218: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+01:59 +219: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+02:00 +220: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: saving new item calls repository.saveItem
+02:00 +221: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_icon_test.dart: ItemIcon Widget renders icon for known item
+02:01 +222: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: auto-populates category for known items
+02:01 +223: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: auto-populates category for known items
+02:01 +224: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: auto-populates category for known items
+02:01 +225: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_icon_test.dart: ItemIcon Widget renders without background by default
+02:01 +226: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:02 +227: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:02 +228: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:03 +229: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:03 +230: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:03 +231: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/item_form_repository_test.dart: edit mode loads existing item from repository
+02:04 +232: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:04 +233: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:04 +234: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:04 +235: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:04 +236: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:05 +237: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:07 +238: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Emits onboarding_started event on first load
+02:08 +239: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/developer_settings_screen_test.dart: DeveloperSettingsScreen renders without crashing
+02:10 +240: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/developer_settings_screen_test.dart: DeveloperSettingsScreen renders without crashing
+02:10 +241: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/developer_settings_screen_test.dart: DeveloperSettingsScreen renders without crashing
+02:12 +241: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Shows permission prompts when permission buttons are tapped
+Telemetry event enqueued: permission_prompt_shown
+02:12 +242: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/developer_settings_screen_test.dart: DeveloperSettingsScreen renders without crashing
+02:12 +243: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:12 +243: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Skip button dismisses onboarding
+Telemetry event enqueued: onboarding_skipped
+Warning: Core event "onboarding_completed" missing "platform" property
+Telemetry event enqueued: onboarding_completed
+GoRouter not available: No GoRouter found in context
+02:12 +244: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:13 +245: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:14 +246: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:14 +246: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Continue to App button completes onboarding
+Warning: Core event "onboarding_completed" missing "platform" property
+Telemetry event enqueued: onboarding_completed
+GoRouter not available: No GoRouter found in context
+02:15 +247: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:16 +248: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:18 +248: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/onboarding_flow_test.dart: OnboardingScreen Deferring camera permission closes dialog
+Telemetry event enqueued: permission_prompt_shown
+Telemetry event enqueued: permission_deferred
+Warning: Core event "onboarding_completed" missing "platform" property
+Telemetry event enqueued: onboarding_completed
+GoRouter not available: No GoRouter found in context
+02:18 +249: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:19 +250: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:20 +251: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:22 +252: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/expiring_today_screen_test.dart: ExpiringTodayScreen renders empty state when no items exist
+02:26 +253: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/item_detail_screen_test.dart: ItemDetailScreen shows loading indicator while fetching item
+02:27 +254: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/item_detail_screen_test.dart: ItemDetailScreen shows loading indicator while fetching item
+02:27 +255: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:28 +256: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:28 +257: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:28 +258: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:29 +259: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:29 +260: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:29 +261: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:29 +262: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:31 +263: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:31 +264: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:31 +265: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:32 +266: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:32 +267: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:32 +268: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:34 +269: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Tab navigation switches between screens
+02:35 +270: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/progress_screen_recent_batch_test.dart: Progress shows recent receipt batch stats
+02:35 +271: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/progress_screen_recent_batch_test.dart: Progress shows recent receipt batch stats
+02:35 +272: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/progress_screen_recent_batch_test.dart: Progress shows recent receipt batch stats
+02:36 +273: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/progress_screen_recent_batch_test.dart: Progress shows recent receipt batch stats
+02:37 +274: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/home_shell_test.dart: Inventory screen displays Add Item FAB
+02:38 +275: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/receipt_batches_screen_test.dart: Receipt batches screen renders list
+02:42 +276: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/receipt_batch_detail_screen_test.dart: Batch detail screen shows totals and items
+02:47 +277: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_analytics_consent_test.dart: SettingsScreen - Analytics Consent Renders analytics consent toggle
+02:48 +278: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_screen_test.dart: SettingsScreen - Notification Preferences & Telemetry Renders notification preference controls
+02:50 +279: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_screen_test.dart: SettingsScreen - Notification Preferences & Telemetry Renders notification preference controls
+02:50 +280: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list shows empty state when no items
+02:50 +280: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_analytics_consent_test.dart: SettingsScreen - Analytics Consent Toggling analytics consent emits telemetry event
+Telemetry event enqueued: analytics_consent_changed
+02:50 +281: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list shows empty state when no items
+02:51 +282: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list shows empty state when no items
+02:52 +282: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_analytics_consent_test.dart: SettingsScreen - Analytics Consent Analytics consent ON allows event queueing
+Telemetry event enqueued: test_event
+02:52 +283: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list shows empty state when no items
+Telemetry event enqueued: shopping_list_viewed
+02:52 +284: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list shows empty state when no items
+02:52 +285: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:53 +285: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Shopping list renders purchased and unpurchased sections
+Telemetry event enqueued: shopping_list_viewed
+02:53 +286: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:54 +287: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:56 +288: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:56 +288: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Checking item opens convert dialog
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_item_toggled
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+02:57 +289: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:57 +290: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget_test.dart: App launches and renders home screen
+02:57 +290: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_screen_test.dart: SettingsScreen - Notification Preferences & Telemetry Notification toggle emits telemetry event
+Telemetry event enqueued: notification_toggle_changed
+02:57 +291: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Convert requires expiry date and saves inventory item
+02:58 +292: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Convert requires expiry date and saves inventory item
+02:58 +292: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_screen_test.dart: SettingsScreen - Notification Preferences & Telemetry Lead time change emits telemetry event
+Telemetry event enqueued: expiry_warning_changed
+02:58 +293: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Convert requires expiry date and saves inventory item
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_item_toggled
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_converted
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+02:58 +294: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/settings_screen_test.dart: SettingsScreen - Notification Preferences & Telemetry Sound and vibration toggles emit telemetry events
+Telemetry event enqueued: sound_toggle_changed
+Telemetry event enqueued: vibration_toggle_changed
+02:59 +295: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Skip conversion keeps item purchased
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_item_toggled
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_convert_skipped
+02:59 +296: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Batch convert processes purchased items
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_converted
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_converted
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+03:00 +297: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Batch convert apply-to-all skips repeated sheets
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_converted
+Telemetry event enqueued: shopping_converted
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+ÔòÉÔòÉÔòí EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK Ôò×ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+The following TestFailure was thrown running a test:
+Expected: <2>
+  Actual: <1>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart:433:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1059:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart line 433
+The test description was:
+  Batch convert apply-to-all skips repeated sheets
+ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
+03:01 +297 -1: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Batch convert apply-to-all skips repeated sheets [E]
+  Test failed. See exception logs above.
+  The test description was: Batch convert apply-to-all skips repeated sheets
+  
+03:01 +297 -1: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Add item creates entry and persists to repository
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_item_added
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+03:02 +298 -1: C:/Projects/zerospoils/etc/zerospoils_github_issues_pack/app/test/widget/screens/shopping_list_screen_test.dart: Toggle purchased moves item between sections
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_item_toggled
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_convert_skipped
+Telemetry event enqueued: shopping_item_toggled
+Telemetry event enqueued: shopping_list_viewed
+Telemetry event enqueued: shopping_list_viewed
+03:03 +299 -1: Some tests failed.
