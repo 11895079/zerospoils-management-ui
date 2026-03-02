@@ -16,19 +16,19 @@ Deliver Reminder preferences UI with concrete notification settings (lead time, 
 - Error and empty states handled
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Settings screen renders notification preferences (toggle + lead time + sound + vibration)
-- [ ] Master toggle disables scheduling when OFF and re-enables when ON
-- [ ] Lead time change updates scheduling window (1/3/7 days)
-- [ ] Sound/vibration toggles persist and are readable by notification service
-- [ ] Preferences persist locally and survive app restart
-- [ ] Telemetry emitted on changes:
+- [x] Settings screen renders notification preferences (toggle + lead time + sound + vibration)
+- [x] Master toggle disables scheduling when OFF and re-enables when ON
+- [x] Lead time change updates scheduling window (1/3/7 days)
+- [x] Sound/vibration toggles persist and are readable by notification service
+- [x] Preferences persist locally and survive app restart
+- [x] Telemetry emitted on changes:
   - `notification_toggle_changed` { notifications_enabled: bool }
   - `expiry_warning_changed` { lead_time_days: int }
   - `sound_toggle_changed` { sound_enabled: bool }
   - `vibration_toggle_changed` { vibration_enabled: bool }
-- [ ] Unit/widget/integration tests added or updated
-- [ ] Offline-first behavior verified
-- [ ] Accessibility basics (labels, contrast, tap targets)
+- [x] Unit/widget/integration tests added or updated
+- [x] Offline-first behavior verified
+- [x] Accessibility basics (labels, contrast, tap targets)
 
 ## Out of scope
 - Cloud sync

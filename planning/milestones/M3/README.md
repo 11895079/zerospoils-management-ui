@@ -30,23 +30,23 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** February 22, 2026 — **Progress:** 5/14 issues complete (36%)
+**Last Updated:** March 1, 2026 — **Progress:** 9/14 issues complete (64%)
 
 ### Issues & Completion
 
 | Issue | Title | Status | PR | Notes |
 |-------|-------|--------|----|----|
 | **130** | Feature flags framework (prepare for Pro) | ⏳ Not Started | — | No implementation detected in `app/` yet |
-| **180** | Reminder preferences UI | ⏳ Not Started | — | Scheduled after M2 notifications integration |
-| **190** | Notification scheduling integration | ⏳ Not Started | — | M2/120 partial; M3 integration pending |
+| **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
+| **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
 | **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
-| **200** | Reminder interaction logging (local) | ⏳ Not Started | — | Depends on reminder UI/integration |
+| **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |
 | **220** | Convert purchased list items → inventory | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | Convert dialog with expiry date + optional location; telemetry tracking |
 | **230** | Offline-first verification suite | ⏳ Not Started | — | No verification suite in `app/test` |
 | **240** | Data export/delete (privacy baseline) | ✅ Complete | [#78](https://github.com/11895079/zerospoils/pull/78) | CSV/JSON export + delete-all with confirmation; BackupRestoreService; Settings → Privacy & Data section; telemetry events |
-| **250** | Telemetry instrumentation for core funnel | ⏳ In Review | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing) |
+| **250** | Telemetry instrumentation for core funnel | ✅ Complete | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing); merged |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
 | **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
 | **360** | Firebase integration (mobile tooling) | ⏳ Not Started | — | Crashlytics + Remote Config + FCM; implements M3/130 feature flags; Spark Plan (free tier) only |
