@@ -424,12 +424,17 @@ void main() {
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
-    // Give extra time for second item to be processed with applyToAll
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pumpAndSettle();
+    // Poll until apply-to-all has persisted both converted items.
+    // This avoids timing flakes in CI where async persistence can lag.
+    var attempts = 0;
+    List<Item> inventoryItems = await itemRepository.getAllItems();
+    while (inventoryItems.length < 2 && attempts < 20) {
+      await tester.pump(const Duration(milliseconds: 100));
+      inventoryItems = await itemRepository.getAllItems();
+      attempts++;
+    }
 
     expect(find.byKey(const Key('item_entry_sheet')), findsNothing);
-    final inventoryItems = await itemRepository.getAllItems();
     expect(inventoryItems.length, 2);
   });
 

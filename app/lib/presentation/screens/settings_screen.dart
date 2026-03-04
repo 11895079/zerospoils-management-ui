@@ -11,6 +11,8 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/notifications/notification_preferences.dart';
 import '../../core/notifications/notification_service.dart';
+import '../../core/feature_flags/feature_flag_key.dart';
+import '../../core/feature_flags/feature_flags_provider.dart';
 import '../di/service_locator.dart'
     show telemetryClientProvider, analyticsConsentProvider;
 import '../di/repository_providers.dart';
@@ -317,6 +319,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackAnalyticsConsentChange(ref, value),
               ),
             ),
+            // Feature-gated: Cloud Analytics Export (demonstrates feature flags)
+            ref
+                .watch(
+                  isFlagEnabledProvider(FeatureFlagKey.cloudAnalyticsExport),
+                )
+                .when(
+                  data: (enabled) => enabled
+                      ? _buildToggleTile(
+                          icon: Icons.cloud_upload,
+                          label: 'Cloud Analytics Export',
+                          subtitle: 'Send telemetry data to cloud',
+                          value: _analyticsConsent,
+                          onChanged: (value) => _setBool(
+                            key: 'cloud_analytics_export_enabled',
+                            value: value,
+                            onUpdate: () {},
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                  error: (error, stack) => const SizedBox.shrink(),
+                ),
             _buildLinkTile(
               icon: Icons.backup,
               label: 'Export My Data',

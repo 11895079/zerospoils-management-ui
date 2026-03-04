@@ -20,6 +20,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/feature_flags/feature_flag_key.dart';
+import '../../core/feature_flags/feature_flags_provider.dart';
 
 // Provider to persist filter state across tab switches
 final inventoryFilterProvider = StateProvider<InventoryFilterState>((ref) {
@@ -909,17 +911,33 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   _openAddItemSheet();
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.receipt_long),
-                title: const Text('Batch entry (receipts)'),
-                subtitle: const Text('Capture receipts and add many items'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  ref.read(telemetryClientProvider).enqueue({
-                    'name': 'inventory_add_menu_selected',
-                    'properties': {'action': 'receipt_batch'},
-                  });
-                  context.pushNamed('receipt-batch-capture');
+              // Gate batch receipt entry with feature flag
+              Consumer(
+                builder: (context, ref, child) {
+                  final batchPhotoEnabled = ref.watch(
+                    isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
+                  );
+                  return batchPhotoEnabled.when(
+                    data: (enabled) => enabled
+                        ? ListTile(
+                            leading: const Icon(Icons.receipt_long),
+                            title: const Text('Batch entry (receipts)'),
+                            subtitle: const Text(
+                              'Capture receipts and add many items',
+                            ),
+                            onTap: () {
+                              Navigator.of(ctx).pop();
+                              ref.read(telemetryClientProvider).enqueue({
+                                'name': 'inventory_add_menu_selected',
+                                'properties': {'action': 'receipt_batch'},
+                              });
+                              context.pushNamed('receipt-batch-capture');
+                            },
+                          )
+                        : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (error, stack) => const SizedBox.shrink(),
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.sm),
