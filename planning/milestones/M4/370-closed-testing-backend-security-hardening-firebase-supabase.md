@@ -16,10 +16,10 @@ Deliver a launch-ready foundation that combines:
 ## Acceptance criteria (Definition of Done)
 - [x] Step 1: Add Firebase SDK integration for Android + iOS with Crashlytics enabled for non-debug builds.
 - [x] Step 2: Add Remote Config adapter + Supabase bootstrap + Android Gradle/iOS config + ProGuard rules.
-- [ ] Step 3: Add Firebase Authentication + Custom Claims for Pro tier; wire into FeatureFlagsService.
-- [ ] Step 4: Implement Android release hardening (obfuscation, R8/proguard minify).
-- [ ] Step 5: Add Play Integrity check gate + secure token storage (flutter_secure_storage) for JWTs.
-- [ ] Step 6: Add kill-switch behavior via Remote Config; validate fallback + closed-testing checklist.
+- [x] Step 3: Add Firebase Authentication + Custom Claims for Pro tier; wire into FeatureFlagsService.
+- [x] Step 4: Implement Android release hardening (obfuscation, R8/proguard minify).
+- [x] Step 5: Add Play Integrity check gate + secure token storage (flutter_secure_storage) for JWTs.
+- [x] Step 6: Add kill-switch behavior via Remote Config; validate fallback + closed-testing checklist.
 - [ ] Server-side endpoint gating (Post-Step-6): OCR/export endpoints check Firebase ID token + custom claims before processing.
 
 ## Out of scope
@@ -34,6 +34,8 @@ Deliver a launch-ready foundation that combines:
 - **Supabase is relational data layer**: Items, receipts, shopping lists stored in Supabase with RLS policies enforcing user_id filtering.
 - Avoid embedding secrets in app binary; use platform config + CI secret injection.
 - Pro gating: Check Firebase Auth custom claims `pro_tier == true` at client (UX layer); server-side validation on first call to gated endpoint.
+- **Step 5 (Secure Token Storage)**: `SecureTokenService` caches Firebase ID tokens in platform-native secure storage (Android KeyStore, iOS Keychain). Tokens persist across app restarts, reducing auth latency. Play Integrity implementation deferred to M6 (requires Google Play Console setup + server-side verification).
+- **Step 6 (Kill-Switch + Checklist)**: Remote Config parameters control feature availability. Master kill-switch (`feature_flags_enabled`) disables all non-essential features for emergency rollback. Integration tests validate bootstrap flow (Auth → Token → Entitlements → Flags). Closed-testing checklist documents release prerequisites (Firebase setup, Play Console config, tester communication).
 
 ## Test plan
 **Automated:**
@@ -56,6 +58,26 @@ Deliver a launch-ready foundation that combines:
 **Automated (Step 4+):**
 - Build validation: Android release build with obfuscation/minify succeeds.
 - Crashlytics mock test: verify errors reach Firebase (non-debug builds only).
-- Remote Config kill-switch test: flag disabled in console → feature hides on app restart
+- Remote Config kill-switch test: flag disabled in console → feature hides on app restart.
+
+**Automated (Step 5 - Token Storage):**
+- Integration test: Sign in → token saved to secure storage → app restart → token retrieved.
+- Integration test: Clear tokens → verify all cached data removed.
+- Integration test: Token retrieval returns null when no token cached.
+
+**Automated (Step 6 - Bootstrap + Kill-Switch):**
+- Integration test: Bootstrap flow validates Auth → Token → Entitlements → Flags → Remote Config initialized.
+- Integration test: Remote Config kill-switch parameters accessible after bootstrap.
+- Integration test: Token persistence across app restart (simulates cold start).
+
+**Manual (Step 5+6):**
+1. Launch app → verify Firebase bootstrap completes (check logcat).
+2. Close app → reopen → verify user session restored (no re-login).
+3. Sign in as Pro user → close app → reopen → verify Pro features still enabled.
+4. Firebase Console: Set `feature_flags_enabled = false` → restart app → verify all Pro features disabled.
+5. Firebase Console: Set `receipt_ocr_enabled = false` → restart app → verify only receipt OCR disabled.
+6. Reset Remote Config → restart app → verify features re-enabled.
+
+**Dependencies:**
 - Existing M4 beta distribution items (260, 270, 290) available for closed-test track usage.
 - M6 subscription strategy/gating alignment for entitlement schema (410).

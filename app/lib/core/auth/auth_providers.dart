@@ -1,10 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firebase_auth_service.dart';
 import 'entitlements_service.dart';
+import 'secure_token_service.dart';
 
 /// Riverpod provider for FirebaseAuthService (singleton).
 final firebaseAuthServiceProvider = Provider((ref) {
   return FirebaseAuthService();
+});
+
+/// Riverpod provider for SecureTokenService (singleton).
+final secureTokenServiceProvider = Provider((ref) {
+  return SecureTokenService();
 });
 
 /// Riverpod provider for EntitlementsService (depends on auth service).
