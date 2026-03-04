@@ -11,9 +11,16 @@ import 'data/adapters/receipt_batch_adapter.dart';
 import 'domain/models/user_category.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/notifications/notification_service.dart';
+import 'core/bootstrap/bootstrap.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bootstrap Firebase services (telemetry, crash reporting, remote config)
+  await FirebaseBootstrapService.initialize();
+
+  // Bootstrap Supabase services (auth, entitlements)
+  await SupabaseBootstrapService.initialize();
 
   // Initialize Hive for local storage
   await Hive.initFlutter();

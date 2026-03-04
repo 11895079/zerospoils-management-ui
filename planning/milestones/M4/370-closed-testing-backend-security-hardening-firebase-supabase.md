@@ -3,8 +3,8 @@ Closed testing is starting soon, and public Play Store launch requires productio
 
 ## Goal
 Deliver a launch-ready foundation that combines:
-- Firebase mobile tooling (Crashlytics, Remote Config, optional FCM)
-- Supabase backend trust boundary (auth, RLS, entitlements)
+- Firebase (Crashlytics, Remote Config, Auth, Custom Claims for Pro tier)
+- Supabase (relational data storage with RLS, read-only for app)
 - Play Store hardening requirements (obfuscation, minification, integrity checks)
 
 ## Expected behavior
@@ -14,16 +14,13 @@ Deliver a launch-ready foundation that combines:
 - Android release artifacts are hardened for launch.
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Add Firebase SDK integration for Android + iOS with Crashlytics enabled for non-debug builds.
-- [ ] Add Remote Config adapter that feeds `FeatureFlagsService` remote overrides (no vendor lock in service layer).
-- [ ] Add Supabase integration (`supabase_flutter`) with authenticated session bootstrap.
-- [ ] Create `entitlements` model/path in backend contract and map it to feature flags (`cloud_sync`, `receipt_ocr`, etc.).
-- [ ] Enforce server-side authorization for at least one Pro endpoint (example: OCR or cloud export) using authenticated user + entitlement check.
-- [ ] Enable Android release hardening: Flutter obfuscation + split debug symbols + R8/proguard minify/shrink.
-- [ ] Add Play Integrity check gate for high-value actions (Pro endpoint calls/export), with graceful handling for failed attestation.
-- [ ] Add secure token handling path (platform-secure storage for session/refresh tokens; no plaintext storage in SharedPreferences).
-- [ ] Add kill-switch behavior via Remote Config for at least one feature flag and validate fallback behavior.
-- [ ] Document closed-testing release checklist (config parity, crash dashboard, rollout rollback steps, symbol upload process).
+- [x] Step 1: Add Firebase SDK integration for Android + iOS with Crashlytics enabled for non-debug builds.
+- [x] Step 2: Add Remote Config adapter + Supabase bootstrap + Android Gradle/iOS config + ProGuard rules.
+- [ ] Step 3: Add Firebase Authentication + Custom Claims for Pro tier; wire into FeatureFlagsService.
+- [ ] Step 4: Implement Android release hardening (obfuscation, R8/proguard minify).
+- [ ] Step 5: Add Play Integrity check gate + secure token storage (flutter_secure_storage) for JWTs.
+- [ ] Step 6: Add kill-switch behavior via Remote Config; validate fallback + closed-testing checklist.
+- [ ] Server-side endpoint gating (Post-Step-6): OCR/export endpoints check Firebase ID token + custom claims before processing.
 
 ## Out of scope
 - Full growth analytics/dashboard work beyond launch-critical telemetry.
@@ -33,28 +30,32 @@ Deliver a launch-ready foundation that combines:
 ## Implementation notes
 - Keep `FeatureFlagsService` precedence unchanged: `local_override > remote_override > default`.
 - For production, local overrides remain debug/internal only; release builds rely on remote/default.
-- Treat backend as source of truth for Pro access; client flags only control UX visibility.
-- Keep Firebase usage focused on mobile concerns (crash reporting, remote config, push). Keep product data/auth in Supabase.
+- **Firebase is primary auth**: Use Firebase Authentication + Custom Claims for Pro tier gating. Custom claims embedded in ID token (no extra RPC).
+- **Supabase is relational data layer**: Items, receipts, shopping lists stored in Supabase with RLS policies enforcing user_id filtering.
 - Avoid embedding secrets in app binary; use platform config + CI secret injection.
+- Pro gating: Check Firebase Auth custom claims `pro_tier == true` at client (UX layer); server-side validation on first call to gated endpoint.
 
 ## Test plan
 **Automated:**
 - Unit test: remote override adapter converts Firebase + Supabase entitlement payload into `Map<String, bool>` correctly.
 - Unit test: Pro entitlement false -> server request returns 403 for gated endpoint.
-- Unit test: Pro entitlement true -> gated endpoint succeeds.
-- Unit test: token persistence uses secure storage adapter (not SharedPreferences).
-- Integration test: startup bootstrap loads auth session, applies remote flags, and updates gated UI.
-- Build validation: Android release build command with obfuscation/minify succeeds in CI.
+- Unit test (Step 3):**
+- Unit test: FirebaseAuthService returns user UID and ID token.
+- Unit test: EntitlementsService extracts `pro_tier` custom claim from ID token.
+- Unit test: Pro entitlement false -> `isFlagEnabled('receipt_ocr')` returns false.
+- Unit test: Pro entitlement true -> `isFlagEnabled('receipt_ocr')` returns true.
+- Integration test: Startup flow: Firebase Auth → fetch ID token → extract claims → update feature flags → UI reflects Pro status.
 
-**Manual:**
-1. Install closed-test build on Android internal track; trigger test crash and verify Crashlytics event received.
-2. Toggle Remote Config flag off for a gated feature; relaunch app and verify feature hides without app update.
-3. Log in as non-Pro test user; attempt Pro flow and verify clear blocked state + no server-side success.
-4. Log in as Pro test user; verify same flow succeeds and telemetry event is recorded.
-5. Validate release artifact: inspect build config to confirm obfuscation + minify/shrink are enabled.
-6. Simulate integrity failure path and verify high-value action is blocked with user-safe messaging.
+**Manual (Step 3):**
+1. Log in as non-Pro user (Firebase Console: custom claims `pro_tier: false`).
+2. Verify OCR/batch photo capture disabled in UI (feature flags read false).
+3. Log in as Pro user (Firebase Console: custom claims `pro_tier: true`).
+4. Verify OCR/batch photo capture enabled in UI (feature flags read true).
+5. Change Firebase Console custom claims and restart app; flags update immediately (tied to ID token refresh).
 
-## Dependencies
-- M3/130 feature flags framework merged.
+**Automated (Step 4+):**
+- Build validation: Android release build with obfuscation/minify succeeds.
+- Crashlytics mock test: verify errors reach Firebase (non-debug builds only).
+- Remote Config kill-switch test: flag disabled in console → feature hides on app restart
 - Existing M4 beta distribution items (260, 270, 290) available for closed-test track usage.
 - M6 subscription strategy/gating alignment for entitlement schema (410).
