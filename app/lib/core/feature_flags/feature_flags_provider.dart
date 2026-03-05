@@ -19,8 +19,6 @@ final featureFlagsServiceProvider = FutureProvider<FeatureFlagsService>((
   ref,
 ) async {
   final prefs = await ref.watch(sharedPreferencesProvider.future);
-
-  // Remote overrides come from cached entitlements (Pro tier)
   // These are initialized during app bootstrap after Firebase Auth is ready
   Map<String, bool> getRemoteOverrides() {
     return ref.watch(getCachedEntitlementsProvider);
