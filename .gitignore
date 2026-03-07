@@ -27,3 +27,19 @@ Thumbs.db
 *.tmp
 *.bak
 .~*
+# Firebase & Secrets (exclude real configs from version control)
+app/android/app/google-services.json
+!app/android/app/google-services.json.placeholder
+app/ios/Runner/GoogleService-Info.plist
+!app/ios/Runner/GoogleService-Info.plist.placeholder
+.env
+.env.local
+.env.*.local
+
+# Secure storage & tokens
+app/lib/core/secure_storage/secrets.dart
+*.keystore
+
+# Debug symbols (large obfuscation artifacts)
+debug-info/
+*.symbols

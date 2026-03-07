@@ -10,11 +10,12 @@
 - Basic metrics dashboard (optional) (300)
 - Dark mode theme toggle (295)
 - Settings feedback entry (285)
+- Closed-testing backend and launch hardening (Firebase + Supabase + release security) (370)
 
-**Acceptance:** App distributed to 10-50 beta testers on iOS and Android; feedback mechanism working; crash reports visible; performance baseline established.
+**Acceptance:** App distributed to 10-50 beta testers on iOS and Android; feedback mechanism working; crash reports visible; performance baseline established; launch hardening checklist completed for production-ready release security.
 
 **Out of Scope:** Public launch, store listing copy, brand assets (deferred to M5).
 
-**Issues:** 260, 270, 280, 285, 290, 295, 300
+**Issues:** 260, 270, 280, 285, 290, 295, 300, 370
 
 **Dependencies:** M3 complete (all MVP features functional, telemetry instrumented).
