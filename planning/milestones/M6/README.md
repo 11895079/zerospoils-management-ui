@@ -30,3 +30,33 @@
 **Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500, 510
 
 **Dependencies:** M5 complete (public launch successful, user base established).
+
+---
+
+## M6 Implementation Status
+
+**Last Updated:** March 7, 2026 — **Progress:** 0/14 planned issues complete (0%)
+
+### Issues & Completion
+
+| Issue | Title | Status | PR | Notes |
+|-------|-------|--------|----|-------|
+| **185** | Full recipe suggestions (prioritize expiring items) | ⚠️ In Progress | — | Recipe suggestion artifacts exist, but full feature is not tracked complete in milestone status |
+| **410** | Subscription strategy + feature gating | ⏳ Not Started | — | No end-to-end subscription launch implementation marked complete |
+| **420** | In-app purchases (IAP) + entitlement storage | ⏳ Not Started | — | IAP pipeline not yet tracked complete |
+| **430** | Receipt capture UX + consent messaging | ⚠️ In Progress | — | Receipt and batch-capture foundations exist; Pro-tier capture UX and consent workflow remain open |
+| **440** | OCR integration spike (accuracy/cost/latency) | ⏳ Not Started | — | Spike report deliverable (`docs/pro/ocr-spike.md`) not present |
+| **450** | Receipt parsing with normalized line items + confidence | ⚠️ In Progress | — | Parser/domain foundations exist; full confidence-scored Pro parsing workflow remains open |
+| **460** | Receipt review UI + mapping rules | ⏳ Not Started | — | Pro review workflow completion not yet tracked |
+| **470** | Household accounts + shared household model | ⏳ Not Started | — | Household auth/sync model not yet implemented |
+| **475** | Data sync settings toggle + status | ⚠️ In Progress | — | Data Sync toggle row exists in Settings but is disabled (`Soon`) and not integrated with sync status |
+| **480** | Sync rules + conflict resolution | ⏳ Not Started | — | Conflict resolution implementation not yet tracked |
+| **490** | Advanced insights dashboard | ⏳ Not Started | — | Advanced Pro analytics dashboard not yet tracked |
+| **495** | Meal planning toggle in Settings | ⚠️ In Progress | — | Meal Planning toggle row exists in Settings but is disabled (`Soon`) |
+| **500** | Consent model for aggregated analytics export | ⚠️ In Progress | — | Analytics consent controls exist in Settings; full Pro consent/export model remains open |
+| **510** | AI category inference (Pro) | ⏳ Not Started | — | AI inference path for Pro item entry is not yet tracked complete |
+
+### Commentary
+
+- M6 has several foundational signals in the codebase (auth, receipt primitives, settings placeholders), but no issue is fully closed to milestone DoD yet.
+- Current state indicates architecture groundwork rather than delivered Pro-tier product readiness.
