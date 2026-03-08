@@ -50,10 +50,15 @@ void main() {
     });
 
     test('classify returns THIS_WEEK for items expiring tomorrow', () {
-      final tomorrow = DateTime.now().add(const Duration(days: 1));
+      // Use fixed date in summer (July) to avoid DST transition issues
+      final today = DateTime(2026, 7, 15);
+      final tomorrow = DateTime(2026, 7, 16);
       final item = createItemWithExpiry(tomorrow);
 
-      expect(ExpiryClassifier.classify(item), ExpiryBucket.thisWeek);
+      expect(
+        ExpiryClassifier.classify(item, now: today),
+        ExpiryBucket.thisWeek,
+      );
     });
 
     test('classify returns THIS_WEEK for items expiring in 3 days', () {
@@ -129,18 +134,15 @@ void main() {
     test(
       'classify handles boundary: 00:00 of tomorrow (should be THIS_WEEK)',
       () {
-        final now = DateTime.now();
-        final startOfTomorrow = DateTime(
-          now.year,
-          now.month,
-          now.day + 1,
-          0,
-          0,
-          0,
-        );
+        // Use fixed date in summer (July) to avoid DST transition issues
+        final today = DateTime(2026, 7, 15);
+        final startOfTomorrow = DateTime(2026, 7, 16, 0, 0, 0);
         final item = createItemWithExpiry(startOfTomorrow);
 
-        expect(ExpiryClassifier.classify(item), ExpiryBucket.thisWeek);
+        expect(
+          ExpiryClassifier.classify(item, now: today),
+          ExpiryBucket.thisWeek,
+        );
       },
     );
 

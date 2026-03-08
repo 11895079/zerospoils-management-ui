@@ -6,7 +6,7 @@ This guide explains how to set up **release signing for Android APKs** to enable
 
 ## The Problem
 
-Currently, the ZeroSpoils Android app uses **debug signing keys** for release builds (see `app/android/app/build.gradle.kts` line 37). This causes:
+If Android release signing is not configured with a persistent keystore, release APKs can end up debug-signed and cause update incompatibilities. In `app/android/app/build.gradle.kts`, release signing now uses `key.properties` when present and can be explicitly gated for local-only fallback. The risk without stable signing is:
 
 - Every new build has a different signature
 - Android won't allow updating an app with a different signature
@@ -171,12 +171,13 @@ The `app/android/app/build.gradle.kts` file is configured to:
 1. **Check for key.properties file**
 2. **Load signing credentials** if file exists
 3. **Use release signing** for release builds (when configured)
-4. **Fall back to debug signing** if key.properties is missing
+4. **Fail release tasks by default** if `key.properties` is missing
+5. **Allow explicit local fallback** only when `-PALLOW_DEBUG_SIGNING_FOR_RELEASE=true` is set
 
 This allows:
 - ✅ Developers without keystore can still build debug APKs
 - ✅ Release builds automatically use proper signing when configured
-- ✅ No code changes needed after initial setup
+- ✅ Accidental distributable debug-signed release builds are blocked by default
 
 ## Distributing Your APK
 
@@ -349,12 +350,17 @@ See `planning/issues/030-set-up-build-pipelines-android-ios-on-tags.md` for full
 
 ### "key.properties file not found"
 
-**Symptom:** Build succeeds but uses debug signing
+**Symptom:** Release build fails with missing `key.properties`
 
 **Solution:**
 1. Create `app/android/key.properties` from template
 2. Fill in your keystore details
 3. Rebuild: `flutter build apk --release`
+
+**Local-only override (not for distribution):**
+```bash
+flutter build apk --release -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
+```
 
 ### "Keystore file not found"
 

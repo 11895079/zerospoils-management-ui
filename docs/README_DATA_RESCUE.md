@@ -8,7 +8,7 @@ Hey! Here's your complete plan to save your data and fix the update issue perman
 
 ## 🚨 IMMEDIATE ACTION (Save Your Current Data)
 
-Your current app version doesn't have the backup feature built in, so we need to manually extract your data from your phone.
+If your installed version does not expose backup/restore in Settings (or you are not sure it worked), manually extract your data from your phone before uninstalling.
 
 ### What You'll Need:
 - ⏱️ Time: 20-30 minutes (first time)
@@ -138,16 +138,16 @@ The new app version has a built-in backup feature in Settings.
 1. **Backup your data (before each update):**
    - Open ZeroSpoils app
    - Tap Settings (gear icon)
-   - Scroll to "Data Management"
-   - Tap "Backup Data"
+   - Scroll to "PRIVACY & DATA"
+   - Tap "Export My Data"
    - Save to Downloads or Google Drive
    - **Store this file safely!**
 
 2. **Restore if needed:**
    - Open ZeroSpoils app
    - Tap Settings
-   - Scroll to "Data Management"
-   - Tap "Restore from Backup"
+   - Scroll to "PRIVACY & DATA"
+   - Tap "Restore Backup"
    - Select your JSON backup file
    - Confirm restore
 
@@ -195,7 +195,7 @@ Complete these in order:
 1. Open the app and navigate through a few screens
 2. Force close the app
 3. Try the backup command again
-4. Alternative: Use `adb backup` method (see MANUAL_DATA_BACKUP.md)
+4. Alternative (legacy only): Use `adb backup` method if your device still supports it (see MANUAL_DATA_BACKUP.md)
 
 ### Can't connect phone via ADB
 
@@ -234,7 +234,7 @@ Complete these in order:
 ## 📚 All Documentation Available
 
 1. **[`APK_UPDATE_FIX.md`](./APK_UPDATE_FIX.md)** - Quick overview (you are here)
-2. **[`MANUAL_DATA_BACKUP.md`](./MANUAL_DATA_BACKUP.md)** - ADB backup/restore (for current version)
+2. **[`MANUAL_DATA_BACKUP.md`](./MANUAL_DATA_BACKUP.md)** - ADB pull/run-as recovery (legacy adb backup noted)
 3. **[`ANDROID_SIGNING_GUIDE.md`](./ANDROID_SIGNING_GUIDE.md)** - Complete signing setup guide
 4. **[`DATA_BACKUP_GUIDE.md`](./DATA_BACKUP_GUIDE.md)** - Built-in backup feature guide
 
@@ -243,9 +243,8 @@ Complete these in order:
 ## 💡 Why This Happened
 
 **The Problem:**
-- App was using debug signing keys for release builds
-- Debug keys are auto-generated and change with each build
-- Android sees different keys as different apps
+- Without stable release signing, APK signatures can differ between builds
+- Different signatures make Android treat builds as different apps
 - Different apps can't update each other (must uninstall first)
 
 **The Fix:**

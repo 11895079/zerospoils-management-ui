@@ -11,5 +11,5 @@
 
 storePassword=YOUR_KEYSTORE_PASSWORD
 keyPassword=YOUR_KEY_PASSWORD
-keyAlias=YOUR_KEY_ALIAS
+keyAlias=zerospoils
 storeFile=/path/to/your/keystore.jks

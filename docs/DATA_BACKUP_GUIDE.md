@@ -14,21 +14,21 @@ When installing a new APK build that has a different signing key, Android requir
 
 1. Open ZeroSpoils app
 2. Tap **Settings** (gear icon in bottom navigation)
-3. Scroll to **Data Management** section
-4. Tap **"Backup Data"** button
+3. Scroll to **PRIVACY & DATA** section
+4. Tap **"Export My Data"**
 5. Choose where to save the backup file:
    - **Recommended:** Save to Downloads folder or Google Drive
    - **Default:** App will save to app documents directory
 6. Wait for confirmation: "Backup saved to: [path]"
 7. **IMPORTANT:** Note or share this backup file location
 
-The backup file is named: `zerospoils_backup_YYYY-MM-DD.json`
+The export file name starts with `zerospoils_export` and ends with `.json` (for example, `zerospoils_export_2026-03-08.json`).
 
 ### 2. Locate Your Backup File
 
 The backup is saved as a JSON file. Default locations:
 - **If you chose a location:** Where you saved it
-- **If you used default:** `/storage/emulated/0/Android/data/com.zerospoils.zerospoils/files/zerospoils_backup_[timestamp].json`
+- **If you used default:** `/storage/emulated/0/Android/data/com.zerospoils.zerospoils/files/zerospoils_export*.json`
 
 **⚠️ CRITICAL:** The default app documents directory is deleted when you uninstall. **Before uninstalling:**
 - Copy the backup file to a safe location like:
@@ -55,10 +55,10 @@ Now it's safe to uninstall the old version:
 
 1. Open ZeroSpoils app (new version)
 2. Tap **Settings** in bottom navigation
-3. Scroll to **Data Management** section
-4. Tap **"Restore from Backup"** button
+3. Scroll to **PRIVACY & DATA** section
+4. Tap **"Restore Backup"**
 5. Browse to where you saved your backup file
-6. Select the `zerospoils_backup_[timestamp].json` file
+6. Select your `zerospoils_export*.json` file
 7. Review the restore preview dialog:
    - Shows number of items to restore
    - Shows if migration is needed
@@ -174,7 +174,7 @@ If you see "Migration required from version X", this means:
 ## Automatic Backup Tracking
 
 The app automatically tracks your last backup:
-- **Last backup time:** Shown in Settings → Data Management
+- **Last backup time:** Shown in Settings → PRIVACY & DATA
 - **Backup file size:** Displayed in KB
 - **File path:** Full path to backup file
 

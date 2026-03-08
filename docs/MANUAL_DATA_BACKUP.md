@@ -140,7 +140,9 @@ adb pull /data/data/com.zerospoils.zerospoils/app_flutter/ .
 - `_metadata.lock` - Lock file (not critical)
 - Possibly other `.hive` files depending on app version
 
-**Option 2: Using ADB Backup (If Pull Fails)**
+**Option 2: Using ADB Backup (Legacy fallback; often unavailable on modern Android)**
+
+`adb backup`/`adb restore` is deprecated and disabled on many devices (commonly Android 12+). Prefer `adb pull`, `run-as`, or the temporary-storage copy method first.
 
 ```bash
 # Create a backup archive
@@ -163,7 +165,7 @@ ls -lh ~/zerospoils-backup/
 # Note the file sizes - items.hive should be > 0 bytes if you have data
 ```
 
-**CRITICAL:** If `items.hive` is 0 bytes or missing, the backup failed. Try again or use Option 2.
+**CRITICAL:** If `items.hive` is 0 bytes or missing, the backup failed. Try `run-as`/temporary-storage methods first; use Option 2 only if your device still supports it.
 
 ### Part 5: Safely Uninstall Old App
 
@@ -248,9 +250,11 @@ adb shell rm /sdcard/Download/items.hive
 adb shell rm /sdcard/Download/_metadata.hive
 ```
 
-#### Method 3: Restore from ADB Backup Archive
+#### Method 3: Restore from ADB Backup Archive (Legacy)
 
 If you used `adb backup` to create `zerospoils-backup.ab`:
+
+> Compatibility note: this restore flow may fail on newer Android versions where ADB backup/restore is blocked.
 
 ```bash
 # Restore the backup
@@ -294,7 +298,9 @@ adb pull /sdcard/Download/items.hive ~/zerospoils-backup/
 adb shell rm /sdcard/Download/items.hive
 ```
 
-**Solution 2: Use adb backup**
+**Solution 2: Use adb backup (legacy fallback)**
+
+This may be unsupported on newer Android versions.
 ```bash
 adb backup -f zerospoils-backup.ab -noapk com.zerospoils.zerospoils
 ```
@@ -407,8 +413,8 @@ adb shell run-as com.zerospoils.zerospoils cp /sdcard/Download/items.hive app_fl
 Once you have the new app version with backup feature installed and data restored:
 
 1. **Test the built-in backup feature:**
-   - Open Settings → Data Management
-   - Tap "Backup Data"
+   - Open Settings -> PRIVACY & DATA
+   - Tap "Export My Data"
    - Save backup to Downloads or Google Drive
 
 2. **Verify backup works:**

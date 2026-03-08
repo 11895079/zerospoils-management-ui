@@ -366,14 +366,14 @@ void main() {
 
   group('NotificationService - boundary cases', () {
     test('expiry date exactly 1 day away schedules notification today', () {
-      final now = DateTime.now();
-      final tomorrow = DateTime(now.year, now.month, now.day + 1);
-      final scheduleTime = notificationService.computeScheduleTime(tomorrow);
+      // Use fixed date to avoid timezone and date boundary issues
+      final expiryDate = DateTime(2026, 3, 10); // March 10, 2026
+      final scheduleTime = notificationService.computeScheduleTime(expiryDate);
 
-      // Should be today at 9am
-      expect(scheduleTime.year, now.year);
-      expect(scheduleTime.month, now.month);
-      expect(scheduleTime.day, now.day);
+      // With default lead time of 1 day, should schedule March 9 at 9am
+      expect(scheduleTime.year, 2026);
+      expect(scheduleTime.month, 3);
+      expect(scheduleTime.day, 9);
       expect(scheduleTime.hour, 9);
     });
 

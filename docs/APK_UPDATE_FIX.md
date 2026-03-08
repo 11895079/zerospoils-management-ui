@@ -17,7 +17,7 @@ You need to do **TWO things**:
 
 ### 1. Preserve Your Existing Data (Immediate Need)
 
-**Your current installed app doesn't have the backup feature**, so you need to manually extract the data:
+**If your installed build doesn't have backup/restore options under `Settings -> PRIVACY & DATA`**, you'll need to manually extract the data:
 
 📖 **Follow this guide:** [`docs/MANUAL_DATA_BACKUP.md`](./MANUAL_DATA_BACKUP.md)
 
@@ -67,9 +67,9 @@ Once you have the new app version installed with data restored:
 
 ### Use Built-in Backup Feature (Going Forward)
 
-The new app version has a **Settings → Data Management** section with:
-- ✅ **Backup Data** button → Exports to JSON file
-- ✅ **Restore from Backup** button → Imports JSON file
+The app has a **Settings -> PRIVACY & DATA** section with:
+- ✅ **Export My Data** tile -> Exports to JSON file
+- ✅ **Restore Backup** tile -> Imports JSON file
 
 📖 **See:** [`docs/DATA_BACKUP_GUIDE.md`](./DATA_BACKUP_GUIDE.md) for details
 

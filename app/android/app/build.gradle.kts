@@ -1,3 +1,5 @@
+import org.gradle.api.GradleException
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -6,12 +8,34 @@ plugins {
     // Firebase integration for cloud telemetry and remote config
     id("com.google.gms.google-services")
 }
+
 // Load keystore properties from key.properties file (if it exists)
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = java.util.Properties()
+val requiredKeystoreKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+val allowDebugSigningForRelease = providers
+    .gradleProperty("ALLOW_DEBUG_SIGNING_FOR_RELEASE")
+    .orNull
+    ?.toBooleanStrictOrNull() == true
+val isReleaseTaskRequested = gradle.startParameter.taskNames.any {
+    it.contains("Release", ignoreCase = true)
+}
 
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+    keystorePropertiesFile.inputStream().use { input ->
+        keystoreProperties.load(input)
+    }
+
+    val missingKeys = requiredKeystoreKeys.filter { key ->
+        keystoreProperties.getProperty(key).isNullOrBlank()
+    }
+
+    if (missingKeys.isNotEmpty()) {
+        throw GradleException(
+            "key.properties is missing required entries: ${missingKeys.joinToString(", ")}. " +
+                "Required keys: ${requiredKeystoreKeys.joinToString(", ")}."
+        )
+    }
 }
 
 
@@ -38,29 +62,36 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        // Configure release signing if key.properties exists
-        signingConfigs {
-            if (keystorePropertiesFile.exists()) {
-                create("release") {
-                    keyAlias = keystoreProperties["keyAlias"] as String
-                    keyPassword = keystoreProperties["keyPassword"] as String
-                    storeFile = file(keystoreProperties["storeFile"] as String)
-                    storePassword = keystoreProperties["storePassword"] as String
-                }
+    }
+
+    // Configure release signing only when key.properties is present and complete.
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
-
     }
 
     buildTypes {
         release {
-            // Use release signing config if available, otherwise fall back to debug
-            // This allows:
-            // - Proper release signing when key.properties is configured
-            // - Debug signing for developers without keystore (for testing)
-            // See docs/ANDROID_SIGNING_GUIDE.md for setup instructions
             signingConfig = if (keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
+            } else if (allowDebugSigningForRelease) {
+                logger.warn(
+                    "Building release with DEBUG signing because key.properties is missing and " +
+                        "ALLOW_DEBUG_SIGNING_FOR_RELEASE=true. Do not distribute this APK."
+                )
+                signingConfigs.getByName("debug")
+            } else if (isReleaseTaskRequested) {
+                throw GradleException(
+                    "Missing app/android/key.properties for release signing. " +
+                        "Configure a release keystore, or set -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true " +
+                        "for local-only testing."
+                )
             } else {
                 signingConfigs.getByName("debug")
             }
