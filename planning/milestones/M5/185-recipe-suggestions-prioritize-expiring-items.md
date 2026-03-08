@@ -1,4 +1,26 @@
 ```markdown
+## ⚠️ DEFERRED TO M6 PRO TIER — LLM Infrastructure Required
+
+**Decision (March 7, 2026):** Recipe suggestions deferred from M5 (public launch) to M6 (Pro tier) to enable proper LLM-powered personalization. No half-measures; if we're going to invest in recipes, they should be premium-quality with AI assistants (local on-device or cloud).
+
+**Rationale:**
+- Bundled recipes + fuzzy matching (free tier) = low differentiation, not worth effort
+- LLM-powered suggestions (Pro tier) = proper personalization, justifies paywall
+- M5 focuses on free-tier engagement drivers: Smart Replenishment (155) + Weekly Streaks (160)
+
+**M6 Pro Tier Vision:**
+- Chef AI assistant with meal planning
+- Cloud recipe catalog (1000+ recipes, updated weekly)
+- Personalized suggestions based on dietary preferences + usage patterns
+- Push notifications for expiring-item recipes
+- Tiered payment plan TBD (base Pro vs advanced AI features)
+
+See M6 milestone for implementation details once Pro tier infrastructure is ready.
+
+---
+
+## Original Spec (Archived for M6 Planning)
+
 ## Context
 Vision mentions recipe suggestions that prioritise soon‑to‑expire items; this is a post‑MVP feature. This issue defines the **full production feature** after POC validation (see M6/185-recipe-suggestions-poc.md for the initial lightweight implementation).
 
