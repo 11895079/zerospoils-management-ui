@@ -1,0 +1,15 @@
+# Android Release Signing Configuration
+#
+# IMPORTANT: This is a TEMPLATE file. Copy it to 'key.properties' and fill in your values.
+# The actual 'key.properties' file is gitignored to protect your keystore credentials.
+#
+# Steps to set up:
+# 1. Copy this file: cp key.properties.template key.properties
+# 2. Generate a keystore (see docs/ANDROID_SIGNING_GUIDE.md)
+# 3. Fill in the values below with your keystore information
+# 4. NEVER commit key.properties to git (it's in .gitignore)
+
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=zerospoils
+storeFile=/path/to/your/keystore.jks
