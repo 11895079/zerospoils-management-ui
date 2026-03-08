@@ -137,6 +137,43 @@ git checkout -b feature/item-inventory
 5. GitHub Actions builds APK, AAB, IPA → uploads artifacts + creates draft release
 
 **Full guide:** See [docs/release.md](docs/release.md) for versioning strategy, code signing setup, and troubleshooting.
+## Android Release Signing & Data Backup
+
+### Release Signing Configuration
+
+To build release APKs that can update without requiring uninstall (preserving user data):
+
+1. **Generate keystore** (one-time setup):
+   ```bash
+   keytool -genkey -v -keystore ~/zerospoils-release-key.jks \
+     -alias zerospoils -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. **Configure signing**:
+   ```bash
+   cd app/android
+   cp key.properties.template key.properties
+   # Edit key.properties with your keystore credentials
+   ```
+
+3. **Build release APK**:
+   ```bash
+   cd app
+   flutter build apk --release
+   ```
+
+**See:** [docs/ANDROID_SIGNING_GUIDE.md](docs/ANDROID_SIGNING_GUIDE.md) for complete setup guide
+
+### Data Backup (For Testing)
+
+If you need to preserve data when updating between differently-signed builds:
+
+- **Quick reference**: [docs/APK_UPDATE_FIX.md](docs/APK_UPDATE_FIX.md)
+- **Manual ADB backup**: [docs/MANUAL_DATA_BACKUP.md](docs/MANUAL_DATA_BACKUP.md)
+- **Complete walkthrough**: [docs/README_DATA_RESCUE.md](docs/README_DATA_RESCUE.md)
+
+Once on a properly signed build, future updates work smoothly without data loss.
+
 
 ## References
 - [planning/AGENTS.md](planning/AGENTS.md) – AI coding agent instructions
