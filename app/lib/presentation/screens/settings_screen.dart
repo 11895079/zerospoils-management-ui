@@ -3,6 +3,7 @@ library;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -149,7 +150,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        st,
+        reason: 'settings_export_failed',
+        fatal: false,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -244,7 +251,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         );
       }
-    } catch (e) {
+    } catch (e, st) {
+      await FirebaseCrashlytics.instance.recordError(
+        e,
+        st,
+        reason: 'settings_restore_failed',
+        fatal: false,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

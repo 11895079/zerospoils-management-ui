@@ -32,6 +32,14 @@ Run this command on your development machine:
 keytool -genkey -v -keystore ~/zerospoils-release-key.jks -alias zerospoils -keyalg RSA -keysize 2048 -validity 10000
 ```
 
+On Windows PowerShell, use an absolute path (or `$HOME`) instead of `~`:
+
+```powershell
+keytool -genkey -v -keystore "$HOME\\zerospoils-release-key.jks" -alias zerospoils -keyalg RSA -keysize 2048 -validity 10000
+```
+
+**Important:** the extension is `.jks` (not `.jsk`).
+
 **You will be prompted for:**
 - Keystore password (choose a strong password)
 - Key password (can be same as keystore password)
@@ -124,6 +132,17 @@ keytool -genkey -v \
   -validity 10000
 ```
 
+Windows PowerShell equivalent:
+
+```powershell
+keytool -genkey -v `
+   -keystore "$HOME\\zerospoils-release-key.jks" `
+   -alias zerospoils `
+   -keyalg RSA `
+   -keysize 2048 `
+   -validity 10000
+```
+
 **Parameters:**
 - `-keystore`: Where to save keystore file
 - `-alias`: Friendly name for the key (used in key.properties)
@@ -145,6 +164,18 @@ keytool -genkeypair -v \
   -storetype JKS
 ```
 
+Windows PowerShell equivalent:
+
+```powershell
+keytool -genkeypair -v `
+   -keystore "$HOME\\zerospoils-release-key.jks" `
+   -alias zerospoils `
+   -keyalg RSA `
+   -keysize 4096 `
+   -validity 25000 `
+   -storetype JKS
+```
+
 **Differences:**
 - `4096-bit key` instead of 2048 (more secure)
 - `25000 days validity` (~68 years)
@@ -156,6 +187,12 @@ Check keystore details:
 
 ```bash
 keytool -list -v -keystore ~/zerospoils-release-key.jks
+```
+
+Windows PowerShell:
+
+```powershell
+keytool -list -v -keystore "$HOME\\zerospoils-release-key.jks"
 ```
 
 Shows:

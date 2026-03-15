@@ -1,4 +1,5 @@
 import org.gradle.api.GradleException
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -11,7 +12,7 @@ plugins {
 
 // Load keystore properties from key.properties file (if it exists)
 val keystorePropertiesFile = rootProject.file("key.properties")
-val keystoreProperties = java.util.Properties()
+val keystoreProperties = Properties()
 val requiredKeystoreKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
 val allowDebugSigningForRelease = providers
     .gradleProperty("ALLOW_DEBUG_SIGNING_FOR_RELEASE")
@@ -119,6 +120,10 @@ configurations.all {
 }
 
 dependencies {
+    // Keep Firebase Android SDK versions aligned when adding direct Firebase deps.
+    implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("com.google.android.play:core:1.10.3")
     implementation("com.google.mlkit:text-recognition-chinese:16.0.1")

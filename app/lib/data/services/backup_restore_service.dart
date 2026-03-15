@@ -138,118 +138,126 @@ class BackupRestoreService {
   /// Export all data to JSON file
   Future<BackupResult> exportToJson(String filePath) async {
     telemetry?.trackBackupStarted();
+    try {
+      final itemsBox = await _openBoxIfNeeded<Item>('items');
+      final categoriesBox = await _openBoxIfNeeded<UserCategory>(
+        'user_categories',
+      );
+      final items = itemsBox.values.toList();
+      final categories = categoriesBox.values.toList();
+      final appVersion = await _getAppVersion();
 
-    final itemsBox = await _openBoxIfNeeded<Item>('items');
-    final categoriesBox = await _openBoxIfNeeded<UserCategory>(
-      'user_categories',
-    );
-    final items = itemsBox.values.toList();
-    final categories = categoriesBox.values.toList();
-    final appVersion = await _getAppVersion();
+      final metadata = BackupMetadata(
+        backupVersion: _backupVersion,
+        schemaVersion: _currentSchemaVersion,
+        appVersion: appVersion,
+        exportedAt: DateTime.now(),
+        itemCount: items.length,
+        categoryCount: categories.length,
+      );
 
-    final metadata = BackupMetadata(
-      backupVersion: _backupVersion,
-      schemaVersion: _currentSchemaVersion,
-      appVersion: appVersion,
-      exportedAt: DateTime.now(),
-      itemCount: items.length,
-      categoryCount: categories.length,
-    );
+      final settings = await _readSettings();
 
-    final settings = await _readSettings();
+      final backup = {
+        'metadata': metadata.toJson(),
+        'data': {
+          'items': items.map((item) => _serializeItem(item)).toList(),
+          'categories': categories
+              .map((category) => _serializeUserCategory(category))
+              .toList(),
+          'locations': [],
+          'batches': [],
+          'events': [],
+          'attachments': [],
+          'settings': settings,
+        },
+      };
 
-    final backup = {
-      'metadata': metadata.toJson(),
-      'data': {
-        'items': items.map((item) => _serializeItem(item)).toList(),
-        'categories': categories
-            .map((category) => _serializeUserCategory(category))
-            .toList(),
-        'locations': [],
-        'batches': [],
-        'events': [],
-        'attachments': [],
-        'settings': settings,
-      },
-    };
+      final jsonString = const JsonEncoder.withIndent('  ').convert(backup);
+      final file = File(filePath);
+      await file.writeAsString(jsonString);
+      final sizeBytes = await file.length();
 
-    final jsonString = const JsonEncoder.withIndent('  ').convert(backup);
-    final file = File(filePath);
-    await file.writeAsString(jsonString);
-    final sizeBytes = await file.length();
+      telemetry?.trackBackupSucceeded(
+        sizeBytes: sizeBytes,
+        itemCount: metadata.itemCount,
+        appVersion: metadata.appVersion,
+      );
 
-    telemetry?.trackBackupSucceeded(
-      sizeBytes: sizeBytes,
-      itemCount: metadata.itemCount,
-      appVersion: metadata.appVersion,
-    );
-
-    return BackupResult(
-      success: true,
-      filePath: filePath,
-      sizeBytes: sizeBytes,
-      metadata: metadata,
-    );
+      return BackupResult(
+        success: true,
+        filePath: filePath,
+        sizeBytes: sizeBytes,
+        metadata: metadata,
+      );
+    } catch (e) {
+      telemetry?.trackBackupFailed(reason: e.runtimeType.toString());
+      rethrow;
+    }
   }
 
   /// Export inventory data to CSV file (human-readable format)
   Future<BackupResult> exportToCsv(String filePath) async {
     telemetry?.trackBackupStarted();
+    try {
+      final itemsBox = await _openBoxIfNeeded<Item>('items');
+      final items = itemsBox.values.toList();
+      final appVersion = await _getAppVersion();
 
-    final itemsBox = await _openBoxIfNeeded<Item>('items');
-    final items = itemsBox.values.toList();
-    final appVersion = await _getAppVersion();
-
-    // Build CSV with headers
-    final buffer = StringBuffer();
-    buffer.writeln(
-      'ID,Name,Category,Expiry Date,Prepared Date,Purchase Price,Location,Status,Created At,Updated At',
-    );
-
-    for (final item in items) {
-      final id = _escapeCSVValue(item.id);
-      final name = _escapeCSVValue(item.name);
-      final category = _escapeCSVValue(
-        item.customCategoryName ?? item.category.displayName,
-      );
-      final expiryDate = item.expiryDate?.toString().split(' ')[0] ?? '';
-      final preparedDate = item.preparedDate?.toString().split(' ')[0] ?? '';
-      final price = item.purchasePrice?.toStringAsFixed(2) ?? '';
-      final location = _escapeCSVValue(item.location.name);
-      final status = item.status.name;
-      final createdAt = item.createdAt.toString().split('.')[0];
-      final updatedAt = item.updatedAt.toString().split('.')[0];
-
+      // Build CSV with headers
+      final buffer = StringBuffer();
       buffer.writeln(
-        '$id,$name,$category,$expiryDate,$preparedDate,$price,$location,$status,$createdAt,$updatedAt',
+        'ID,Name,Category,Expiry Date,Prepared Date,Purchase Price,Location,Status,Created At,Updated At',
       );
+
+      for (final item in items) {
+        final id = _escapeCSVValue(item.id);
+        final name = _escapeCSVValue(item.name);
+        final category = _escapeCSVValue(
+          item.customCategoryName ?? item.category.displayName,
+        );
+        final expiryDate = item.expiryDate?.toString().split(' ')[0] ?? '';
+        final preparedDate = item.preparedDate?.toString().split(' ')[0] ?? '';
+        final price = item.purchasePrice?.toStringAsFixed(2) ?? '';
+        final location = _escapeCSVValue(item.location.name);
+        final status = item.status.name;
+        final createdAt = item.createdAt.toString().split('.')[0];
+        final updatedAt = item.updatedAt.toString().split('.')[0];
+
+        buffer.writeln(
+          '$id,$name,$category,$expiryDate,$preparedDate,$price,$location,$status,$createdAt,$updatedAt',
+        );
+      }
+
+      final csvString = buffer.toString();
+      final file = File(filePath);
+      await file.writeAsString(csvString);
+      final sizeBytes = await file.length();
+
+      final metadata = BackupMetadata(
+        backupVersion: _backupVersion,
+        schemaVersion: _currentSchemaVersion,
+        appVersion: appVersion,
+        exportedAt: DateTime.now(),
+        itemCount: items.length,
+      );
+
+      telemetry?.trackBackupSucceeded(
+        sizeBytes: sizeBytes,
+        itemCount: metadata.itemCount,
+        appVersion: metadata.appVersion,
+      );
+
+      return BackupResult(
+        success: true,
+        filePath: filePath,
+        sizeBytes: sizeBytes,
+        metadata: metadata,
+      );
+    } catch (e) {
+      telemetry?.trackBackupFailed(reason: e.runtimeType.toString());
+      rethrow;
     }
-
-    final csvString = buffer.toString();
-    final file = File(filePath);
-    await file.writeAsString(csvString);
-    final sizeBytes = await file.length();
-
-    final metadata = BackupMetadata(
-      backupVersion: _backupVersion,
-      schemaVersion: _currentSchemaVersion,
-      appVersion: appVersion,
-      exportedAt: DateTime.now(),
-      itemCount: items.length,
-    );
-
-    telemetry?.trackBackupSucceeded(
-      sizeBytes: sizeBytes,
-      itemCount: metadata.itemCount,
-      appVersion: metadata.appVersion,
-    );
-
-    return BackupResult(
-      success: true,
-      filePath: filePath,
-      sizeBytes: sizeBytes,
-      metadata: metadata,
-    );
   }
 
   /// Escape CSV values (handle commas, quotes, newlines)

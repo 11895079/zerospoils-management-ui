@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "kitName": "project-bootstrap-prompt-kit",
+  "prompts": [
+    {
+      "id": "orchestrator.init.v1",
+      "title": "Master Orchestrator",
+      "file": "../00-master-orchestrator.md",
+      "phase": "intake-planning",
+      "requiredInputs": [
+        "project.name",
+        "project.type",
+        "project.businessObjective",
+        "docs.vision",
+        "docs.prd"
+      ],
+      "recommendedInputs": [
+        "docs.milestones",
+        "docs.architectureNotes",
+        "docs.kpiBaseline",
+        "docs.releaseOps"
+      ],
+      "dependsOn": [],
+      "outputs": [
+        "projectCharter",
+        "roadmap",
+        "riskRegister",
+        "architectureDirection",
+        "qualityStrategy",
+        "performanceStrategy",
+        "documentationGapReport"
+      ]
+    },
+    {
+      "id": "lifecycle.discovery.v1",
+      "title": "Discovery Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "discovery",
+      "requiredInputs": [
+        "project.context"
+      ],
+      "dependsOn": [
+        "orchestrator.init.v1"
+      ],
+      "outputs": [
+        "userSegments",
+        "valueHypothesis",
+        "discoveryBacklog"
+      ]
+    },
+    {
+      "id": "lifecycle.planning.v1",
+      "title": "Planning Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "planning",
+      "requiredInputs": [
+        "discovery.outputs"
+      ],
+      "dependsOn": [
+        "lifecycle.discovery.v1"
+      ],
+      "outputs": [
+        "milestonePlan",
+        "wbs",
+        "criticalPath",
+        "reportingTemplate"
+      ]
+    },
+    {
+      "id": "lifecycle.architecture.v1",
+      "title": "Architecture Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "architecture",
+      "requiredInputs": [
+        "requirements.functional",
+        "requirements.nonFunctional"
+      ],
+      "dependsOn": [
+        "lifecycle.planning.v1"
+      ],
+      "outputs": [
+        "architectureDecision",
+        "decisionMatrix",
+        "adrList"
+      ]
+    },
+    {
+      "id": "lifecycle.implementation.v1",
+      "title": "Implementation Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "implementation",
+      "requiredInputs": [
+        "architecture.approved",
+        "backlog.milestone"
+      ],
+      "dependsOn": [
+        "lifecycle.architecture.v1"
+      ],
+      "outputs": [
+        "sprintTasks",
+        "testPlan",
+        "telemetryPlan",
+        "rolloutPlan"
+      ]
+    },
+    {
+      "id": "lifecycle.validation.v1",
+      "title": "Validation Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "validation-release",
+      "requiredInputs": [
+        "implementation.summary",
+        "quality.metrics",
+        "performance.metrics"
+      ],
+      "dependsOn": [
+        "lifecycle.implementation.v1"
+      ],
+      "outputs": [
+        "releaseReadiness",
+        "qualityGapAnalysis",
+        "goNoGoRecommendation"
+      ]
+    },
+    {
+      "id": "lifecycle.postrelease.v1",
+      "title": "Post Release Prompt",
+      "file": "../01-lifecycle-prompts.md",
+      "phase": "operations-optimization",
+      "requiredInputs": [
+        "telemetry.usage",
+        "operations.incidents",
+        "kpis.actualVsTarget"
+      ],
+      "dependsOn": [
+        "lifecycle.validation.v1"
+      ],
+      "outputs": [
+        "impactReview",
+        "optimizationBacklog",
+        "nextMilestoneRecommendations"
+      ]
+    },
+    {
+      "id": "governance.weekly.v1",
+      "title": "Governance Prompt Set",
+      "file": "../03-tracking-and-governance-prompts.md",
+      "phase": "governance",
+      "requiredInputs": [
+        "scorecard.current",
+        "risks.current",
+        "milestones.current"
+      ],
+      "dependsOn": [
+        "lifecycle.planning.v1"
+      ],
+      "outputs": [
+        "statusReport",
+        "riskMovement",
+        "recoveryActions"
+      ]
+    }
+  ],
+  "projectTypeRouting": {
+    "mobile": "../02-follow-on-by-project-type.md#mobile",
+    "web": "../02-follow-on-by-project-type.md#web",
+    "backend": "../02-follow-on-by-project-type.md#backend",
+    "data-ai": "../02-follow-on-by-project-type.md#data-ai",
+    "saas": "../02-follow-on-by-project-type.md#saas",
+    "devtool-platform": "../02-follow-on-by-project-type.md#devtool-platform"
+  }
+}

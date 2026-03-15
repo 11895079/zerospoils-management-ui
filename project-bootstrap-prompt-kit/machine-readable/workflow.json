@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "initialState": "intake",
+  "states": [
+    "intake",
+    "discovery",
+    "planning",
+    "architecture",
+    "implementation",
+    "validation",
+    "release",
+    "operations",
+    "governance",
+    "handoff"
+  ],
+  "transitions": [
+    {
+      "from": "intake",
+      "to": "discovery",
+      "on": "orchestratorCompleted",
+      "requiredArtifacts": [
+        "projectCharter",
+        "documentationGapReport"
+      ]
+    },
+    {
+      "from": "discovery",
+      "to": "planning",
+      "on": "discoveryValidated",
+      "requiredArtifacts": [
+        "discoveryBacklog",
+        "valueHypothesis"
+      ]
+    },
+    {
+      "from": "planning",
+      "to": "architecture",
+      "on": "milestonesApproved",
+      "requiredArtifacts": [
+        "milestonePlan",
+        "criticalPath"
+      ]
+    },
+    {
+      "from": "architecture",
+      "to": "implementation",
+      "on": "architectureApproved",
+      "requiredArtifacts": [
+        "architectureDecision",
+        "adrList"
+      ]
+    },
+    {
+      "from": "implementation",
+      "to": "validation",
+      "on": "featureComplete",
+      "requiredArtifacts": [
+        "sprintTasks",
+        "testPlan",
+        "telemetryPlan"
+      ]
+    },
+    {
+      "from": "validation",
+      "to": "release",
+      "on": "goDecision",
+      "requiredArtifacts": [
+        "releaseReadiness",
+        "goNoGoRecommendation"
+      ]
+    },
+    {
+      "from": "release",
+      "to": "operations",
+      "on": "released",
+      "requiredArtifacts": [
+        "releaseNotes",
+        "monitoringBaseline"
+      ]
+    },
+    {
+      "from": "operations",
+      "to": "planning",
+      "on": "nextCycle",
+      "requiredArtifacts": [
+        "impactReview",
+        "optimizationBacklog"
+      ]
+    }
+  ],
+  "parallelTracks": [
+    {
+      "name": "governance",
+      "startsAfter": "planning",
+      "cadence": "weekly",
+      "promptId": "governance.weekly.v1"
+    }
+  ]
+}
