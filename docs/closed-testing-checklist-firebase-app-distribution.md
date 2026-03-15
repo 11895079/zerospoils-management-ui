@@ -196,6 +196,23 @@ flutter build apk --release --obfuscate --split-debug-info=./debug-info
 
 ## 4) Upload to Firebase App Distribution
 
+### 4.0 How the Build File Gets to Firebase (Android)
+
+You have two supported upload paths:
+
+- [ ] **Path A (recommended): Firebase CLI upload from local file**
+  - No manual "move" step required.
+  - The CLI command reads your local APK at `app/build/app/outputs/flutter-apk/app-release.apk` and uploads it directly to Firebase.
+
+- [ ] **Path B: Firebase Console manual upload**
+  1. Open Firebase Console → App Distribution → your Android app.
+  2. Click **Distribute** (or **Get started** on first use).
+  3. Drag and drop `app-release.apk` (or browse and select it from `app/build/app/outputs/flutter-apk/`).
+  4. Select groups (`internal-qa` or `beta-closed`).
+  5. Add release notes.
+  6. Click **Distribute**.
+
+
 ### 4.1 Install/Use Firebase CLI
 
 - [ ] Firebase CLI installed and authenticated:
@@ -656,6 +673,96 @@ firebase appdistribution:group:list --app <FIREBASE_APP_ID>
 
 # If missing, create in Firebase Console → App Distribution → Testers & Groups
 ```
+
+---
+
+## iOS Add-On Checklist (Firebase App Distribution)
+
+Use this add-on when you want the same Firebase closed-testing flow on iOS.
+
+### A) Platform Requirements
+
+- [ ] Build machine is macOS (iOS release builds are not supported on Windows/Linux).
+- [ ] Apple Developer Program membership is active.
+- [ ] Bundle ID matches Firebase app registration: `com.zerospoils.zerospoils`.
+- [ ] iOS app is registered in Firebase project (same project as Android).
+- [ ] `GoogleService-Info.plist` exists at `app/ios/Runner/GoogleService-Info.plist`.
+
+### B) Signing & Provisioning (Xcode)
+
+- [ ] Open `app/ios/Runner.xcworkspace` in Xcode.
+- [ ] Select Runner target → Signing & Capabilities.
+- [ ] Team selected correctly.
+- [ ] Automatic signing enabled (or manual profiles configured).
+- [ ] Distribution certificate valid (Apple Distribution).
+- [ ] Provisioning profile supports Ad Hoc / internal distribution as needed.
+
+### C) Build Artifact (IPA)
+
+- [ ] Build iOS release artifact:
+
+```bash
+cd app
+flutter build ipa --release
+```
+
+- [ ] Confirm IPA exists under:
+  `app/build/ios/ipa/Runner.ipa`
+
+### D) Upload to Firebase App Distribution
+
+- [ ] Choose one upload path for iOS:
+  - **Path A (recommended):** CLI upload of `app/build/ios/ipa/Runner.ipa`.
+  - **Path B:** Firebase Console manual upload (App Distribution → iOS app → Distribute → select `Runner.ipa`).
+
+- [ ] Confirm Firebase CLI login:
+
+```bash
+firebase login
+firebase projects:list
+```
+
+- [ ] Distribute to internal iOS testers:
+
+```bash
+firebase appdistribution:distribute app/build/ios/ipa/Runner.ipa \
+  --app <FIREBASE_IOS_APP_ID> \
+  --groups "internal-qa" \
+  --release-notes "iOS nightly: auth + feature flag validation"
+```
+
+- [ ] Promote stable iOS beta build:
+
+```bash
+firebase appdistribution:distribute app/build/ios/ipa/Runner.ipa \
+  --app <FIREBASE_IOS_APP_ID> \
+  --groups "beta-closed" \
+  --release-notes "iOS beta: stable milestone candidate"
+```
+
+### E) Tester Onboarding (iOS)
+
+- [ ] Testers accept Firebase invitation email.
+- [ ] Testers install Firebase App Tester app (if prompted).
+- [ ] Testers trust the distribution profile/device management certificate when prompted.
+- [ ] Testers install build and launch app successfully.
+- [ ] Testers confirm update flow works from one Firebase iOS build to the next.
+
+### F) iOS Validation Targets
+
+- [ ] Firebase bootstrap succeeds on first launch.
+- [ ] Auth/session persistence works across app restart.
+- [ ] Remote Config fetches and kill-switch behavior matches Android.
+- [ ] Crashlytics receives a non-debug crash event from iOS build.
+- [ ] No critical startup or sign-in regressions.
+
+### G) Common iOS Failure Points
+
+- [ ] Bundle ID mismatch between Xcode and Firebase app registration.
+- [ ] Expired Apple Distribution certificate.
+- [ ] Provisioning profile missing required devices/capabilities.
+- [ ] Wrong Firebase app ID used in CLI command (`--app`).
+- [ ] Missing `GoogleService-Info.plist` in Runner target.
 
 ---
 
