@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "ZeroSpoils Pilot Expansion",
+    "type": "mobile",
+    "businessObjective": "Reduce household food waste by improving inventory tracking and reminders.",
+    "targetUsers": [
+      "Busy households",
+      "Budget-conscious families"
+    ],
+    "platforms": [
+      "ios",
+      "android",
+      "backend-api"
+    ]
+  },
+  "docs": {
+    "vision": {
+      "source": "planning/docs/BUSINESS_PLAN.md",
+      "summary": "Deliver a practical and measurable reduction in food waste through proactive inventory and planning workflows."
+    },
+    "prd": {
+      "source": "planning/issues/",
+      "summary": "Define MVP scope, user journeys, acceptance criteria, and measurable quality/performance outcomes."
+    },
+    "milestones": {
+      "source": "planning/milestones/",
+      "summary": "Milestones M1-M5 define sequencing from foundations to advanced capabilities."
+    },
+    "architectureNotes": {
+      "source": "ARCHITECTURE.md",
+      "summary": "Monorepo planning plus Flutter app architecture with offline-first principles and telemetry requirements."
+    },
+    "kpiBaseline": {
+      "source": "telemetry/README.md",
+      "summary": "Baseline event schema and KPI instrumentation for adoption, retention, and reliability trends."
+    },
+    "releaseOps": {
+      "source": "docs/release.md",
+      "summary": "Release process, checks, and post-release monitoring responsibilities."
+    }
+  },
+  "constraints": {
+    "timeline": "12 weeks to first public beta",
+    "budget": "Lean team budget with strict cloud spend controls",
+    "compliance": "No PII in telemetry by default, explicit consent for sensitive capture workflows",
+    "technical": "Flutter mobile clients, CI quality gates, offline-first UX where applicable"
+  }
+}
