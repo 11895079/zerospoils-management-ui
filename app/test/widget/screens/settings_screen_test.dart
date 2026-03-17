@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 
 void main() {
   Widget buildTestHarness() {
@@ -17,6 +19,23 @@ void main() {
       home: ProviderScope(
         overrides: [telemetryClientProvider.overrideWithValue(client)],
         child: Scaffold(body: SettingsScreen()),
+      ),
+    );
+  }
+
+  Widget buildThemeAwareHarnessWithTelemetry(TelemetryClient client) {
+    return ProviderScope(
+      overrides: [telemetryClientProvider.overrideWithValue(client)],
+      child: Consumer(
+        builder: (context, ref, _) {
+          final themeMode = ref.watch(themeModeProvider);
+          return MaterialApp(
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            home: Scaffold(body: SettingsScreen()),
+          );
+        },
       ),
     );
   }
@@ -240,6 +259,66 @@ void main() {
       final vibrationEvent = telemetry.events.last;
       expect(vibrationEvent['name'], 'vibration_toggle_changed');
       expect(vibrationEvent['properties']['vibration_enabled'], false);
+    });
+
+    testWidgets('Dark mode toggle persists preference', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.dark_mode);
+
+      var prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('dark_mode_enabled') ?? false, false);
+
+      await tester.tap(switchForIcon(Icons.dark_mode));
+      await tester.pumpAndSettle();
+
+      prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('dark_mode_enabled'), true);
+    });
+
+    testWidgets('Dark mode toggle emits telemetry event', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.dark_mode);
+
+      await tester.tap(switchForIcon(Icons.dark_mode));
+      await tester.pumpAndSettle();
+
+      final event = telemetry.events.last;
+      expect(event['name'], 'theme_changed');
+      expect(event['properties']['theme'], 'dark');
+    });
+
+    testWidgets('Dark mode toggle updates app theme brightness live', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildThemeAwareHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.dark_mode);
+
+      final materialAppBefore = tester.widget<MaterialApp>(
+        find.byType(MaterialApp).first,
+      );
+      expect(materialAppBefore.themeMode, ThemeMode.light);
+
+      await tester.tap(switchForIcon(Icons.dark_mode));
+      await tester.pumpAndSettle();
+
+      final materialAppAfter = tester.widget<MaterialApp>(
+        find.byType(MaterialApp).first,
+      );
+      expect(materialAppAfter.themeMode, ThemeMode.dark);
     });
   });
 }
