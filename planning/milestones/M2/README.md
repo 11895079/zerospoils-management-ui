@@ -24,7 +24,7 @@
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
-| [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN REVIEW | [#46](https://github.com/bakintunde/zerospoils/pull/46) | — |
+| [M2/030](030-set-up-build-pipelines-android-ios-on-tags.md) | Build pipelines (Android/iOS) | ⚠️ IN PROGRESS (split: Android now, iOS blocked) | [#46](https://github.com/bakintunde/zerospoils/pull/46) | Android/AAB + signing validation pending; iOS blocked by Apple enrollment |
 | [M2/100](100-local-storage-implementation-with-migrations.md) | Hive local storage for Items + migrations | ✅ DONE | [#44](https://github.com/bakintunde/zerospoils/pull/44) | Jan 24, 2026 |
 | [M2/101](101-shopping-list-repository-persistence.md) | ShoppingList repository | ✅ DONE | Implemented locally | Feb 12, 2026 |
 | [M2/102](102-events-audit-log-persistence.md) | Events audit log repository | ✅ DONE | [#66](https://github.com/11895079/zerospoils/pull/66) | Feb 3, 2026 |
@@ -44,18 +44,19 @@
 
 ## Next Priorities
 
-**Recommended next issue: M2/155 - Demo Mode DB Isolation Toggle**
+**Recommended next issue: M2/030 - Build Pipelines (Android first pass)**
+- Complete Android release CI for signed APK + AAB artifacts on tag push
+- Validate keystore secret decode and version/tag mismatch guard in CI
+- Defer iOS signing validation until Apple Developer enrollment is active
+- Estimated effort: 2-4 hours
+
+**Secondary: M2/155 - Demo Mode DB Isolation Toggle**
 - Add `demo_mode_toggled` telemetry + accessibility polish
 - Important for analytics baseline and UX clarity
 - Estimated effort: 2-3 hours
 
-**Secondary: M2/190 - Batch Receipt Capture MVP**
-- Add Shopping List CTA entry point + permission recovery messaging
-- Validate OCR error states and Web fallback
-- Estimated effort: 3-5 hours
-
 **Backlog (remaining M2 gaps):**
-1. **M2/155** - Demo mode telemetry + accessibility polish
-2. **M2/190** - Batch receipt capture entry points + permissions
-3. **M2/030** - Build pipelines (currently in review)
+1. **M2/030** - Build pipelines (Android now; iOS after Apple enrollment)
+2. **M2/155** - Demo mode telemetry + accessibility polish
+3. **M2/190** - Batch receipt capture entry points + permissions
 

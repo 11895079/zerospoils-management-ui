@@ -4,6 +4,14 @@ We want repeatable artifacts for QA/beta testing and later store releases. GitHu
 ## Goal
 Create CI workflows that build Android APK/AAB and iOS IPA artifacts when tagging releases, with artifacts uploaded to GitHub Actions for download.
 
+## Current delivery split (Mar 2026)
+- **Track A (unblocked now): Android release CI completion**
+	- Finish signed APK + AAB generation and artifact upload on tag pushes.
+	- Validate keystore secret decoding and release signing in CI.
+- **Track B (blocked): iOS release CI completion**
+	- Requires active Apple Developer Program enrollment and valid distribution assets.
+	- Keep workflow scaffolding in place, then finalize signing and IPA distribution once enrollment is active.
+
 ## Expected behavior
 - Pushing a tag like `v0.1.0-beta.1` triggers both Android and iOS build workflows
 - Android workflow produces APK (for direct install) and AAB (for Play Store)
@@ -14,11 +22,13 @@ Create CI workflows that build Android APK/AAB and iOS IPA artifacts when taggin
 ## Acceptance criteria (Definition of Done)
 - [x] `.github/workflows/build-android.yml` workflow exists and triggers on tag push
 - [x] `.github/workflows/build-ios.yml` workflow exists and triggers on tag push
-- [ ] Android workflow builds release APK and AAB, uploads as artifacts
-- [ ] iOS workflow builds release IPA (ad-hoc or enterprise), uploads as artifact
+- [ ] **Track A / Android (execute now):** workflow builds signed release APK and AAB, uploads both artifacts
+- [ ] **Track A / Android (execute now):** keystore secret decode + signing step validated end-to-end on tag build
+- [ ] **Track A / Android (execute now):** workflow fails fast on tag/version mismatch with clear error
+- [ ] **Track B / iOS (blocked until Apple enrollment):** workflow builds signed IPA (ad-hoc or enterprise), uploads artifact
+- [ ] **Track B / iOS (blocked until Apple enrollment):** provisioning profile + certificate secret handling validated end-to-end
 - [ ] Versioning strategy documented in `docs/release.md` (semver, tag format, changelog)
-- [ ] Workflows handle signing (Android keystore in secrets, iOS provisioning profiles)
-- [ ] README updated with release/tagging instructions
+- [ ] README updated with release/tagging instructions (Android now; iOS addendum when unblocked)
 
 ## Out of scope
 - Store submission automation (fastlane upload to Play Store/App Store Connect deferred to M4)
@@ -26,6 +36,10 @@ Create CI workflows that build Android APK/AAB and iOS IPA artifacts when taggin
 - Code signing certificate generation (manual setup, document in `docs/release.md`)
 - Automated changelog generation (M3)
 - Multi-flavor builds (dev/staging/prod) (M3)
+
+## Blockers
+- iOS release artifact validation is blocked by Apple Developer Program enrollment and distribution signing assets.
+- Android release CI completion is not blocked and should be shipped first.
 
 ## Implementation notes
 - **Android signing:** Store keystore in GitHub Secrets as base64, decode in workflow
@@ -38,8 +52,9 @@ Create CI workflows that build Android APK/AAB and iOS IPA artifacts when taggin
 
 ## Test plan
 **Automated:**
-- Workflow validation: Use `act` (local GitHub Actions runner) to test workflow syntax
-- Dry-run: Test workflow with a test tag without publishing
+- Workflow syntax validation for both `build-android.yml` and `build-ios.yml`
+- Android tag run validates: APK + AAB artifacts present, signing step executed, and tag/version guard works
+- iOS validation queued until Apple enrollment and signing assets are available
 
 **Manual:**
 1. Update `pubspec.yaml` version to `0.1.0-beta.1` → commit → push to main
@@ -47,10 +62,10 @@ Create CI workflows that build Android APK/AAB and iOS IPA artifacts when taggin
 3. Verify Android workflow triggers and completes successfully (check Actions tab)
 4. Download APK artifact from GitHub Actions → install on Android device → verify app launches
 5. Download AAB artifact → upload to Play Store internal testing track → verify integrity
-6. Verify iOS workflow triggers and completes successfully (macOS runner)
-7. Download IPA artifact from GitHub Actions → install on iOS device via TestFlight or ad-hoc → verify app launches
-8. Test version mismatch: Push tag without updating `pubspec.yaml` → verify workflow fails with clear error
-9. Test invalid tag format: Push `release-1.0` → verify workflow doesn't trigger (only `v*` tags)
+6. Test version mismatch: Push tag without updating `pubspec.yaml` → verify workflow fails with clear error
+7. Test invalid tag format: Push `release-1.0` → verify workflow doesn't trigger (only `v*` tags)
+8. After Apple enrollment is active, run iOS workflow validation on tag
+9. Download IPA artifact → validate install via Firebase App Distribution/TestFlight
 
 ## Dependencies
 - None (can be done independently)
