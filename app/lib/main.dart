@@ -6,6 +6,7 @@ import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart' hide itemRepositoryProvider;
 import 'presentation/di/repository_providers.dart';
+import 'presentation/di/theme_providers.dart';
 import 'data/adapters/item_adapter.dart';
 import 'data/adapters/receipt_batch_adapter.dart';
 import 'domain/models/user_category.dart';
@@ -94,6 +95,9 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
     if (hasManual) {
       ref.read(hasManualItemsProvider.notifier).state = true;
     }
+
+    await loadThemeModePreference(ref);
+
     setState(() {
       _initialized = true;
     });
@@ -106,9 +110,14 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
       );
     }
+
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp.router(
       title: 'ZeroSpoils',
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

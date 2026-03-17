@@ -17,6 +17,7 @@ import '../../core/feature_flags/feature_flags_provider.dart';
 import '../di/service_locator.dart'
     show telemetryClientProvider, analyticsConsentProvider;
 import '../di/repository_providers.dart';
+import '../di/theme_providers.dart';
 import '../../data/services/backup_restore_service.dart';
 import 'onboarding_screen.dart';
 
@@ -436,8 +437,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.dark_mode,
               label: 'Dark Mode',
               value: _darkModeEnabled,
-              onChanged: null,
-              trailingLabel: 'Soon',
+              onChanged: (value) => _setBool(
+                key: 'dark_mode_enabled',
+                value: value,
+                onUpdate: () => _darkModeEnabled = value,
+                onChange: () {
+                  final nextTheme = value ? ThemeMode.dark : ThemeMode.light;
+                  ref.read(themeModeProvider.notifier).state = nextTheme;
+                  _trackThemeChanged(ref, value);
+                },
+              ),
             ),
             _buildDropdownTile<String>(
               icon: Icons.date_range,
@@ -531,14 +540,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildCard(List<Widget> children) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x11000000),
+            color: isDarkMode
+                ? const Color(0x33000000)
+                : const Color(0x11000000),
             blurRadius: 8,
             offset: Offset(0, 4),
           ),
@@ -893,6 +906,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     telemetry.enqueue({
       'name': 'analytics_consent_changed',
       'properties': {'consent_enabled': consented},
+    });
+  }
+
+  void _trackThemeChanged(WidgetRef ref, bool darkModeEnabled) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({
+      'name': 'theme_changed',
+      'properties': {'theme': darkModeEnabled ? 'dark' : 'light'},
     });
   }
 }
