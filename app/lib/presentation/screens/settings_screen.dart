@@ -277,9 +277,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       key: const Key('screen_settings'),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Settings', style: AppTextStyles.h3),
+        title: Text(
+          'Settings',
+          style: Theme.of(
+            context,
+          ).appBarTheme.titleTextStyle?.copyWith(fontWeight: FontWeight.w600),
+        ),
         elevation: 1,
       ),
       body: ListView(
@@ -526,13 +529,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildSectionHeader(String title) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(
         title,
-        style: AppTextStyles.body.copyWith(
+        style: textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w700,
-          color: AppColors.textSecondary,
+          color: textTheme.bodySmall?.color,
           letterSpacing: 0.5,
         ),
       ),
@@ -578,13 +583,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String? subtitle,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: AppColors.textPrimary),
-      title: Text(label, style: AppTextStyles.body),
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: theme.textTheme.bodyMedium),
       subtitle: subtitle == null
           ? null
-          : Text(subtitle, style: AppTextStyles.bodySmall),
+          : Text(subtitle, style: theme.textTheme.bodySmall),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
     );
@@ -598,20 +605,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required ValueChanged<bool>? onChanged,
     String? trailingLabel,
   }) {
+    final theme = Theme.of(context);
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: AppColors.textPrimary),
-      title: Text(label, style: AppTextStyles.body),
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: theme.textTheme.bodyMedium),
       subtitle: subtitle == null
           ? null
-          : Text(subtitle, style: AppTextStyles.bodySmall),
+          : Text(subtitle, style: theme.textTheme.bodySmall),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (trailingLabel != null)
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: Text(trailingLabel, style: AppTextStyles.bodySmall),
+              child: Text(trailingLabel, style: theme.textTheme.bodySmall),
             ),
           Switch(value: value, onChanged: onChanged),
         ],
@@ -627,18 +636,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String Function(T) itemLabel,
     required ValueChanged<T> onChanged,
   }) {
+    final theme = Theme.of(context);
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: AppColors.textPrimary),
-      title: Text(label, style: AppTextStyles.body),
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: theme.textTheme.bodyMedium),
       trailing: DropdownButton<T>(
         value: value,
+        dropdownColor: theme.cardColor,
+        style: theme.textTheme.bodyMedium,
         underline: const SizedBox.shrink(),
         items: items
             .map(
               (item) => DropdownMenuItem<T>(
                 value: item,
-                child: Text(itemLabel(item)),
+                child: Text(itemLabel(item), style: theme.textTheme.bodyMedium),
               ),
             )
             .toList(),

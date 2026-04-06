@@ -3,7 +3,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/receipt_batch.dart';
@@ -38,15 +37,15 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final batchesAsync = ref.watch(receiptBatchesProvider);
 
     return Scaffold(
       key: const Key('screen_receipt_batches'),
       drawer: const AppDrawer(),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Receipt Batches', style: AppTextStyles.h3),
+        title: const Text('Receipt Batches'),
         elevation: 1,
         actions: [
           TextButton(
@@ -62,7 +61,9 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
           child: Text(
             key: const Key('receipt_batches_error'),
             'Unable to load batches',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
         ),
         data: (batches) {
@@ -71,8 +72,8 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
               child: Text(
                 key: const Key('receipt_batches_empty_state'),
                 'No receipt batches yet',
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             );
@@ -101,9 +102,9 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                   margin: const EdgeInsets.only(bottom: AppSpacing.md),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: theme.dividerColor),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,8 +118,8 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         '${batch.items.length} items · $total total',
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.textSecondary,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.textTheme.bodySmall?.color,
                         ),
                       ),
                     ],

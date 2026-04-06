@@ -9,6 +9,7 @@ import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/app_button.dart';
 
 /// Mock repository for testing without Hive file I/O
@@ -77,6 +78,26 @@ void main() {
     repository = MockItemRepository();
     await repository.init(); // Initialize before use
   });
+
+  Future<void> pumpItemForm(
+    WidgetTester tester, {
+    ThemeMode themeMode = ThemeMode.light,
+    String? itemId,
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: ItemFormScreen(itemId: itemId),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+  }
 
   testWidgets('saving new item calls repository.saveItem', (tester) async {
     // Make the viewport large enough to avoid overflow/scroll issues
@@ -314,5 +335,36 @@ void main() {
       find.byKey(const Key('item_form_expiry_date')),
     );
     expect(expiryDateField.onTap, isNotNull);
+  });
+
+  testWidgets('uses dark theme surfaces in dark mode', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await pumpItemForm(tester, themeMode: ThemeMode.dark);
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final previewContainer = tester.widget<Container>(
+      find
+          .byWidgetPredicate(
+            (widget) =>
+                widget is Container && widget.decoration is BoxDecoration,
+          )
+          .first,
+    );
+    final decoration = previewContainer.decoration as BoxDecoration;
+    final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
+
+    expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+    expect(
+      appBar.backgroundColor ?? theme.appBarTheme.backgroundColor,
+      theme.appBarTheme.backgroundColor,
+    );
+    expect(decoration.color, theme.colorScheme.surfaceContainerHigh);
   });
 }

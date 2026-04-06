@@ -3,7 +3,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
@@ -34,15 +33,12 @@ class _ReceiptBatchDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       key: const Key('screen_receipt_batch_detail'),
       drawer: const AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Batch Detail', style: AppTextStyles.h3),
-        elevation: 1,
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text('Batch Detail'), elevation: 1),
       body: FutureBuilder<_BatchDetailData>(
         future: _batchFuture,
         builder: (context, snapshot) {
@@ -53,8 +49,8 @@ class _ReceiptBatchDetailScreenState
             return Center(
               child: Text(
                 'Unable to load batch',
-                style: AppTextStyles.body.copyWith(
-                  color: AppColors.textSecondary,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             );
@@ -76,9 +72,9 @@ class _ReceiptBatchDetailScreenState
                 key: const Key('receipt_batch_summary'),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: theme.dividerColor),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,7 +95,12 @@ class _ReceiptBatchDetailScreenState
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text('Items', style: AppTextStyles.h3),
+              Text(
+                'Items',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: AppSpacing.sm),
               ...batch.items.map((item) {
                 final inventoryItem = data.inventoryItems[item.inventoryItemId];
@@ -109,9 +110,9 @@ class _ReceiptBatchDetailScreenState
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    border: Border.all(color: AppColors.border),
+                    border: Border.all(color: theme.dividerColor),
                   ),
                   child: Row(
                     children: [
@@ -124,7 +125,7 @@ class _ReceiptBatchDetailScreenState
                             Text(
                               status,
                               style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textSecondary,
+                                color: theme.textTheme.bodySmall?.color,
                               ),
                             ),
                           ],
@@ -182,6 +183,8 @@ class _ReceiptBatchDetailScreenState
   }
 
   Widget _buildStatRow(String label, String value) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -189,12 +192,12 @@ class _ReceiptBatchDetailScreenState
           Expanded(
             child: Text(
               label,
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodySmall?.color,
               ),
             ),
           ),
-          Text(value, style: AppTextStyles.body),
+          Text(value, style: theme.textTheme.bodyMedium),
         ],
       ),
     );

@@ -8,6 +8,8 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
+import 'package:zerospoils/presentation/widgets/item_icon.dart';
 
 /// Mock implementations
 class MockItemRepository extends HiveItemRepository {
@@ -66,14 +68,26 @@ void main() {
       mockTelemetry = MockTelemetryClient();
     });
 
-    Widget createTestWidget(String itemId) {
+    Widget createThemedTestWidget(
+      String itemId, {
+      ThemeMode themeMode = ThemeMode.light,
+    }) {
       return ProviderScope(
         overrides: [
           itemRepositoryProvider.overrideWithValue(mockRepository),
           telemetryClientProvider.overrideWithValue(mockTelemetry),
         ],
-        child: MaterialApp(home: ItemDetailScreen(itemId: itemId)),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: ItemDetailScreen(itemId: itemId),
+        ),
       );
+    }
+
+    Widget createTestWidget(String itemId) {
+      return createThemedTestWidget(itemId);
     }
 
     testWidgets('shows loading indicator while fetching item', (
@@ -181,6 +195,52 @@ void main() {
 
       expect(find.byKey(const Key('item_mark_consumed_button')), findsNothing);
       expect(find.byKey(const Key('item_mark_wasted_button')), findsNothing);
+    });
+
+    testWidgets('uses dark theme surfaces in dark mode', (
+      WidgetTester tester,
+    ) async {
+      final testItem = Item(
+        id: 'item-1',
+        name: 'Test Apple',
+        category: ItemCategory.produce,
+        type: ItemType.raw,
+        location: StorageLocation.fridge,
+        quantity: 5,
+        unit: Unit.count,
+        expiryDate: DateTime(2026, 2, 1),
+        purchasePrice: 3.99,
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 1, 20),
+        updatedAt: DateTime(2026, 1, 20),
+      );
+      mockRepository.addMockItem(testItem);
+
+      await tester.pumpWidget(
+        createThemedTestWidget('item-1', themeMode: ThemeMode.dark),
+      );
+      await tester.pumpAndSettle();
+
+      final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      final detailCard = tester.widget<Card>(find.byType(Card).first);
+      final theme = Theme.of(tester.element(find.byType(ItemDetailScreen)));
+
+      expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+      expect(
+        appBar.backgroundColor ?? theme.appBarTheme.backgroundColor,
+        theme.appBarTheme.backgroundColor,
+      );
+      expect(
+        detailCard.color ?? theme.cardTheme.color ?? theme.cardColor,
+        theme.cardTheme.color ?? theme.cardColor,
+      );
+
+      final itemIcon = tester.widget<Icon>(
+        find.descendant(of: find.byType(ItemIcon), matching: find.byType(Icon)),
+      );
+
+      expect(itemIcon.color, theme.colorScheme.onSurface);
     });
 
     testWidgets('mark used dialog shows confirmation', (

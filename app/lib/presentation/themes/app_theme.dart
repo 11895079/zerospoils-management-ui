@@ -132,6 +132,8 @@ class AppTheme {
           color: Color(0xFFF2F6F2),
         ),
       ),
+      iconTheme: IconThemeData(color: colorScheme.onSurface),
+      primaryIconTheme: IconThemeData(color: colorScheme.onSurface),
       cardColor: const Color(0xFF1A201D),
       dividerColor: const Color(0xFF2C3631),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -210,6 +212,7 @@ class AppTheme {
         unselectedItemColor: Color(0xFF9DA8A1),
         type: BottomNavigationBarType.fixed,
       ),
+      listTileTheme: ListTileThemeData(iconColor: colorScheme.onSurface),
     );
   }
 

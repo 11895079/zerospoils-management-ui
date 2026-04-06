@@ -100,14 +100,12 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       key: const Key('screen_expiring_today'),
       drawer: const AppDrawer(),
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Expiring Soon', style: AppTextStyles.h3),
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text('Expiring Soon')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
@@ -170,6 +168,8 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+
     return Center(
       key: const ValueKey('expiring_empty_state'),
       child: Column(
@@ -181,7 +181,9 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
           const SizedBox(height: AppSpacing.md),
           Text(
             'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.xl),
@@ -199,6 +201,8 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   }
 
   Widget _buildBucketSection(ExpiryBucket bucket, List<Item> items) {
+    final theme = Theme.of(context);
+
     return Semantics(
       label: 'Expiring ${bucket.displayName} section',
       child: Column(
@@ -215,8 +219,8 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
                 const Spacer(),
                 Text(
                   '(${items.length})',
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
               ],

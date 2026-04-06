@@ -26,6 +26,7 @@ class ShoppingListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     // Track screen view
     _trackScreenViewed(ref);
 
@@ -34,9 +35,12 @@ class ShoppingListScreen extends ConsumerWidget {
     return Scaffold(
       key: const Key('screen_shopping_list'),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Shopping List', style: AppTextStyles.h3),
+        title: Text(
+          'Shopping List',
+          style: theme.appBarTheme.titleTextStyle?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         elevation: 1,
       ),
       drawer: const AppDrawer(),
@@ -412,9 +416,11 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Text(
       title,
-      style: AppTextStyles.h4.copyWith(color: AppColors.textPrimary),
+      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
     );
   }
 }
@@ -435,6 +441,11 @@ class _ShoppingItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurfaceColor = theme.colorScheme.onSurface;
+    final secondaryTextColor =
+        theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurfaceVariant;
+
     final isPurchased = item.isPurchased;
     return Dismissible(
       key: ValueKey('shopping_item_dismiss_${item.id}'),
@@ -452,9 +463,9 @@ class _ShoppingItemTile extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: CheckboxListTile(
           key: checkboxKey,
@@ -463,9 +474,7 @@ class _ShoppingItemTile extends StatelessWidget {
           title: Text(
             item.name,
             style: AppTextStyles.body.copyWith(
-              color: isPurchased
-                  ? AppColors.textSecondary
-                  : AppColors.textPrimary,
+              color: isPurchased ? secondaryTextColor : onSurfaceColor,
               decoration: isPurchased ? TextDecoration.lineThrough : null,
             ),
           ),
@@ -483,6 +492,8 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -497,7 +508,7 @@ class _EmptyState extends StatelessWidget {
             Text(
               'Add items you need to buy on your next grocery trip.',
               style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.textTheme.bodySmall?.color,
               ),
               textAlign: TextAlign.center,
             ),

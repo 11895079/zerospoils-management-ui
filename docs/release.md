@@ -2,6 +2,8 @@
 
 This document describes the release workflow for ZeroSpoils mobile app builds.
 
+For Windows desktop closed testing through Microsoft Store private audience or Store flighting, see [Windows Store closed-testing plan](windows-store-closed-testing.md).
+
 ## Versioning Strategy
 
 **Semantic Versioning:** `MAJOR.MINOR.PATCH[-PRERELEASE]`

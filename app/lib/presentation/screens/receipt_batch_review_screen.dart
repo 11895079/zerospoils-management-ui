@@ -2,9 +2,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart' hide ShoppingListItem;
 import '../../domain/models/receipt_batch.dart';
 import '../../domain/models/shopping_list_item.dart';
@@ -223,12 +221,10 @@ class _ReceiptBatchReviewScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Review Items', style: AppTextStyles.h3),
-      ),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(title: const Text('Review Items')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [
@@ -236,6 +232,7 @@ class _ReceiptBatchReviewScreenState
             final index = entry.key;
             final item = entry.value;
             return Card(
+              color: theme.cardTheme.color ?? theme.cardColor,
               child: ListTile(
                 key: ValueKey('receipt_review_item_$index'),
                 title: Text(item.name),
@@ -251,7 +248,10 @@ class _ReceiptBatchReviewScreenState
                   },
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: Icon(
+                    Icons.edit,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                   onPressed: () => _editItem(index),
                 ),
               ),
@@ -260,6 +260,10 @@ class _ReceiptBatchReviewScreenState
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
             onPressed: () => _saveBatch(ReceiptBatchDestination.shoppingList),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+            ),
             child: const Text('Save to Shopping List'),
           ),
           const SizedBox(height: AppSpacing.sm),

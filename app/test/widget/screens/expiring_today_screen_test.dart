@@ -8,6 +8,7 @@ import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/screens/expiring_today_screen.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 
 class TestTelemetryClient extends TelemetryClient {
   final List<Map<String, dynamic>> recorded = [];
@@ -106,12 +107,21 @@ GoRouter buildRouter(Widget child) {
 
 void main() {
   group('ExpiringTodayScreen', () {
-    testWidgets('renders empty state when no items exist', (
-      WidgetTester tester,
-    ) async {
-      final repository = MockItemRepository([]);
-      final telemetry = TestTelemetryClient();
+    void useTallViewport(WidgetTester tester) {
+      tester.view.physicalSize = const Size(1200, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+    }
 
+    Future<void> pumpExpiringScreen(
+      WidgetTester tester, {
+      required MockItemRepository repository,
+      required TestTelemetryClient telemetry,
+      ThemeMode themeMode = ThemeMode.light,
+    }) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -119,11 +129,27 @@ void main() {
             telemetryClientProvider.overrideWithValue(telemetry),
           ],
           child: MaterialApp.router(
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
             routerConfig: buildRouter(const ExpiringTodayScreen()),
           ),
         ),
       );
       await tester.pumpAndSettle();
+    }
+
+    testWidgets('renders empty state when no items exist', (
+      WidgetTester tester,
+    ) async {
+      final repository = MockItemRepository([]);
+      final telemetry = TestTelemetryClient();
+
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
+      );
 
       expect(
         find.byKey(const ValueKey('expiring_empty_state')),
@@ -141,18 +167,11 @@ void main() {
       final repository = MockItemRepository([futureItem]);
       final telemetry = TestTelemetryClient();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            itemRepositoryProvider.overrideWithValue(repository),
-            telemetryClientProvider.overrideWithValue(telemetry),
-          ],
-          child: MaterialApp.router(
-            routerConfig: buildRouter(const ExpiringTodayScreen()),
-          ),
-        ),
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
       );
-      await tester.pumpAndSettle();
 
       expect(
         find.byKey(const ValueKey('expiring_empty_state')),
@@ -163,30 +182,26 @@ void main() {
     testWidgets('renders buckets for today, this week, and expired', (
       WidgetTester tester,
     ) async {
+      useTallViewport(tester);
+
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 12);
       final items = [
-        buildItem(id: 'today', expiryDate: now),
-        buildItem(id: 'week', expiryDate: now.add(const Duration(days: 3))),
+        buildItem(id: 'today', expiryDate: today),
+        buildItem(id: 'week', expiryDate: today.add(const Duration(days: 3))),
         buildItem(
           id: 'expired',
-          expiryDate: now.subtract(const Duration(days: 1)),
+          expiryDate: today.subtract(const Duration(days: 2)),
         ),
       ];
       final repository = MockItemRepository(items);
       final telemetry = TestTelemetryClient();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            itemRepositoryProvider.overrideWithValue(repository),
-            telemetryClientProvider.overrideWithValue(telemetry),
-          ],
-          child: MaterialApp.router(
-            routerConfig: buildRouter(const ExpiringTodayScreen()),
-          ),
-        ),
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
       );
-      await tester.pumpAndSettle();
 
       expect(
         find.byKey(const ValueKey('expiring_section_today')),
@@ -205,30 +220,26 @@ void main() {
     testWidgets('renders sections in expected order', (
       WidgetTester tester,
     ) async {
+      useTallViewport(tester);
+
       final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 12);
       final items = [
-        buildItem(id: 'today', expiryDate: now),
-        buildItem(id: 'week', expiryDate: now.add(const Duration(days: 3))),
+        buildItem(id: 'today', expiryDate: today),
+        buildItem(id: 'week', expiryDate: today.add(const Duration(days: 3))),
         buildItem(
           id: 'expired',
-          expiryDate: now.subtract(const Duration(days: 1)),
+          expiryDate: today.subtract(const Duration(days: 2)),
         ),
       ];
       final repository = MockItemRepository(items);
       final telemetry = TestTelemetryClient();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            itemRepositoryProvider.overrideWithValue(repository),
-            telemetryClientProvider.overrideWithValue(telemetry),
-          ],
-          child: MaterialApp.router(
-            routerConfig: buildRouter(const ExpiringTodayScreen()),
-          ),
-        ),
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
       );
-      await tester.pumpAndSettle();
 
       final todayDy = tester
           .getTopLeft(find.byKey(const ValueKey('expiring_section_today')))
@@ -252,18 +263,11 @@ void main() {
       final repository = MockItemRepository(items);
       final telemetry = TestTelemetryClient();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            itemRepositoryProvider.overrideWithValue(repository),
-            telemetryClientProvider.overrideWithValue(telemetry),
-          ],
-          child: MaterialApp.router(
-            routerConfig: buildRouter(const ExpiringTodayScreen()),
-          ),
-        ),
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const ValueKey('expiring_item_tap-1')));
       await tester.pumpAndSettle();
@@ -279,18 +283,11 @@ void main() {
       final repository = MockItemRepository(items);
       final telemetry = TestTelemetryClient();
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            itemRepositoryProvider.overrideWithValue(repository),
-            telemetryClientProvider.overrideWithValue(telemetry),
-          ],
-          child: MaterialApp.router(
-            routerConfig: buildRouter(const ExpiringTodayScreen()),
-          ),
-        ),
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
       );
-      await tester.pumpAndSettle();
 
       expect(
         telemetry.recorded.any(
@@ -310,6 +307,29 @@ void main() {
         ),
         isTrue,
       );
+    });
+
+    testWidgets('uses dark theme app bar colors in dark mode', (
+      WidgetTester tester,
+    ) async {
+      final repository = MockItemRepository([]);
+      final telemetry = TestTelemetryClient();
+
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
+        themeMode: ThemeMode.dark,
+      );
+
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      final theme = Theme.of(tester.element(find.byType(ExpiringTodayScreen)));
+
+      expect(
+        appBar.backgroundColor ?? theme.appBarTheme.backgroundColor,
+        theme.appBarTheme.backgroundColor,
+      );
+      expect(theme.iconTheme.color, theme.colorScheme.onSurface);
     });
 
     testWidgets('pull-to-refresh triggers repository reload', (

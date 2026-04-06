@@ -4,7 +4,6 @@ library;
 /// Horizontal scrollable chip selector
 
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -22,6 +21,8 @@ class CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -30,17 +31,19 @@ class CategoryChip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? theme.colorScheme.primary : Colors.transparent,
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
+            color: isSelected ? theme.colorScheme.primary : theme.dividerColor,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
         child: Text(
           label,
-          style: AppTextStyles.chip.copyWith(
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+          style: (theme.textTheme.labelLarge ?? AppTextStyles.chip).copyWith(
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.textTheme.labelLarge?.color,
           ),
         ),
       ),

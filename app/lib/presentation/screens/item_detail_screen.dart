@@ -449,16 +449,15 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // Watch date format preference
     final dateFormatAsync = ref.watch(dateFormatPreferenceProvider);
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        title: const Text('Item Detail', style: AppTextStyles.h3),
+        title: const Text('Item Detail'),
         actions: [
           if (_item != null && _item!.status == ItemStatus.available)
             TextButton(
@@ -469,9 +468,12 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                 );
                 _loadItem(); // Reload after edit
               },
-              child: const Text(
+              child: Text(
                 'Edit',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontSize: 16,
+                ),
               ),
             ),
         ],
@@ -507,8 +509,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   Text(
                     key: const Key('item_detail_not_found'),
                     'Item not found',
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.textSecondary,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -531,7 +533,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       vertical: AppSpacing.xl,
                       horizontal: AppSpacing.lg,
                     ),
-                    decoration: BoxDecoration(color: AppColors.cardBackground),
+                    decoration: BoxDecoration(color: theme.cardColor),
                     child: Column(
                       children: [
                         ItemIcon(
@@ -547,7 +549,9 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                         Text(
                           key: const Key('item_detail_name'),
                           _item!.name,
-                          style: AppTextStyles.h1,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -558,10 +562,11 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Card(
+                      color: theme.cardTheme.color ?? theme.cardColor,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: AppColors.border, width: 1),
+                        side: BorderSide(color: theme.dividerColor, width: 1),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.md),
@@ -720,6 +725,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     Color? valueColor,
     Key? valueKey,
   }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Row(
@@ -727,12 +734,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         children: [
           Text(
             label,
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
           ),
           Text(
             key: valueKey,
             value,
-            style: AppTextStyles.body.copyWith(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w500,
               color: valueColor,
             ),

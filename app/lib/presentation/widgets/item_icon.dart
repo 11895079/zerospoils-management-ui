@@ -26,7 +26,12 @@ class ItemIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = ItemIconLibrary.getIconForItem(itemName, category: category);
-    final iconColor = color ?? Theme.of(context).primaryColor;
+    final theme = Theme.of(context);
+    final iconColor =
+        color ??
+        (theme.brightness == Brightness.dark
+            ? theme.colorScheme.onSurface
+            : theme.primaryColor);
 
     Widget iconWidget = Icon(icon, size: size, color: iconColor);
 

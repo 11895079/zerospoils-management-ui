@@ -151,6 +151,7 @@ class _ReceiptBatchCaptureScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -168,16 +169,15 @@ class _ReceiptBatchCaptureScreenState
         },
         child: Scaffold(
           drawer: const AppDrawer(),
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
             leading: Navigator.of(context).canPop()
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back),
                     onPressed: () => Navigator.of(context).maybePop(),
                   )
                 : null,
-            title: const Text('Batch Receipt Capture', style: AppTextStyles.h3),
+            title: const Text('Batch Receipt Capture'),
           ),
           body: Padding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -200,7 +200,7 @@ class _ReceiptBatchCaptureScreenState
                 Text(
                   'Capture clear photos of each receipt section. Max 5 photos.',
                   style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
                 const Spacer(),
@@ -247,31 +247,35 @@ class _ReceiptBatchCaptureScreenState
   }
 
   Widget _buildPhotoTile(String label) {
+    final theme = Theme.of(context);
+
     return Container(
       width: 90,
       height: 90,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Center(child: Text(label, style: AppTextStyles.caption)),
     );
   }
 
   Widget _buildAddTile() {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: _processing || _pickingPhoto ? null : _addPhoto,
       child: Container(
         width: 90,
         height: 90,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: theme.dividerColor),
         ),
-        child: const Center(
-          child: Icon(Icons.add, color: AppColors.textSecondary),
+        child: Center(
+          child: Icon(Icons.add, color: theme.colorScheme.onSurfaceVariant),
         ),
       ),
     );
