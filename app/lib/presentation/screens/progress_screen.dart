@@ -20,16 +20,20 @@ class ProgressScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
     final statsAsync = ref.watch(progressStatsProvider);
 
     return Scaffold(
       key: const Key('screen_progress'),
       drawer: const AppDrawer(),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Progress', style: AppTextStyles.h3),
+        title: Text(
+          'Progress',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         elevation: 1,
       ),
       body: statsAsync.when(
@@ -184,6 +188,7 @@ class ProgressScreen extends ConsumerWidget {
     return FutureBuilder<ReceiptBatch?>(
       future: _loadRecentBatch(ref),
       builder: (context, snapshot) {
+        final theme = Theme.of(context);
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -210,9 +215,9 @@ class ProgressScreen extends ConsumerWidget {
         return Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -550,15 +555,18 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final content = Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        border: Border.all(color: theme.dividerColor),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x11000000),
+            color: theme.brightness == Brightness.dark
+                ? const Color(0x33000000)
+                : const Color(0x11000000),
             blurRadius: 4,
             offset: Offset(0, 2),
           ),
@@ -591,15 +599,16 @@ class _BadgeProgressTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final percentage = (progress.progressPercentage * 100).round();
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -623,7 +632,7 @@ class _BadgeProgressTile extends StatelessWidget {
           LinearProgressIndicator(
             value: progress.progressPercentage.clamp(0, 1),
             minHeight: 8,
-            backgroundColor: AppColors.border,
+            backgroundColor: theme.dividerColor,
             valueColor: const AlwaysStoppedAnimation(AppColors.primary),
           ),
         ],

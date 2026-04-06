@@ -441,10 +441,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   void _showFilterOptions() {
     final currentState = ref.read(inventoryFilterProvider);
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor:
+          theme.bottomSheetTheme.backgroundColor ?? theme.colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
@@ -739,6 +741,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final itemsAsync = ref.watch(itemsFutureProvider);
     final filterState = ref.watch(inventoryFilterProvider);
     final progressStatsAsync = ref.watch(progressStatsProvider);
@@ -751,11 +754,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return Scaffold(
       key: const Key('screen_inventory'),
       drawer: const AppDrawer(),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        title: const Text('Inventory', style: AppTextStyles.h3),
+        title: Text(
+          'Inventory',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         elevation: 1,
         actions: [
           _buildViewModeToggle(viewMode, filterState, filteredCount),
@@ -765,7 +771,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               IconButton(
                 key: const Key('inventory_filter_button'),
                 onPressed: _showFilterOptions,
-                icon: const Icon(Icons.tune, color: AppColors.textPrimary),
+                icon: Icon(Icons.tune, color: theme.colorScheme.onSurface),
               ),
               if (filterState.activeFilterCount > 0)
                 Positioned(
@@ -1092,12 +1098,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     InventoryFilterState filterState,
     int resultCount,
   ) {
+    final theme = Theme.of(context);
+    final secondaryTextColor =
+        theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurfaceVariant;
+
     return Container(
       margin: const EdgeInsets.only(right: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1109,7 +1119,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Icons.view_list,
               color: current == InventoryViewMode.list
                   ? AppColors.primary
-                  : AppColors.textSecondary,
+                  : secondaryTextColor,
             ),
             onPressed: () =>
                 _setViewMode(InventoryViewMode.list, filterState, resultCount),
@@ -1121,7 +1131,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Icons.table_chart,
               color: current == InventoryViewMode.table
                   ? AppColors.primary
-                  : AppColors.textSecondary,
+                  : secondaryTextColor,
             ),
             onPressed: () =>
                 _setViewMode(InventoryViewMode.table, filterState, resultCount),
@@ -1133,7 +1143,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               Icons.grid_view,
               color: current == InventoryViewMode.grid
                   ? AppColors.primary
-                  : AppColors.textSecondary,
+                  : secondaryTextColor,
             ),
             onPressed: () =>
                 _setViewMode(InventoryViewMode.grid, filterState, resultCount),
@@ -1303,6 +1313,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildGridCard(Item item) {
+    final theme = Theme.of(context);
+
     return Semantics(
       button: true,
       label: '${item.name}, ${item.status.displayName}',
@@ -1312,9 +1324,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1383,6 +1395,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildExpiryChip(Item item) {
+    final theme = Theme.of(context);
+
     final label = item.expiryDate == null
         ? 'No expiry'
         : 'Exp ${DateFormat('MMM d').format(item.expiryDate!)}';
@@ -1392,13 +1406,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Text(
         label,
         style: AppTextStyles.caption.copyWith(
-          color: AppColors.textSecondary,
+          color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -1406,19 +1420,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildLocationChip(Item item) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Text(
         item.location.displayName,
         style: AppTextStyles.caption.copyWith(
-          color: AppColors.textSecondary,
+          color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -1517,14 +1533,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildActiveFilters(InventoryFilterState filterState) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5F5F5),
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       child: Row(
         children: [
@@ -1665,14 +1683,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        border: Border(
+          bottom: BorderSide(color: theme.dividerColor, width: 0.5),
+        ),
       ),
       child: TextField(
         controller: _searchController,
@@ -1684,11 +1706,16 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         },
         decoration: InputDecoration(
           hintText: 'Search items...',
-          hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+          hintStyle: AppTextStyles.body.copyWith(
+            color: theme.textTheme.bodySmall?.color,
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: theme.textTheme.bodySmall?.color,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            borderSide: const BorderSide(color: AppColors.border, width: 0.5),
+            borderSide: BorderSide(color: theme.dividerColor, width: 0.5),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,

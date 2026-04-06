@@ -10,6 +10,7 @@ import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/screens/shopping_list_screen.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 
 class MockShoppingListRepository extends HiveShoppingListRepository {
   bool _initialized = false;
@@ -109,6 +110,30 @@ class MockItemRepository extends HiveItemRepository {
 }
 
 void main() {
+  Future<void> pumpShoppingListScreen(
+    WidgetTester tester, {
+    required MockShoppingListRepository repository,
+    required MockItemRepository itemRepository,
+    ThemeMode themeMode = ThemeMode.light,
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          shoppingListRepositoryProvider.overrideWithValue(repository),
+          itemRepositoryProvider.overrideWithValue(itemRepository),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: const ShoppingListScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+  }
+
   setUp(() {
     // Initialize SharedPreferences for telemetry consent provider
     SharedPreferences.setMockInitialValues({'analytics_consent': true});
@@ -122,17 +147,11 @@ void main() {
     await repository.init();
     await itemRepository.init();
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          shoppingListRepositoryProvider.overrideWithValue(repository),
-          itemRepositoryProvider.overrideWithValue(itemRepository),
-        ],
-        child: const MaterialApp(home: ShoppingListScreen()),
-      ),
+    await pumpShoppingListScreen(
+      tester,
+      repository: repository,
+      itemRepository: itemRepository,
     );
-
-    await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('shopping_empty_state')), findsOneWidget);
   });
@@ -160,17 +179,11 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          shoppingListRepositoryProvider.overrideWithValue(repository),
-          itemRepositoryProvider.overrideWithValue(itemRepository),
-        ],
-        child: const MaterialApp(home: ShoppingListScreen()),
-      ),
+    await pumpShoppingListScreen(
+      tester,
+      repository: repository,
+      itemRepository: itemRepository,
     );
-
-    await tester.pumpAndSettle();
 
     expect(
       find.byKey(const Key('shopping_unpurchased_section')),
@@ -181,6 +194,48 @@ void main() {
     expect(find.byKey(const Key('shopping_item_tile_2')), findsOneWidget);
     expect(find.byKey(const Key('shopping_item_checkbox_1')), findsOneWidget);
     expect(find.byKey(const Key('shopping_item_checkbox_2')), findsOneWidget);
+  });
+
+  testWidgets('uses dark theme surfaces in dark mode', (
+    WidgetTester tester,
+  ) async {
+    final repository = MockShoppingListRepository();
+    final itemRepository = MockItemRepository();
+    await repository.init();
+    await itemRepository.init();
+    final now = DateTime.now();
+
+    await repository.saveShoppingListItem(
+      ShoppingListItem(id: '1', name: 'Milk', createdAt: now, updatedAt: now),
+    );
+
+    await pumpShoppingListScreen(
+      tester,
+      repository: repository,
+      itemRepository: itemRepository,
+      themeMode: ThemeMode.dark,
+    );
+
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final tileContainer = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byKey(const Key('shopping_item_checkbox_1')),
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is Container && widget.decoration is BoxDecoration,
+            ),
+          )
+          .first,
+    );
+    final decoration = tileContainer.decoration as BoxDecoration;
+    final theme = Theme.of(tester.element(find.byType(ShoppingListScreen)));
+
+    expect(
+      appBar.backgroundColor ?? theme.appBarTheme.backgroundColor,
+      theme.appBarTheme.backgroundColor,
+    );
+    expect(decoration.color, theme.cardColor);
   });
 
   testWidgets('Checking item opens convert dialog', (

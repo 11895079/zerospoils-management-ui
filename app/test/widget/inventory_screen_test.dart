@@ -7,7 +7,9 @@ import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/screens/inventory_screen.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/item_card.dart';
+import 'package:zerospoils/presentation/widgets/item_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Mock repositories and telemetry client for testing
@@ -61,6 +63,7 @@ void main() {
   Future<void> pumpInventoryScreen(
     WidgetTester tester, {
     InventoryFilterState? filterState,
+    ThemeMode themeMode = ThemeMode.light,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -74,7 +77,12 @@ void main() {
             inventoryFilterProvider.overrideWith((ref) => filterState),
           telemetryClientProvider.overrideWithValue(MockTelemetryClient()),
         ],
-        child: const MaterialApp(home: InventoryScreen()),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          home: const InventoryScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -87,6 +95,60 @@ void main() {
 
     expect(find.byKey(const Key('inventory_empty_state')), findsOneWidget);
     expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
+  });
+
+  testWidgets('uses dark theme surfaces in dark mode', (tester) async {
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(tester, themeMode: ThemeMode.dark);
+
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).first);
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    final theme = Theme.of(tester.element(find.byType(InventoryScreen)));
+
+    expect(scaffold.backgroundColor, theme.scaffoldBackgroundColor);
+    expect(
+      appBar.backgroundColor ?? theme.appBarTheme.backgroundColor,
+      theme.appBarTheme.backgroundColor,
+    );
+  });
+
+  testWidgets('uses high-contrast item icons in dark mode', (tester) async {
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(tester, themeMode: ThemeMode.dark);
+
+    final itemIcon = tester.widget<Icon>(
+      find.descendant(
+        of: find.byType(ItemIcon).first,
+        matching: find.byType(Icon),
+      ),
+    );
+    final theme = Theme.of(tester.element(find.byType(InventoryScreen)));
+
+    expect(itemIcon.color, theme.colorScheme.onSurface);
   });
 
   testWidgets('displays list of items', (tester) async {

@@ -1,7 +1,6 @@
 // Home shell with 4-tab navigation
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/theme/app_colors.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import 'inventory_screen.dart';
@@ -14,6 +13,7 @@ class HomeShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bottomNavigationTheme = Theme.of(context).bottomNavigationBarTheme;
     final selectedIndex = ref.watch(homeTabIndexProvider);
     final screens = [
       const InventoryScreen(),
@@ -39,40 +39,24 @@ class HomeShell extends ConsumerWidget {
           });
         },
         type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: AppColors.textSecondary,
-        unselectedItemColor: AppColors.textSecondary,
+        backgroundColor: bottomNavigationTheme.backgroundColor,
+        selectedItemColor: bottomNavigationTheme.selectedItemColor,
+        unselectedItemColor: bottomNavigationTheme.unselectedItemColor,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.inventory_2,
-              key: Key('nav_inventory'),
-              color: Color(0xFF2E7D32),
-            ),
+            icon: Icon(Icons.inventory_2, key: Key('nav_inventory')),
             label: 'Inventory',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.schedule,
-              key: Key('nav_expiring'),
-              color: Color(0xFFEF6C00),
-            ),
+            icon: Icon(Icons.schedule, key: Key('nav_expiring')),
             label: 'Expiring',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.shopping_cart,
-              key: Key('nav_shopping'),
-              color: Color(0xFF1565C0),
-            ),
+            icon: Icon(Icons.shopping_cart, key: Key('nav_shopping')),
             label: 'Shopping',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.insights,
-              key: Key('nav_progress'),
-              color: Color(0xFF6A1B9A),
-            ),
+            icon: Icon(Icons.insights, key: Key('nav_progress')),
             label: 'Progress',
           ),
         ],

@@ -92,7 +92,6 @@ class AppDrawer extends ConsumerWidget {
               context,
               ref,
               icon: Icons.settings,
-              iconColor: const Color(0xFF455A64),
               label: 'Settings',
               tileKey: const Key('drawer_settings_item'),
               onTap: () {
@@ -118,12 +117,14 @@ class AppDrawer extends ConsumerWidget {
     bool selected = false,
     Key? tileKey,
   }) {
+    final theme = Theme.of(context);
+
     return ListTile(
       key: tileKey,
-      leading: Icon(icon, color: iconColor ?? AppColors.textPrimary),
+      leading: Icon(icon, color: iconColor ?? theme.colorScheme.onSurface),
       title: Text(label),
       selected: selected,
-      selectedTileColor: AppColors.primary.withValues(alpha: 0.08),
+      selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.08),
       onTap: onTap,
     );
   }

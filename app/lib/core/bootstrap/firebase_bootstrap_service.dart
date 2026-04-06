@@ -17,7 +17,9 @@ class FirebaseBootstrapService {
   static Future<void> initialize() async {
     try {
       // Initialize Firebase Core
-      await Firebase.initializeApp();
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp();
+      }
 
       // Initialize Firebase Authentication (anonymous sign-in with token caching)
       final authService = FirebaseAuthService();

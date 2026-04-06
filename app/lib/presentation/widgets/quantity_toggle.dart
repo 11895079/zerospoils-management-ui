@@ -48,13 +48,16 @@ class _QuantityToggleState extends State<QuantityToggle> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isChanged = _localQuantity != widget.quantity;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
-          color: widget.isEnabled ? AppColors.textSecondary : AppColors.border,
+          color: widget.isEnabled
+              ? theme.colorScheme.onSurface
+              : theme.dividerColor,
           onPressed: widget.isEnabled && _localQuantity > 1
               ? () => _changeQuantity(_localQuantity - 1)
               : null,
@@ -64,25 +67,27 @@ class _QuantityToggleState extends State<QuantityToggle> {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
             color: widget.isEnabled
-                ? Colors.white
-                : AppColors.backgroundSecondary,
+                ? theme.colorScheme.surface
+                : theme.colorScheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Text(
             _localQuantity.toString(),
-            style: TextStyle(
+            style: (theme.textTheme.bodyLarge ?? const TextStyle()).copyWith(
               fontWeight: FontWeight.bold,
               fontSize: 16,
               color: widget.isEnabled
-                  ? AppColors.textPrimary
-                  : AppColors.textTertiary,
+                  ? theme.textTheme.bodyLarge?.color
+                  : theme.textTheme.bodySmall?.color,
             ),
           ),
         ),
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
-          color: widget.isEnabled ? AppColors.textSecondary : AppColors.border,
+          color: widget.isEnabled
+              ? theme.colorScheme.onSurface
+              : theme.dividerColor,
           onPressed: widget.isEnabled
               ? () => _changeQuantity(_localQuantity + 1)
               : null,

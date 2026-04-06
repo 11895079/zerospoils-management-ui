@@ -30,12 +30,25 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     final daysLeft = item.daysUntilExpiry;
     final isExpired = daysLeft != null && daysLeft < 0;
     final isUrgent = daysLeft != null && daysLeft <= 1 && !isExpired;
     final isConsumedOrWasted = item.status != ItemStatus.available;
     final hasWasteBadge =
         item.wastePercentage != null && item.wastePercentage! > 0;
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final secondaryTextColor =
+        textTheme.bodySmall?.color ?? theme.colorScheme.onSurfaceVariant;
+
+    final cardBackgroundColor = isConsumedOrWasted
+        ? theme.colorScheme.surfaceContainerHigh
+        : isExpired
+        ? (isDarkMode ? const Color(0xFF3A1F25) : const Color(0xFFFCE4EC))
+        : isUrgent
+        ? (isDarkMode ? const Color(0xFF3A321C) : const Color(0xFFFFF8E1))
+        : theme.cardColor;
 
     // Calculate progress percentage (0-1)
     double? expiryProgress;
@@ -65,21 +78,15 @@ class ItemCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: isConsumedOrWasted
-              ? AppColors.backgroundSecondary
-              : isExpired
-              ? const Color(0xFFFCE4EC)
-              : isUrgent
-              ? const Color(0xFFFFF8E1)
-              : Colors.white,
+          color: cardBackgroundColor,
           border: Border.all(
             color: isConsumedOrWasted
-                ? AppColors.border
+                ? theme.dividerColor
                 : isExpired
                 ? AppColors.danger
                 : isUrgent
                 ? AppColors.warning
-                : AppColors.border,
+                : theme.dividerColor,
             width: isExpired || isUrgent ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -102,8 +109,8 @@ class ItemCard extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     color: isConsumedOrWasted
-                        ? AppColors.border
-                        : AppColors.backgroundSecondary,
+                        ? theme.dividerColor
+                        : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   alignment: Alignment.center,
@@ -138,7 +145,10 @@ class ItemCard extends StatelessWidget {
                                       Expanded(
                                         child: Text(
                                           item.name,
-                                          style: AppTextStyles.h4,
+                                          style: textTheme.titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                         ),
                                       ),
                                       if (item.type == ItemType.prepared)
@@ -196,8 +206,8 @@ class ItemCard extends StatelessWidget {
                                     children: [
                                       Text(
                                         item.unit.displayName,
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: AppColors.textSecondary,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: secondaryTextColor,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -240,8 +250,8 @@ class ItemCard extends StatelessWidget {
                         opacity: isConsumedOrWasted ? 0.5 : 1.0,
                         child: Text(
                           _getLocationDisplay(item.location),
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: secondaryTextColor,
                           ),
                         ),
                       ),
@@ -252,12 +262,12 @@ class ItemCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 _getExpiryDisplay(),
-                                style: AppTextStyles.body.copyWith(
+                                style: textTheme.bodyMedium?.copyWith(
                                   color: isExpired
                                       ? AppColors.danger
                                       : isUrgent
                                       ? AppColors.warning
-                                      : AppColors.textSecondary,
+                                      : secondaryTextColor,
                                   fontWeight: isUrgent || isExpired
                                       ? FontWeight.bold
                                       : FontWeight.normal,
@@ -270,8 +280,8 @@ class ItemCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           'Added ${DateFormat('MMM d').format(item.createdAt)}',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.textSecondary,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: secondaryTextColor,
                           ),
                         ),
                       ],
@@ -284,8 +294,8 @@ class ItemCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       '\$${item.purchasePrice!.toStringAsFixed(2)}',
-                      style: AppTextStyles.body.copyWith(
-                        color: AppColors.textSecondary,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: secondaryTextColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -328,7 +338,7 @@ class ItemCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                   child: LinearProgressIndicator(
                     value: expiryProgress,
-                    backgroundColor: AppColors.border,
+                    backgroundColor: theme.dividerColor,
                     valueColor: AlwaysStoppedAnimation<Color>(progressColor!),
                     minHeight: 4,
                   ),

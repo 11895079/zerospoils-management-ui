@@ -278,6 +278,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               final customs = options
                   .where((option) => option.isCustom)
                   .toList();
+              final theme = Theme.of(context);
 
               Future<void> handleDelete(UserCategory category) async {
                 final deleted = await _deleteCategoryFlow(category);
@@ -347,7 +348,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                         controller: searchController,
                         decoration: InputDecoration(
                           hintText: 'Search categories',
-                          prefixIcon: const Icon(Icons.search),
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusMd,
@@ -365,8 +369,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             if (builtIns.isNotEmpty) ...[
                               Text(
                                 'Built-in',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textSecondary,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -382,8 +386,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             if (customs.isNotEmpty) ...[
                               Text(
                                 'Custom',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textSecondary,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -393,7 +397,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                   title: Text(option.label),
                                   onTap: () => Navigator.pop(context, option),
                                   trailing: IconButton(
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: Icon(
+                                      Icons.delete_outline,
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
                                     onPressed: () async {
                                       if (option.custom == null) return;
                                       await handleDelete(option.custom!);
@@ -410,8 +417,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                 ),
                                 child: Text(
                                   'No categories match your search.',
-                                  style: AppTextStyles.body.copyWith(
-                                    color: AppColors.textSecondary,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
                                   ),
                                 ),
                               ),
@@ -909,17 +916,19 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isPro = ref.watch(proEntitlementProvider);
     final ocrEnabled = ref.watch(expiryDateOcrFeatureProvider);
     final showExpiryOcrButton = isPro && ocrEnabled && !kIsWeb;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         title: Text(
           _isEditMode ? 'Edit Item' : 'Add Item',
-          style: AppTextStyles.h3,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         elevation: 0,
       ),
@@ -990,7 +999,12 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                               style: AppTextStyles.body,
                             ),
                           ),
-                          const Icon(Icons.expand_more),
+                          Icon(
+                            Icons.expand_more,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
                         ],
                       ),
                     ),
@@ -1078,8 +1092,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                               : 'Prepared: ${_selectedPreparedDate!.toLocal().toString().split(' ')[0]}',
                           style: AppTextStyles.body.copyWith(
                             color: _selectedPreparedDate == null
-                                ? AppColors.textSecondary
-                                : AppColors.textPrimary,
+                                ? theme.textTheme.bodySmall?.color
+                                : theme.textTheme.bodyMedium?.color,
                           ),
                         ),
                         const Text('📅', style: TextStyle(fontSize: 20)),
@@ -1224,16 +1238,19 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                   : 'Expires: ${_selectedExpiryDate!.toLocal().toString().split(' ')[0]}',
                               style: AppTextStyles.body.copyWith(
                                 color: _selectedExpiryDate == null
-                                    ? AppColors.textSecondary
-                                    : AppColors.textPrimary,
+                                    ? theme.textTheme.bodySmall?.color
+                                    : theme.textTheme.bodyMedium?.color,
                               ),
                             ),
                           ),
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.calendar_today_outlined,
                                 size: 20,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: 8),
                               if (showExpiryOcrButton)
@@ -1252,9 +1269,12 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                                 strokeWidth: 2,
                                               ),
                                             )
-                                          : const Icon(
+                                          : Icon(
                                               Icons.camera_alt_outlined,
                                               size: 20,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
                                             ),
                                       padding: EdgeInsets.zero,
                                       constraints: const BoxConstraints(
@@ -1277,7 +1297,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                   Text(
                     'Or scan the expiry date with camera',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
+                      color: theme.textTheme.bodySmall?.color,
                     ),
                   ),
                 ],
@@ -1315,6 +1335,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   Widget _buildIconPreview() {
+    final theme = Theme.of(context);
     final name = _nameController.text.trim();
     final displayName = name.isEmpty
         ? (_isEditMode ? 'Item' : 'New item')
@@ -1323,9 +1344,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.backgroundSecondary,
+        color: theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
@@ -1351,7 +1372,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 Text(
                   _selectedUserCategory?.name ?? _selectedCategory.displayName,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
               ],
@@ -1380,11 +1401,24 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   InputDecoration _buildInputDecoration({required String hintText}) {
+    final theme = Theme.of(context);
+
     return InputDecoration(
       hintText: hintText,
+      hintStyle: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.textTheme.bodySmall?.color,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: theme.dividerColor),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderSide: BorderSide(color: theme.dividerColor),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderSide: BorderSide(color: theme.colorScheme.primary),
       ),
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,

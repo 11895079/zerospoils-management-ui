@@ -1,7 +1,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
@@ -136,6 +135,7 @@ class _ItemEntrySheetState extends State<ItemEntrySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       key: const Key('item_entry_sheet'),
       padding: EdgeInsets.only(
@@ -155,7 +155,7 @@ class _ItemEntrySheetState extends State<ItemEntrySheet> {
               Text(
                 widget.sourceLabel!,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textSecondary,
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -466,8 +466,8 @@ class _ItemEntrySheetState extends State<ItemEntrySheet> {
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
                     ),
                     child: const Text('Save'),
                   ),

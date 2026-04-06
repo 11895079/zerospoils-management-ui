@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/core/theme/app_colors.dart';
 import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
@@ -37,6 +38,15 @@ void main() {
           );
         },
       ),
+    );
+  }
+
+  Widget buildDarkThemeHarness() {
+    return MaterialApp(
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark,
+      home: ProviderScope(child: Scaffold(body: SettingsScreen())),
     );
   }
 
@@ -319,6 +329,28 @@ void main() {
         find.byType(MaterialApp).first,
       );
       expect(materialAppAfter.themeMode, ThemeMode.dark);
+    });
+
+    testWidgets('Settings tiles use dark theme colors in dark mode', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildDarkThemeHarness());
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.dark_mode);
+
+      final tile = tileForIcon(Icons.dark_mode);
+      final icon = tester.widget<Icon>(
+        find.descendant(of: tile, matching: find.byIcon(Icons.dark_mode)),
+      );
+      final title = tester.widget<Text>(
+        find.descendant(of: tile, matching: find.text('Dark Mode')),
+      );
+      final theme = Theme.of(tester.element(find.byType(SettingsScreen)));
+
+      expect(icon.color, isNot(AppColors.textPrimary));
+      expect(icon.color, theme.colorScheme.onSurface);
+      expect(title.style?.color, theme.textTheme.bodyMedium?.color);
     });
   });
 }

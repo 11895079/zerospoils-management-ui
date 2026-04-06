@@ -3,6 +3,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/item_icon.dart';
 
 void main() {
@@ -94,6 +95,26 @@ void main() {
 
       final icon = tester.widget<Icon>(find.byType(Icon));
       expect(icon.color, customColor);
+    });
+
+    testWidgets('uses high-contrast icon color in dark mode by default', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const Scaffold(
+            body: ItemIcon(itemName: 'Apple', category: ItemCategory.produce),
+          ),
+        ),
+      );
+
+      final icon = tester.widget<Icon>(find.byType(Icon));
+      final theme = Theme.of(tester.element(find.byType(ItemIcon)));
+
+      expect(icon.color, theme.colorScheme.onSurface);
     });
 
     testWidgets('renders for all categories', (WidgetTester tester) async {
