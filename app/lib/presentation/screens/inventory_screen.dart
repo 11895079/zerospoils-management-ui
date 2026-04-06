@@ -756,12 +756,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Inventory',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Inventory'),
         elevation: 1,
         actions: [
           _buildViewModeToggle(viewMode, filterState, filteredCount),

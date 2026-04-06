@@ -39,12 +39,7 @@ class _ReceiptBatchDetailScreenState
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Batch Detail',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Batch Detail'),
         elevation: 1,
       ),
       body: FutureBuilder<_BatchDetailData>(

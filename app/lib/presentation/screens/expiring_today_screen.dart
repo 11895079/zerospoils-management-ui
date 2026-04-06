@@ -106,12 +106,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Expiring Soon',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Expiring Soon'),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

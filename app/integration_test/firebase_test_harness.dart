@@ -39,11 +39,6 @@ final bool firebaseIntegrationConfigAvailable =
     _firebaseMessagingSenderId.isNotEmpty &&
     _firebaseProjectId.isNotEmpty;
 
-final String? firebaseIntegrationSkipReason = firebaseIntegrationConfigAvailable
-    ? null
-    : 'Requires Firebase dart-defines: FIREBASE_API_KEY, FIREBASE_APP_ID, '
-          'FIREBASE_MESSAGING_SENDER_ID, and FIREBASE_PROJECT_ID.';
-
 Future<bool> ensureFirebaseInitializedForIntegrationTests() async {
   if (!firebaseIntegrationConfigAvailable) {
     return false;

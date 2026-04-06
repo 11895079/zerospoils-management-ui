@@ -28,12 +28,7 @@ class ProgressScreen extends ConsumerWidget {
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Progress',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Progress'),
         elevation: 1,
       ),
       body: statsAsync.when(

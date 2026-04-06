@@ -153,6 +153,7 @@ class _ItemEntrySheetState extends State<ItemEntrySheet> {
             if (widget.sourceLabel != null) ...[
               const SizedBox(height: AppSpacing.xs),
               Text(
+                key: const Key('item_entry_source_label'),
                 widget.sourceLabel!,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: theme.textTheme.bodySmall?.color,

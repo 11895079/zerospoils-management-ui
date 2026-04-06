@@ -138,7 +138,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = tester.widget<Text>(find.text('Milk'));
+    final title = tester.widget<Text>(
+      find.descendant(of: find.byType(ItemCard), matching: find.byType(Text)).first,
+    );
     final itemIcon = tester.widget<Icon>(
       find.descendant(of: find.byType(ItemIcon), matching: find.byType(Icon)),
     );
@@ -160,23 +162,26 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final quantityText = tester.widget<Text>(find.text('1'));
+    final quantityToggleFinder = find.byType(QuantityToggle);
+    final quantityContainerFinder = find.descendant(
+      of: quantityToggleFinder,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Container && widget.decoration is BoxDecoration,
+      ),
+    );
+    final quantityTextFinder = find.descendant(
+      of: quantityContainerFinder.first,
+      matching: find.byType(Text),
+    );
+    final quantityText = tester.widget<Text>(quantityTextFinder.first);
     final quantityContainer = tester.widget<Container>(
-      find
-          .ancestor(
-            of: find.text('1'),
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is Container && widget.decoration is BoxDecoration,
-            ),
-          )
-          .first,
+      quantityContainerFinder.first,
     );
     final decoration = quantityContainer.decoration as BoxDecoration;
     final iconButtons = tester
         .widgetList<IconButton>(find.byType(IconButton))
         .toList();
-    final theme = Theme.of(tester.element(find.byType(QuantityToggle)));
+    final theme = Theme.of(tester.element(quantityToggleFinder));
 
     expect(decoration.color, theme.colorScheme.surface);
     expect(quantityText.style?.color, theme.textTheme.bodyLarge?.color);
@@ -192,7 +197,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final label = tester.widget<Text>(find.text('Produce'));
+    final label = tester.widget<Text>(
+      find.descendant(of: find.byType(CategoryChip), matching: find.byType(Text)),
+    );
     final theme = Theme.of(tester.element(find.byType(CategoryChip)));
 
     expect(label.style?.color, theme.textTheme.labelLarge?.color);

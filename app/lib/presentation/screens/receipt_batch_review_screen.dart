@@ -225,12 +225,7 @@ class _ReceiptBatchReviewScreenState
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Review Items',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Review Items'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),

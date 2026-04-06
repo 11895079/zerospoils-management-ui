@@ -344,7 +344,7 @@ void main() {
         find.descendant(of: tile, matching: find.byIcon(Icons.dark_mode)),
       );
       final title = tester.widget<Text>(
-        find.descendant(of: tile, matching: find.text('Dark Mode')),
+        find.descendant(of: tile, matching: find.byType(Text)).first,
       );
       final theme = Theme.of(tester.element(find.byType(SettingsScreen)));
 

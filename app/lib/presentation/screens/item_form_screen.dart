@@ -924,12 +924,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          _isEditMode ? 'Edit Item' : 'Add Item',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: Text(_isEditMode ? 'Edit Item' : 'Add Item'),
         elevation: 0,
       ),
       body: Form(

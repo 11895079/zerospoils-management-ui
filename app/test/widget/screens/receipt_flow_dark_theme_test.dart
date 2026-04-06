@@ -90,7 +90,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final sourceText = tester.widget<Text>(find.text('Receipt import'));
+    final sourceText = tester.widget<Text>(
+      find.byKey(const Key('item_entry_source_label')),
+    );
     final saveButton = tester.widget<ElevatedButton>(
       find.byKey(const Key('item_entry_save')),
     );

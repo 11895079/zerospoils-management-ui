@@ -177,12 +177,7 @@ class _ReceiptBatchCaptureScreenState
                     onPressed: () => Navigator.of(context).maybePop(),
                   )
                 : null,
-            title: Text(
-              'Batch Receipt Capture',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            title: const Text('Batch Receipt Capture'),
           ),
           body: Padding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
