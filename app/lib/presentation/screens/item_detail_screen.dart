@@ -476,7 +476,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               child: Text(
                 'Edit',
                 style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
+                  color: theme.colorScheme.onPrimary,
                   fontSize: 16,
                 ),
               ),
