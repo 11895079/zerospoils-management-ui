@@ -224,9 +224,7 @@ class _ReceiptBatchReviewScreenState
     final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Review Items'),
-      ),
+      appBar: AppBar(title: const Text('Review Items')),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [

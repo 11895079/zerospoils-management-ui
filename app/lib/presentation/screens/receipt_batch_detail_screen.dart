@@ -38,10 +38,7 @@ class _ReceiptBatchDetailScreenState
       key: const Key('screen_receipt_batch_detail'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Batch Detail'),
-        elevation: 1,
-      ),
+      appBar: AppBar(title: const Text('Batch Detail'), elevation: 1),
       body: FutureBuilder<_BatchDetailData>(
         future: _batchFuture,
         builder: (context, snapshot) {

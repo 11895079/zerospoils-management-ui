@@ -27,10 +27,7 @@ class ProgressScreen extends ConsumerWidget {
       key: const Key('screen_progress'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Progress'),
-        elevation: 1,
-      ),
+      appBar: AppBar(title: const Text('Progress'), elevation: 1),
       body: statsAsync.when(
         data: (stats) => _buildContent(context, ref, stats),
         loading: () => const Center(child: CircularProgressIndicator()),

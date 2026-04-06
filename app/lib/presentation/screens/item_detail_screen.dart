@@ -457,12 +457,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          'Item Detail',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text('Item Detail'),
         actions: [
           if (_item != null && _item!.status == ItemStatus.available)
             TextButton(

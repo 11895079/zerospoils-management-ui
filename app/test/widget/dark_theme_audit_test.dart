@@ -139,7 +139,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final title = tester.widget<Text>(
-      find.descendant(of: find.byType(ItemCard), matching: find.byType(Text)).first,
+      find
+          .descendant(of: find.byType(ItemCard), matching: find.byType(Text))
+          .first,
     );
     final itemIcon = tester.widget<Icon>(
       find.descendant(of: find.byType(ItemIcon), matching: find.byType(Icon)),
@@ -198,7 +200,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final label = tester.widget<Text>(
-      find.descendant(of: find.byType(CategoryChip), matching: find.byType(Text)),
+      find.descendant(
+        of: find.byType(CategoryChip),
+        matching: find.byType(Text),
+      ),
     );
     final theme = Theme.of(tester.element(find.byType(CategoryChip)));
 

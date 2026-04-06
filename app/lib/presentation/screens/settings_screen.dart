@@ -281,9 +281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           'Settings',
           style: Theme.of(
             context,
-          ).appBarTheme.titleTextStyle?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          ).appBarTheme.titleTextStyle?.copyWith(fontWeight: FontWeight.w600),
         ),
         elevation: 1,
       ),

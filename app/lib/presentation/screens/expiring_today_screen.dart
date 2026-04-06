@@ -105,9 +105,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
       key: const Key('screen_expiring_today'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Expiring Soon'),
-      ),
+      appBar: AppBar(title: const Text('Expiring Soon')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
