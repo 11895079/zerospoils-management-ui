@@ -37,7 +37,7 @@ class ShoppingListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Shopping List',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.appBarTheme.titleTextStyle?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
