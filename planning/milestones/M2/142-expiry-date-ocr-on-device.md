@@ -2,7 +2,7 @@
 Manual date entry is tedious and error-prone. On-device OCR for expiry dates reduces friction and improves data quality.
 
 ## Goal
-Enable users (Pro tier) to scan product labels with device camera and auto-extract expiry dates using Google ML Kit (offline, privacy-first). Free tier keeps manual entry and basic photos only.
+Enable users to scan product labels with device camera and auto-extract expiry dates using Google ML Kit (offline, privacy-first). This is a free-tier acceleration path for manual item entry, not a Pro feature.
 
 ## Expected behavior
 - Camera icon button next to expiry date field in Add Item form
@@ -12,44 +12,44 @@ Enable users (Pro tier) to scan product labels with device camera and auto-extra
 - Graceful fallback to manual entry if OCR fails or unavailable
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Pro gating: OCR only runs for Pro users with feature flag `expiry_date_ocr` enabled
-- [ ] Free tier: camera/OCR controls hidden; manual entry remains
-- [ ] Camera permission requested on first tap; denial shows guidance and allows retry
-- [ ] Camera button appears next to expiry date field when Pro + flag enabled
-- [ ] Camera capture UI with focus guidance ("Point camera at expiry date")
-- [ ] Date parsing supports formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, and labels ("Best By", "Use By", "Exp")
-- [ ] Extracted date pre-fills expiry field and remains editable
-- [ ] OCR failure shows toast and returns to manual entry
-- [ ] ML Kit unavailable → camera button hidden (no crash)
-- [ ] Telemetry event `expiry_date_scanned` emitted with properties { success, format_detected }
-- [ ] Offline-first verified (no network required)
-- [ ] Accessibility basics (camera button labeled; OCR result announced)
+- [x] Feature available to free users via `expiry_date_ocr` feature flag; no Pro entitlement required
+- [x] Camera permission requested on first tap; denial returns user to manual entry and allows retry
+- [x] Camera button appears next to expiry date field when `expiry_date_ocr` is enabled on supported mobile platforms
+- [x] Camera capture guidance shown before opening the camera ("Point camera at expiry date")
+- [x] Date parsing supports formats: MM/DD/YYYY, DD/MM/YYYY, YYYY-MM-DD, and labels ("Best By", "Use By", "Exp")
+- [x] Extracted date pre-fills expiry field and remains editable
+- [x] OCR failure shows toast and returns to manual entry
+- [x] Unsupported platforms hide the OCR button (no crash)
+- [x] Telemetry event `expiry_date_scanned` emitted with properties { success, format_detected }
+- [x] Offline-first verified (no network required)
+- [x] Accessibility basics: camera button labeled; successful OCR result announced
 
-- [ ] Google ML Kit Text Recognition integrated (iOS + Android) and gated by Pro
+- [x] Google ML Kit Text Recognition integrated for supported mobile platforms
 - [ ] Unit/widget/integration tests added or updated
 
 ## Out of scope
 - Full receipt OCR (deferred to M6 Pro tier)
+- Full package OCR extracting name/category/quantity/price (handled by M3/195)
 - Barcode scanning for product lookup
 - Cloud-based OCR (Google Vision API)
 - Multi-item batch scanning
 
 ## Implementation notes
-- Use Google ML Kit Text Recognition v2 (on-device, free); gate behind Pro entitlement + feature flag
+- Use Google ML Kit Text Recognition v2 (on-device, free); keep behind feature flag for kill-switch control, but not Pro gating
 - iOS: `GoogleMLKit/TextRecognition` pod
 - Android: `com.google.mlkit:text-recognition` Maven
 - Date parsing regex: capture common patterns, prioritize dates within next 2 years (avoid false positives)
-- Camera UI: Show crosshair/focus box overlay
+- Camera UI: current implementation shows a guidance dialog before native camera capture; a custom in-camera overlay remains optional follow-up work if accuracy testing shows it is needed
 - Permission handling: Request camera on first tap; graceful denial handling
 - Keep manual entry as primary method; OCR is optional enhancement
-- Feature flag from M3/130; entitlement check from Pro subscription (M6/410/420)
+- Feature flag from M3/130; default should remain enabled because this is offline and free-tier
 
 ## Test plan
 **Automated:**
 - Unit test: Date parsing logic with various formats ("01/15/2026", "Best By Jan 15 2026", "EXP 15-01-26")
 - Unit test: False positive rejection (dates >2 years away, invalid dates)
-- Widget test: Camera button appears and is tappable
-- Integration test: Mock ML Kit response → verify date pre-filled
+- [x] Widget test: Camera button appears, shows guidance, and can pre-fill the detected date via mocked OCR service
+- [ ] Integration test: Mock ML Kit response → verify date pre-filled
 
 **Manual:**
 1. Tap camera button in Add Item form (verify permission prompt on first use)

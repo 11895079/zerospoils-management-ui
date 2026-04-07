@@ -6,16 +6,17 @@ library;
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../../core/feature_flags/feature_flag_key.dart';
+import '../../core/feature_flags/feature_flags_provider.dart';
+import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/models/user_category.dart';
-import '../../domain/utils/expiry_date_parser.dart';
+import '../../domain/utils/local_id_generator.dart';
 import '../widgets/app_button.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/quantity_toggle.dart';
@@ -71,8 +72,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   final _nameController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
-  final ImagePicker _imagePicker = ImagePicker();
-  final ExpiryDateParser _expiryDateParser = const ExpiryDateParser();
 
   ItemCategory _selectedCategory = ItemCategory.produce;
   UserCategory? _selectedUserCategory;
@@ -88,6 +87,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   bool _ocrInProgress = false;
 
   bool get _isEditMode => widget.itemId != null;
+
+  bool get _supportsExpiryOcrPlatform =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   @override
   void initState() {
@@ -295,7 +299,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 }
 
                 final category = UserCategory(
-                  id: DateTime.now().millisecondsSinceEpoch.toString(),
+                  id: LocalIdGenerator.next(prefix: 'category'),
                   name: name,
                   icon: iconController.text.trim().isEmpty
                       ? null
@@ -691,62 +695,114 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   Future<void> _scanExpiryDate() async {
     if (_ocrInProgress) return;
-    if (kIsWeb) {
+    if (!_supportsExpiryOcrPlatform) {
       _showSnack('Expiry OCR is not available on web yet');
       return;
     }
 
+    final shouldContinue = await _showExpiryOcrGuidance();
+    if (!shouldContinue || !mounted) {
+      return;
+    }
+
+    final view = View.of(context);
+    final textDirection = Directionality.of(context);
+
     setState(() => _ocrInProgress = true);
-    TextRecognizer? textRecognizer;
 
     try {
-      final photo = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
-      if (photo == null) {
-        return;
-      }
+      final scanResult = await ref
+          .read(expiryDateOcrServiceProvider)
+          .scanExpiryDate();
+      if (!mounted) return;
 
-      textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-      final input = InputImage.fromFilePath(photo.path);
-      final result = await textRecognizer.processImage(input);
-
-      final parsed = _expiryDateParser.parse(result.text);
-      if (parsed == null) {
-        _showSnack('No expiry date detected');
+      if (scanResult.isSuccess) {
+        final parsed = scanResult.parsed!;
+        setState(() => _selectedExpiryDate = parsed.date);
+        _showSnack('Expiry date detected');
+        SemanticsService.sendAnnouncement(
+          view,
+          'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
+          textDirection,
+        );
         ref.read(telemetryClientProvider).enqueue({
           'name': 'expiry_date_scanned',
-          'properties': {'success': false, 'format_detected': 'none'},
+          'properties': {'success': true, 'format_detected': parsed.format},
         });
         return;
       }
 
-      setState(() => _selectedExpiryDate = parsed.date);
-      _showSnack('Expiry date detected');
-      ref.read(telemetryClientProvider).enqueue({
-        'name': 'expiry_date_scanned',
-        'properties': {'success': true, 'format_detected': parsed.format},
-      });
-    } on PlatformException catch (_) {
-      _showSnack('Camera permission denied');
-      ref.read(telemetryClientProvider).enqueue({
-        'name': 'expiry_date_scanned',
-        'properties': {
-          'success': false,
-          'format_detected': 'permission_denied',
-        },
-      });
-    } catch (_) {
-      _showSnack('Unable to scan expiry date');
-      ref.read(telemetryClientProvider).enqueue({
-        'name': 'expiry_date_scanned',
-        'properties': {'success': false, 'format_detected': 'error'},
-      });
+      switch (scanResult.failure) {
+        case ExpiryDateOcrFailure.cancelled:
+          return;
+        case ExpiryDateOcrFailure.noDateDetected:
+          _showSnack('No expiry date detected');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'expiry_date_scanned',
+            'properties': {'success': false, 'format_detected': 'none'},
+          });
+          return;
+        case ExpiryDateOcrFailure.permissionDenied:
+          _showSnack(
+            'Camera permission denied. Enable it in Settings to scan expiry dates.',
+          );
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'expiry_date_scanned',
+            'properties': {
+              'success': false,
+              'format_detected': 'permission_denied',
+            },
+          });
+          return;
+        case ExpiryDateOcrFailure.unavailable:
+          _showSnack('Expiry OCR is not available on this platform yet');
+          return;
+        case ExpiryDateOcrFailure.unknown:
+        case null:
+          _showSnack('Unable to scan expiry date');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'expiry_date_scanned',
+            'properties': {'success': false, 'format_detected': 'error'},
+          });
+          return;
+      }
     } finally {
-      await textRecognizer?.close();
       if (mounted) setState(() => _ocrInProgress = false);
     }
+  }
+
+  Future<bool> _showExpiryOcrGuidance() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            key: const Key('expiry_ocr_guidance_dialog'),
+            title: const Text('Point camera at expiry date'),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Align the expiry text inside the camera frame.'),
+                SizedBox(height: 8),
+                Text('Use good lighting and hold the package steady.'),
+                SizedBox(height: 8),
+                Text('You can always edit the detected date before saving.'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                key: const Key('expiry_ocr_guidance_cancel'),
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                key: const Key('expiry_ocr_guidance_continue'),
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Open Camera'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   void _showSnack(String message) {
@@ -851,7 +907,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       final item = Item(
         id: _isEditMode
             ? widget.itemId!
-            : DateTime.now().millisecondsSinceEpoch.toString(),
+            : LocalIdGenerator.next(prefix: 'item'),
         name: _nameController.text.trim(),
         category: _selectedCategory,
         customCategoryId: _selectedUserCategory?.id,
@@ -917,9 +973,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPro = ref.watch(proEntitlementProvider);
-    final ocrEnabled = ref.watch(expiryDateOcrFeatureProvider);
-    final showExpiryOcrButton = isPro && ocrEnabled && !kIsWeb;
+    final expiryOcrEnabledAsync = ref.watch(
+      isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
+    );
+    final showExpiryOcrButton = expiryOcrEnabledAsync.maybeWhen(
+      data: (enabled) => enabled && _supportsExpiryOcrPlatform,
+      orElse: () =>
+          FeatureFlagKey.expiryDateOcr.defaultValue &&
+          _supportsExpiryOcrPlatform,
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1288,13 +1350,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Or scan the expiry date with camera',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
+                  if (showExpiryOcrButton) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Scan the product label to fill the expiry date offline.',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

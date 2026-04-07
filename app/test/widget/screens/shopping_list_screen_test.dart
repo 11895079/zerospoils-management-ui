@@ -479,18 +479,24 @@ void main() {
     await tester.tap(saveButton);
     await tester.pumpAndSettle();
 
-    // Poll until apply-to-all has persisted both converted items.
-    // This avoids timing flakes in CI where async persistence can lag.
+    // Poll until apply-to-all has persisted both converted items and removed
+    // the purchased shopping-list entries. This avoids CI timing flakes where
+    // async sheet dismissal and repository updates can land out of order.
     var attempts = 0;
     List<Item> inventoryItems = await itemRepository.getAllItems();
-    while (inventoryItems.length < 2 && attempts < 20) {
+    List<ShoppingListItem> remainingShoppingItems = await repository
+        .getAllItems();
+    while ((inventoryItems.length < 2 || remainingShoppingItems.isNotEmpty) &&
+        attempts < 50) {
       await tester.pump(const Duration(milliseconds: 100));
       inventoryItems = await itemRepository.getAllItems();
+      remainingShoppingItems = await repository.getAllItems();
       attempts++;
     }
 
     expect(find.byKey(const Key('item_entry_sheet')), findsNothing);
     expect(inventoryItems.length, 2);
+    expect(remainingShoppingItems, isEmpty);
   });
 
   testWidgets('Add item creates entry and persists to repository', (

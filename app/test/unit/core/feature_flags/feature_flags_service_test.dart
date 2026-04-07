@@ -100,7 +100,7 @@ void main() {
         expect(service.isEnabled(FeatureFlagKey.batchPhotoCapture), false);
         expect(service.isEnabled(FeatureFlagKey.householdSync), false);
         expect(service.isEnabled(FeatureFlagKey.iotHooks), false);
-        expect(service.isEnabled(FeatureFlagKey.expiryDateOcr), false);
+        expect(service.isEnabled(FeatureFlagKey.expiryDateOcr), true);
       });
     });
 
@@ -187,7 +187,7 @@ void main() {
         expect(flags.keys.length, 7);
         expect(flags[FeatureFlagKey.cloudSync], false);
         expect(flags[FeatureFlagKey.receiptOcr], false);
-        expect(flags[FeatureFlagKey.expiryDateOcr], false);
+        expect(flags[FeatureFlagKey.expiryDateOcr], true);
       });
 
       test('getAllFlags respects overrides', () async {

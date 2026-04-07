@@ -2,7 +2,7 @@
 Current M2/142 OCR is limited to expiry date extraction only. Users want to point phone at food package and extract all relevant information: product name, category, weight/quantity, cost, expiry date, batch/lot code. This reduces manual entry friction and improves data accuracy for packaged goods.
 
 ## Goal
-Deliver full package OCR feature that extracts multiple fields from product packaging using on-device ML, with confirmation/edit flow and Pro tier gating.
+Deliver full package OCR feature that extracts multiple fields from product packaging using on-device ML, with a confirmation/edit flow that makes item addition materially faster in the free tier.
 
 ## Expected behavior
 - Add-item screen shows "Scan Package" button (camera icon); tap opens camera viewfinder with OCR overlay
@@ -10,13 +10,13 @@ Deliver full package OCR feature that extracts multiple fields from product pack
 - After capture, show confirmation screen with extracted fields pre-filled in add-item form; user reviews/edits before saving
 - OCR confidence indicators: high-confidence fields auto-filled; low-confidence fields flagged with warning icon for manual review
 - Works offline (on-device ML); no cloud API calls required for MVP
-- Gated to Pro tier; free tier users see upgrade prompt when tapping "Scan Package"
+- Available in the free tier as a faster item-entry path; advanced cloud receipt parsing remains separate Pro scope
 - Supports common package types: boxed goods, canned items, dairy labels, meat/poultry labels, frozen packages
 - Telemetry: `package_ocr_attempted`, `package_ocr_success`, `package_ocr_field_edited` events with field-level accuracy tracking
 - Offline-first: all ML inference local; no network dependency
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Add "Scan Package" button to add-item screen (camera icon + label); Pro tier only (show upgrade prompt for free users)
+- [ ] Add "Scan Package" button to add-item screen (camera icon + label); available by default behind feature flag `package_ocr`
 - [ ] Camera viewfinder with OCR overlay: guide user to center package text; real-time text detection feedback
 - [ ] On-device ML model extracts: product_name, category_hint, quantity+unit, price, expiry_date, batch_code from captured image
 - [ ] Confirmation screen: pre-fill add-item form with extracted fields; show confidence indicators (checkmark=high, warning=low)
@@ -50,14 +50,14 @@ Deliver full package OCR feature that extracts multiple fields from product pack
   - Category: keyword matching (e.g., "MILK" → dairy, "CHICKEN" → meat_poultry)
 - Confidence scoring: ML Kit returns per-word confidence; compute field-level average; threshold high ≥ 0.8, low < 0.6
 - Confirmation screen: use read-only text fields for high-confidence; editable fields with warning icon for low-confidence
-- Pro tier check: query feature flag or subscription status; show upgrade dialog with "Unlock OCR" CTA for free users
+- Feature rollout: gate behind a feature flag for kill-switch control; do not require Pro entitlement for the on-device MVP
 - Telemetry: emit `package_ocr_attempted` on camera open; `package_ocr_success` on confirmation save; include array of extracted fields and confidence scores
 - Fallback: if OCR extracts nothing, show empty form with message "No text detected. Please enter manually."
 
 ## Test plan
 **Automated:**
-- Widget test: "Scan Package" button visible for Pro users; tapping opens camera viewfinder
-- Widget test: free tier users tap "Scan Package"; verify upgrade prompt shown
+- Widget test: "Scan Package" button visible when feature flag enabled; tapping opens camera guidance/viewfinder flow
+- Widget test: feature flag disabled hides the package OCR entry point
 - Unit test: OCR extraction logic with mock text blocks; verify correct field mapping (name, category, quantity, expiry, batch)
 - Unit test: date parsing supports MM/DD/YYYY, DD/MM/YYYY, "Best By MM/DD" formats
 - Unit test: quantity parsing extracts "1.5 LB" → quantity=1.5, unit=lbs; "500 ML" → quantity=500, unit=ml
@@ -66,13 +66,13 @@ Deliver full package OCR feature that extracts multiple fields from product pack
 - Integration test: end-to-end OCR flow (mock camera → extraction → confirmation → save item)
 
 **Manual:**
-1. (Pro user) Open add-item; tap "Scan Package"; verify camera opens with OCR overlay guide
+1. Open add-item; tap "Scan Package"; verify camera opens with OCR overlay guide
 2. Point camera at milk carton; capture image; verify extracted fields: name="Whole Milk", category=dairy, quantity=1, unit=gallon, expiry=MM/DD
 3. Review confirmation screen; verify high-confidence fields have checkmark; low-confidence have warning
 4. Edit product name from "Whole Milk" to "Organic Milk"; save item; verify telemetry tracks edit
 5. Test with various packages: cereal box, canned soup, meat label, frozen pizza; verify extraction quality
 6. Test with poor lighting/blurry image; verify graceful fallback (partial extraction or empty fields)
-7. (Free user) Tap "Scan Package"; verify upgrade prompt with "Unlock OCR" CTA; dismiss and use manual entry
+7. Disable the package OCR feature flag; verify the entry point is hidden and manual entry remains available
 8. Test date formats: "Best By 12/31/2025", "EXP: 01/15/26", "Use By 2026-02-10"; verify all parsed correctly
 9. Screen reader: verify camera guidance voiceover, confirmation form announces confidence levels
 
@@ -80,4 +80,4 @@ Deliver full package OCR feature that extracts multiple fields from product pack
 - M2/142 expiry date OCR foundation (ML Kit/Vision setup)
 - M1/080 data model (Item fields: name, category, quantity/unit, cost, expiry, batch_code)
 - M2/140 add-item screen (integrate "Scan Package" button and confirmation flow)
-- Pro tier feature flag system (subscription check for gating)
+- Feature flag system (for rollout and kill-switch control)

@@ -123,9 +123,10 @@ class _ExpiryDateOcr extends FeatureFlagKey {
   const _ExpiryDateOcr()
     : super(
         key: 'expiry_date_ocr',
-        description: 'Extract expiry dates from receipt text',
-        defaultValue: false,
-        targetMilestone: 'M5+',
-        costNotes: 'ML text extraction (Google Vision API)',
+        description:
+            'Extract expiry dates from product labels using on-device OCR',
+        defaultValue: true,
+        targetMilestone: 'M2',
+        costNotes: 'On-device ML Kit OCR; no network cost',
       );
 }

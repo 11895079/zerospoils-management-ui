@@ -8,6 +8,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart'
     show Item, ItemCategory, ItemStatus, Unit;
 import '../../domain/models/shopping_list_item.dart';
+import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
@@ -168,7 +169,7 @@ class ShoppingListScreen extends ConsumerWidget {
           final repository = ref.read(shoppingListRepositoryProvider);
           final now = DateTime.now();
           final item = ShoppingListItem(
-            id: now.microsecondsSinceEpoch.toString(),
+            id: LocalIdGenerator.next(prefix: 'shopping'),
             name: name,
             createdAt: now,
             updatedAt: now,
@@ -332,7 +333,7 @@ class ShoppingListScreen extends ConsumerWidget {
 
     final now = DateTime.now();
     final converted = Item(
-      id: now.microsecondsSinceEpoch.toString(),
+      id: LocalIdGenerator.next(prefix: 'item'),
       name: result.name,
       category: result.category,
       type: result.type,
