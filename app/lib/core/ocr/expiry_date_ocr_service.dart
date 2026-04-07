@@ -30,7 +30,9 @@ class ExpiryDateOcrScanResult {
 }
 
 abstract class ExpiryDateOcrService {
-  Future<ExpiryDateOcrScanResult> scanExpiryDate();
+  Future<ExpiryDateOcrScanResult> scanExpiryDate({
+    String preferredDateFormat = 'MM/DD/YYYY',
+  });
 }
 
 final expiryDateOcrServiceProvider = Provider<ExpiryDateOcrService>((ref) {
@@ -53,7 +55,9 @@ class MlKitExpiryDateOcrService implements ExpiryDateOcrService {
           defaultTargetPlatform == TargetPlatform.iOS);
 
   @override
-  Future<ExpiryDateOcrScanResult> scanExpiryDate() async {
+  Future<ExpiryDateOcrScanResult> scanExpiryDate({
+    String preferredDateFormat = 'MM/DD/YYYY',
+  }) async {
     if (!_isSupportedPlatform) {
       return const ExpiryDateOcrScanResult.failure(
         ExpiryDateOcrFailure.unavailable,
@@ -76,7 +80,10 @@ class MlKitExpiryDateOcrService implements ExpiryDateOcrService {
       final input = InputImage.fromFilePath(photo.path);
       final result = await textRecognizer.processImage(input);
 
-      final parsed = _parser.parse(result.text);
+      final parsed = _parser.parse(
+        result.text,
+        preferredDateFormat: preferredDateFormat,
+      );
       if (parsed == null) {
         return const ExpiryDateOcrScanResult.failure(
           ExpiryDateOcrFailure.noDateDetected,
@@ -84,9 +91,15 @@ class MlKitExpiryDateOcrService implements ExpiryDateOcrService {
       }
 
       return ExpiryDateOcrScanResult.success(parsed);
-    } on PlatformException {
+    } on PlatformException catch (error) {
+      if (_isPermissionDenied(error)) {
+        return const ExpiryDateOcrScanResult.failure(
+          ExpiryDateOcrFailure.permissionDenied,
+        );
+      }
+
       return const ExpiryDateOcrScanResult.failure(
-        ExpiryDateOcrFailure.permissionDenied,
+        ExpiryDateOcrFailure.unknown,
       );
     } catch (_) {
       return const ExpiryDateOcrScanResult.failure(
@@ -95,5 +108,15 @@ class MlKitExpiryDateOcrService implements ExpiryDateOcrService {
     } finally {
       await textRecognizer?.close();
     }
+  }
+
+  bool _isPermissionDenied(PlatformException error) {
+    final code = error.code.toLowerCase();
+    final message = (error.message ?? '').toLowerCase();
+
+    return code.contains('permission') ||
+        code.contains('denied') ||
+        message.contains('permission') ||
+        message.contains('denied');
   }
 }

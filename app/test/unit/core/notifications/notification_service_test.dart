@@ -6,6 +6,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz show TZDateTime;
 import 'package:zerospoils/core/notifications/notification_service.dart';
 import 'package:zerospoils/core/notifications/reminder_notification_payload.dart';
+import 'package:zerospoils/domain/utils/local_id_generator.dart';
 
 /// Mock plugin for testing notification scheduling
 
@@ -587,6 +588,26 @@ void main() {
       expect(scheduledDate.month, 2);
       expect(scheduledDate.year, 2026);
     });
+
+    test(
+      'rescheduleAllNotifications accepts prefixed string item IDs',
+      () async {
+        final items = [
+          {
+            'id': 'item-1712486400000000-3',
+            'expiryDate': DateTime(2026, 2, 15),
+          },
+        ];
+
+        await notificationService.rescheduleAllNotifications(items);
+
+        expect(mockPlugin.scheduledNotifications.length, 1);
+        expect(
+          mockPlugin.scheduledNotifications[0]['id'],
+          LocalIdGenerator.notificationIdFor(items.first['id']! as String),
+        );
+      },
+    );
   });
 
   group('NotificationService - restoreScheduled on app startup', () {
@@ -719,6 +740,29 @@ void main() {
       // Feb 15 - 7 days = Feb 8
       expect(scheduledDate.day, 8);
       expect(scheduledDate.month, 2);
+    });
+
+    test('restoreScheduled accepts prefixed string item IDs', () async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+      });
+
+      final localMockPlugin = MockFlutterLocalNotificationsPlugin();
+      final localService = NotificationService(plugin: localMockPlugin);
+      final items = [
+        {'id': 'item-1712486400000000-4', 'expiryDate': DateTime(2026, 2, 15)},
+      ];
+
+      await localService.restoreScheduled(items: items);
+
+      expect(localMockPlugin.scheduledNotifications.length, 1);
+      expect(
+        localMockPlugin.scheduledNotifications[0]['id'],
+        LocalIdGenerator.notificationIdFor(items.first['id']! as String),
+      );
     });
   });
 }

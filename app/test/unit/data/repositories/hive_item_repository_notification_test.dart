@@ -5,6 +5,7 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/core/notifications/notification_service.dart';
 import 'package:zerospoils/data/adapters/item_adapter.dart';
+import 'package:zerospoils/domain/utils/local_id_generator.dart';
 
 class MockNotificationService implements NotificationService {
   final List<Map<String, dynamic>> scheduledNotifications = [];
@@ -141,6 +142,28 @@ void main() {
       },
     );
 
+    test('saveItem schedules notification for prefixed item IDs', () async {
+      final now = DateTime.now();
+      final item = Item(
+        id: 'item-1712486400000000-1',
+        name: 'Lettuce',
+        category: ItemCategory.produce,
+        expiryDate: DateTime(2026, 2, 16),
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      await repository.saveItem(item);
+
+      expect(mockNotificationService.scheduledNotifications.length, 1);
+      expect(
+        mockNotificationService.scheduledNotifications[0]['itemId'],
+        LocalIdGenerator.notificationIdFor(item.id),
+      );
+    });
+
     test(
       'saveItem does not schedule notification for item without expiry',
       () async {
@@ -257,6 +280,31 @@ void main() {
       expect(
         mockNotificationService.cancelledNotifications[0]['reason'],
         'item_deleted',
+      );
+    });
+
+    test('deleteItem cancels notification for prefixed item IDs', () async {
+      final now = DateTime.now();
+      final item = Item(
+        id: 'item-1712486400000000-2',
+        name: 'Spinach',
+        category: ItemCategory.produce,
+        expiryDate: DateTime(2026, 2, 18),
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      await repository.saveItem(item);
+      mockNotificationService.scheduledNotifications.clear();
+
+      await repository.deleteItem(item.id);
+
+      expect(mockNotificationService.cancelledNotifications.length, 1);
+      expect(
+        mockNotificationService.cancelledNotifications[0]['itemId'],
+        LocalIdGenerator.notificationIdFor(item.id),
       );
     });
 

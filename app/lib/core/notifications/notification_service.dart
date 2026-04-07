@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:zerospoils/core/notifications/notification_preferences.dart';
 import 'package:zerospoils/core/notifications/reminder_notification_payload.dart';
 import 'package:zerospoils/core/notifications/reminder_time_of_day.dart';
+import 'package:zerospoils/domain/utils/local_id_generator.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -381,7 +382,7 @@ class NotificationService {
 
   int? _parseNotificationId(dynamic rawId) {
     if (rawId is int) return rawId;
-    if (rawId is String) return int.tryParse(rawId);
+    if (rawId is String) return LocalIdGenerator.notificationIdFor(rawId);
     return null;
   }
 

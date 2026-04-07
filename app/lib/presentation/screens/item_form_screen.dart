@@ -696,7 +696,24 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   Future<void> _scanExpiryDate() async {
     if (_ocrInProgress) return;
     if (!_supportsExpiryOcrPlatform) {
-      _showSnack('Expiry OCR is not available on web yet');
+      _showSnack('Expiry OCR is not available on this platform yet');
+      return;
+    }
+
+    bool expiryOcrEnabled;
+    String preferredDateFormat;
+    try {
+      expiryOcrEnabled = await ref.read(
+        isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr).future,
+      );
+      preferredDateFormat = await ref.read(dateFormatPreferenceProvider.future);
+    } catch (_) {
+      expiryOcrEnabled = false;
+      preferredDateFormat = 'MM/DD/YYYY';
+    }
+
+    if (!expiryOcrEnabled) {
+      _showSnack('Expiry OCR is currently unavailable');
       return;
     }
 
@@ -713,7 +730,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     try {
       final scanResult = await ref
           .read(expiryDateOcrServiceProvider)
-          .scanExpiryDate();
+          .scanExpiryDate(preferredDateFormat: preferredDateFormat);
       if (!mounted) return;
 
       if (scanResult.isSuccess) {
@@ -978,9 +995,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
     final showExpiryOcrButton = expiryOcrEnabledAsync.maybeWhen(
       data: (enabled) => enabled && _supportsExpiryOcrPlatform,
-      orElse: () =>
-          FeatureFlagKey.expiryDateOcr.defaultValue &&
-          _supportsExpiryOcrPlatform,
+      orElse: () => false,
     );
 
     return Scaffold(
@@ -1290,6 +1305,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                         children: [
                           Expanded(
                             child: Text(
+                              key: const Key('item_form_expiry_date_value'),
                               _selectedExpiryDate == null
                                   ? 'Select date'
                                   : 'Expires: ${_selectedExpiryDate!.toLocal().toString().split(' ')[0]}',

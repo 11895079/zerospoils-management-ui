@@ -5,6 +5,7 @@ library;
 
 import 'package:hive/hive.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/utils/local_id_generator.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../presentation/di/service_locator.dart';
 import 'item_repository_base.dart';
@@ -93,32 +94,30 @@ class HiveItemRepository implements ItemRepositoryBase {
 
     // Handle notification scheduling
     if (_notificationService != null) {
-      final notificationId = _parseItemId(item.id);
-      if (notificationId != null) {
-        if (isNewItem && item.expiryDate != null) {
-          // New item with expiry: schedule notification
-          await _notificationService.scheduleForItem(
+      final notificationId = _notificationIdFor(item.id);
+      if (isNewItem && item.expiryDate != null) {
+        // New item with expiry: schedule notification
+        await _notificationService.scheduleForItem(
+          itemId: notificationId,
+          expiryDate: item.expiryDate!,
+          title: 'Item expiring soon',
+          body: '${item.name} expires tomorrow',
+        );
+      } else if (!isNewItem && existingItem.expiryDate != item.expiryDate) {
+        // Expiry date changed: reschedule notification
+        if (item.expiryDate != null) {
+          await _notificationService.rescheduleForItem(
             itemId: notificationId,
-            expiryDate: item.expiryDate!,
+            newExpiryDate: item.expiryDate!,
             title: 'Item expiring soon',
             body: '${item.name} expires tomorrow',
           );
-        } else if (!isNewItem && existingItem.expiryDate != item.expiryDate) {
-          // Expiry date changed: reschedule notification
-          if (item.expiryDate != null) {
-            await _notificationService.rescheduleForItem(
-              itemId: notificationId,
-              newExpiryDate: item.expiryDate!,
-              title: 'Item expiring soon',
-              body: '${item.name} expires tomorrow',
-            );
-          } else {
-            // Expiry date cleared: cancel notification
-            await _notificationService.cancelForItem(
-              notificationId,
-              reason: 'expiry_cleared',
-            );
-          }
+        } else {
+          // Expiry date cleared: cancel notification
+          await _notificationService.cancelForItem(
+            notificationId,
+            reason: 'expiry_cleared',
+          );
         }
       }
     }
@@ -131,13 +130,10 @@ class HiveItemRepository implements ItemRepositoryBase {
 
     // Cancel any scheduled notification
     if (_notificationService != null) {
-      final notificationId = _parseItemId(id);
-      if (notificationId != null) {
-        await _notificationService.cancelForItem(
-          notificationId,
-          reason: 'item_deleted',
-        );
-      }
+      await _notificationService.cancelForItem(
+        _notificationIdFor(id),
+        reason: 'item_deleted',
+      );
     }
 
     await _box!.delete(id);
@@ -174,13 +170,10 @@ class HiveItemRepository implements ItemRepositoryBase {
     // Cancel all scheduled notifications
     if (_notificationService != null) {
       for (final item in _box!.values) {
-        final notificationId = _parseItemId(item.id);
-        if (notificationId != null) {
-          await _notificationService.cancelForItem(
-            notificationId,
-            reason: 'clear_all',
-          );
-        }
+        await _notificationService.cancelForItem(
+          _notificationIdFor(item.id),
+          reason: 'clear_all',
+        );
       }
     }
 
@@ -193,14 +186,7 @@ class HiveItemRepository implements ItemRepositoryBase {
     await _box?.close();
   }
 
-  /// Parse item ID to notification ID safely
-  /// Returns null if ID is not numeric (for non-numeric IDs, notifications are skipped)
-  int? _parseItemId(String id) {
-    try {
-      return int.parse(id);
-    } catch (e) {
-      // Silently skip notifications for non-numeric IDs
-      return null;
-    }
+  int _notificationIdFor(String id) {
+    return LocalIdGenerator.notificationIdFor(id);
   }
 }

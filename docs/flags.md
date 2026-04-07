@@ -17,7 +17,7 @@ This design ensures:
 
 ## Flags
 
-All flags default to **disabled** for M3 MVP. Flags are enabled per feature's target milestone.
+Flags default per feature based on current milestone readiness and rollout intent.
 
 | Flag | Description | Default | Target | Cost Notes |
 |------|-------------|---------|--------|-----------|

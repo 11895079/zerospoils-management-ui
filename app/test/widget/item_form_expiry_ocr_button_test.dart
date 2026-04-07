@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +10,7 @@ import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/core/ocr/expiry_date_ocr_service.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
+import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 
 class FakeExpiryDateOcrService implements ExpiryDateOcrService {
@@ -15,10 +18,14 @@ class FakeExpiryDateOcrService implements ExpiryDateOcrService {
 
   final ExpiryDateOcrScanResult result;
   int callCount = 0;
+  String? lastPreferredDateFormat;
 
   @override
-  Future<ExpiryDateOcrScanResult> scanExpiryDate() async {
+  Future<ExpiryDateOcrScanResult> scanExpiryDate({
+    String preferredDateFormat = 'MM/DD/YYYY',
+  }) async {
     callCount++;
+    lastPreferredDateFormat = preferredDateFormat;
     return result;
   }
 }
@@ -47,6 +54,7 @@ void main() {
   testWidgets('expiry OCR button hides when feature flag is disabled', (
     tester,
   ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     tester.view.physicalSize = const Size(1200, 2000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -54,25 +62,30 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          isFlagEnabledProvider(
-            FeatureFlagKey.expiryDateOcr,
-          ).overrideWith((ref) async => false),
-        ],
-        child: const MaterialApp(home: ItemFormScreen()),
-      ),
-    );
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) async => false),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('expiry_date_scan_button')), findsNothing);
+      expect(find.byKey(const Key('expiry_date_scan_button')), findsNothing);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets(
-    'expiry OCR button shows by default on supported mobile platforms',
+    'expiry OCR button shows when feature flag resolves true on mobile',
     (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
       tester.view.physicalSize = const Size(1200, 2000);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -80,19 +93,71 @@ void main() {
         tester.view.resetDevicePixelRatio();
       });
 
+      try {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              isFlagEnabledProvider(
+                FeatureFlagKey.expiryDateOcr,
+              ).overrideWith((ref) async => true),
+            ],
+            child: const MaterialApp(home: ItemFormScreen()),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('expiry_date_scan_button')),
+          findsOneWidget,
+        );
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+
+  testWidgets('expiry OCR button stays hidden while flag is loading', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final completer = Completer<bool>();
+
+    try {
       await tester.pumpWidget(
-        const ProviderScope(child: MaterialApp(home: ItemFormScreen())),
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) => completer.future),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
       );
 
+      await tester.pump();
+      expect(find.byKey(const Key('expiry_date_scan_button')), findsNothing);
+
+      completer.complete(true);
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('expiry_date_scan_button')), findsOneWidget);
-    },
-  );
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
 
   testWidgets('guidance dialog opens and OCR result pre-fills expiry date', (
     tester,
   ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     tester.view.physicalSize = const Size(1200, 2000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -109,25 +174,42 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          expiryDateOcrServiceProvider.overrideWithValue(fakeService),
-        ],
-        child: const MaterialApp(home: ItemFormScreen()),
-      ),
-    );
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) async => true),
+            dateFormatPreferenceProvider.overrideWith(
+              (ref) async => 'DD/MM/YYYY',
+            ),
+            expiryDateOcrServiceProvider.overrideWithValue(fakeService),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
 
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('expiry_date_scan_button')));
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('expiry_date_scan_button')));
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('expiry_ocr_guidance_dialog')), findsOneWidget);
+      expect(
+        find.byKey(const Key('expiry_ocr_guidance_dialog')),
+        findsOneWidget,
+      );
 
-    await tester.tap(find.byKey(const Key('expiry_ocr_guidance_continue')));
-    await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('expiry_ocr_guidance_continue')));
+      await tester.pumpAndSettle();
 
-    expect(fakeService.callCount, 1);
-    expect(find.text('Expires: 2026-01-15'), findsOneWidget);
+      expect(fakeService.callCount, 1);
+      expect(fakeService.lastPreferredDateFormat, 'DD/MM/YYYY');
+      final expiryText = tester.widget<Text>(
+        find.byKey(const Key('item_form_expiry_date_value')),
+      );
+      expect(expiryText.data, 'Expires: 2026-01-15');
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }

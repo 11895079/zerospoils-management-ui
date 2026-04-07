@@ -10,7 +10,11 @@ class ExpiryDateParseResult {
 class ExpiryDateParser {
   const ExpiryDateParser();
 
-  ExpiryDateParseResult? parse(String text, {DateTime? now}) {
+  ExpiryDateParseResult? parse(
+    String text, {
+    DateTime? now,
+    String preferredDateFormat = 'MM/DD/YYYY',
+  }) {
     final reference = now ?? DateTime.now();
     final candidates = <ExpiryDateParseResult>[];
     final lower = text.toLowerCase();
@@ -31,10 +35,33 @@ class ExpiryDateParser {
       if (first == null || second == null || yearRaw == null) continue;
       final year = _normalizeYear(yearRaw);
 
-      // Try MM/DD
-      _tryAddCandidate(candidates, year, first, second, 'MM/DD/YYYY');
-      // Try DD/MM
-      _tryAddCandidate(candidates, year, second, first, 'DD/MM/YYYY');
+      final mmDd = _buildCandidate(year, first, second, 'MM/DD/YYYY');
+      final ddMm = _buildCandidate(year, second, first, 'DD/MM/YYYY');
+      final isAmbiguous = first <= 12 && second <= 12;
+
+      if (isAmbiguous) {
+        if (preferredDateFormat == 'DD/MM/YYYY') {
+          if (ddMm != null) {
+            candidates.add(ddMm);
+          } else if (mmDd != null) {
+            candidates.add(mmDd);
+          }
+        } else {
+          if (mmDd != null) {
+            candidates.add(mmDd);
+          } else if (ddMm != null) {
+            candidates.add(ddMm);
+          }
+        }
+        continue;
+      }
+
+      if (mmDd != null) {
+        candidates.add(mmDd);
+      }
+      if (ddMm != null) {
+        candidates.add(ddMm);
+      }
     }
 
     final monthNamePattern = RegExp(
@@ -75,12 +102,25 @@ class ExpiryDateParser {
     int? day,
     String format,
   ) {
-    if (year == null || month == null || day == null) return;
-    if (month < 1 || month > 12 || day < 1 || day > 31) return;
+    final candidate = _buildCandidate(year, month, day, format);
+    if (candidate != null) {
+      candidates.add(candidate);
+    }
+  }
+
+  ExpiryDateParseResult? _buildCandidate(
+    int? year,
+    int? month,
+    int? day,
+    String format,
+  ) {
+    if (year == null || month == null || day == null) return null;
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
     try {
       final date = DateTime(year, month, day);
-      candidates.add(ExpiryDateParseResult(date: date, format: format));
+      return ExpiryDateParseResult(date: date, format: format);
     } catch (_) {}
+    return null;
   }
 
   List<ExpiryDateParseResult> _filterValid(
