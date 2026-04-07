@@ -25,6 +25,26 @@ void main() {
       expect(result!.date, DateTime(2026, 1, 15));
     });
 
+    test('prefers MM/DD/YYYY for ambiguous slash dates by default', () {
+      final result = parser.parse('EXP 03/04/2026', now: now);
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 3, 4));
+      expect(result.format, 'MM/DD/YYYY');
+    });
+
+    test('prefers configured DD/MM/YYYY for ambiguous slash dates', () {
+      final result = parser.parse(
+        'EXP 03/04/2026',
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 3));
+      expect(result.format, 'DD/MM/YYYY');
+    });
+
     test('parses month name format', () {
       final result = parser.parse('Use By Jan 15 2026', now: now);
       expect(result, isNotNull);

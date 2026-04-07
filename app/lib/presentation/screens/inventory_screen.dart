@@ -10,6 +10,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
+import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
@@ -257,7 +258,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       await repo.init();
       final now = DateTime.now();
       final item = Item(
-        id: now.microsecondsSinceEpoch.toString(),
+        id: LocalIdGenerator.next(prefix: 'item'),
         name: result.name,
         category: result.category,
         type: result.type,

@@ -19,12 +19,6 @@ import 'service_locator.dart'
 /// Demo mode flag (enabled by default for prototyping)
 final demoModeProvider = StateProvider<bool>((ref) => true);
 
-/// Pro entitlement flag (defaults to false until subscriptions are wired)
-final proEntitlementProvider = StateProvider<bool>((ref) => false);
-
-/// Feature flag for expiry date OCR (Pro-only)
-final expiryDateOcrFeatureProvider = StateProvider<bool>((ref) => false);
-
 /// Home tab index for bottom navigation (Inventory, Expiring, Shopping, Progress)
 final homeTabIndexProvider = StateProvider<int>((ref) => 0);
 

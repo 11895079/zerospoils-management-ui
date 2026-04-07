@@ -20,7 +20,7 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** In Progress (14/17 completed) — Last Updated: Feb 20, 2026
+**Status:** In Progress (13/17 completed) — Last Updated: Apr 6, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
@@ -31,7 +31,7 @@
 | [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ✅ DONE | Implemented locally | Jan 27, 2026 |
 | [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 28, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
-| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ✅ DONE | Implemented locally | Feb 20, 2026 |
+| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ⚠️ PARTIAL | Implemented locally | Free-tier offline ML Kit flow, guidance prompt, and widget prefill coverage exist; dedicated device-level integration coverage still pending |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ✅ DONE | [commit 7264c7d](https://github.com/bakintunde/zerospoils/commit/7264c7d) | Feb 3, 2026 |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
 | [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⚠️ PARTIAL | Implemented locally | Feb 12, 2026 (Telemetry + accessibility pending) |

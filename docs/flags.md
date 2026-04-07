@@ -17,7 +17,7 @@ This design ensures:
 
 ## Flags
 
-All flags default to **disabled** for M3 MVP. Flags are enabled per feature's target milestone.
+Flags default per feature based on current milestone readiness and rollout intent.
 
 | Flag | Description | Default | Target | Cost Notes |
 |------|-------------|---------|--------|-----------|
@@ -27,7 +27,7 @@ All flags default to **disabled** for M3 MVP. Flags are enabled per feature's ta
 | `batch_photo_capture` | Scan multiple receipts in one session | ❌ | M5+ | Scales with receipt_ocr volume |
 | `household_sync` | Collaborate with household members | ❌ | M6 | Cloud database + sync logic |
 | `iot_hooks` | Integration with smart kitchen devices | ❌ | M7+ | Device APIs and cloud messaging |
-| `expiry_date_ocr` | Extract expiry dates from receipt text | ❌ | M5+ | ML text extraction (Google Vision API) |
+| `expiry_date_ocr` | Extract expiry dates from product labels using on-device OCR | ✅ | M2 | On-device ML Kit OCR; no network cost |
 
 ## Usage
 

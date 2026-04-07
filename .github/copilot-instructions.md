@@ -305,6 +305,7 @@ Examples:
 - Consolidate overlapping issues (example: merged 050 wireframes + 055 UX foundations)
 - Add concrete, automatable test plans to every new issue
 - **MANDATORY TDD:** For every new feature, bugfix, or refactor, always write or update a failing test (unit/widget/integration) before implementing code. Verify the test fails, then implement code until it passes. This applies to all future work items.
+- When addressing pull request review comments, gather all unresolved feedback first, implement the minimal verified fixes, and then resolve the addressed GitHub review threads/comments before handing the work back. If no code change is needed, leave a clear rationale instead of leaving the thread unresolved.
 - Keep milestone READMEs concise (80-120 words: objective, scope, acceptance, issue reference)
 - Use 10-step numbering for easy reordering of planning issues
 - **When implementing features**: Create code in `app/` folder, link PRs to planning issues

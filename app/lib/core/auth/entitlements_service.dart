@@ -36,6 +36,7 @@ class EntitlementsService {
 
       // Map custom claims to feature flag entitlements
       // Pro-only features: receipt_ocr, batch_photo_capture, cloud_sync, cloud_analytics_export
+      // Free-tier features should be omitted here so feature flag defaults remain authoritative.
       return {
         'receipt_ocr': isPro,
         'batch_photo_capture': isPro,
@@ -44,7 +45,6 @@ class EntitlementsService {
         // Free-tier features remain unaffected
         'household_sync': false, // Deferred to M5+
         'iot_hooks': false, // Deferred to M5+
-        'expiry_date_ocr': false, // Deferred to M5+
       };
     } catch (e) {
       debugPrint('[Entitlements] Failed to get entitlements: $e');
