@@ -51,6 +51,13 @@ void main() {
       expect(result!.date, DateTime(2026, 1, 15));
     });
 
+    test('prefers expiry-labelled dates over manufacture dates', () {
+      final result = parser.parse('MFG 01/10/2026\nEXP 03/18/2026', now: now);
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 3, 18));
+    });
+
     test('rejects far future dates', () {
       final result = parser.parse('Best By 12/31/2030', now: now);
       expect(result, isNull);

@@ -5,6 +5,7 @@
 **Scope:**
 - Reminder preferences and notification integration (180, 190, 200)
 - Date format preference (205)
+- Expiry OCR reliability follow-up (196)
 - Shopping list UI and conversion workflow (210, 220)
 - Offline-first verification suite (230)
 - Data export/delete for privacy baseline (240)
@@ -17,7 +18,7 @@
 
 **Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations, full recipe feature. Firebase Firestore/Cloud Functions (using local Hive/sqflite for M3; Supabase for Pro tier in M6).
 
-**Issues:** 130, 180, 190, 195, 200, 205, 210, 220, 230, 240, 250, 300, 350, 360
+**Issues:** 130, 180, 190, 195, 196, 200, 205, 210, 220, 230, 240, 250, 300, 350, 360
 
 **New M3 Features:**
 - **Issue 300:** Badge system (20 badges) — prerequisite for mascot unlocks
@@ -30,7 +31,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** March 1, 2026 — **Progress:** 9/14 issues complete (64%)
+**Last Updated:** April 8, 2026 — **Progress:** 9/15 issues complete (60%)
 
 ### Issues & Completion
 
@@ -40,6 +41,7 @@
 | **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
 | **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
 | **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
+| **196** | Live expiry OCR multi-angle capture | ⏳ Not Started | — | Follow-up to issue 142 for live camera, auto-capture, haptics, and 5-angle capture reliability |
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |

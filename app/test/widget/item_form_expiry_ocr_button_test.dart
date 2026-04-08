@@ -11,18 +11,19 @@ import 'package:zerospoils/core/ocr/expiry_date_ocr_service.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/ocr/expiry_ocr_capture_launcher.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 
-class FakeExpiryDateOcrService implements ExpiryDateOcrService {
-  FakeExpiryDateOcrService(this.result);
+class FakeExpiryOcrCaptureLauncher {
+  FakeExpiryOcrCaptureLauncher(this.result);
 
   final ExpiryDateOcrScanResult result;
   int callCount = 0;
   String? lastPreferredDateFormat;
 
-  @override
-  Future<ExpiryDateOcrScanResult> scanExpiryDate({
-    String preferredDateFormat = 'MM/DD/YYYY',
+  Future<ExpiryDateOcrScanResult> call({
+    required BuildContext context,
+    required String preferredDateFormat,
   }) async {
     callCount++;
     lastPreferredDateFormat = preferredDateFormat;
@@ -165,7 +166,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    final fakeService = FakeExpiryDateOcrService(
+    final fakeLauncher = FakeExpiryOcrCaptureLauncher(
       ExpiryDateOcrScanResult.success(
         ExpiryDateParseResult(
           date: DateTime(2026, 1, 15),
@@ -184,7 +185,9 @@ void main() {
             dateFormatPreferenceProvider.overrideWith(
               (ref) async => 'DD/MM/YYYY',
             ),
-            expiryDateOcrServiceProvider.overrideWithValue(fakeService),
+            expiryOcrCaptureLauncherProvider.overrideWithValue(
+              fakeLauncher.call,
+            ),
           ],
           child: const MaterialApp(home: ItemFormScreen()),
         ),
@@ -202,8 +205,8 @@ void main() {
       await tester.tap(find.byKey(const Key('expiry_ocr_guidance_continue')));
       await tester.pumpAndSettle();
 
-      expect(fakeService.callCount, 1);
-      expect(fakeService.lastPreferredDateFormat, 'DD/MM/YYYY');
+      expect(fakeLauncher.callCount, 1);
+      expect(fakeLauncher.lastPreferredDateFormat, 'DD/MM/YYYY');
       final expiryText = tester.widget<Text>(
         find.byKey(const Key('item_form_expiry_date_value')),
       );

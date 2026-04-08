@@ -12,6 +12,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
+import '../ocr/expiry_ocr_capture_launcher.dart';
 import 'quantity_toggle.dart';
 
 class ItemEntrySeed {
@@ -182,9 +183,10 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
     setState(() => _ocrInProgress = true);
 
     try {
-      final scanResult = await ref
-          .read(expiryDateOcrServiceProvider)
-          .scanExpiryDate(preferredDateFormat: preferredDateFormat);
+      final scanResult = await ref.read(expiryOcrCaptureLauncherProvider)(
+        context: context,
+        preferredDateFormat: preferredDateFormat,
+      );
       if (!mounted) return;
 
       if (scanResult.isSuccess) {

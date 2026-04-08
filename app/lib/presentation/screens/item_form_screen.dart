@@ -22,6 +22,7 @@ import '../widgets/item_icon.dart';
 import '../widgets/quantity_toggle.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
+import '../ocr/expiry_ocr_capture_launcher.dart';
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
@@ -728,9 +729,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     setState(() => _ocrInProgress = true);
 
     try {
-      final scanResult = await ref
-          .read(expiryDateOcrServiceProvider)
-          .scanExpiryDate(preferredDateFormat: preferredDateFormat);
+      final scanResult = await ref.read(expiryOcrCaptureLauncherProvider)(
+        context: context,
+        preferredDateFormat: preferredDateFormat,
+      );
       if (!mounted) return;
 
       if (scanResult.isSuccess) {

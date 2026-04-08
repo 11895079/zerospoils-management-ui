@@ -59,6 +59,7 @@ dependencies:
   path_provider: ^2.1.5
 
   # Camera and OCR
+  camera: ^0.11.0+2
   image_picker: ^1.1.2
   google_mlkit_text_recognition: ^0.15.0
 
