@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
+import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
@@ -64,6 +67,7 @@ void main() {
     WidgetTester tester, {
     InventoryFilterState? filterState,
     ThemeMode themeMode = ThemeMode.light,
+    List<Override> overrides = const [],
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -76,6 +80,7 @@ void main() {
           if (filterState != null)
             inventoryFilterProvider.overrideWith((ref) => filterState),
           telemetryClientProvider.overrideWithValue(MockTelemetryClient()),
+          ...overrides,
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
@@ -619,5 +624,57 @@ void main() {
 
     // Verify FAB exists (navigation requires GoRouter context, tested in integration tests)
     expect(find.byType(FloatingActionButton), findsOneWidget);
+  });
+
+  testWidgets('manual add flow opens item entry sheet from add menu', (
+    tester,
+  ) async {
+    mockRepository.items = [];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byKey(const Key('inventory_add_fab')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add item manually'), findsOneWidget);
+
+    await tester.tap(find.text('Add item manually'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
+  });
+
+  testWidgets('add menu shows expiry OCR option on supported mobile', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    mockRepository.items = [];
+
+    try {
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.expiryDateOcr,
+          ).overrideWith((ref) async => true),
+        ],
+      );
+
+      await tester.tap(find.byKey(const Key('inventory_add_fab')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scan expiry date'), findsOneWidget);
+
+      await tester.tap(find.text('Scan expiry date'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
+      expect(
+        find.byKey(const Key('item_entry_expiry_scan_button')),
+        findsOneWidget,
+      );
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }

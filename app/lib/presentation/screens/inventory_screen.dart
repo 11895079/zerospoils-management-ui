@@ -3,6 +3,7 @@ library;
 /// Inventory list screen
 /// Main screen showing all items with category filters and search
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -32,6 +33,8 @@ final inventoryFilterProvider = StateProvider<InventoryFilterState>((ref) {
 enum InventoryViewMode { list, table, grid }
 
 enum InventorySortKey { name, category, location, expiry, quantity, status }
+
+enum _InventoryAddAction { manualItem, expiryScan, receiptBatch }
 
 extension InventorySortKeyExtension on InventorySortKey {
   String get telemetryKey {
@@ -136,6 +139,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   bool _sortAscending = true;
   int _sortColumnIndex = 3;
 
+  bool get _supportsExpiryOcrPlatform =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
+
   @override
   void initState() {
     super.initState();
@@ -226,7 +234,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     await ref.read(itemRepositoryProvider).init();
   }
 
-  Future<void> _openAddItemSheet({bool emitOpenedTelemetry = true}) async {
+  Future<void> _openAddItemSheet({
+    bool emitOpenedTelemetry = true,
+    String? sourceLabel,
+  }) async {
     if (emitOpenedTelemetry) {
       ref.read(telemetryClientProvider).enqueue({
         'name': 'item_add_opened',
@@ -248,6 +259,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         builder: (_) => ItemEntrySheet(
           requireExpiry: false,
           seed: seed,
+          sourceLabel: sourceLabel,
           showAddAnother: true,
         ),
       );
@@ -878,7 +890,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       'properties': {},
     });
 
-    await showModalBottomSheet<void>(
+    final action = await showModalBottomSheet<_InventoryAddAction>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -904,13 +916,30 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 leading: const Icon(Icons.add_circle_outline),
                 title: const Text('Add item manually'),
                 subtitle: const Text('Enter a single item with details'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  ref.read(telemetryClientProvider).enqueue({
-                    'name': 'inventory_add_menu_selected',
-                    'properties': {'action': 'manual_item'},
-                  });
-                  _openAddItemSheet();
+                onTap: () =>
+                    Navigator.of(ctx).pop(_InventoryAddAction.manualItem),
+              ),
+              Consumer(
+                builder: (context, ref, child) {
+                  final expiryOcrEnabled = ref.watch(
+                    isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
+                  );
+                  return expiryOcrEnabled.when(
+                    data: (enabled) => enabled && _supportsExpiryOcrPlatform
+                        ? ListTile(
+                            leading: const Icon(Icons.camera_alt_outlined),
+                            title: const Text('Scan expiry date'),
+                            subtitle: const Text(
+                              'Use the camera to pre-fill the expiry date',
+                            ),
+                            onTap: () => Navigator.of(
+                              ctx,
+                            ).pop(_InventoryAddAction.expiryScan),
+                          )
+                        : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (error, stack) => const SizedBox.shrink(),
+                  );
                 },
               ),
               // Gate batch receipt entry with feature flag
@@ -927,14 +956,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                             subtitle: const Text(
                               'Capture receipts and add many items',
                             ),
-                            onTap: () {
-                              Navigator.of(ctx).pop();
-                              ref.read(telemetryClientProvider).enqueue({
-                                'name': 'inventory_add_menu_selected',
-                                'properties': {'action': 'receipt_batch'},
-                              });
-                              context.pushNamed('receipt-batch-capture');
-                            },
+                            onTap: () => Navigator.of(
+                              ctx,
+                            ).pop(_InventoryAddAction.receiptBatch),
                           )
                         : const SizedBox.shrink(),
                     loading: () => const SizedBox.shrink(),
@@ -948,6 +972,37 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         );
       },
     );
+
+    if (!mounted || action == null) {
+      return;
+    }
+
+    switch (action) {
+      case _InventoryAddAction.manualItem:
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'inventory_add_menu_selected',
+          'properties': {'action': 'manual_item'},
+        });
+        await _openAddItemSheet();
+        return;
+      case _InventoryAddAction.expiryScan:
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'inventory_add_menu_selected',
+          'properties': {'action': 'expiry_scan'},
+        });
+        await _openAddItemSheet(
+          sourceLabel: 'Scan the expiry date to speed up manual entry',
+        );
+        return;
+      case _InventoryAddAction.receiptBatch:
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'inventory_add_menu_selected',
+          'properties': {'action': 'receipt_batch'},
+        });
+        if (!mounted) return;
+        context.pushNamed('receipt-batch-capture');
+        return;
+    }
   }
 
   Widget _buildDemoModeWarning() {
