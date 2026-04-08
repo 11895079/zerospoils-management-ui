@@ -15,6 +15,7 @@ import '../../core/ocr/expiry_ocr_capture_session.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/utils/expiry_date_parser.dart';
+import '../../domain/utils/live_ocr_product_insight_extractor.dart';
 
 const _expiryOcrAutoCaptureKey = 'expiry_ocr_auto_capture_enabled';
 
@@ -37,6 +38,8 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   };
 
   final ExpiryDateParser _parser = const ExpiryDateParser();
+  final LiveOcrProductInsightExtractor _insightExtractor =
+      const LiveOcrProductInsightExtractor();
 
   CameraController? _cameraController;
   TextRecognizer? _textRecognizer;
@@ -54,6 +57,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   String? _errorMessage;
   String? _liveText;
   ExpiryDateParseResult? _liveDetection;
+  LiveOcrProductInsights _liveInsights = const LiveOcrProductInsights();
   ExpiryDateParseResult? _bestDetection;
   int _frameCounter = 0;
 
@@ -209,6 +213,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
             ? null
             : recognized.text.trim();
         _liveDetection = parsed;
+        _liveInsights = _insightExtractor.extract(recognized.text);
       });
 
       if (parsed == null) {
@@ -592,6 +597,56 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                           : 'Detected expiry: ${_liveDetection!.date.toLocal().toString().split(' ')[0]}',
                       style: AppTextStyles.body.copyWith(color: Colors.white),
                     ),
+                    if (_liveInsights.productName != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Product: ${_liveInsights.productName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                    if (_liveInsights.brandName != null ||
+                        _liveInsights.productType != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        [
+                          if (_liveInsights.brandName != null)
+                            'Brand: ${_liveInsights.brandName}',
+                          if (_liveInsights.productType != null)
+                            'Type: ${_liveInsights.productType}',
+                        ].join('  •  '),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                    if (_liveInsights.storageHint != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _liveInsights.storageHint!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                    if (_liveInsights.keywords.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Keywords: ${_liveInsights.keywords.take(3).join(', ')}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       _liveText == null || _liveText!.isEmpty

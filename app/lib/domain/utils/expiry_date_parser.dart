@@ -26,7 +26,7 @@ class ExpiryDateParser {
     final candidates = <_ScoredExpiryCandidate>[];
     final lower = text.toLowerCase();
 
-    final isoPattern = RegExp(r'(\d{4})[/-](\d{1,2})[/-](\d{1,2})');
+    final isoPattern = RegExp(r'(\d{4})[./-](\d{1,2})[./-](\d{1,2})');
     for (final match in isoPattern.allMatches(lower)) {
       final year = int.tryParse(match.group(1) ?? '');
       final month = int.tryParse(match.group(2) ?? '');
@@ -41,7 +41,7 @@ class ExpiryDateParser {
       );
     }
 
-    final slashPattern = RegExp(r'(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})');
+    final slashPattern = RegExp(r'(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})');
     for (final match in slashPattern.allMatches(lower)) {
       final first = int.tryParse(match.group(1) ?? '');
       final second = int.tryParse(match.group(2) ?? '');

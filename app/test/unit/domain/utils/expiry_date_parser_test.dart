@@ -58,6 +58,17 @@ void main() {
       expect(result!.date, DateTime(2026, 3, 18));
     });
 
+    test('parses dotted expiry labels from package prints', () {
+      final result = parser.parse(
+        'MFG:11.11.25.BND.00871125\nEXP:11.11.27',
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2027, 11, 11));
+    });
+
     test('rejects far future dates', () {
       final result = parser.parse('Best By 12/31/2030', now: now);
       expect(result, isNull);
