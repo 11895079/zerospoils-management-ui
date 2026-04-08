@@ -42,7 +42,7 @@ List past receipt batches with spend totals, item counts, and quick access to ba
 - [ ] Section headers use semantic headings
 
 ## Related Docs
-- See issue `190-batch-receipt-capture-mvp.md` for acceptance criteria
+- See issue `198-shopping-batch-receipt-capture.md` for acceptance criteria
 
 ## Status
 🚧 **PLACEHOLDER** - To be expanded in Figma during M1.

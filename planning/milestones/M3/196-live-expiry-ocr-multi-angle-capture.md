@@ -2,23 +2,24 @@
 Issue 142 delivered the first free-tier expiry OCR path, but it still depends on a single still photo and falls back too often when labels are angled, glossy, or printed near manufacture dates. Users now need a more reliable mobile capture workflow that guides them through several viewpoints, detects expiry text live, and reduces manual retries on real packaging.
 
 ## Goal
-Deliver a dedicated live expiry OCR capture flow that can scan up to five package angles, optionally auto-capture when a valid expiry date is detected, and provide haptic feedback when recognition is confident enough for review.
+Deliver a reusable live expiry OCR capture flow that can run inside the add-item experience or a dedicated fallback flow, scan up to five package angles, optionally auto-capture when a valid expiry date is detected, and provide haptic feedback when recognition is confident enough for review.
 
 ## Expected behavior
-- Add-item expiry OCR opens a dedicated live camera experience instead of a single-shot camera picker
+- Add-item expiry OCR can run inside a shared add-item camera panel or, when needed, a dedicated fallback camera experience instead of the original single-shot camera picker
 - User can capture up to 5 photos for the same item to improve detection across glare, curved packaging, and crowded labels
-- Auto-capture is enabled by default and captures a frame once OCR detects an expiry-labelled date; user can switch auto-capture off and take photos manually
+- Auto-capture is enabled by default and captures a frame once OCR detects an expiry-labelled date that remains stable long enough to be considered reliable; user can switch auto-capture off and take photos manually
 - Device provides haptic feedback when a likely expiry date is detected in the live preview so the user knows the scan is working before capture completes
 - The workflow prefers expiry-labelled dates over manufacture or packed-on dates when multiple dates are visible
-- After capture, the best detected expiry date is returned to the add-item form and remains editable before saving
+- After capture, the best detected expiry date is returned to the add-item form and remains editable before saving; embedded flows can then pause or collapse the camera to conserve resources
 - Works fully offline using on-device text recognition only
 - Telemetry distinguishes camera opens, auto-captures, manual captures, haptic detections, and successful date handoff back into the form
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Replace the single-shot expiry OCR flow with a dedicated live camera screen for supported mobile platforms
-- [ ] Live screen shows capture guidance, current progress, and a visible auto-capture toggle
+- [ ] Replace the single-shot expiry OCR flow with a reusable live camera-based expiry capture experience for supported mobile platforms
+- [ ] Embedded or fallback live camera UI shows capture guidance, current progress, and a visible auto-capture toggle
 - [ ] Auto-capture is on by default, persisted locally, and can be turned off without leaving the flow
 - [ ] Live OCR detection triggers haptic feedback with debounce so repeated detections do not spam vibration
+- [ ] Auto-capture requires the same expiry value to remain stable for a short confidence window before locking the result
 - [ ] User can capture a maximum of 5 photos per item; UI clearly communicates the remaining capture count
 - [ ] Manual capture remains available even when auto-capture is enabled
 - [ ] Detection logic favors expiry-labelled dates over manufacture / packed-on / produced-on dates when both appear in view
@@ -31,7 +32,7 @@ Deliver a dedicated live expiry OCR capture flow that can scan up to five packag
 
 ## Out of scope
 - Full package OCR extraction for name, quantity, price, or batch fields (tracked separately in M3/195)
-- Barcode scanning or product lookup
+- Barcode/product lookup orchestration for packaged-item fast add (tracked separately in M3/197)
 - Cloud OCR APIs or server-side post-processing
 - Background batch scanning for multiple distinct items in one session
 - Advanced camera overlays such as polygon detection or AR alignment guides
@@ -41,6 +42,7 @@ Deliver a dedicated live expiry OCR capture flow that can scan up to five packag
 - Use a camera preview stream on mobile with throttled OCR analysis; maintain a separate still-image pass for captured photos when needed
 - Persist the auto-capture toggle locally so the next scan reuses the user’s last preference
 - Model capture-session behavior in pure Dart to keep auto-capture cooldowns, haptic debounce, and 5-photo limits testable without device plugins
+- Separate OCR session logic from screen routing so the same expiry-detection behavior can be embedded in the add-item form or hosted in a dedicated fallback camera surface
 - Rank candidate dates using nearby keyword context so labels like `EXP`, `Best By`, and `Use By` beat manufacture-oriented labels
 - Capture telemetry granularly enough to compare auto-capture success rates against manual capture fallback
 - Continue returning an editable `ExpiryDateOcrScanResult` back into existing item-entry forms rather than saving directly from the camera flow

@@ -57,7 +57,7 @@ Capture up to 5 receipt photos, extract items, review/edit, and save in one batc
 - [ ] Selection state announced for items
 
 ## Related Docs
-- See issue `190-batch-receipt-capture-mvp.md` for acceptance criteria
+- See issue `198-shopping-batch-receipt-capture.md` for acceptance criteria
 
 ## Status
 🚧 **PLACEHOLDER** - To be expanded in Figma during M1.

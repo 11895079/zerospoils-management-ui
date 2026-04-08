@@ -14,7 +14,7 @@
 - Shopping list features and item conversion workflow (M3).
 - Offline-first verification suite, data export/delete, telemetry instrumentation (M3).
 - Cloud sync, auth, Supabase, serverless functions (M6).
-- Full receipt OCR, barcode scanning, batch photo capture (M6).
+- Full receipt OCR and computer-vision batch photo capture (M6); shopping batch capture with optional receipt-photo attachment and barcode-assisted packaged-item fast add are deferred to M3.
 - Accessibility audit (M4), household sharing (M6), IoT integrations (M7).
 
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.

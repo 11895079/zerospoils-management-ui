@@ -10,7 +10,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - Receipt photo stored locally; max 1 photo per batch; dedupe by checksum
 - Support non-perishable items in batches (e.g., toothpaste, detergent, supplies without expiry_date); items without expiry still link to batch for shopping history tracking
 - After batch created, user adds items and optionally links to batch; batch selector appears in add-item form
-- Items can be linked to batch at add-time (batch dropdown in add-item form) or retroactively (multi-select items → "Link to Batch")
+- Items can be linked to batch at add-time (batch dropdown in add-item form) or retroactively (multi-select items -> "Link to Batch")
 - Each inventory item shows purchase date (from batch purchase date or manual entry if not batched)
 - Each inventory item shows batch association (batch name/date) and allows navigating to batch detail
 - Shopping tab integrates batch history: shows shopping list + past batches (expandable sections)
@@ -30,7 +30,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - [ ] Add `purchase_date` field to Item entity (required; uses batch purchase date when linked)
 - [ ] Add-item form includes batch dropdown (show batches from last 30 days; searchable by store/date)
 - [ ] Add-item form sets purchase date: auto-populate from batch when selected; allow manual override when no batch
-- [ ] Retroactive linking: multi-select items in inventory → "Link to Batch" action → batch selector
+- [ ] Retroactive linking: multi-select items in inventory -> "Link to Batch" action -> batch selector
 - [ ] Shopping tab redesign: tabs/sections for "Shopping List" and "Shopping History" (batches chronological, most recent first)
 - [ ] Batch detail view: receipt photo preview (tap to enlarge), metadata, linked items list, aggregate stats (cost, count, category pie chart)
 - [ ] Inventory item detail shows purchase date and batch info (with link to batch detail)
@@ -67,7 +67,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 ## Test plan
 **Automated:**
 - Widget test: tap "+" FAB shows "Add Individual Item" and "Add Shopping Batch" options
-- Widget test: "Add Shopping Batch" form validation (store name required, total cost ≥0, date not future)
+- Widget test: "Add Shopping Batch" form validation (store name required, total cost >=0, date not future)
 - Widget test: attach receipt photo; verify stored locally and displayed in batch detail
 - Unit test: ShoppingBatch repository CRUD operations (create, read, update, delete)
 - Widget test: add-item form with batch selected; verify `item.batch_id` set correctly
@@ -82,16 +82,16 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 **Manual:**
 1. Tap "+" FAB; select "Add Shopping Batch"; fill store="Costco", date=today, cost=$125.50, payment=credit_card
 2. Attach receipt photo from gallery; verify photo preview shown; save batch
-3. Open Shopping tab → "Shopping History"; verify batch listed with store, date, cost
+3. Open Shopping tab -> "Shopping History"; verify batch listed with store, date, cost
 4. Tap batch; verify detail view shows receipt photo, metadata, 0 items linked
 5. Add item "Milk"; select batch "Costco - 01/25/2026" from dropdown; save item
 6. Return to batch detail; verify "Milk" now listed; item count = 1
 7. Open item detail; verify purchase date shows 01/25/2026 and batch link points to Costco batch
-7. Add 5 more items without batch; go to inventory; multi-select 3 items; tap "Link to Batch"; choose Costco batch
-8. Verify batch detail now shows 4 items (Milk + 3 retroactive); aggregate stats updated
-9. Inventory filter: select "Batch: Costco 01/25"; verify only 4 items shown
-10. Backup data via M2/165; delete batch; restore backup; verify batch + receipt photo + item links restored
-11. Screen reader: verify form labels, receipt photo alt text, batch list announces store/date/cost
+8. Add 5 more items without batch; go to inventory; multi-select 3 items; tap "Link to Batch"; choose Costco batch
+9. Verify batch detail now shows 4 items (Milk + 3 retroactive); aggregate stats updated
+10. Inventory filter: select "Batch: Costco 01/25"; verify only 4 items shown
+11. Backup data via M2/165; delete batch; restore backup; verify batch + receipt photo + item links restored
+12. Screen reader: verify form labels, receipt photo alt text, batch list announces store/date/cost
 
 ## Dependencies
 - M1/080 data model (Item entity for batch_id foreign key)
