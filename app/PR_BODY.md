@@ -52,3 +52,10 @@ This PR completes the free camera-assisted add flow cleanup and telemetry normal
 - Use `item_added` rather than scan-attempt events as the source of truth for accepted camera-derived values
 - `receipt_batch_camera` is intentionally normalized as camera-based without claiming field-level barcode/expiry acceptance
 - Concrete dashboard queries for these semantics now live in `docs/item-entry-telemetry-analysis.md`
+
+## Code Review Fixes (post-review)
+- Replaced non-existent `SemanticsService.sendAnnouncement` with correct `SemanticsService.announce` API
+- Normalized `expiry_date_scanned` telemetry: `success`→`scan_success`, `format_detected`→`date_format_detected`
+- Removed dead unreachable `setState` block in `_capturePhoto`
+- Replaced eager full-res photo bytes with lazy `FutureBuilder` thumbnail loading
+- Hardened widget test: `find.text(...)` replaced with key-based `Text.data` assertion
