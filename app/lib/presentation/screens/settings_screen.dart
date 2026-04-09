@@ -1,7 +1,6 @@
 library;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -11,7 +10,6 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../core/settings/settings_keys.dart';
 import '../../core/notifications/notification_preferences.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
@@ -37,15 +35,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _darkModeEnabled = false;
   bool _mealPlanningEnabled = false;
   bool _dataSyncEnabled = false;
-  bool _cameraAssistedAddEnabled = false;
   bool _analyticsConsent = true;
   int _leadTimeDays = 3;
   String _dateFormat = 'MM/DD/YYYY';
-
-  bool get _supportsCameraAssistedAddPlatform =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
 
   @override
   void initState() {
@@ -68,8 +60,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _darkModeEnabled = prefs.getBool('dark_mode_enabled') ?? false;
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
-      _cameraAssistedAddEnabled =
-          prefs.getBool(cameraAssistedAddEnabledKey) ?? false;
       _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
       _leadTimeDays =
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
@@ -476,20 +466,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
-            if (_supportsCameraAssistedAddPlatform)
-              _buildToggleTile(
-                icon: Icons.camera_alt,
-                label: 'Camera-assisted add',
-                subtitle:
-                    'Show the packaged-item camera panel at the top of add item.',
-                value: _cameraAssistedAddEnabled,
-                onChanged: (value) => _setBool(
-                  key: cameraAssistedAddEnabledKey,
-                  value: value,
-                  onUpdate: () => _cameraAssistedAddEnabled = value,
-                  onChange: () => _trackCameraAssistedAddChanged(ref, value),
-                ),
-              ),
             _buildToggleTile(
               icon: Icons.restaurant,
               label: 'Meal Planning',
@@ -951,14 +927,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     telemetry.enqueue({
       'name': 'theme_changed',
       'properties': {'theme': darkModeEnabled ? 'dark' : 'light'},
-    });
-  }
-
-  void _trackCameraAssistedAddChanged(WidgetRef ref, bool enabled) {
-    final telemetry = ref.read(telemetryClientProvider);
-    telemetry.enqueue({
-      'name': 'camera_assisted_add_changed',
-      'properties': {'enabled': enabled},
     });
   }
 }

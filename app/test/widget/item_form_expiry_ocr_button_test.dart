@@ -171,11 +171,9 @@ void main() {
   });
 
   testWidgets(
-    'camera-assisted panel shows when enabled in settings on mobile',
+    'camera-assisted panel shows on supported mobile when OCR is enabled',
     (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'camera_assisted_add_enabled': true,
-      });
+      SharedPreferences.setMockInitialValues({});
 
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       tester.view.physicalSize = const Size(1200, 2000);
@@ -213,47 +211,10 @@ void main() {
     },
   );
 
-  testWidgets('camera-assisted panel stays hidden when disabled in settings', (
-    tester,
-  ) async {
-    SharedPreferences.setMockInitialValues({
-      'camera_assisted_add_enabled': false,
-    });
-
-    debugDefaultTargetPlatformOverride = TargetPlatform.android;
-    tester.view.physicalSize = const Size(1200, 2000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    try {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            isFlagEnabledProvider(
-              FeatureFlagKey.expiryDateOcr,
-            ).overrideWith((ref) async => true),
-          ],
-          child: const MaterialApp(home: ItemFormScreen()),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('camera_assisted_add_panel')), findsNothing);
-    } finally {
-      debugDefaultTargetPlatformOverride = null;
-    }
-  });
-
   testWidgets('barcode stage prefills name and locks panel after capture', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({
-      'camera_assisted_add_enabled': true,
-    });
+    SharedPreferences.setMockInitialValues({});
 
     final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
       const BarcodeCaptureResult.success(
@@ -316,9 +277,7 @@ void main() {
   testWidgets('barcode stage keeps form untouched when scan is cancelled', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues({
-      'camera_assisted_add_enabled': true,
-    });
+    SharedPreferences.setMockInitialValues({});
 
     final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
       const BarcodeCaptureResult.failure(BarcodeCaptureFailure.cancelled),
@@ -369,9 +328,7 @@ void main() {
   testWidgets(
     'camera-assisted expiry handoff locks expiry after barcode scan',
     (tester) async {
-      SharedPreferences.setMockInitialValues({
-        'camera_assisted_add_enabled': true,
-      });
+      SharedPreferences.setMockInitialValues({});
 
       final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
         const BarcodeCaptureResult.success(

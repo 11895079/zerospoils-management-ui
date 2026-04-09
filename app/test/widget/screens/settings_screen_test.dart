@@ -308,7 +308,7 @@ void main() {
       expect(event['properties']['theme'], 'dark');
     });
 
-    testWidgets('Camera-assisted add toggle persists preference', (
+    testWidgets('Camera-assisted add toggle is no longer shown', (
       WidgetTester tester,
     ) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -317,16 +317,7 @@ void main() {
         await tester.pumpWidget(buildTestHarness());
         await tester.pumpAndSettle();
 
-        await scrollToIcon(tester, Icons.camera_alt);
-
-        var prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('camera_assisted_add_enabled') ?? false, false);
-
-        await tester.tap(switchForIcon(Icons.camera_alt));
-        await tester.pumpAndSettle();
-
-        prefs = await SharedPreferences.getInstance();
-        expect(prefs.getBool('camera_assisted_add_enabled'), true);
+        expect(find.byIcon(Icons.camera_alt), findsNothing);
       } finally {
         debugDefaultTargetPlatformOverride = null;
       }

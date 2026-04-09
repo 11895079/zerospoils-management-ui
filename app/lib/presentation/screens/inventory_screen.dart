@@ -3,7 +3,6 @@ library;
 /// Inventory list screen
 /// Main screen showing all items with category filters and search
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -11,13 +10,12 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
-import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/item_entry_sheet.dart';
 import '../widgets/item_icon.dart';
+import 'item_form_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -34,7 +32,7 @@ enum InventoryViewMode { list, table, grid }
 
 enum InventorySortKey { name, category, location, expiry, quantity, status }
 
-enum _InventoryAddAction { manualItem, expiryScan, receiptBatch }
+enum _InventoryAddAction { manualItem, receiptBatch }
 
 extension InventorySortKeyExtension on InventorySortKey {
   String get telemetryKey {
@@ -139,11 +137,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   bool _sortAscending = true;
   int _sortColumnIndex = 3;
 
-  bool get _supportsExpiryOcrPlatform =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
-
   @override
   void initState() {
     super.initState();
@@ -234,80 +227,21 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     await ref.read(itemRepositoryProvider).init();
   }
 
-  Future<void> _openAddItemSheet({
-    bool emitOpenedTelemetry = true,
-    String? sourceLabel,
-  }) async {
+  Future<void> _openAddItemForm({bool emitOpenedTelemetry = true}) async {
     if (emitOpenedTelemetry) {
       ref.read(telemetryClientProvider).enqueue({
         'name': 'item_add_opened',
         'properties': {},
       });
     }
-    ItemEntrySeed? seed;
-    var keepAdding = true;
+    if (!mounted) return;
 
-    while (keepAdding && mounted) {
-      final result = await showModalBottomSheet<ItemEntryResult>(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusLg),
-          ),
-        ),
-        builder: (_) => ItemEntrySheet(
-          requireExpiry: false,
-          seed: seed,
-          sourceLabel: sourceLabel,
-          showAddAnother: true,
-        ),
-      );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const ItemFormScreen()));
 
-      if (result == null || result.skipped) break;
-
-      final repo = ref.read(itemRepositoryProvider);
-      await repo.init();
-      final now = DateTime.now();
-      final item = Item(
-        id: LocalIdGenerator.next(prefix: 'item'),
-        name: result.name,
-        category: result.category,
-        type: result.type,
-        preparedDate: result.preparedDate,
-        location: result.location,
-        quantity: result.quantity,
-        unit: result.unit,
-        expiryDate: result.expiryDate,
-        purchasePrice: result.purchasePrice,
-        status: ItemStatus.available,
-        createdAt: now,
-        updatedAt: now,
-      );
-      await repo.saveItem(item);
-      ref.invalidate(itemsFutureProvider);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${item.name} added to inventory'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-      keepAdding = result.addAnother;
-      if (keepAdding) {
-        seed = ItemEntrySeed(
-          name: '',
-          category: result.category,
-          quantity: result.quantity,
-          unit: result.unit,
-          purchasePrice: result.purchasePrice,
-          type: result.type,
-          preparedDate: result.preparedDate,
-        );
-      }
-    }
+    if (!mounted) return;
+    ref.invalidate(itemsFutureProvider);
   }
 
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
@@ -916,33 +850,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 key: const Key('inventory_add_manual_action'),
                 leading: const Icon(Icons.add_circle_outline),
                 title: const Text('Add item manually'),
-                subtitle: const Text('Enter a single item with details'),
+                subtitle: const Text('Open the full add item form'),
                 onTap: () =>
                     Navigator.of(ctx).pop(_InventoryAddAction.manualItem),
-              ),
-              Consumer(
-                builder: (context, ref, child) {
-                  final expiryOcrEnabled = ref.watch(
-                    isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
-                  );
-                  return expiryOcrEnabled.when(
-                    data: (enabled) => enabled && _supportsExpiryOcrPlatform
-                        ? ListTile(
-                            key: const Key('inventory_add_expiry_scan_action'),
-                            leading: const Icon(Icons.camera_alt_outlined),
-                            title: const Text('Scan expiry date'),
-                            subtitle: const Text(
-                              'Use the camera to pre-fill the expiry date',
-                            ),
-                            onTap: () => Navigator.of(
-                              ctx,
-                            ).pop(_InventoryAddAction.expiryScan),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (error, stack) => const SizedBox.shrink(),
-                  );
-                },
               ),
               // Gate batch receipt entry with feature flag
               Consumer(
@@ -985,16 +895,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           'name': 'inventory_add_menu_selected',
           'properties': {'action': 'manual_item'},
         });
-        await _openAddItemSheet();
-        return;
-      case _InventoryAddAction.expiryScan:
-        ref.read(telemetryClientProvider).enqueue({
-          'name': 'inventory_add_menu_selected',
-          'properties': {'action': 'expiry_scan'},
-        });
-        await _openAddItemSheet(
-          sourceLabel: 'Scan the expiry date to speed up manual entry',
-        );
+        await _openAddItemForm();
         return;
       case _InventoryAddAction.receiptBatch:
         ref.read(telemetryClientProvider).enqueue({
@@ -1819,7 +1720,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   'name': 'add_item_from_empty_state',
                   'properties': {},
                 });
-                _openAddItemSheet(emitOpenedTelemetry: false);
+                _openAddItemForm(emitOpenedTelemetry: false);
               },
               child: const Text('Add your first item'),
             ),

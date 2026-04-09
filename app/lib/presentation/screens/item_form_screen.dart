@@ -8,12 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
 import '../../core/feature_flags/feature_flags_provider.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
-import '../../core/settings/settings_keys.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -92,7 +90,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   bool _isLoading = false;
   bool _categoryTouched = false;
   bool _ocrInProgress = false;
-  bool _cameraAssistedAddEnabled = false;
   bool _barcodeScanInProgress = false;
   _CameraAssistedStage _cameraAssistedStage = _CameraAssistedStage.barcodeReady;
   String? _cameraBarcodeValue;
@@ -109,20 +106,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   void initState() {
     super.initState();
-    _loadCameraAssistedAddSetting();
     _loadUserCategories();
     if (_isEditMode) {
       _loadItem();
     }
-  }
-
-  Future<void> _loadCameraAssistedAddSetting() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    setState(() {
-      _cameraAssistedAddEnabled =
-          prefs.getBool(cameraAssistedAddEnabledKey) ?? false;
-    });
   }
 
   Color _randomPastelColor() {
@@ -1131,8 +1118,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       data: (enabled) => enabled && _supportsExpiryOcrPlatform,
       orElse: () => false,
     );
-    final showCameraAssistedPanel =
-        _cameraAssistedAddEnabled && showExpiryOcrButton;
+    final showCameraAssistedPanel = showExpiryOcrButton;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

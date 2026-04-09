@@ -4,12 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
 import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
+import 'package:zerospoils/data/repositories/user_category_repository.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/screens/inventory_screen.dart';
+import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/item_card.dart';
 import 'package:zerospoils/presentation/widgets/item_icon.dart';
@@ -43,8 +46,22 @@ class MockTelemetryClient extends TelemetryClient {
   }
 }
 
+class FakeUserCategoryRepository extends UserCategoryRepository {
+  final List<UserCategory> categories;
+
+  FakeUserCategoryRepository({this.categories = const []});
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<UserCategory>> getAll() async =>
+      List<UserCategory>.from(categories);
+}
+
 void main() {
   late MockItemRepository mockRepository;
+  late FakeUserCategoryRepository fakeUserCategoryRepository;
   Item buildTestItem() {
     final now = DateTime.now();
     return Item(
@@ -60,6 +77,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockItemRepository();
+    fakeUserCategoryRepository = FakeUserCategoryRepository();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -77,6 +95,9 @@ void main() {
             // Bypass Hive init - return mock items directly
             return mockRepository.items;
           }),
+          userCategoryRepositoryProvider.overrideWithValue(
+            fakeUserCategoryRepository,
+          ),
           if (filterState != null)
             inventoryFilterProvider.overrideWith((ref) => filterState),
           telemetryClientProvider.overrideWithValue(MockTelemetryClient()),
@@ -644,10 +665,10 @@ void main() {
     await tester.tap(find.byKey(const Key('inventory_add_manual_action')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
+    expect(find.byType(ItemFormScreen), findsOneWidget);
   });
 
-  testWidgets('add menu shows expiry OCR option on supported mobile', (
+  testWidgets('add menu does not show separate expiry OCR option on mobile', (
     tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -668,18 +689,7 @@ void main() {
 
       expect(
         find.byKey(const Key('inventory_add_expiry_scan_action')),
-        findsOneWidget,
-      );
-
-      await tester.tap(
-        find.byKey(const Key('inventory_add_expiry_scan_action')),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
-      expect(
-        find.byKey(const Key('item_entry_expiry_scan_button')),
-        findsOneWidget,
+        findsNothing,
       );
     } finally {
       debugDefaultTargetPlatformOverride = null;
