@@ -303,6 +303,8 @@ class Item extends Equatable {
     createdAt,
     updatedAt,
     brand,
+    customCategoryId,
+    customCategoryName,
   ];
 }
 
