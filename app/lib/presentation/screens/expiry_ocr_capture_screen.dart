@@ -316,7 +316,11 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     try {
       await _stopImageStream();
       final photo = await controller.takePicture();
-      _photoThumbnailBytes[photo.path] = await _encodeThumbnail(photo);
+      try {
+        _photoThumbnailBytes[photo.path] = await _encodeThumbnail(photo);
+      } catch (_) {
+        // Thumbnail encoding failed; the photo strip will show a placeholder.
+      }
       final analysis = await _analyzeCapturedPhoto(photo.path);
 
       _captureSession.registerPhotoCaptured();
@@ -361,22 +365,32 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     }
   }
 
-  /// Decodes [photo] and scales it down to [_thumbnailDimension]×[_thumbnailDimension]
-  /// pixels before re-encoding as PNG. Storing only small thumbnails instead of
-  /// full-resolution bytes avoids multi-MB allocations per captured frame.
+  /// Decodes [photo] and scales it down so the longest edge fits within
+  /// [_thumbnailDimension] pixels before re-encoding as PNG. Storing only small
+  /// thumbnails instead of full-resolution bytes avoids multi-MB allocations per
+  /// captured frame.
+  ///
+  /// Throws if the image cannot be decoded or encoded, letting callers decide
+  /// how to handle failures (e.g. skip storing the thumbnail).
   Future<Uint8List> _encodeThumbnail(XFile photo) async {
     final fullBytes = await photo.readAsBytes();
     final codec = await ui.instantiateImageCodec(
       fullBytes,
       targetWidth: _thumbnailDimension,
-      targetHeight: _thumbnailDimension,
     );
-    final frame = await codec.getNextFrame();
-    final byteData = await frame.image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    frame.image.dispose();
-    return byteData?.buffer.asUint8List() ?? fullBytes;
+    try {
+      final frame = await codec.getNextFrame();
+      final byteData = await frame.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      frame.image.dispose();
+      if (byteData == null) {
+        throw StateError('Failed to encode thumbnail PNG');
+      }
+      return byteData.buffer.asUint8List();
+    } finally {
+      codec.dispose();
+    }
   }
 
   Future<ExpiryDateOcrScanResult> _analyzeCapturedPhoto(String path) async {
