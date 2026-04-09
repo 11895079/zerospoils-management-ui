@@ -51,4 +51,14 @@ Best before:
 0F 09353F
 3016 43010
 ''';
+
+  static const String yearMonthDayCompactStamp = '''
+BEST
+BEFORE
+MEILLEUR
+AVANT
+YEAR/MONTH/DAY · ANNEE/MOIS/JOUR
+27APR22A
+Use this number in correspondence related to this product.
+''';
 }

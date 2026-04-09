@@ -183,6 +183,26 @@ class ExpiryDateParser {
       );
     }
 
+    final yearMonthDayTextPattern = RegExp(
+      r'(\d{2,4})\s*(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s*(\d{1,2})(?:[a-z])?',
+    );
+    for (final match in yearMonthDayTextPattern.allMatches(lower)) {
+      final yearRaw = int.tryParse(match.group(1) ?? '');
+      final month = _monthFromName(match.group(2) ?? '');
+      final day = int.tryParse(match.group(3) ?? '');
+      if (yearRaw == null || month == null || day == null) continue;
+
+      final score =
+          _scoreContext(contextText, match.start, match.end) +
+          _scoreYearMonthDayContext(contextText, match.start, match.end);
+      if (score <= 0) {
+        continue;
+      }
+
+      final year = _normalizeYear(yearRaw);
+      _tryAddCandidate(candidates, year, month, day, 'YY MMM DD', score);
+    }
+
     final bilingualMonthCodePattern = RegExp(
       r'(\d{4})\s*([a-z]{2})\s*(\d{1,2})',
     );
@@ -324,6 +344,27 @@ class ExpiryDateParser {
       score -= 40;
     }
     return score;
+  }
+
+  int _scoreYearMonthDayContext(String text, int start, int end) {
+    final windowStart = start - 48 < 0 ? 0 : start - 48;
+    final windowEnd = end + 48 > text.length ? text.length : end + 48;
+    final context = text.substring(windowStart, windowEnd);
+
+    const yearMonthDayKeywords = [
+      'year/month/day',
+      'year month day',
+      'annee/mois/jour',
+      'annee mois jour',
+      'année/mois/jour',
+      'année mois jour',
+    ];
+
+    if (yearMonthDayKeywords.any(context.contains)) {
+      return 160;
+    }
+
+    return 0;
   }
 
   int _normalizeYear(int yearRaw) {

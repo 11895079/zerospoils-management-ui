@@ -152,6 +152,18 @@ void main() {
       expect(result.format, 'DD MM YYYY');
     });
 
+    test('parses compact YYMONDD stamp when label says year month day', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.yearMonthDayCompactStamp,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2027, 4, 22));
+      expect(result.format, 'YY MMM DD');
+    });
+
     test('prefers BB/MA month-code date over packed month-code date', () {
       final result = parser.parse(
         ExpiryOcrTextFixtures.canadianMonthCodePackedAndBestBefore,
