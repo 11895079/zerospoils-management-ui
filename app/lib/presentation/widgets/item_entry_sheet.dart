@@ -177,7 +177,6 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
       return;
     }
 
-    final view = View.of(context);
     final textDirection = Directionality.of(context);
 
     setState(() => _ocrInProgress = true);
@@ -193,14 +192,16 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
         final parsed = scanResult.parsed!;
         setState(() => _expiryDate = parsed.date);
         _showSnack('Expiry date detected');
-        SemanticsService.sendAnnouncement(
-          view,
+        SemanticsService.announce(
           'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
           textDirection,
         );
         ref.read(telemetryClientProvider).enqueue({
           'name': 'expiry_date_scanned',
-          'properties': {'success': true, 'format_detected': parsed.format},
+          'properties': {
+            'scan_success': true,
+            'date_format_detected': parsed.format,
+          },
         });
         return;
       }
@@ -212,7 +213,10 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
           _showSnack('No expiry date detected');
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
-            'properties': {'success': false, 'format_detected': 'none'},
+            'properties': {
+              'scan_success': false,
+              'date_format_detected': 'none',
+            },
           });
           return;
         case ExpiryDateOcrFailure.permissionDenied:
@@ -222,8 +226,8 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
             'properties': {
-              'success': false,
-              'format_detected': 'permission_denied',
+              'scan_success': false,
+              'date_format_detected': 'permission_denied',
             },
           });
           return;
@@ -235,7 +239,10 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
           _showSnack('Unable to scan expiry date');
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
-            'properties': {'success': false, 'format_detected': 'error'},
+            'properties': {
+              'scan_success': false,
+              'date_format_detected': 'error',
+            },
           });
           return;
       }
