@@ -56,6 +56,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   bool _streaming = false;
   bool _autoCaptureEnabled = true;
   bool _hapticsEnabled = true;
+  bool _torchEnabled = false;
   String? _errorMessage;
   String? _liveText;
   ExpiryDateParseResult? _liveDetection;
@@ -130,6 +131,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
 
       await controller.initialize();
       await controller.setFlashMode(FlashMode.off);
+      _torchEnabled = false;
 
       _cameraController = controller;
       _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
@@ -321,6 +323,16 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
       }
       _bestDetection = _selectBestDetection(_capturedDetections);
 
+      if (analysis.isSuccess) {
+        if (!mounted) {
+          return;
+        }
+        Navigator.of(
+          context,
+        ).pop(ExpiryDateOcrScanResult.success(analysis.parsed!));
+        return;
+      }
+
       if (!mounted) {
         return;
       }
@@ -333,8 +345,8 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
 
       _showSnack(
         autoCaptured
-            ? 'Photo ${_photos.length}/$_maxPhotos captured automatically'
-            : 'Photo ${_photos.length}/$_maxPhotos captured',
+            ? 'Captured angle ${_photos.length}/$_maxPhotos'
+            : 'Captured angle ${_photos.length}/$_maxPhotos',
       );
     } on CameraException catch (error) {
       _showSnack(_mapCameraException(error));
@@ -428,6 +440,28 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     );
   }
 
+  Future<void> _toggleTorch() async {
+    final controller = _cameraController;
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
+
+    final nextTorchEnabled = !_torchEnabled;
+    try {
+      await controller.setFlashMode(
+        nextTorchEnabled ? FlashMode.torch : FlashMode.off,
+      );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _torchEnabled = nextTorchEnabled;
+      });
+    } on CameraException {
+      _showSnack('Torch is not available on this device');
+    }
+  }
+
   String _mapCameraException(CameraException error) {
     final code = error.code.toLowerCase();
     if (code.contains('denied') || code.contains('permission')) {
@@ -471,6 +505,17 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                           style: AppTextStyles.h4,
                         ),
                       ),
+                      IconButton(
+                        tooltip: _torchEnabled
+                            ? 'Turn torch off'
+                            : 'Turn torch on',
+                        onPressed: _toggleTorch,
+                        icon: Icon(
+                          _torchEnabled
+                              ? Icons.flashlight_off_outlined
+                              : Icons.flashlight_on_outlined,
+                        ),
+                      ),
                       Switch.adaptive(
                         value: _autoCaptureEnabled,
                         onChanged: (value) => _setAutoCaptureEnabled(value),
@@ -484,6 +529,20 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                     _autoCaptureEnabled
                         ? 'Move the product to up to five angles. The app will capture when it can read the expiry text.'
                         : 'Auto-capture is off. Use the shutter button to capture up to five angles manually.',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Embossed or stamped dates: tilt the package and use side lighting or the torch so the numbers cast a small shadow.',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Canadian labels may show BB/MA before the date. Aim so both the label and date stay inside the frame.',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: theme.textTheme.bodySmall?.color,
                     ),
@@ -688,7 +747,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
                 child: Text(
-                  'Aim at the expiry label, then tilt the package to capture up to five angles.',
+                  'Aim at the expiry label, then tilt the package to capture up to five angles. For embossed dates, use side lighting or the torch.',
                   style: AppTextStyles.bodySmall.copyWith(color: Colors.white),
                 ),
               ),

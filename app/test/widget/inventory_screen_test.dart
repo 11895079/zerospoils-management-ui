@@ -647,9 +647,7 @@ void main() {
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 
-  testWidgets('manual add flow opens item entry sheet from add menu', (
-    tester,
-  ) async {
+  testWidgets('FAB opens item form directly', (tester) async {
     mockRepository.items = [];
 
     await pumpInventoryScreen(tester);
@@ -657,20 +655,10 @@ void main() {
     await tester.tap(find.byKey(const Key('inventory_add_fab')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('inventory_add_manual_action')),
-      findsOneWidget,
-    );
-
-    await tester.tap(find.byKey(const Key('inventory_add_manual_action')));
-    await tester.pumpAndSettle();
-
     expect(find.byType(ItemFormScreen), findsOneWidget);
   });
 
-  testWidgets('add menu does not show separate expiry OCR option on mobile', (
-    tester,
-  ) async {
+  testWidgets('FAB opens item form directly on mobile', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
     mockRepository.items = [];
 
@@ -687,10 +675,7 @@ void main() {
       await tester.tap(find.byKey(const Key('inventory_add_fab')));
       await tester.pumpAndSettle();
 
-      expect(
-        find.byKey(const Key('inventory_add_expiry_scan_action')),
-        findsNothing,
-      );
+      expect(find.byType(ItemFormScreen), findsOneWidget);
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }

@@ -351,6 +351,26 @@ class ShoppingListScreen extends ConsumerWidget {
     await itemRepository.saveItem(converted);
     ref.invalidate(itemsFutureProvider);
 
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'item_added',
+      'properties': {
+        'item_id': converted.id,
+        'source': 'shopping_convert',
+        'entry_method': 'shopping_convert',
+        'camera_used': false,
+        'category': converted.categoryLabel,
+        'is_custom_category': converted.customCategoryId != null,
+        'location': converted.location.name,
+        'quantity': converted.quantity,
+        'has_expiry': converted.expiryDate != null,
+        'has_expiry_date': converted.expiryDate != null,
+        'camera_barcode_accepted': false,
+        'camera_expiry_accepted': false,
+        'camera_barcode_source': 'none',
+        'camera_expiry_format': 'none',
+      },
+    });
+
     final shoppingRepository = ref.read(shoppingListRepositoryProvider);
     await shoppingRepository.deleteItem(item.id);
 

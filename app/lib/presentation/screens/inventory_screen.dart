@@ -32,8 +32,6 @@ enum InventoryViewMode { list, table, grid }
 
 enum InventorySortKey { name, category, location, expiry, quantity, status }
 
-enum _InventoryAddAction { manualItem, receiptBatch }
-
 extension InventorySortKeyExtension on InventorySortKey {
   String get telemetryKey {
     switch (this) {
@@ -242,6 +240,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
     if (!mounted) return;
     ref.invalidate(itemsFutureProvider);
+  }
+
+  void _openReceiptBatchCapture() {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'inventory_receipt_batch_opened',
+      'properties': {},
+    });
+    if (!mounted) return;
+    context.pushNamed('receipt-batch-capture');
   }
 
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
@@ -706,6 +713,28 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: const Text('Inventory'),
         elevation: 1,
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final batchPhotoEnabled = ref.watch(
+                isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
+              );
+              return batchPhotoEnabled.when(
+                data: (enabled) => enabled
+                    ? IconButton(
+                        key: const Key('inventory_receipt_batch_button'),
+                        tooltip: 'Batch receipt entry',
+                        onPressed: _openReceiptBatchCapture,
+                        icon: Icon(
+                          Icons.receipt_long,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                loading: () => const SizedBox.shrink(),
+                error: (error, stackTrace) => const SizedBox.shrink(),
+              );
+            },
+          ),
           _buildViewModeToggle(viewMode, filterState, filteredCount),
           Stack(
             alignment: Alignment.center,
@@ -802,7 +831,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('inventory_add_fab'),
-        onPressed: _openAddMenu,
+        onPressed: _openAddItemForm,
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         elevation: 4,
@@ -816,96 +845,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _openAddMenu() async {
-    ref.read(telemetryClientProvider).enqueue({
-      'name': 'inventory_add_menu_opened',
-      'properties': {},
-    });
-
-    final action = await showModalBottomSheet<_InventoryAddAction>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusLg),
-        ),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              Container(
-                width: 48,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              ListTile(
-                key: const Key('inventory_add_manual_action'),
-                leading: const Icon(Icons.add_circle_outline),
-                title: const Text('Add item manually'),
-                subtitle: const Text('Open the full add item form'),
-                onTap: () =>
-                    Navigator.of(ctx).pop(_InventoryAddAction.manualItem),
-              ),
-              // Gate batch receipt entry with feature flag
-              Consumer(
-                builder: (context, ref, child) {
-                  final batchPhotoEnabled = ref.watch(
-                    isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
-                  );
-                  return batchPhotoEnabled.when(
-                    data: (enabled) => enabled
-                        ? ListTile(
-                            leading: const Icon(Icons.receipt_long),
-                            title: const Text('Batch entry (receipts)'),
-                            subtitle: const Text(
-                              'Capture receipts and add many items',
-                            ),
-                            onTap: () => Navigator.of(
-                              ctx,
-                            ).pop(_InventoryAddAction.receiptBatch),
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (error, stack) => const SizedBox.shrink(),
-                  );
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (!mounted || action == null) {
-      return;
-    }
-
-    switch (action) {
-      case _InventoryAddAction.manualItem:
-        ref.read(telemetryClientProvider).enqueue({
-          'name': 'inventory_add_menu_selected',
-          'properties': {'action': 'manual_item'},
-        });
-        await _openAddItemForm();
-        return;
-      case _InventoryAddAction.receiptBatch:
-        ref.read(telemetryClientProvider).enqueue({
-          'name': 'inventory_add_menu_selected',
-          'properties': {'action': 'receipt_batch'},
-        });
-        if (!mounted) return;
-        context.pushNamed('receipt-batch-capture');
-        return;
-    }
   }
 
   Widget _buildDemoModeWarning() {

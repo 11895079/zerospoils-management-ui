@@ -61,6 +61,24 @@ class _CategoryOption {
   int get hashCode => id.hashCode;
 }
 
+class _RecentItemDefaults {
+  final String name;
+  final ItemCategory category;
+  final StorageLocation location;
+  final String? customCategoryId;
+  final String? customCategoryName;
+  final DateTime updatedAt;
+
+  const _RecentItemDefaults({
+    required this.name,
+    required this.category,
+    required this.location,
+    required this.updatedAt,
+    this.customCategoryId,
+    this.customCategoryName,
+  });
+}
+
 class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   static const List<Color> _categoryColors = [
     Color(0xFFFFD6A5),
@@ -95,6 +113,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   String? _cameraBarcodeValue;
   String? _cameraSuggestedName;
   String? _cameraSuggestionSource;
+  String? _cameraAcceptedExpiryFormat;
+  List<_RecentItemDefaults> _recentItemDefaults = const [];
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -107,6 +127,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   void initState() {
     super.initState();
     _loadUserCategories();
+    _loadRecentItemDefaults();
     if (_isEditMode) {
       _loadItem();
     }
@@ -146,6 +167,118 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     setState(() {
       _userCategories = categories..sort((a, b) => a.name.compareTo(b.name));
     });
+  }
+
+  Future<void> _loadRecentItemDefaults() async {
+    try {
+      final repository = ref.read(itemRepositoryProvider);
+      await repository.init();
+      final items = await repository.getAllItems();
+
+      final recentByName = <String, _RecentItemDefaults>{};
+      final sortedItems = [...items]
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+      for (final item in sortedItems) {
+        final normalizedName = item.name.trim().toLowerCase();
+        if (normalizedName.isEmpty ||
+            recentByName.containsKey(normalizedName)) {
+          continue;
+        }
+
+        recentByName[normalizedName] = _RecentItemDefaults(
+          name: item.name.trim(),
+          category: item.category,
+          location: item.location,
+          customCategoryId: item.customCategoryId,
+          customCategoryName: item.customCategoryName,
+          updatedAt: item.updatedAt,
+        );
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _recentItemDefaults = recentByName.values.toList()
+          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _recentItemDefaults = const []);
+    }
+  }
+
+  List<_RecentItemDefaults> _recentSuggestionsForQuery(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) {
+      return const [];
+    }
+
+    return _recentItemDefaults
+        .where((item) => item.name.toLowerCase().contains(normalizedQuery))
+        .take(3)
+        .toList();
+  }
+
+  _RecentItemDefaults? _findRecentDefaultsForName(String? name) {
+    final normalizedName = name?.trim().toLowerCase();
+    if (normalizedName == null || normalizedName.isEmpty) {
+      return null;
+    }
+
+    for (final item in _recentItemDefaults) {
+      if (item.name.toLowerCase() == normalizedName) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  UserCategory? _resolveRecentUserCategory(_RecentItemDefaults defaults) {
+    final customCategoryId = defaults.customCategoryId;
+    if (customCategoryId == null) {
+      return null;
+    }
+
+    for (final category in _userCategories) {
+      if (category.id == customCategoryId) {
+        return category;
+      }
+    }
+
+    return UserCategory(
+      id: customCategoryId,
+      name: defaults.customCategoryName ?? 'Custom',
+      createdAt: DateTime.now(),
+    );
+  }
+
+  void _applyRecentItemDefaults(_RecentItemDefaults defaults) {
+    setState(() {
+      _nameController.text = defaults.name;
+      _selectedCategory = defaults.category;
+      _selectedUserCategory = _resolveRecentUserCategory(defaults);
+      _selectedLocation = defaults.location;
+    });
+  }
+
+  void _applyRecentSuggestion(_RecentItemDefaults defaults) {
+    _applyRecentItemDefaults(defaults);
+  }
+
+  String _entryMethodForSave() {
+    final barcodeAccepted = _cameraBarcodeValue != null;
+    final expiryAccepted = _cameraAcceptedExpiryFormat != null;
+
+    if (barcodeAccepted && expiryAccepted) {
+      return 'camera_barcode_and_expiry';
+    }
+    if (barcodeAccepted) {
+      return 'camera_barcode';
+    }
+    if (expiryAccepted) {
+      return 'camera_expiry';
+    }
+    return 'manual';
   }
 
   void _maybeAutoSetCategory(String value) {
@@ -748,11 +881,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         final parsed = scanResult.parsed!;
         setState(() {
           _selectedExpiryDate = parsed.date;
+          _cameraAcceptedExpiryFormat = parsed.format;
           if (_cameraBarcodeValue != null) {
             _cameraAssistedStage = _CameraAssistedStage.expiryLocked;
           }
         });
-        _showSnack('Expiry date detected');
         SemanticsService.sendAnnouncement(
           view,
           'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
@@ -817,11 +950,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
       if (result.isSuccess) {
         _applyBarcodeCapture(result);
-        _showSnack(
-          result.suggestedName == null
-              ? 'Barcode captured'
-              : 'Product details applied from barcode',
-        );
         ref.read(telemetryClientProvider).enqueue({
           'name': 'camera_assisted_barcode_scanned',
           'properties': {
@@ -858,6 +986,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     final suggestedName = result.suggestedName?.trim();
     final previousSuggestedName = _cameraSuggestedName;
     final currentName = _nameController.text.trim();
+    final recentDefaults = _findRecentDefaultsForName(suggestedName);
     final shouldApplySuggestedName =
         !_isEditMode &&
         suggestedName != null &&
@@ -877,13 +1006,21 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       _cameraSuggestionSource = result.source;
       _cameraAssistedStage = _CameraAssistedStage.barcodeLocked;
 
-      if (!_categoryTouched) {
+      if (recentDefaults != null) {
+        if (!_categoryTouched) {
+          _selectedCategory = recentDefaults.category;
+          _selectedUserCategory = _resolveRecentUserCategory(recentDefaults);
+        }
+        _selectedLocation = recentDefaults.location;
+      } else if (!_categoryTouched) {
         if (result.suggestedCategory != null) {
           _selectedCategory = result.suggestedCategory!;
+          _selectedUserCategory = null;
         } else if (suggestedName != null) {
           final inferredCategory = _inferCategoryFromName(suggestedName);
           if (inferredCategory != null) {
             _selectedCategory = inferredCategory;
+            _selectedUserCategory = null;
           }
         }
       }
@@ -903,6 +1040,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 Text('Align the expiry text inside the camera frame.'),
                 SizedBox(height: 8),
                 Text('Use good lighting and hold the package steady.'),
+                SizedBox(height: 8),
+                Text(
+                  'Canadian labels may show BB/MA before the date instead of EXP.',
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'For embossed dates, tilt the package so side lighting creates shadow contrast.',
+                ),
                 SizedBox(height: 8),
                 Text('You can always edit the detected date before saving.'),
               ],
@@ -1002,6 +1147,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     if (picked != null) {
       setState(() {
         _selectedExpiryDate = picked;
+        _cameraAcceptedExpiryFormat = null;
       });
     }
   }
@@ -1017,6 +1163,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     try {
       final repository = ref.read(itemRepositoryProvider);
       await repository.init();
+      final entryMethod = _entryMethodForSave();
+      final cameraUsed = entryMethod != 'manual';
+      final cameraBarcodeAccepted = _cameraBarcodeValue != null;
+      final cameraExpiryAccepted = _cameraAcceptedExpiryFormat != null;
 
       final quantity = int.tryParse(_quantityController.text);
       final price = _priceController.text.isEmpty
@@ -1067,11 +1217,21 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         'name': _isEditMode ? 'item_updated' : 'item_added',
         'properties': {
           'item_id': item.id,
+          'source': entryMethod,
+          'entry_method': entryMethod,
+          'camera_used': cameraUsed,
           'category': item.categoryLabel,
           'is_custom_category': item.customCategoryId != null,
           'location': item.location.name,
           'quantity': item.quantity,
           'has_expiry': item.expiryDate != null,
+          'has_expiry_date': item.expiryDate != null,
+          'camera_barcode_accepted': cameraBarcodeAccepted,
+          'camera_expiry_accepted': cameraExpiryAccepted,
+          'camera_barcode_source': cameraBarcodeAccepted
+              ? (_cameraSuggestionSource ?? 'unknown')
+              : 'none',
+          'camera_expiry_format': _cameraAcceptedExpiryFormat ?? 'none',
         },
       });
       telemetry.enqueue({
@@ -1119,6 +1279,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       orElse: () => false,
     );
     final showCameraAssistedPanel = showExpiryOcrButton;
+    final recentSuggestions = _recentSuggestionsForQuery(_nameController.text);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1140,22 +1301,48 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             // Name field (required)
             _buildFormGroup(
               label: 'Name *',
-              child: TextFormField(
-                key: const Key('item_form_name_field'),
-                controller: _nameController,
-                decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
-                onChanged: (value) {
-                  if (!_isEditMode) {
-                    _maybeAutoSetCategory(value);
-                  }
-                  setState(() {});
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Name is required';
-                  }
-                  return null;
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    key: const Key('item_form_name_field'),
+                    controller: _nameController,
+                    decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
+                    onChanged: (value) {
+                      if (!_isEditMode) {
+                        _maybeAutoSetCategory(value);
+                      }
+                      setState(() {});
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Name is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (!_isEditMode && recentSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        for (
+                          var index = 0;
+                          index < recentSuggestions.length;
+                          index++
+                        )
+                          ActionChip(
+                            key: Key('recent_item_suggestion_$index'),
+                            label: Text(recentSuggestions[index].name),
+                            onPressed: () => _applyRecentSuggestion(
+                              recentSuggestions[index],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
 
@@ -1240,12 +1427,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 7),
                       );
+                      _cameraAcceptedExpiryFormat = null;
                     } else {
                       _selectedPreparedDate = DateTime.now();
                       _selectedLocation = StorageLocation.freezer;
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 30),
                       );
+                      _cameraAcceptedExpiryFormat = null;
                     }
                   });
                 },
@@ -1601,6 +1790,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+                        if (_cameraBarcodeValue != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            _cameraBarcodeValue!,
+                            key: const Key('camera_assisted_detected_barcode'),
+                            style: AppTextStyles.body.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
             ),
@@ -1671,6 +1871,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 children: [
                   Text(
                     'Barcode: $_cameraBarcodeValue',
+                    key: const Key('camera_assisted_detected_barcode_summary'),
                     style: AppTextStyles.body,
                   ),
                   if (_cameraSuggestedName != null) ...[

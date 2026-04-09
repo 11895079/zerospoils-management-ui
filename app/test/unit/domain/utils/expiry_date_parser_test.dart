@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
 
+import '../../../fixtures/ocr/expiry_ocr_text_fixtures.dart';
+
 void main() {
   group('ExpiryDateParser', () {
     const parser = ExpiryDateParser();
@@ -56,6 +58,85 @@ void main() {
 
       expect(result, isNotNull);
       expect(result!.date, DateTime(2026, 3, 18));
+    });
+
+    test('parses BB/MA-labelled Canadian dates', () {
+      final result = parser.parse(
+        'BB/MA 21/04/2026',
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 21));
+      expect(result.format, 'DD/MM/YYYY');
+    });
+
+    test('prefers BB/MA-labelled date over packed date', () {
+      final result = parser.parse(
+        'PKD 01/04/2026\nBB/MA 21/04/2026',
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 21));
+    });
+
+    test('parses realistic Canadian BB/MA OCR block', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.canadianBbMaWithPackedDate,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 21));
+      expect(result.format, 'DD/MM/YYYY');
+    });
+
+    test('parses stamped BB/MA dotted date layout', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.stampedBbMaDotted,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 21));
+    });
+
+    test('parses French meilleur avant label', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.frenchBestBefore,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 21));
+    });
+
+    test('parses Canadian BB/MA month-code format from package stamp', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.canadianMonthCodeBestBefore,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2027, 11, 20));
+    });
+
+    test('prefers BB/MA month-code date over packed month-code date', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.canadianMonthCodePackedAndBestBefore,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2027, 11, 20));
     });
 
     test('parses dotted expiry labels from package prints', () {

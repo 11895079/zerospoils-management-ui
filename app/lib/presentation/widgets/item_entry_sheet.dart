@@ -258,6 +258,10 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
                 SizedBox(height: 8),
                 Text('Use good lighting and hold the package steady.'),
                 SizedBox(height: 8),
+                Text(
+                  'Canadian labels may show BB/MA before the date instead of EXP.',
+                ),
+                SizedBox(height: 8),
                 Text('You can always edit the detected date before saving.'),
               ],
             ),

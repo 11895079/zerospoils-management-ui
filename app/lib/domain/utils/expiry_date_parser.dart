@@ -117,6 +117,24 @@ class ExpiryDateParser {
       );
     }
 
+    final bilingualMonthCodePattern = RegExp(
+      r'(\d{4})\s*([a-z]{2})\s*(\d{1,2})',
+    );
+    for (final match in bilingualMonthCodePattern.allMatches(lower)) {
+      final year = int.tryParse(match.group(1) ?? '');
+      final month = _monthFromBilingualCode(match.group(2) ?? '');
+      final day = int.tryParse(match.group(3) ?? '');
+      if (year == null || month == null || day == null) continue;
+      _tryAddCandidate(
+        candidates,
+        year,
+        month,
+        day,
+        'YYYY MON DD',
+        _scoreContext(lower, match.start, match.end),
+      );
+    }
+
     final valid = _filterValid(reference, candidates);
     if (valid.isEmpty) return null;
 
@@ -187,6 +205,10 @@ class ExpiryDateParser {
       'expiry',
       'best by',
       'best before',
+      'bb/ma',
+      'bb / ma',
+      'bbma',
+      'meilleur avant',
       'use by',
       'sell by',
     ];
@@ -196,6 +218,8 @@ class ExpiryDateParser {
       'manufacture',
       'packed on',
       'packed',
+      'pkd',
+      'pkg',
       'prod',
       'production',
     ];
@@ -247,6 +271,36 @@ class ExpiryDateParser {
       case 'nov':
         return 11;
       case 'dec':
+        return 12;
+    }
+    return null;
+  }
+
+  int? _monthFromBilingualCode(String code) {
+    switch (code.toLowerCase()) {
+      case 'ja':
+        return 1;
+      case 'fe':
+        return 2;
+      case 'mr':
+        return 3;
+      case 'al':
+        return 4;
+      case 'ma':
+        return 5;
+      case 'jn':
+        return 6;
+      case 'jl':
+        return 7;
+      case 'au':
+        return 8;
+      case 'se':
+        return 9;
+      case 'oc':
+        return 10;
+      case 'no':
+        return 11;
+      case 'de':
         return 12;
     }
     return null;
