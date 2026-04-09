@@ -40,4 +40,15 @@ Best before:
 0F 09353F
 3016 43010
 ''';
+
+  static const String multilingualEmbossedBestBeforeOcrConfused = '''
+A consommer de
+preference avant le :
+Ten minste
+houdbaar tot:
+Best before:
+2B 1O 2O2B
+0F 09353F
+3016 43010
+''';
 }

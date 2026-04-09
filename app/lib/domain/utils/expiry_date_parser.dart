@@ -26,6 +26,34 @@ class ExpiryDateParser {
     final candidates = <_ScoredExpiryCandidate>[];
     final lower = text.toLowerCase();
 
+    _collectCandidates(candidates, lower, lower, preferredDateFormat);
+
+    final normalized = _normalizeOcrDateSegments(lower);
+    if (normalized != lower) {
+      _collectCandidates(candidates, normalized, lower, preferredDateFormat);
+    }
+
+    final valid = _filterValid(reference, candidates);
+    if (valid.isEmpty) return null;
+
+    valid.sort((a, b) {
+      final scoreCompare = b.score.compareTo(a.score);
+      if (scoreCompare != 0) {
+        return scoreCompare;
+      }
+      return a.result.date.compareTo(b.result.date);
+    });
+    return valid.first.result;
+  }
+
+  void _collectCandidates(
+    List<_ScoredExpiryCandidate> candidates,
+    String scanText,
+    String contextText,
+    String preferredDateFormat,
+  ) {
+    final lower = scanText;
+
     final isoPattern = RegExp(r'(\d{4})[./-](\d{1,2})[./-](\d{1,2})');
     for (final match in isoPattern.allMatches(lower)) {
       final year = int.tryParse(match.group(1) ?? '');
@@ -37,7 +65,7 @@ class ExpiryDateParser {
         month,
         day,
         'YYYY-MM-DD',
-        _scoreContext(lower, match.start, match.end),
+        _scoreContext(contextText, match.start, match.end),
       );
     }
 
@@ -52,7 +80,7 @@ class ExpiryDateParser {
       final mmDd = _buildCandidate(year, first, second, 'MM/DD/YYYY');
       final ddMm = _buildCandidate(year, second, first, 'DD/MM/YYYY');
       final isAmbiguous = first <= 12 && second <= 12;
-      final score = _scoreContext(lower, match.start, match.end);
+      final score = _scoreContext(contextText, match.start, match.end);
 
       if (isAmbiguous) {
         if (preferredDateFormat == 'DD/MM/YYYY') {
@@ -90,7 +118,7 @@ class ExpiryDateParser {
       final mmDd = _buildCandidate(year, first, second, 'MM DD YYYY');
       final ddMm = _buildCandidate(year, second, first, 'DD MM YYYY');
       final isAmbiguous = first <= 12 && second <= 12;
-      final score = _scoreContext(lower, match.start, match.end);
+      final score = _scoreContext(contextText, match.start, match.end);
 
       if (isAmbiguous) {
         if (preferredDateFormat == 'DD/MM/YYYY') {
@@ -132,7 +160,7 @@ class ExpiryDateParser {
         month,
         day,
         'MMM DD YYYY',
-        _scoreContext(lower, match.start, match.end),
+        _scoreContext(contextText, match.start, match.end),
       );
     }
 
@@ -151,7 +179,7 @@ class ExpiryDateParser {
         month,
         day,
         'DD MMM YYYY',
-        _scoreContext(lower, match.start, match.end),
+        _scoreContext(contextText, match.start, match.end),
       );
     }
 
@@ -169,21 +197,43 @@ class ExpiryDateParser {
         month,
         day,
         'YYYY MON DD',
-        _scoreContext(lower, match.start, match.end),
+        _scoreContext(contextText, match.start, match.end),
       );
     }
+  }
 
-    final valid = _filterValid(reference, candidates);
-    if (valid.isEmpty) return null;
+  String _normalizeOcrDateSegments(String text) {
+    final dateLikeSegmentPattern = RegExp(
+      r'[0-9obsliz]{1,4}(?:[ ./-]+[0-9obsliz]{1,4}){2}',
+    );
 
-    valid.sort((a, b) {
-      final scoreCompare = b.score.compareTo(a.score);
-      if (scoreCompare != 0) {
-        return scoreCompare;
+    return text.replaceAllMapped(dateLikeSegmentPattern, (match) {
+      final segment = match.group(0)!;
+      final buffer = StringBuffer();
+      for (final rune in segment.runes) {
+        final char = String.fromCharCode(rune);
+        buffer.write(_normalizeOcrDateChar(char));
       }
-      return a.result.date.compareTo(b.result.date);
+      return buffer.toString();
     });
-    return valid.first.result;
+  }
+
+  String _normalizeOcrDateChar(String char) {
+    switch (char) {
+      case 'o':
+        return '0';
+      case 'b':
+        return '8';
+      case 's':
+        return '5';
+      case 'l':
+      case 'i':
+        return '1';
+      case 'z':
+        return '2';
+      default:
+        return char;
+    }
   }
 
   void _tryAddCandidate(

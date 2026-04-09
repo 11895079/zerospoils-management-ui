@@ -140,6 +140,18 @@ void main() {
       expect(result.format, 'DD MM YYYY');
     });
 
+    test('parses multilingual embossed date with OCR-confused digits', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.multilingualEmbossedBestBeforeOcrConfused,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2028, 10, 28));
+      expect(result.format, 'DD MM YYYY');
+    });
+
     test('prefers BB/MA month-code date over packed month-code date', () {
       final result = parser.parse(
         ExpiryOcrTextFixtures.canadianMonthCodePackedAndBestBefore,
