@@ -5,11 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
 import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/core/ocr/expiry_date_ocr_service.dart';
+import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
+import 'package:zerospoils/presentation/barcode/barcode_capture_launcher.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/ocr/expiry_ocr_capture_launcher.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
@@ -27,6 +30,18 @@ class FakeExpiryOcrCaptureLauncher {
   }) async {
     callCount++;
     lastPreferredDateFormat = preferredDateFormat;
+    return result;
+  }
+}
+
+class FakeBarcodeCaptureLauncher {
+  FakeBarcodeCaptureLauncher(this.result);
+
+  final BarcodeCaptureResult result;
+  int callCount = 0;
+
+  Future<BarcodeCaptureResult> call({required BuildContext context}) async {
+    callCount++;
     return result;
   }
 }
@@ -154,6 +169,276 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     }
   });
+
+  testWidgets(
+    'camera-assisted panel shows when enabled in settings on mobile',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'camera_assisted_add_enabled': true,
+      });
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      tester.view.physicalSize = const Size(1200, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      try {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              isFlagEnabledProvider(
+                FeatureFlagKey.expiryDateOcr,
+              ).overrideWith((ref) async => true),
+            ],
+            child: const MaterialApp(home: ItemFormScreen()),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('camera_assisted_add_panel')),
+          findsOneWidget,
+        );
+        expect(find.text('Scan barcode first'), findsOneWidget);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+
+  testWidgets('camera-assisted panel stays hidden when disabled in settings', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'camera_assisted_add_enabled': false,
+    });
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) async => true),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('camera_assisted_add_panel')), findsNothing);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
+  testWidgets('barcode stage prefills name and locks panel after capture', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'camera_assisted_add_enabled': true,
+    });
+
+    final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
+      const BarcodeCaptureResult.success(
+        rawValue: '0678000012345',
+        suggestedName: 'Greek Yogurt',
+        suggestedCategory: ItemCategory.dairy,
+        source: 'seed_catalog',
+      ),
+    );
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) async => true),
+            barcodeCaptureLauncherProvider.overrideWithValue(
+              fakeBarcodeLauncher.call,
+            ),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const Key('camera_assisted_scan_barcode_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(fakeBarcodeLauncher.callCount, 1);
+      expect(find.text('Barcode locked'), findsOneWidget);
+      expect(
+        find.byKey(const Key('camera_assisted_detected_name')),
+        findsOneWidget,
+      );
+
+      final nameField = tester.widget<TextFormField>(
+        find.byKey(const Key('item_form_name_field')),
+      );
+      expect(nameField.controller?.text, 'Greek Yogurt');
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
+  testWidgets('barcode stage keeps form untouched when scan is cancelled', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({
+      'camera_assisted_add_enabled': true,
+    });
+
+    final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
+      const BarcodeCaptureResult.failure(BarcodeCaptureFailure.cancelled),
+    );
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    try {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            isFlagEnabledProvider(
+              FeatureFlagKey.expiryDateOcr,
+            ).overrideWith((ref) async => true),
+            barcodeCaptureLauncherProvider.overrideWithValue(
+              fakeBarcodeLauncher.call,
+            ),
+          ],
+          child: const MaterialApp(home: ItemFormScreen()),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('camera_assisted_scan_barcode_button')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scan barcode first'), findsOneWidget);
+      final nameField = tester.widget<TextFormField>(
+        find.byKey(const Key('item_form_name_field')),
+      );
+      expect(nameField.controller?.text, isEmpty);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
+  testWidgets(
+    'camera-assisted expiry handoff locks expiry after barcode scan',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'camera_assisted_add_enabled': true,
+      });
+
+      final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
+        const BarcodeCaptureResult.success(
+          rawValue: '0678000012345',
+          suggestedName: 'Greek Yogurt',
+          suggestedCategory: ItemCategory.dairy,
+          source: 'seed_catalog',
+        ),
+      );
+      final fakeExpiryLauncher = FakeExpiryOcrCaptureLauncher(
+        ExpiryDateOcrScanResult.success(
+          ExpiryDateParseResult(
+            date: DateTime(2026, 2, 10),
+            format: 'MM/DD/YYYY',
+          ),
+        ),
+      );
+
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      tester.view.physicalSize = const Size(1200, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      try {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              isFlagEnabledProvider(
+                FeatureFlagKey.expiryDateOcr,
+              ).overrideWith((ref) async => true),
+              dateFormatPreferenceProvider.overrideWith(
+                (ref) async => 'MM/DD/YYYY',
+              ),
+              barcodeCaptureLauncherProvider.overrideWithValue(
+                fakeBarcodeLauncher.call,
+              ),
+              expiryOcrCaptureLauncherProvider.overrideWithValue(
+                fakeExpiryLauncher.call,
+              ),
+            ],
+            child: const MaterialApp(home: ItemFormScreen()),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('camera_assisted_scan_barcode_button')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('camera_assisted_scan_expiry_button')),
+          findsOneWidget,
+        );
+
+        await tester.tap(
+          find.byKey(const Key('camera_assisted_scan_expiry_button')),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('expiry_ocr_guidance_continue')));
+        await tester.pumpAndSettle();
+
+        expect(fakeExpiryLauncher.callCount, 1);
+        expect(find.text('Expiry locked'), findsOneWidget);
+        expect(
+          find.byKey(const Key('camera_assisted_detected_expiry')),
+          findsOneWidget,
+        );
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
 
   testWidgets('guidance dialog opens and OCR result pre-fills expiry date', (
     tester,

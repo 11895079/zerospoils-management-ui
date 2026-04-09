@@ -8,9 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
 import '../../core/feature_flags/feature_flags_provider.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
+import '../../core/settings/settings_keys.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -20,9 +23,12 @@ import '../../domain/utils/local_id_generator.dart';
 import '../widgets/app_button.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/quantity_toggle.dart';
+import '../barcode/barcode_capture_launcher.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../ocr/expiry_ocr_capture_launcher.dart';
+
+enum _CameraAssistedStage { barcodeReady, barcodeLocked, expiryLocked }
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
@@ -86,6 +92,12 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   bool _isLoading = false;
   bool _categoryTouched = false;
   bool _ocrInProgress = false;
+  bool _cameraAssistedAddEnabled = false;
+  bool _barcodeScanInProgress = false;
+  _CameraAssistedStage _cameraAssistedStage = _CameraAssistedStage.barcodeReady;
+  String? _cameraBarcodeValue;
+  String? _cameraSuggestedName;
+  String? _cameraSuggestionSource;
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -97,10 +109,20 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCameraAssistedAddSetting();
     _loadUserCategories();
     if (_isEditMode) {
       _loadItem();
     }
+  }
+
+  Future<void> _loadCameraAssistedAddSetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _cameraAssistedAddEnabled =
+          prefs.getBool(cameraAssistedAddEnabledKey) ?? false;
+    });
   }
 
   Color _randomPastelColor() {
@@ -737,7 +759,12 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
       if (scanResult.isSuccess) {
         final parsed = scanResult.parsed!;
-        setState(() => _selectedExpiryDate = parsed.date);
+        setState(() {
+          _selectedExpiryDate = parsed.date;
+          if (_cameraBarcodeValue != null) {
+            _cameraAssistedStage = _CameraAssistedStage.expiryLocked;
+          }
+        });
         _showSnack('Expiry date detected');
         SemanticsService.sendAnnouncement(
           view,
@@ -788,6 +815,92 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     } finally {
       if (mounted) setState(() => _ocrInProgress = false);
     }
+  }
+
+  Future<void> _scanBarcode() async {
+    if (_barcodeScanInProgress) return;
+
+    setState(() => _barcodeScanInProgress = true);
+
+    try {
+      final result = await ref.read(barcodeCaptureLauncherProvider)(
+        context: context,
+      );
+      if (!mounted) return;
+
+      if (result.isSuccess) {
+        _applyBarcodeCapture(result);
+        _showSnack(
+          result.suggestedName == null
+              ? 'Barcode captured'
+              : 'Product details applied from barcode',
+        );
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'camera_assisted_barcode_scanned',
+          'properties': {
+            'success': true,
+            'barcode_length': result.rawValue!.length,
+            'has_suggestion': result.suggestedName != null,
+            'source': result.source ?? 'unknown',
+          },
+        });
+        return;
+      }
+
+      switch (result.failure) {
+        case BarcodeCaptureFailure.cancelled:
+          return;
+        case BarcodeCaptureFailure.invalidBarcode:
+          _showSnack('Enter a valid 8 to 14 digit barcode');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'camera_assisted_barcode_scanned',
+            'properties': {'success': false, 'reason': 'invalid_barcode'},
+          });
+          return;
+        case null:
+          return;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _barcodeScanInProgress = false);
+      }
+    }
+  }
+
+  void _applyBarcodeCapture(BarcodeCaptureResult result) {
+    final suggestedName = result.suggestedName?.trim();
+    final previousSuggestedName = _cameraSuggestedName;
+    final currentName = _nameController.text.trim();
+    final shouldApplySuggestedName =
+        !_isEditMode &&
+        suggestedName != null &&
+        (currentName.isEmpty ||
+            (previousSuggestedName != null &&
+                currentName == previousSuggestedName));
+
+    if (shouldApplySuggestedName) {
+      _nameController.text = suggestedName;
+    }
+
+    final normalizedBarcode = normalizeBarcodeValue(result.rawValue!)!;
+
+    setState(() {
+      _cameraBarcodeValue = normalizedBarcode;
+      _cameraSuggestedName = suggestedName;
+      _cameraSuggestionSource = result.source;
+      _cameraAssistedStage = _CameraAssistedStage.barcodeLocked;
+
+      if (!_categoryTouched) {
+        if (result.suggestedCategory != null) {
+          _selectedCategory = result.suggestedCategory!;
+        } else if (suggestedName != null) {
+          final inferredCategory = _inferCategoryFromName(suggestedName);
+          if (inferredCategory != null) {
+            _selectedCategory = inferredCategory;
+          }
+        }
+      }
+    });
   }
 
   Future<bool> _showExpiryOcrGuidance() async {
@@ -946,6 +1059,16 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
       await repository.saveItem(item);
 
+      if (_cameraBarcodeValue != null) {
+        await ref
+            .read(learnedBarcodeMappingStoreProvider)
+            .saveMapping(
+              rawValue: _cameraBarcodeValue!,
+              name: item.name,
+              category: item.category,
+            );
+      }
+
       // No longer disables demo mode on item save. Only settings screen can change demo mode.
 
       // Force refresh of inventory list
@@ -971,6 +1094,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           'is_custom': item.customCategoryId != null,
         },
       });
+      if (_cameraBarcodeValue != null) {
+        telemetry.enqueue({
+          'name': 'camera_assisted_barcode_learned',
+          'properties': {
+            'barcode_length': _cameraBarcodeValue!.length,
+            'category': item.category.name,
+          },
+        });
+      }
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -999,6 +1131,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       data: (enabled) => enabled && _supportsExpiryOcrPlatform,
       orElse: () => false,
     );
+    final showCameraAssistedPanel =
+        _cameraAssistedAddEnabled && showExpiryOcrButton;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1011,12 +1145,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.pagePadding),
           children: [
+            if (showCameraAssistedPanel) ...[
+              _buildCameraAssistedAddPanel(theme),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             _buildIconPreview(),
             const SizedBox(height: AppSpacing.lg),
             // Name field (required)
             _buildFormGroup(
               label: 'Name *',
               child: TextFormField(
+                key: const Key('item_form_name_field'),
                 controller: _nameController,
                 decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
                 onChanged: (value) {
@@ -1407,6 +1546,174 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCameraAssistedAddPanel(ThemeData theme) {
+    final barcodeLocked =
+        _cameraAssistedStage == _CameraAssistedStage.barcodeLocked ||
+        _cameraAssistedStage == _CameraAssistedStage.expiryLocked;
+    final expiryLocked =
+        _cameraAssistedStage == _CameraAssistedStage.expiryLocked;
+    final statusTitle = expiryLocked
+        ? 'Expiry locked'
+        : barcodeLocked
+        ? 'Barcode locked'
+        : 'Scan barcode first';
+    final statusMessage = expiryLocked
+        ? 'Expiry has been captured. You can review the date below or rescan before saving.'
+        : barcodeLocked
+        ? 'Review the detected item details, then capture expiry from this panel next.'
+        : 'Product details will appear here before expiry capture begins.';
+
+    return Container(
+      key: const Key('camera_assisted_add_panel'),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.camera_alt_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Text('Camera-assisted add', style: AppTextStyles.h3),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            key: const Key('camera_assisted_barcode_stage'),
+            height: 180,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            child: Center(
+              child: _barcodeScanInProgress
+                  ? const CircularProgressIndicator()
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          barcodeLocked
+                              ? Icons.qr_code_2
+                              : Icons.photo_camera_back_outlined,
+                          size: 36,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          barcodeLocked
+                              ? 'Barcode captured for this item'
+                              : 'Barcode stage ready',
+                          style: AppTextStyles.body.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('camera_assisted_scan_barcode_button'),
+              onPressed: _barcodeScanInProgress ? null : _scanBarcode,
+              icon: Icon(
+                barcodeLocked
+                    ? Icons.center_focus_strong
+                    : Icons.qr_code_scanner,
+              ),
+              label: Text(barcodeLocked ? 'Rescan barcode' : 'Scan barcode'),
+            ),
+          ),
+          if (barcodeLocked) ...[
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const Key('camera_assisted_scan_expiry_button'),
+                onPressed: _ocrInProgress ? null : _scanExpiryDate,
+                icon: Icon(
+                  expiryLocked
+                      ? Icons.calendar_month
+                      : Icons.document_scanner_outlined,
+                ),
+                label: Text(
+                  expiryLocked ? 'Rescan expiry' : 'Scan expiry next',
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          Text(statusTitle, style: AppTextStyles.body),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            statusMessage,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
+          ),
+          if (_cameraBarcodeValue != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Barcode: $_cameraBarcodeValue',
+                    style: AppTextStyles.body,
+                  ),
+                  if (_cameraSuggestedName != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Suggested item: $_cameraSuggestedName',
+                      key: const Key('camera_assisted_detected_name'),
+                      style: AppTextStyles.body,
+                    ),
+                  ],
+                  if (_cameraSuggestionSource != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Source: $_cameraSuggestionSource',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (_selectedExpiryDate != null && barcodeLocked) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Detected expiry: ${_selectedExpiryDate!.year.toString().padLeft(4, '0')}-${_selectedExpiryDate!.month.toString().padLeft(2, '0')}-${_selectedExpiryDate!.day.toString().padLeft(2, '0')}',
+              key: const Key('camera_assisted_detected_expiry'),
+              style: AppTextStyles.body,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Expiry scan starts after barcode and will auto-lock once the date is stable.',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
+          ),
+        ],
       ),
     );
   }
