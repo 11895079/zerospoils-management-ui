@@ -2,6 +2,7 @@ library;
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,8 @@ class ExpiryOcrCaptureScreen extends StatefulWidget {
 
 class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   static const int _maxPhotos = 5;
+  // Thumbnail dimension used when storing preview images; keeps memory low.
+  static const int _thumbnailDimension = 200;
   static const Map<DeviceOrientation, int> _orientations = {
     DeviceOrientation.portraitUp: 0,
     DeviceOrientation.landscapeLeft: 90,
@@ -313,7 +316,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     try {
       await _stopImageStream();
       final photo = await controller.takePicture();
-      _photoThumbnailBytes[photo.path] = await photo.readAsBytes();
+      _photoThumbnailBytes[photo.path] = await _encodeThumbnail(photo);
       final analysis = await _analyzeCapturedPhoto(photo.path);
 
       _captureSession.registerPhotoCaptured();
@@ -356,6 +359,24 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
         });
       }
     }
+  }
+
+  /// Decodes [photo] and scales it down to [_thumbnailDimension]×[_thumbnailDimension]
+  /// pixels before re-encoding as PNG. Storing only small thumbnails instead of
+  /// full-resolution bytes avoids multi-MB allocations per captured frame.
+  Future<Uint8List> _encodeThumbnail(XFile photo) async {
+    final fullBytes = await photo.readAsBytes();
+    final codec = await ui.instantiateImageCodec(
+      fullBytes,
+      targetWidth: _thumbnailDimension,
+      targetHeight: _thumbnailDimension,
+    );
+    final frame = await codec.getNextFrame();
+    final byteData = await frame.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    frame.image.dispose();
+    return byteData?.buffer.asUint8List() ?? fullBytes;
   }
 
   Future<ExpiryDateOcrScanResult> _analyzeCapturedPhoto(String path) async {
