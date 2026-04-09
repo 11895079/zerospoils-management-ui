@@ -29,4 +29,15 @@ BB/MA 2027 NO 20
 PKD 2025 OC29
 BB/MA 2027 NO 20
 ''';
+
+  static const String multilingualEmbossedBestBefore = '''
+A consommer de
+preference avant le :
+Ten minste
+houdbaar tot:
+Best before:
+28 10 2028
+0F 09353F
+3016 43010
+''';
 }

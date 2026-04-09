@@ -79,6 +79,44 @@ class ExpiryDateParser {
       }
     }
 
+    final spacedNumericPattern = RegExp(r'(\d{1,2})\s+(\d{1,2})\s+(\d{2,4})');
+    for (final match in spacedNumericPattern.allMatches(lower)) {
+      final first = int.tryParse(match.group(1) ?? '');
+      final second = int.tryParse(match.group(2) ?? '');
+      final yearRaw = int.tryParse(match.group(3) ?? '');
+      if (first == null || second == null || yearRaw == null) continue;
+      final year = _normalizeYear(yearRaw);
+
+      final mmDd = _buildCandidate(year, first, second, 'MM DD YYYY');
+      final ddMm = _buildCandidate(year, second, first, 'DD MM YYYY');
+      final isAmbiguous = first <= 12 && second <= 12;
+      final score = _scoreContext(lower, match.start, match.end);
+
+      if (isAmbiguous) {
+        if (preferredDateFormat == 'DD/MM/YYYY') {
+          if (ddMm != null) {
+            candidates.add(_ScoredExpiryCandidate(result: ddMm, score: score));
+          } else if (mmDd != null) {
+            candidates.add(_ScoredExpiryCandidate(result: mmDd, score: score));
+          }
+        } else {
+          if (mmDd != null) {
+            candidates.add(_ScoredExpiryCandidate(result: mmDd, score: score));
+          } else if (ddMm != null) {
+            candidates.add(_ScoredExpiryCandidate(result: ddMm, score: score));
+          }
+        }
+        continue;
+      }
+
+      if (mmDd != null) {
+        candidates.add(_ScoredExpiryCandidate(result: mmDd, score: score));
+      }
+      if (ddMm != null) {
+        candidates.add(_ScoredExpiryCandidate(result: ddMm, score: score));
+      }
+    }
+
     final monthNamePattern = RegExp(
       r'(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s*(\d{1,2})(?:st|nd|rd|th)?[,]?\s*(\d{2,4})',
     );
@@ -181,7 +219,7 @@ class ExpiryDateParser {
     DateTime now,
     List<_ScoredExpiryCandidate> candidates,
   ) {
-    final maxDate = DateTime(now.year + 2, now.month, now.day);
+    final maxDate = DateTime(now.year + 3, now.month, now.day);
     return candidates.where((candidate) {
       final date = candidate.result.date;
       final isTooOld = date.isBefore(now.subtract(const Duration(days: 1)));
