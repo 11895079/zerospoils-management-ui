@@ -4,6 +4,24 @@ All notable changes to telemetry schemas, tools, and policies are documented her
 
 The format is based on [Keep a Changelog](https://keepachangelog.com), and this project adheres to [Semantic Versioning](https://semver.org).
 
+## [1.1.0] - 2026-04-09
+
+### Changed
+
+- `events/item_added.schema.json`: Expanded save-time item entry attribution for camera-assisted and conversion flows
+  - `source` / `entry_method` enums now distinguish `manual`, `camera_barcode`, `camera_expiry`, `camera_barcode_and_expiry`, `shopping_convert`, and `receipt_batch_camera`
+  - Added `camera_used`, `camera_barcode_accepted`, and `camera_expiry_accepted` to measure whether camera-derived values were actually saved
+  - Added `camera_barcode_source` and `camera_expiry_format` for barcode provenance and OCR-format trust analysis
+  - Added `item_id`, `location`, `quantity`, `is_custom_category`, and compatibility field `has_expiry`
+
+- `allowlist.json`: Updated `item_added` property whitelist to match the shipped item save payload
+
+- `fixtures/events/item_added.json`: Refreshed sample payload to represent the current manual save contract
+
+### Notes
+
+- Save-time attribution is now the source of truth for manual-vs-camera entry analysis; scan-attempt events remain useful for OCR/barcode attempt diagnostics but should not be used alone to infer accepted values.
+
 ## [1.0.0] - 2025-01-17
 
 ### Added

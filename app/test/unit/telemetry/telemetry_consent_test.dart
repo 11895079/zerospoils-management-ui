@@ -68,6 +68,16 @@ void main() {
   });
 
   group('TelemetryClient - Schema Validation (Debug Mode)', () {
+    test('Accepts events with empty properties map', () {
+      final client = TelemetryClient(consentEnabled: true);
+
+      client.enqueue({'name': 'test_event', 'properties': {}});
+
+      expect(client.events.length, 1);
+      expect(client.events.first['properties'], isA<Map<String, dynamic>>());
+      expect(client.events.first['properties'], isEmpty);
+    });
+
     test('Rejects events with missing name field', () {
       final client = TelemetryClient(consentEnabled: true);
 
@@ -79,13 +89,14 @@ void main() {
       );
     });
 
-    test('Rejects events with missing properties field', () {
+    test('Normalizes events with missing properties field to empty map', () {
       final client = TelemetryClient(consentEnabled: true);
 
-      expect(
-        () => client.enqueue({'name': 'test_event'}),
-        throwsA(isA<AssertionError>()),
-      );
+      client.enqueue({'name': 'test_event'});
+
+      expect(client.events.length, 1);
+      expect(client.events.first['properties'], isA<Map<String, dynamic>>());
+      expect(client.events.first['properties'], isEmpty);
     });
 
     test('Rejects events containing PII keys (email)', () {

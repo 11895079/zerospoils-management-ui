@@ -74,28 +74,40 @@ class TelemetryClient {
       return;
     }
 
+    final rawProperties = event['properties'];
+
     // Validate event structure in debug builds
     assert(event['name'] is String, 'Event must have a "name" field (String)');
     assert(
-      event['properties'] is Map<String, dynamic>,
+      rawProperties == null || rawProperties is Map,
       'Event must have a "properties" field (Map)',
     );
 
+    final normalizedProperties = rawProperties is Map
+        ? Map<String, dynamic>.from(rawProperties)
+        : <String, dynamic>{};
+
+    final normalizedEvent = Map<String, dynamic>.from(event)
+      ..['properties'] = normalizedProperties;
+
     // Schema validation in debug mode only (not profile builds)
     if (kDebugMode) {
-      _validateEvent(event);
+      _validateEvent(normalizedEvent);
     }
 
-    events.add(event);
+    events.add(normalizedEvent);
     if (_emitCallback != null &&
-        event['name'] is String &&
-        event['properties'] is Map<String, dynamic>) {
-      _emitCallback!(event['name'], event['properties']);
+        normalizedEvent['name'] is String &&
+        normalizedEvent['properties'] is Map<String, dynamic>) {
+      _emitCallback!(
+        normalizedEvent['name'] as String,
+        normalizedEvent['properties'] as Map<String, dynamic>,
+      );
     }
 
     // Persist to store if available
     if (eventStore != null) {
-      eventStore.addEvent(event);
+      eventStore.addEvent(normalizedEvent);
     }
 
     // TODO: M1/090 - Implement local queue with Hive
@@ -103,7 +115,7 @@ class TelemetryClient {
     // - Apply sampling from telemetry/policies/sampling.yaml
     // - Store in Hive queue for later batch upload
     if (kDebugMode) {
-      debugPrint('Telemetry event enqueued: ${event['name']}');
+      debugPrint('Telemetry event enqueued: ${normalizedEvent['name']}');
     }
   }
 

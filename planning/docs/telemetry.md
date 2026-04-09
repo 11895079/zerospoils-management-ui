@@ -11,7 +11,7 @@ Define consistent event instrumentation for measuring adoption, retention, and v
 2. **Core Funnel Events:**
    - `app_installed` - First app launch
    - `onboarding_completed` - User completes first-run setup
-   - `item_added` - Manual item entry submitted
+   - `item_added` - Item save submitted from manual, camera-assisted, shopping conversion, or receipt-batch entry
    - `expiry_date_scanned` - OCR capture attempted (property: `scan_success` boolean)
    - `item_edited` - Item updated
    - `inventory_viewed` - User opens inventory list
@@ -30,8 +30,8 @@ Define consistent event instrumentation for measuring adoption, retention, and v
    - `session_id`: UUID for session grouping
 
 4. **Event-Specific Properties:**
-   - **item_added:** `category` (enum), `location` (enum), `lead_time_days` (int), `entry_method` ("manual" | "ocr" | "shopping_convert")
-   - **expiry_date_scanned:** `scan_success` (boolean), `scan_duration_ms` (int), `date_format_detected` (string | null)
+   - **item_added:** `source`, `entry_method`, `camera_used`, `category`, `location`, `quantity`, `has_expiry_date`, `camera_barcode_accepted`, `camera_expiry_accepted`, `camera_barcode_source`, `camera_expiry_format`
+   - **expiry_date_scanned:** `scan_success` (boolean), `scan_duration_ms` (int), `date_format_detected` (string | null); use with `item_added.camera_expiry_accepted` to distinguish attempt vs accepted save
    - **item_wasted:** `category`, `location`, `waste_reason` (enum), `days_overdue` (int)
    - **reminder_opened:** `lead_time_days`, `time_of_day` ("morning" | "afternoon" | "evening")
    - **inventory_view_mode_changed:** `from` ("list" | "table" | "grid"), `to` ("list" | "table" | "grid"), `filters_applied` (boolean), `sort_key` (string | null), `result_count` (int)
@@ -59,4 +59,4 @@ Define consistent event instrumentation for measuring adoption, retention, and v
 Extract from PRD Section 8.5 (Analytics) and issue 040-define-telemetry-taxonomy.
 
 ## Status
-🚧 **PLACEHOLDER** - To be filled during M1 milestone completion.
+🟡 **PARTIALLY CURRENT** - Baseline taxonomy is in use, but some screen-specific events continue to evolve. Treat `telemetry/README.md` plus repo-root schemas as the implementation source of truth.

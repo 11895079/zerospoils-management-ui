@@ -34,8 +34,8 @@ Deliver full package OCR feature that extracts multiple fields from product pack
 ## Out of scope
 - Cloud-based OCR API (Azure/Google Vision) for higher accuracy (defer to M6)
 - Multi-language support (English only for MVP)
-- Barcode scanning integration (separate M6 feature)
-- Receipt OCR for line items (handled by M3/190 batch feature)
+- Barcode-led packaged-item fast-add orchestration (tracked in M3/197)
+- Receipt OCR for line items (handled separately from M3/198 shopping batch capture)
 - Real-time continuous OCR (single capture only; no video stream processing)
 - OCR model training/customization (use pre-trained ML Kit/Vision models)
 

@@ -3,6 +3,13 @@
 ## Purpose
 Modal bottom sheet for quick item entry. Minimizes typing with smart defaults and category/location pickers.
 
+## Planned M3 Expansion
+- Add an optional camera-assisted panel at the top of the add-item surface for packaged-item fast add on supported mobile devices.
+- The panel uses one camera view with staged guidance: barcode first, expiry date second.
+- Extracted barcode details appear inline in the form before the user edits or saves.
+- Once expiry is held clearly for a short stability window, the camera panel auto-locks the date and pauses or collapses to conserve resources.
+- Manual fields remain editable at all times and the camera-assisted mode can be disabled from settings.
+
 ## Mermaid Diagram
 
 ```mermaid

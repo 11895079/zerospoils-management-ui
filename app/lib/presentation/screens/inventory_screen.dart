@@ -10,13 +10,12 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
-import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/item_entry_sheet.dart';
 import '../widgets/item_icon.dart';
+import 'item_form_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -226,76 +225,30 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     await ref.read(itemRepositoryProvider).init();
   }
 
-  Future<void> _openAddItemSheet({bool emitOpenedTelemetry = true}) async {
+  Future<void> _openAddItemForm({bool emitOpenedTelemetry = true}) async {
     if (emitOpenedTelemetry) {
       ref.read(telemetryClientProvider).enqueue({
         'name': 'item_add_opened',
         'properties': {},
       });
     }
-    ItemEntrySeed? seed;
-    var keepAdding = true;
+    if (!mounted) return;
 
-    while (keepAdding && mounted) {
-      final result = await showModalBottomSheet<ItemEntryResult>(
-        context: context,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusLg),
-          ),
-        ),
-        builder: (_) => ItemEntrySheet(
-          requireExpiry: false,
-          seed: seed,
-          showAddAnother: true,
-        ),
-      );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const ItemFormScreen()));
 
-      if (result == null || result.skipped) break;
+    if (!mounted) return;
+    ref.invalidate(itemsFutureProvider);
+  }
 
-      final repo = ref.read(itemRepositoryProvider);
-      await repo.init();
-      final now = DateTime.now();
-      final item = Item(
-        id: LocalIdGenerator.next(prefix: 'item'),
-        name: result.name,
-        category: result.category,
-        type: result.type,
-        preparedDate: result.preparedDate,
-        location: result.location,
-        quantity: result.quantity,
-        unit: result.unit,
-        expiryDate: result.expiryDate,
-        purchasePrice: result.purchasePrice,
-        status: ItemStatus.available,
-        createdAt: now,
-        updatedAt: now,
-      );
-      await repo.saveItem(item);
-      ref.invalidate(itemsFutureProvider);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${item.name} added to inventory'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-
-      keepAdding = result.addAnother;
-      if (keepAdding) {
-        seed = ItemEntrySeed(
-          name: '',
-          category: result.category,
-          quantity: result.quantity,
-          unit: result.unit,
-          purchasePrice: result.purchasePrice,
-          type: result.type,
-          preparedDate: result.preparedDate,
-        );
-      }
-    }
+  void _openReceiptBatchCapture() {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'inventory_receipt_batch_opened',
+      'properties': {},
+    });
+    if (!mounted) return;
+    context.pushNamed('receipt-batch-capture');
   }
 
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
@@ -760,6 +713,28 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: const Text('Inventory'),
         elevation: 1,
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final batchPhotoEnabled = ref.watch(
+                isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
+              );
+              return batchPhotoEnabled.when(
+                data: (enabled) => enabled
+                    ? IconButton(
+                        key: const Key('inventory_receipt_batch_button'),
+                        tooltip: 'Batch receipt entry',
+                        onPressed: _openReceiptBatchCapture,
+                        icon: Icon(
+                          Icons.receipt_long,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                loading: () => const SizedBox.shrink(),
+                error: (error, stackTrace) => const SizedBox.shrink(),
+              );
+            },
+          ),
           _buildViewModeToggle(viewMode, filterState, filteredCount),
           Stack(
             alignment: Alignment.center,
@@ -856,7 +831,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         key: const Key('inventory_add_fab'),
-        onPressed: _openAddMenu,
+        onPressed: _openAddItemForm,
         backgroundColor: AppColors.primary,
         shape: const CircleBorder(),
         elevation: 4,
@@ -869,84 +844,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _openAddMenu() async {
-    ref.read(telemetryClientProvider).enqueue({
-      'name': 'inventory_add_menu_opened',
-      'properties': {},
-    });
-
-    await showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppSpacing.radiusLg),
-        ),
-      ),
-      builder: (ctx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: AppSpacing.md),
-              Container(
-                width: 48,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              ListTile(
-                leading: const Icon(Icons.add_circle_outline),
-                title: const Text('Add item manually'),
-                subtitle: const Text('Enter a single item with details'),
-                onTap: () {
-                  Navigator.of(ctx).pop();
-                  ref.read(telemetryClientProvider).enqueue({
-                    'name': 'inventory_add_menu_selected',
-                    'properties': {'action': 'manual_item'},
-                  });
-                  _openAddItemSheet();
-                },
-              ),
-              // Gate batch receipt entry with feature flag
-              Consumer(
-                builder: (context, ref, child) {
-                  final batchPhotoEnabled = ref.watch(
-                    isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
-                  );
-                  return batchPhotoEnabled.when(
-                    data: (enabled) => enabled
-                        ? ListTile(
-                            leading: const Icon(Icons.receipt_long),
-                            title: const Text('Batch entry (receipts)'),
-                            subtitle: const Text(
-                              'Capture receipts and add many items',
-                            ),
-                            onTap: () {
-                              Navigator.of(ctx).pop();
-                              ref.read(telemetryClientProvider).enqueue({
-                                'name': 'inventory_add_menu_selected',
-                                'properties': {'action': 'receipt_batch'},
-                              });
-                              context.pushNamed('receipt-batch-capture');
-                            },
-                          )
-                        : const SizedBox.shrink(),
-                    loading: () => const SizedBox.shrink(),
-                    error: (error, stack) => const SizedBox.shrink(),
-                  );
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -1762,7 +1659,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   'name': 'add_item_from_empty_state',
                   'properties': {},
                 });
-                _openAddItemSheet(emitOpenedTelemetry: false);
+                _openAddItemForm(emitOpenedTelemetry: false);
               },
               child: const Text('Add your first item'),
             ),

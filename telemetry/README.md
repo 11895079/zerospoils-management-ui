@@ -71,14 +71,59 @@ Every event follows this structure:
 {
   "name": "item_added",
   "properties": {
-    "source": "manual|receipt|household",  // How item was added
-    "category": "dairy|produce|...",       // Item category
-    "has_expiry_date": true                // boolean
+   "source": "manual|camera_barcode|camera_expiry|camera_barcode_and_expiry|shopping_convert|receipt_batch_camera",
+   "entry_method": "manual|camera_barcode|camera_expiry|camera_barcode_and_expiry|shopping_convert|receipt_batch_camera",
+   "camera_used": true,
+   "category": "dairy|produce|...",
+   "location": "fridge|freezer|pantry|counter|other",
+   "quantity": 1,
+   "has_expiry_date": true,
+   "camera_barcode_accepted": true,
+   "camera_expiry_accepted": false,
+   "camera_barcode_source": "seed_catalog|learned_mapping|unknown|none",
+   "camera_expiry_format": "MM/DD/YYYY|DD/MM/YYYY|YYYY MON DD|none"
   }
 }
 ```
-**When:** User adds item to inventory  
-**Use:** Understand data entry patterns, category distribution
+**When:** User saves a new inventory item from the add form, shopping conversion, or receipt-batch inventory path  
+**Use:** Understand entry-channel adoption, camera trust, category/location distribution, and conversion-path mix
+
+### Item Entry Analysis Queries
+
+The shipped `item_added` payload is sufficient to answer the product questions behind the recent camera-assisted work without joining against scan-attempt events.
+
+**Recommended dashboard cards:**
+
+1. **Entry mix**
+  - Group `item_added` by `entry_method`
+  - Primary read: share of `manual` vs `camera_barcode`, `camera_expiry`, `camera_barcode_and_expiry`, `shopping_convert`, `receipt_batch_camera`
+
+2. **Camera reliance rate**
+  - Formula: `count(item_added where camera_used=true) / count(item_added)`
+  - Primary read: how much of item creation is camera-assisted at save time
+
+3. **Barcode trust rate**
+  - Formula: `count(item_added where camera_barcode_accepted=true) / count(item_added where source in ('camera_barcode','camera_barcode_and_expiry'))`
+  - Primary read: how often a barcode capture actually survives into the saved item
+
+4. **Expiry trust rate**
+  - Formula: `count(item_added where camera_expiry_accepted=true) / count(item_added where source in ('camera_expiry','camera_barcode_and_expiry'))`
+  - Primary read: how often OCR-derived expiry dates are accepted into the saved item
+
+5. **Camera full-success rate**
+  - Formula: `count(item_added where entry_method='camera_barcode_and_expiry' and camera_barcode_accepted=true and camera_expiry_accepted=true) / count(item_added where entry_method='camera_barcode_and_expiry')`
+  - Primary read: how often the combined flow succeeds end-to-end
+
+6. **Barcode source quality**
+  - Group accepted camera saves by `camera_barcode_source`
+  - Primary read: compare seeded catalog vs learned mappings vs unknown fallback
+
+**Interpretation guidance:**
+
+- Use `item_added` as the source of truth for accepted values.
+- Use `camera_assisted_barcode_scanned` and `expiry_date_scanned` only for attempt, cancel, and failure analysis.
+- `receipt_batch_camera` indicates a camera-derived bulk path, but it does not imply field-level barcode or expiry acceptance.
+- `shopping_convert` is intentionally non-camera even if the original shopping item came from a prior suggested flow.
 
 #### item_wasted
 ```json

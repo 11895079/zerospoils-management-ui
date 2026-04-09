@@ -5,7 +5,22 @@
       "description": "App first launched"
     },
     "item_added": {
-      "allowed_properties": ["source", "category", "has_expiry_date"],
+      "allowed_properties": [
+        "item_id",
+        "source",
+        "entry_method",
+        "camera_used",
+        "category",
+        "is_custom_category",
+        "location",
+        "quantity",
+        "has_expiry",
+        "has_expiry_date",
+        "camera_barcode_accepted",
+        "camera_expiry_accepted",
+        "camera_barcode_source",
+        "camera_expiry_format"
+      ],
       "description": "User adds item to inventory"
     },
     "item_wasted": {

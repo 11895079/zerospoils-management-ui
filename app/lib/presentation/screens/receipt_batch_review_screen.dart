@@ -115,6 +115,25 @@ class _ReceiptBatchReviewScreenState
           updatedAt: now,
         );
         await itemRepo.saveItem(inventoryItem);
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'item_added',
+          'properties': {
+            'item_id': inventoryItem.id,
+            'source': 'receipt_batch_camera',
+            'entry_method': 'receipt_batch_camera',
+            'camera_used': true,
+            'category': inventoryItem.categoryLabel,
+            'is_custom_category': inventoryItem.customCategoryId != null,
+            'location': inventoryItem.location.name,
+            'quantity': inventoryItem.quantity,
+            'has_expiry': inventoryItem.expiryDate != null,
+            'has_expiry_date': inventoryItem.expiryDate != null,
+            'camera_barcode_accepted': false,
+            'camera_expiry_accepted': false,
+            'camera_barcode_source': 'none',
+            'camera_expiry_format': 'none',
+          },
+        });
         batchItems.add(
           ReceiptBatchItem(
             id: id,

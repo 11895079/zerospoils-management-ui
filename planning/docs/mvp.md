@@ -94,13 +94,14 @@ ZeroSpoils MVP is a **cross-platform mobile app** (iOS & Android) that helps hou
 ## Non-Goals (Explicitly Out of Scope)
 
 ### Deferred to Pro Tier
-- **Receipt OCR / Batch Photo Capture** – Capturing items from photos or receipts with computer vision (M5/M6 roadmap)
+- **Receipt OCR** – Extracting line items, prices, or expiry data directly from receipt images remains deferred to the Pro roadmap
 - **Household Sync / Multi-User Accounts** – Family account support and real-time sync (M3/M4 roadmap)
 - **Advanced Analytics Dashboard** – Charts, trends, money saved calculators (M5 roadmap)
 - **Meal Planning** – Recipe suggestions and meal plan scheduling (M6 roadmap)
 
 ### Deferred to Future / Out of Scope Long-Term
-- **Barcode Scanning** – Will not implement; competitors already saturated in this space; we differentiate via photos/receipts
+- **Standalone Barcode-Only Inventory Flow** – Not the core differentiation; the limited M3 packaged-item fast-add path may use local barcode lookup paired with expiry OCR, but cloud catalog sync remains future work
+- **Computer-Vision Batch Photo Capture** – Tabletop/fridge multi-item photo recognition remains future or Pro work; free-tier M3 may still include shopping batch capture with receipt-photo attachment and manual item linking
 - **IoT Integrations** – NFC tags, smart shelves, Bluetooth scales (M7 roadmap)
 - **Web App** – Initial launch is mobile-only; web may follow post-MVP
 - **Internationalization** – MVP supports English only; French, Spanish, etc. deferred
