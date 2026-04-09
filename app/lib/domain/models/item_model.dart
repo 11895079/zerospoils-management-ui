@@ -190,6 +190,9 @@ class Item extends Equatable {
   final DateTime createdAt;
   @HiveField(13)
   final DateTime updatedAt;
+  @HiveField(17)
+  /// Optional manufacturer or brand name for the product (e.g., "Organic Valley").
+  final String? brand;
 
   const Item({
     required this.id,
@@ -209,6 +212,7 @@ class Item extends Equatable {
     this.wastePercentage,
     required this.createdAt,
     required this.updatedAt,
+    this.brand,
   });
 
   /// Create a copy of Item with optional field overrides
@@ -230,6 +234,7 @@ class Item extends Equatable {
     int? wastePercentage,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? brand,
   }) {
     return Item(
       id: id ?? this.id,
@@ -249,6 +254,7 @@ class Item extends Equatable {
       wastePercentage: wastePercentage ?? this.wastePercentage,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      brand: brand ?? this.brand,
     );
   }
 
@@ -296,6 +302,7 @@ class Item extends Equatable {
     wastePercentage,
     createdAt,
     updatedAt,
+    brand,
   ];
 }
 

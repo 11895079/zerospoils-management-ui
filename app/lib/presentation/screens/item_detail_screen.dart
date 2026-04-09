@@ -578,6 +578,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                               valueKey: const Key('item_detail_category'),
                             ),
                             const Divider(height: 1),
+                            if (_item!.brand?.isNotEmpty ?? false) ...[
+                              _buildInfoRow(
+                                'Brand',
+                                _item!.brand!,
+                                valueKey: const Key('item_detail_brand'),
+                              ),
+                              const Divider(height: 1),
+                            ],
                             _buildInfoRow(
                               'Type',
                               _item!.type.displayName,

@@ -34,13 +34,14 @@ class ItemAdapter extends TypeAdapter<Item> {
       createdAt: fields[12] as DateTime,
       updatedAt: fields[13] as DateTime,
       wastePercentage: fields[14] as int?,
+      brand: fields[17] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Item obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -74,7 +75,9 @@ class ItemAdapter extends TypeAdapter<Item> {
       ..writeByte(15)
       ..write(obj.customCategoryId)
       ..writeByte(16)
-      ..write(obj.customCategoryName);
+      ..write(obj.customCategoryName)
+      ..writeByte(17)
+      ..write(obj.brand);
   }
 
   @override

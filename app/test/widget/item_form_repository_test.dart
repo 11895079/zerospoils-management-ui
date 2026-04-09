@@ -367,4 +367,78 @@ void main() {
     );
     expect(decoration.color, theme.colorScheme.surfaceContainerHigh);
   });
+
+  testWidgets('brand field is persisted when saving a new item', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Enter name
+    final nameField = find.byType(TextFormField).first;
+    await tester.enterText(nameField, 'Organic Milk');
+
+    // Enter brand
+    final brandField = find.byKey(const Key('item_form_brand_field'));
+    await tester.enterText(brandField, 'Organic Valley');
+
+    // Save
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final items = await repository.getAllItems();
+    expect(items.length, 1);
+    expect(items.first.brand, 'Organic Valley');
+  });
+
+  testWidgets('edit mode pre-fills brand field from existing item', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final existingItem = Item(
+      id: 'brand-edit-1',
+      name: 'Milk',
+      category: ItemCategory.dairy,
+      location: StorageLocation.fridge,
+      status: ItemStatus.available,
+      brand: 'Horizon',
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
+    );
+    await repository.saveItem(existingItem);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        child: MaterialApp(home: ItemFormScreen(itemId: existingItem.id)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final brandField = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('item_form_brand_field')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(brandField.controller?.text, 'Horizon');
+  });
 }
