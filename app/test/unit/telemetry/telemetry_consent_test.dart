@@ -89,13 +89,14 @@ void main() {
       );
     });
 
-    test('Rejects events with missing properties field', () {
+    test('Normalizes events with missing properties field to empty map', () {
       final client = TelemetryClient(consentEnabled: true);
 
-      expect(
-        () => client.enqueue({'name': 'test_event'}),
-        throwsA(isA<AssertionError>()),
-      );
+      client.enqueue({'name': 'test_event'});
+
+      expect(client.events.length, 1);
+      expect(client.events.first['properties'], isA<Map<String, dynamic>>());
+      expect(client.events.first['properties'], isEmpty);
     });
 
     test('Rejects events containing PII keys (email)', () {

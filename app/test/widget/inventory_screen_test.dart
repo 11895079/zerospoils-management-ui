@@ -636,9 +636,12 @@ void main() {
     await tester.tap(find.byKey(const Key('inventory_add_fab')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Add item manually'), findsOneWidget);
+    expect(
+      find.byKey(const Key('inventory_add_manual_action')),
+      findsOneWidget,
+    );
 
-    await tester.tap(find.text('Add item manually'));
+    await tester.tap(find.byKey(const Key('inventory_add_manual_action')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);
@@ -663,9 +666,14 @@ void main() {
       await tester.tap(find.byKey(const Key('inventory_add_fab')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Scan expiry date'), findsOneWidget);
+      expect(
+        find.byKey(const Key('inventory_add_expiry_scan_action')),
+        findsOneWidget,
+      );
 
-      await tester.tap(find.text('Scan expiry date'));
+      await tester.tap(
+        find.byKey(const Key('inventory_add_expiry_scan_action')),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('item_entry_sheet')), findsOneWidget);

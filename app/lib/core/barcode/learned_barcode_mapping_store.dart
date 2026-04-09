@@ -16,11 +16,11 @@ class LearnedBarcodeMappingStore {
 
     final prefs = await SharedPreferences.getInstance();
     final jsonValue = prefs.getString(_storageKey);
-    if (jsonValue == null || jsonValue.isEmpty) {
+    final decoded = _decodeMappings(jsonValue);
+    if (decoded.isEmpty) {
       return null;
     }
 
-    final decoded = jsonDecode(jsonValue) as Map<String, dynamic>;
     final entry = decoded[normalized];
     if (entry is! Map<String, dynamic>) {
       return null;
@@ -56,12 +56,25 @@ class LearnedBarcodeMappingStore {
 
     final prefs = await SharedPreferences.getInstance();
     final jsonValue = prefs.getString(_storageKey);
-    final decoded = jsonValue == null || jsonValue.isEmpty
-        ? <String, dynamic>{}
-        : jsonDecode(jsonValue) as Map<String, dynamic>;
+    final decoded = _decodeMappings(jsonValue);
 
     decoded[normalized] = {'name': trimmedName, 'category': category.name};
 
     await prefs.setString(_storageKey, jsonEncode(decoded));
+  }
+
+  Map<String, dynamic> _decodeMappings(String? jsonValue) {
+    if (jsonValue == null || jsonValue.isEmpty) {
+      return <String, dynamic>{};
+    }
+
+    try {
+      final decoded = jsonDecode(jsonValue);
+      return decoded is Map<String, dynamic>
+          ? decoded
+          : Map<String, dynamic>.from(decoded as Map);
+    } catch (_) {
+      return <String, dynamic>{};
+    }
   }
 }

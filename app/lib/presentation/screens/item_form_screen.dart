@@ -1652,7 +1652,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ),
           ],
           const SizedBox(height: AppSpacing.md),
-          Text(statusTitle, style: AppTextStyles.body),
+          Text(
+            statusTitle,
+            key: Key(
+              expiryLocked
+                  ? 'camera_assisted_status_expiry_locked'
+                  : barcodeLocked
+                  ? 'camera_assisted_status_barcode_locked'
+                  : 'camera_assisted_status_barcode_ready',
+            ),
+            style: AppTextStyles.body,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             statusMessage,

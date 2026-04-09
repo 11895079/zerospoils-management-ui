@@ -913,6 +913,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
               ListTile(
+                key: const Key('inventory_add_manual_action'),
                 leading: const Icon(Icons.add_circle_outline),
                 title: const Text('Add item manually'),
                 subtitle: const Text('Enter a single item with details'),
@@ -927,6 +928,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   return expiryOcrEnabled.when(
                     data: (enabled) => enabled && _supportsExpiryOcrPlatform
                         ? ListTile(
+                            key: const Key('inventory_add_expiry_scan_action'),
                             leading: const Icon(Icons.camera_alt_outlined),
                             title: const Text('Scan expiry date'),
                             subtitle: const Text(

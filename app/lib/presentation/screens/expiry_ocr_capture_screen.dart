@@ -1,9 +1,10 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
@@ -46,6 +47,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   late ExpiryOcrCaptureSession _captureSession;
 
   final List<XFile> _photos = [];
+  final Map<String, Uint8List> _photoThumbnailBytes = {};
   final List<ExpiryDateParseResult> _capturedDetections = [];
 
   bool _initializing = true;
@@ -60,6 +62,9 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   LiveOcrProductInsights _liveInsights = const LiveOcrProductInsights();
   ExpiryDateParseResult? _bestDetection;
   int _frameCounter = 0;
+
+  bool get _usesIosCameraFormat =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
   void initState() {
@@ -118,7 +123,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
         selectedCamera,
         ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup: Platform.isIOS
+        imageFormatGroup: _usesIosCameraFormat
             ? ImageFormatGroup.bgra8888
             : ImageFormatGroup.nv21,
       );
@@ -246,15 +251,13 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
       return null;
     }
 
-    final format = Platform.isIOS
+    final format = _usesIosCameraFormat
         ? InputImageFormat.bgra8888
         : InputImageFormat.nv21;
 
-    final bytes = Platform.isIOS
+    final bytes = _usesIosCameraFormat
         ? image.planes.first.bytes
-        : Uint8List.fromList(
-            image.planes.expand((plane) => plane.bytes).toList(),
-          );
+        : _combinePlanes(image);
 
     return InputImage.fromBytes(
       bytes: bytes,
@@ -267,8 +270,16 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     );
   }
 
+  Uint8List _combinePlanes(CameraImage image) {
+    final buffer = BytesBuilder(copy: false);
+    for (final plane in image.planes) {
+      buffer.add(plane.bytes);
+    }
+    return buffer.toBytes();
+  }
+
   InputImageRotation? _inputImageRotation(CameraController controller) {
-    if (Platform.isIOS) {
+    if (_usesIosCameraFormat) {
       return InputImageRotationValue.fromRawValue(
         controller.description.sensorOrientation,
       );
@@ -300,6 +311,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     try {
       await _stopImageStream();
       final photo = await controller.takePicture();
+      _photoThumbnailBytes[photo.path] = await photo.readAsBytes();
       final analysis = await _analyzeCapturedPhoto(photo.path);
 
       _captureSession.registerPhotoCaptured();
@@ -486,16 +498,19 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                           const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final photo = _photos[index];
+                        final thumbnailBytes = _photoThumbnailBytes[photo.path];
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
                           ),
-                          child: Image.file(
-                            File(photo.path),
-                            width: 72,
-                            height: 72,
-                            fit: BoxFit.cover,
-                          ),
+                          child: thumbnailBytes == null
+                              ? const SizedBox(width: 72, height: 72)
+                              : Image.memory(
+                                  thumbnailBytes,
+                                  width: 72,
+                                  height: 72,
+                                  fit: BoxFit.cover,
+                                ),
                         );
                       },
                     ),

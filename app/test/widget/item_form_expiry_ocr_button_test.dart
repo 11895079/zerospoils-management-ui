@@ -203,7 +203,10 @@ void main() {
           find.byKey(const Key('camera_assisted_add_panel')),
           findsOneWidget,
         );
-        expect(find.text('Scan barcode first'), findsOneWidget);
+        expect(
+          find.byKey(const Key('camera_assisted_status_barcode_ready')),
+          findsOneWidget,
+        );
       } finally {
         debugDefaultTargetPlatformOverride = null;
       }
@@ -292,7 +295,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(fakeBarcodeLauncher.callCount, 1);
-      expect(find.text('Barcode locked'), findsOneWidget);
+      expect(
+        find.byKey(const Key('camera_assisted_status_barcode_locked')),
+        findsOneWidget,
+      );
       expect(
         find.byKey(const Key('camera_assisted_detected_name')),
         findsOneWidget,
@@ -347,7 +353,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Scan barcode first'), findsOneWidget);
+      expect(
+        find.byKey(const Key('camera_assisted_status_barcode_ready')),
+        findsOneWidget,
+      );
       final nameField = tester.widget<TextFormField>(
         find.byKey(const Key('item_form_name_field')),
       );
@@ -429,7 +438,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(fakeExpiryLauncher.callCount, 1);
-        expect(find.text('Expiry locked'), findsOneWidget);
+        expect(
+          find.byKey(const Key('camera_assisted_status_expiry_locked')),
+          findsOneWidget,
+        );
         expect(
           find.byKey(const Key('camera_assisted_detected_expiry')),
           findsOneWidget,

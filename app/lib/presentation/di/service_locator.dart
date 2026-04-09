@@ -78,10 +78,17 @@ class TelemetryClient {
 
     // Validate event structure in debug builds
     assert(event['name'] is String, 'Event must have a "name" field (String)');
-    assert(rawProperties is Map, 'Event must have a "properties" field (Map)');
+    assert(
+      rawProperties == null || rawProperties is Map,
+      'Event must have a "properties" field (Map)',
+    );
+
+    final normalizedProperties = rawProperties is Map
+        ? Map<String, dynamic>.from(rawProperties)
+        : <String, dynamic>{};
 
     final normalizedEvent = Map<String, dynamic>.from(event)
-      ..['properties'] = Map<String, dynamic>.from(rawProperties as Map);
+      ..['properties'] = normalizedProperties;
 
     // Schema validation in debug mode only (not profile builds)
     if (kDebugMode) {
