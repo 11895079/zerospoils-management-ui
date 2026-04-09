@@ -337,12 +337,6 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
         return;
       }
 
-      setState(() {
-        if (analysis.isSuccess) {
-          _liveDetection = analysis.parsed;
-        }
-      });
-
       _showSnack(
         autoCaptured
             ? 'Captured angle ${_photos.length}/$_maxPhotos'
