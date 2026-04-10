@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "item_added Event",
-  "description": "User adds item to inventory (manual entry or from shopping list)",
+  "description": "User adds item to inventory through manual, camera-assisted, shopping conversion, or receipt-batch flows",
   "type": "object",
   "required": ["id", "name", "timestamp", "app_version", "platform", "session_id", "properties"],
   "properties": {
@@ -17,16 +17,76 @@
       "properties": {
         "source": {
           "type": "string",
-          "enum": ["manual", "shopping_list", "ocr"],
-          "description": "How item was added"
+          "enum": [
+            "manual",
+            "camera_barcode",
+            "camera_expiry",
+            "camera_barcode_and_expiry",
+            "shopping_convert",
+            "receipt_batch_camera"
+          ],
+          "description": "Canonical save-time attribution for how the item was added"
+        },
+        "entry_method": {
+          "type": "string",
+          "enum": [
+            "manual",
+            "camera_barcode",
+            "camera_expiry",
+            "camera_barcode_and_expiry",
+            "shopping_convert",
+            "receipt_batch_camera"
+          ],
+          "description": "Normalized item-entry funnel segment used for analysis"
+        },
+        "camera_used": {
+          "type": "boolean",
+          "description": "True when any camera-assisted input contributed to the saved item"
         },
         "category": {
           "type": "string",
           "description": "Item category (from enum)"
         },
+        "is_custom_category": {
+          "type": "boolean",
+          "description": "True when the saved category came from a user-defined custom category"
+        },
+        "location": {
+          "type": "string",
+          "description": "Storage location selected for the saved item"
+        },
+        "quantity": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Saved quantity value"
+        },
+        "has_expiry": {
+          "type": "boolean",
+          "description": "Legacy mirror of has_expiry_date retained for compatibility"
+        },
         "has_expiry_date": {
           "type": "boolean",
           "description": "Whether expiry date was provided"
+        },
+        "camera_barcode_accepted": {
+          "type": "boolean",
+          "description": "True when the saved item retained a camera-derived barcode result"
+        },
+        "camera_expiry_accepted": {
+          "type": "boolean",
+          "description": "True when the saved item retained a camera-derived expiry date"
+        },
+        "camera_barcode_source": {
+          "type": "string",
+          "description": "Origin of the accepted barcode suggestion, or 'none' when not applicable"
+        },
+        "camera_expiry_format": {
+          "type": "string",
+          "description": "Detected OCR expiry format saved with the item, or 'none' when not applicable"
+        },
+        "item_id": {
+          "type": "string",
+          "description": "Local item identifier for correlation with subsequent item events"
         }
       }
     }

@@ -22,12 +22,14 @@
 - Meal planning toggle in Settings (495)
 - Consent model for aggregated analytics export (500)
 - Full recipe suggestions feature (prioritize expiring items) (185)
+- Pro geofenced grocery reminders for low inventory (525)
+- Store affinity and grocery reminder preferences model (530)
 
 **Acceptance:** Pro tier subscription working with IAP; receipt OCR functional; household sync operational; advanced analytics dashboard live; recipe suggestions recommending meals based on expiring items.
 
 **Out of Scope:** IoT integrations (deferred to M7).
 
-**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500, 510
+**Issues:** 185, 410, 420, 430, 440, 450, 460, 470, 475, 480, 490, 495, 500, 510, 525, 530
 
 **Dependencies:** M5 complete (public launch successful, user base established).
 
@@ -35,7 +37,7 @@
 
 ## M6 Implementation Status
 
-**Last Updated:** March 7, 2026 — **Progress:** 0/14 planned issues complete (0%)
+**Last Updated:** April 9, 2026 — **Progress:** 0/16 planned issues complete (0%)
 
 ### Issues & Completion
 
@@ -55,6 +57,8 @@
 | **495** | Meal planning toggle in Settings | ⚠️ In Progress | — | Meal Planning toggle row exists in Settings but is disabled (`Soon`) |
 | **500** | Consent model for aggregated analytics export | ⚠️ In Progress | — | Analytics consent controls exist in Settings; full Pro consent/export model remains open |
 | **510** | AI category inference (Pro) | ⏳ Not Started | — | AI inference path for Pro item entry is not yet tracked complete |
+| **525** | Geofenced grocery reminders for low inventory | ⏳ Not Started | — | Pro-only local location reminders near regular grocery stores when shopping list or low-stock candidates exist |
+| **530** | Store affinity and grocery reminder preferences model | ⏳ Not Started | — | Local persistence for learned stores, suppression state, cooldowns, and nearby-store reminder preferences |
 
 ### Commentary
 

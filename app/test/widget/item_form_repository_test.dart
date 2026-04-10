@@ -8,6 +8,8 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart'
+    show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/app_button.dart';
@@ -120,6 +122,10 @@ void main() {
     // Enter required fields
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Test Milk');
+    await tester.enterText(
+      find.byKey(const Key('item_form_brand_field')),
+      'Fairlife',
+    );
 
     // Increment quantity using QuantityToggle's add button
     final addQuantityButton = find.byIcon(Icons.add_circle_outline).first;
@@ -138,6 +144,7 @@ void main() {
     final items = await repository.getAllItems();
     expect(items.length, 1);
     expect(items.first.name, 'Test Milk');
+    expect(items.first.brand, 'Fairlife');
     expect(items.first.quantity, 2);
   });
 
@@ -169,6 +176,103 @@ void main() {
     expect(items.first.category, ItemCategory.dairy);
   });
 
+  testWidgets('manual save emits manual entry telemetry', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final telemetry = TelemetryClient(consentEnabled: true);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(repository),
+          telemetryClientProvider.overrideWithValue(telemetry),
+        ],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('item_form_name_field')),
+      'Manual Milk',
+    );
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final itemAddedEvent = telemetry.events.lastWhere(
+      (event) => event['name'] == 'item_added',
+    );
+    final properties = itemAddedEvent['properties'] as Map<String, dynamic>;
+
+    expect(properties['entry_method'], 'manual');
+    expect(properties['source'], 'manual');
+    expect(properties['camera_used'], false);
+    expect(properties['camera_barcode_accepted'], false);
+    expect(properties['camera_expiry_accepted'], false);
+    expect(properties['camera_barcode_source'], 'none');
+    expect(properties['camera_expiry_format'], 'none');
+  });
+
+  testWidgets('recent item suggestion reuses prior category and location', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final existingItem = Item(
+      id: 'recent-1',
+      name: 'Greek Yogurt',
+      brand: 'Fage',
+      category: ItemCategory.dairy,
+      location: StorageLocation.freezer,
+      quantity: 1,
+      status: ItemStatus.available,
+      createdAt: DateTime.now().subtract(const Duration(days: 2)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
+    );
+    await repository.saveItem(existingItem);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('item_form_name_field')),
+      'Greek',
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('recent_item_suggestion_0')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('recent_item_suggestion_0')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final items = await repository.getAllItems();
+    final saved = items.firstWhere((item) => item.id != existingItem.id);
+    expect(saved.name, 'Greek Yogurt');
+    expect(saved.brand, 'Fage');
+    expect(saved.category, ItemCategory.dairy);
+    expect(saved.location, StorageLocation.freezer);
+  });
+
   testWidgets('edit mode loads existing item from repository', (tester) async {
     tester.view.physicalSize = const Size(1200, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -180,6 +284,7 @@ void main() {
     final existingItem = Item(
       id: 'edit-1',
       name: 'Carrots',
+      brand: 'Fresh Farms',
       category: ItemCategory.produce,
       location: StorageLocation.fridge,
       quantity: 3,
@@ -204,8 +309,19 @@ void main() {
     // Ensure existing data is shown
     final nameField = find.byType(TextFormField).first;
     expect(tester.widget<TextFormField>(nameField).controller?.text, 'Carrots');
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('item_form_brand_field')))
+          .controller
+          ?.text,
+      'Fresh Farms',
+    );
 
     await tester.enterText(nameField, 'Baby Carrots');
+    await tester.enterText(
+      find.byKey(const Key('item_form_brand_field')),
+      'Local Roots',
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));
@@ -213,6 +329,7 @@ void main() {
 
     final updated = await repository.getItem(existingItem.id);
     expect(updated?.name, 'Baby Carrots');
+    expect(updated?.brand, 'Local Roots');
     expect(updated?.quantity, 3);
   });
 
@@ -285,7 +402,7 @@ void main() {
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Price Test');
 
-    final priceField = find.byType(TextFormField).at(1);
+    final priceField = find.byKey(const Key('item_form_price_field'));
     await tester.enterText(priceField, '-5');
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));

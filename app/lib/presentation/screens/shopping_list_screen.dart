@@ -212,6 +212,7 @@ class ShoppingListScreen extends ConsumerWidget {
           requireExpiry: true,
           seed: ItemEntrySeed(
             name: item.name,
+            brand: null,
             category: ItemCategory.fromString(item.category ?? 'other'),
             quantity: item.quantity,
             unit: Unit.fromString(item.unit ?? 'count'),
@@ -274,10 +275,14 @@ class ShoppingListScreen extends ConsumerWidget {
               requireExpiry: true,
               seed: ItemEntrySeed(
                 name: item.name,
+                brand: batchDefaults?.brand,
                 category: ItemCategory.fromString(item.category ?? 'other'),
                 quantity: item.quantity,
                 unit: Unit.fromString(item.unit ?? 'count'),
-                purchasePrice: item.estimatedCost,
+                purchasePrice:
+                    batchDefaults?.purchasePrice ?? item.estimatedCost,
+                type: batchDefaults?.type,
+                preparedDate: batchDefaults?.preparedDate,
               ),
               sourceLabel: 'From Shopping List',
               showSkip: true,
@@ -293,6 +298,7 @@ class ShoppingListScreen extends ConsumerWidget {
 
       final resolved = ItemEntryResult(
         name: item.name,
+        brand: result.brand,
         category: result.category,
         location: result.location,
         quantity: result.quantity,
@@ -335,6 +341,7 @@ class ShoppingListScreen extends ConsumerWidget {
     final converted = Item(
       id: LocalIdGenerator.next(prefix: 'item'),
       name: result.name,
+      brand: result.brand,
       category: result.category,
       type: result.type,
       preparedDate: result.preparedDate,
@@ -350,6 +357,26 @@ class ShoppingListScreen extends ConsumerWidget {
 
     await itemRepository.saveItem(converted);
     ref.invalidate(itemsFutureProvider);
+
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'item_added',
+      'properties': {
+        'item_id': converted.id,
+        'source': 'shopping_convert',
+        'entry_method': 'shopping_convert',
+        'camera_used': false,
+        'category': converted.categoryLabel,
+        'is_custom_category': converted.customCategoryId != null,
+        'location': converted.location.name,
+        'quantity': converted.quantity,
+        'has_expiry': converted.expiryDate != null,
+        'has_expiry_date': converted.expiryDate != null,
+        'camera_barcode_accepted': false,
+        'camera_expiry_accepted': false,
+        'camera_barcode_source': 'none',
+        'camera_expiry_format': 'none',
+      },
+    });
 
     final shoppingRepository = ref.read(shoppingListRepositoryProvider);
     await shoppingRepository.deleteItem(item.id);

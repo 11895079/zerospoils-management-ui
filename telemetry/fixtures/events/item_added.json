@@ -6,8 +6,19 @@
   "platform": "android",
   "session_id": "550e8400-e29b-41d4-a716-446655440001",
   "properties": {
+    "item_id": "item_demo_123",
     "source": "manual",
+    "entry_method": "manual",
+    "camera_used": false,
     "category": "dairy",
-    "has_expiry_date": true
+    "is_custom_category": false,
+    "location": "fridge",
+    "quantity": 1,
+    "has_expiry": true,
+    "has_expiry_date": true,
+    "camera_barcode_accepted": false,
+    "camera_expiry_accepted": false,
+    "camera_barcode_source": "none",
+    "camera_expiry_format": "none"
   }
 }

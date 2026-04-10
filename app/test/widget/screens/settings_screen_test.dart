@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -305,6 +306,21 @@ void main() {
       final event = telemetry.events.last;
       expect(event['name'], 'theme_changed');
       expect(event['properties']['theme'], 'dark');
+    });
+
+    testWidgets('Camera-assisted add toggle is no longer shown', (
+      WidgetTester tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+
+      try {
+        await tester.pumpWidget(buildTestHarness());
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.camera_alt), findsNothing);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
 
     testWidgets('Dark mode toggle updates app theme brightness live', (
