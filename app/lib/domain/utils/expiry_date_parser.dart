@@ -26,11 +26,23 @@ class ExpiryDateParser {
     final candidates = <_ScoredExpiryCandidate>[];
     final lower = text.toLowerCase();
 
-    _collectCandidates(candidates, lower, lower, preferredDateFormat);
+    _collectCandidates(
+      candidates,
+      lower,
+      lower,
+      preferredDateFormat,
+      reference,
+    );
 
     final normalized = _normalizeOcrDateSegments(lower);
     if (normalized != lower) {
-      _collectCandidates(candidates, normalized, lower, preferredDateFormat);
+      _collectCandidates(
+        candidates,
+        normalized,
+        lower,
+        preferredDateFormat,
+        reference,
+      );
     }
 
     final valid = _filterValid(reference, candidates);
@@ -51,8 +63,11 @@ class ExpiryDateParser {
     String scanText,
     String contextText,
     String preferredDateFormat,
+    DateTime reference,
   ) {
     final lower = scanText;
+    const monthNameTokenPattern =
+        r'(jan|january|ene|enero|feb|february|mar|march|apr|april|abr|abril|may|mayo|jun|june|jul|july|aug|august|ago|agosto|sep|sept|september|set|oct|october|nov|november|dec|december|dic|diciembre)';
 
     final isoPattern = RegExp(r'(\d{4})[./-](\d{1,2})[./-](\d{1,2})');
     for (final match in isoPattern.allMatches(lower)) {
@@ -145,8 +160,21 @@ class ExpiryDateParser {
       }
     }
 
+    final compactIsoPattern = RegExp(r'\b(20\d{2})(\d{2})(\d{2})\b');
+    for (final match in compactIsoPattern.allMatches(lower)) {
+      final score = _scoreContext(contextText, match.start, match.end);
+      if (score <= 0) {
+        continue;
+      }
+
+      final year = int.tryParse(match.group(1) ?? '');
+      final month = int.tryParse(match.group(2) ?? '');
+      final day = int.tryParse(match.group(3) ?? '');
+      _tryAddCandidate(candidates, year, month, day, 'YYYYMMDD', score + 20);
+    }
+
     final monthNamePattern = RegExp(
-      r'(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s*(\d{1,2})(?:st|nd|rd|th)?[,]?\s*(\d{2,4})',
+      '$monthNameTokenPattern\\s*(\\d{1,2})(?:st|nd|rd|th)?[,]?\\s+(\\d{2,4})',
     );
     for (final match in monthNamePattern.allMatches(lower)) {
       final month = _monthFromName(match.group(1) ?? '');
@@ -165,7 +193,7 @@ class ExpiryDateParser {
     }
 
     final dayMonthPattern = RegExp(
-      r'(\d{1,2})\s*(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s*(\d{2,4})',
+      '(\\d{1,2})\\s*$monthNameTokenPattern\\s*(\\d{2,4})',
     );
     for (final match in dayMonthPattern.allMatches(lower)) {
       final day = int.tryParse(match.group(1) ?? '');
@@ -183,8 +211,42 @@ class ExpiryDateParser {
       );
     }
 
+    final monthDayNoYearPattern = RegExp(
+      '$monthNameTokenPattern\\s*(\\d{1,2})(?:st|nd|rd|th)?\\b(?!\\s*\\d{2,4})',
+    );
+    for (final match in monthDayNoYearPattern.allMatches(lower)) {
+      final month = _monthFromName(match.group(1) ?? '');
+      final day = int.tryParse(match.group(2) ?? '');
+      if (month == null || day == null) continue;
+
+      final score = _scoreContext(contextText, match.start, match.end);
+      if (score <= 0) {
+        continue;
+      }
+
+      final inferredYear = _inferOpenDateYear(reference, month, day);
+      _tryAddCandidate(candidates, inferredYear, month, day, 'MMM DD', score);
+    }
+
+    final dayMonthNoYearPattern = RegExp(
+      '(\\d{1,2})\\s*$monthNameTokenPattern\\b(?!\\s*\\d{2,4})',
+    );
+    for (final match in dayMonthNoYearPattern.allMatches(lower)) {
+      final day = int.tryParse(match.group(1) ?? '');
+      final month = _monthFromName(match.group(2) ?? '');
+      if (month == null || day == null) continue;
+
+      final score = _scoreContext(contextText, match.start, match.end);
+      if (score <= 0) {
+        continue;
+      }
+
+      final inferredYear = _inferOpenDateYear(reference, month, day);
+      _tryAddCandidate(candidates, inferredYear, month, day, 'DD MMM', score);
+    }
+
     final yearMonthDayTextPattern = RegExp(
-      r'(\d{2,4})\s*(jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s*(\d{1,2})(?:[a-z])?',
+      '(\\d{2,4})\\s*$monthNameTokenPattern\\s*(\\d{1,2})(?:[a-z])?',
     );
     for (final match in yearMonthDayTextPattern.allMatches(lower)) {
       final yearRaw = int.tryParse(match.group(1) ?? '');
@@ -302,22 +364,37 @@ class ExpiryDateParser {
     final lineStart = text.lastIndexOf('\n', start - 1) + 1;
     final lineEndIndex = text.indexOf('\n', end);
     final lineEnd = lineEndIndex == -1 ? text.length : lineEndIndex;
+    final previousLineBreak = lineStart > 0
+        ? text.lastIndexOf('\n', lineStart - 2)
+        : -1;
+    final nextLineBreak = lineEnd < text.length
+        ? text.indexOf('\n', lineEnd + 1)
+        : -1;
+    final blockStart = previousLineBreak == -1 ? 0 : previousLineBreak + 1;
+    final blockEnd = nextLineBreak == -1 ? text.length : nextLineBreak;
 
-    final beforeStart = start - 24 < lineStart ? lineStart : start - 24;
-    final afterEnd = end + 10 > lineEnd ? lineEnd : end + 10;
+    final beforeStart = start - 32 < blockStart ? blockStart : start - 32;
+    final afterEnd = end + 16 > blockEnd ? blockEnd : end + 16;
     final beforeContext = text.substring(beforeStart, start);
     final afterContext = text.substring(end, afterEnd);
 
     const expiryKeywords = [
       'exp',
       'expiry',
+      'expiration',
+      'expiration date',
       'best by',
       'best before',
+      'best if used by',
+      'best if used before',
       'bb/ma',
       'bb / ma',
       'bbma',
       'meilleur avant',
       'use by',
+      'use or freeze by',
+      'freeze by',
+      'expires on',
       'sell by',
     ];
     const manufactureKeywords = [
@@ -374,16 +451,28 @@ class ExpiryDateParser {
     return yearRaw;
   }
 
+  int _inferOpenDateYear(DateTime reference, int month, int day) {
+    final candidateThisYear = DateTime(reference.year, month, day);
+    if (!candidateThisYear.isBefore(
+      reference.subtract(const Duration(days: 1)),
+    )) {
+      return reference.year;
+    }
+    return reference.year + 1;
+  }
+
   int? _monthFromName(String name) {
     if (name.length < 3) return null;
     switch (name.substring(0, 3)) {
       case 'jan':
+      case 'ene':
         return 1;
       case 'feb':
         return 2;
       case 'mar':
         return 3;
       case 'apr':
+      case 'abr':
         return 4;
       case 'may':
         return 5;
@@ -392,14 +481,17 @@ class ExpiryDateParser {
       case 'jul':
         return 7;
       case 'aug':
+      case 'ago':
         return 8;
       case 'sep':
+      case 'set':
         return 9;
       case 'oct':
         return 10;
       case 'nov':
         return 11;
       case 'dec':
+      case 'dic':
         return 12;
     }
     return null;

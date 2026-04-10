@@ -160,6 +160,8 @@ class Item extends Equatable {
   final String id;
   @HiveField(1)
   final String name;
+  @HiveField(17)
+  final String? brand;
   @HiveField(2)
   final ItemCategory category;
   @HiveField(3)
@@ -194,6 +196,7 @@ class Item extends Equatable {
   const Item({
     required this.id,
     required this.name,
+    this.brand,
     required this.category,
     this.type = ItemType.raw,
     this.preparedDate,
@@ -215,6 +218,7 @@ class Item extends Equatable {
   Item copyWith({
     String? id,
     String? name,
+    String? brand,
     ItemCategory? category,
     ItemType? type,
     DateTime? preparedDate,
@@ -234,6 +238,7 @@ class Item extends Equatable {
     return Item(
       id: id ?? this.id,
       name: name ?? this.name,
+      brand: brand ?? this.brand,
       category: category ?? this.category,
       type: type ?? this.type,
       preparedDate: preparedDate ?? this.preparedDate,
@@ -283,6 +288,7 @@ class Item extends Equatable {
   List<Object?> get props => [
     id,
     name,
+    brand,
     category,
     type,
     preparedDate,

@@ -186,6 +186,51 @@ void main() {
       expect(result!.date, DateTime(2027, 11, 11));
     });
 
+    test('parses best-if-used-by wording variant', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.bestIfUsedByLabel,
+        now: now,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 22));
+      expect(result.format, 'MMM DD YYYY');
+    });
+
+    test('parses compact numeric expiry stamp with strong expiry context', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.compactNumericExpiryStamp,
+        now: now,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2027, 4, 22));
+      expect(result.format, 'YYYYMMDD');
+    });
+
+    test('infers current year for yearless use-or-freeze-by label', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.yearlessUseOrFreezeBy,
+        now: now,
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 22));
+      expect(result.format, 'MMM DD');
+    });
+
+    test('parses Spanish month abbreviation on best-before label', () {
+      final result = parser.parse(
+        ExpiryOcrTextFixtures.spanishBestBeforeMonthAbbrev,
+        now: now,
+        preferredDateFormat: 'DD/MM/YYYY',
+      );
+
+      expect(result, isNotNull);
+      expect(result!.date, DateTime(2026, 4, 22));
+      expect(result.format, 'DD MMM YYYY');
+    });
+
     test('rejects far future dates', () {
       final result = parser.parse('Best By 12/31/2030', now: now);
       expect(result, isNull);

@@ -554,6 +554,18 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        if (_item!.brand?.trim().isNotEmpty == true) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            key: const Key('item_detail_brand'),
+                            _item!.brand!.trim(),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: theme.textTheme.bodySmall?.color,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -572,6 +584,14 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                         padding: const EdgeInsets.all(AppSpacing.md),
                         child: Column(
                           children: [
+                            _buildInfoRow(
+                              'Brand',
+                              _item!.brand?.trim().isNotEmpty == true
+                                  ? _item!.brand!.trim()
+                                  : '—',
+                              valueKey: const Key('item_detail_brand_value'),
+                            ),
+                            const Divider(height: 1),
                             _buildInfoRow(
                               'Category',
                               '${_item!.customCategoryName != null ? '🏷️' : _item!.category.emoji} ${_item!.categoryLabel}',

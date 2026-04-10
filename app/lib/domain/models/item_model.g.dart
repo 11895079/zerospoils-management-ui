@@ -19,6 +19,7 @@ class ItemAdapter extends TypeAdapter<Item> {
     return Item(
       id: fields[0] as String,
       name: fields[1] as String,
+      brand: fields[17] as String?,
       category: fields[2] as ItemCategory,
       type: fields[3] as ItemType,
       preparedDate: fields[4] as DateTime?,
@@ -40,11 +41,13 @@ class ItemAdapter extends TypeAdapter<Item> {
   @override
   void write(BinaryWriter writer, Item obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.name)
+      ..writeByte(17)
+      ..write(obj.brand)
       ..writeByte(2)
       ..write(obj.category)
       ..writeByte(3)

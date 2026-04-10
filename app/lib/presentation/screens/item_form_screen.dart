@@ -63,6 +63,7 @@ class _CategoryOption {
 
 class _RecentItemDefaults {
   final String name;
+  final String? brand;
   final ItemCategory category;
   final StorageLocation location;
   final String? customCategoryId;
@@ -71,6 +72,7 @@ class _RecentItemDefaults {
 
   const _RecentItemDefaults({
     required this.name,
+    this.brand,
     required this.category,
     required this.location,
     required this.updatedAt,
@@ -93,6 +95,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _brandController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
 
@@ -115,6 +118,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   String? _cameraSuggestionSource;
   String? _cameraAcceptedExpiryFormat;
   List<_RecentItemDefaults> _recentItemDefaults = const [];
+  List<String> _recentBrands = const [];
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -188,6 +192,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
         recentByName[normalizedName] = _RecentItemDefaults(
           name: item.name.trim(),
+          brand: item.brand?.trim(),
           category: item.category,
           location: item.location,
           customCategoryId: item.customCategoryId,
@@ -196,14 +201,32 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         );
       }
 
+      final recentBrands = <String>[];
+      final seenBrands = <String>{};
+      for (final item in sortedItems) {
+        final brand = item.brand?.trim();
+        if (brand == null || brand.isEmpty) {
+          continue;
+        }
+
+        final normalizedBrand = brand.toLowerCase();
+        if (seenBrands.add(normalizedBrand)) {
+          recentBrands.add(brand);
+        }
+      }
+
       if (!mounted) return;
       setState(() {
         _recentItemDefaults = recentByName.values.toList()
           ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        _recentBrands = recentBrands;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _recentItemDefaults = const []);
+      setState(() {
+        _recentItemDefaults = const [];
+        _recentBrands = const [];
+      });
     }
   }
 
@@ -217,6 +240,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         .where((item) => item.name.toLowerCase().contains(normalizedQuery))
         .take(3)
         .toList();
+  }
+
+  List<String> _recentBrandSuggestions(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    final brands = normalizedQuery.isEmpty
+        ? _recentBrands
+        : _recentBrands
+              .where((brand) => brand.toLowerCase().contains(normalizedQuery))
+              .toList();
+
+    return brands.take(6).toList();
   }
 
   _RecentItemDefaults? _findRecentDefaultsForName(String? name) {
@@ -255,6 +289,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   void _applyRecentItemDefaults(_RecentItemDefaults defaults) {
     setState(() {
       _nameController.text = defaults.name;
+      _brandController.text = defaults.brand ?? '';
       _selectedCategory = defaults.category;
       _selectedUserCategory = _resolveRecentUserCategory(defaults);
       _selectedLocation = defaults.location;
@@ -263,6 +298,134 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   void _applyRecentSuggestion(_RecentItemDefaults defaults) {
     _applyRecentItemDefaults(defaults);
+  }
+
+  Future<void> _openBrandPicker() async {
+    final searchController = TextEditingController(text: _brandController.text);
+    var query = _brandController.text;
+
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setSheetState) {
+              final theme = Theme.of(context);
+              final trimmedQuery = query.trim();
+              final options = _recentBrandSuggestions(query);
+              final hasExactMatch =
+                  trimmedQuery.isNotEmpty &&
+                  options.any(
+                    (brand) =>
+                        brand.toLowerCase() == trimmedQuery.toLowerCase(),
+                  );
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: AppSpacing.lg,
+                  right: AppSpacing.lg,
+                  top: AppSpacing.md,
+                  bottom:
+                      MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Select brand', style: AppTextStyles.h3),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search brands',
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setSheetState(() => query = value);
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            if (trimmedQuery.isNotEmpty && !hasExactMatch)
+                              ListTile(
+                                leading: const Icon(Icons.add),
+                                title: Text('Use "$trimmedQuery"'),
+                                onTap: () =>
+                                    Navigator.pop(context, trimmedQuery),
+                              ),
+                            if (options.isNotEmpty) ...[
+                              Text(
+                                'Recent brands',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              ...options.map(
+                                (brand) => ListTile(
+                                  title: Text(brand),
+                                  onTap: () => Navigator.pop(context, brand),
+                                ),
+                              ),
+                            ],
+                            if (options.isEmpty && trimmedQuery.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                child: Text(
+                                  'No recent brands yet. Type one manually.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ),
+                            if (options.isEmpty && trimmedQuery.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                child: Text(
+                                  'No recent brands match your search.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      if (selected == null) {
+        return;
+      }
+
+      setState(() {
+        _brandController.text = selected;
+      });
+    } finally {
+      searchController.dispose();
+    }
   }
 
   String _entryMethodForSave() {
@@ -1007,6 +1170,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       _cameraAssistedStage = _CameraAssistedStage.barcodeLocked;
 
       if (recentDefaults != null) {
+        _brandController.text = recentDefaults.brand ?? '';
         if (!_categoryTouched) {
           _selectedCategory = recentDefaults.category;
           _selectedUserCategory = _resolveRecentUserCategory(recentDefaults);
@@ -1087,6 +1251,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         if (item != null) {
           setState(() {
             _nameController.text = item.name;
+            _brandController.text = item.brand ?? '';
             _selectedCategory = item.category;
             _selectedUserCategory = item.customCategoryId == null
                 ? null
@@ -1132,9 +1297,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _brandController.dispose();
     _quantityController.dispose();
     _priceController.dispose();
     super.dispose();
+  }
+
+  String? _normalizedBrand() {
+    final brand = _brandController.text.trim();
+    return brand.isEmpty ? null : brand;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -1178,6 +1349,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ? widget.itemId!
             : LocalIdGenerator.next(prefix: 'item'),
         name: _nameController.text.trim(),
+        brand: _normalizedBrand(),
         category: _selectedCategory,
         customCategoryId: _selectedUserCategory?.id,
         customCategoryName: _selectedUserCategory?.name,
@@ -1280,6 +1452,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
     final showCameraAssistedPanel = showExpiryOcrButton;
     final recentSuggestions = _recentSuggestionsForQuery(_nameController.text);
+    final recentBrandSuggestions = _recentBrandSuggestions(
+      _brandController.text,
+    );
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -1338,6 +1513,53 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             onPressed: () => _applyRecentSuggestion(
                               recentSuggestions[index],
                             ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            _buildFormGroup(
+              label: 'Brand (optional)',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    key: const Key('item_form_brand_field'),
+                    controller: _brandController,
+                    decoration: _buildInputDecoration(
+                      hintText: 'e.g., Chobani',
+                      suffixIcon: IconButton(
+                        key: const Key('item_form_brand_picker_button'),
+                        tooltip: 'Search recent brands',
+                        onPressed: _openBrandPicker,
+                        icon: const Icon(Icons.arrow_drop_down),
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  if (recentBrandSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        for (
+                          var index = 0;
+                          index < recentBrandSuggestions.length;
+                          index++
+                        )
+                          ActionChip(
+                            key: Key('recent_brand_suggestion_$index'),
+                            label: Text(recentBrandSuggestions[index]),
+                            onPressed: () {
+                              setState(() {
+                                _brandController.text =
+                                    recentBrandSuggestions[index];
+                              });
+                            },
                           ),
                       ],
                     ),
@@ -1921,6 +2143,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     final displayName = name.isEmpty
         ? (_isEditMode ? 'Item' : 'New item')
         : name;
+    final brand = _normalizedBrand();
+    final subtitle = brand == null
+        ? (_selectedUserCategory?.name ?? _selectedCategory.displayName)
+        : '$brand • ${_selectedUserCategory?.name ?? _selectedCategory.displayName}';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -1951,7 +2177,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _selectedUserCategory?.name ?? _selectedCategory.displayName,
+                  subtitle,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: theme.textTheme.bodySmall?.color,
                   ),
@@ -1981,11 +2207,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration({required String hintText}) {
+  InputDecoration _buildInputDecoration({
+    required String hintText,
+    Widget? suffixIcon,
+  }) {
     final theme = Theme.of(context);
 
     return InputDecoration(
       hintText: hintText,
+      suffixIcon: suffixIcon,
       hintStyle: theme.textTheme.bodyMedium?.copyWith(
         color: theme.textTheme.bodySmall?.color,
       ),

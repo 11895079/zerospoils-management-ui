@@ -122,6 +122,10 @@ void main() {
     // Enter required fields
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Test Milk');
+    await tester.enterText(
+      find.byKey(const Key('item_form_brand_field')),
+      'Fairlife',
+    );
 
     // Increment quantity using QuantityToggle's add button
     final addQuantityButton = find.byIcon(Icons.add_circle_outline).first;
@@ -140,6 +144,7 @@ void main() {
     final items = await repository.getAllItems();
     expect(items.length, 1);
     expect(items.first.name, 'Test Milk');
+    expect(items.first.brand, 'Fairlife');
     expect(items.first.quantity, 2);
   });
 
@@ -227,6 +232,7 @@ void main() {
     final existingItem = Item(
       id: 'recent-1',
       name: 'Greek Yogurt',
+      brand: 'Fage',
       category: ItemCategory.dairy,
       location: StorageLocation.freezer,
       quantity: 1,
@@ -262,6 +268,7 @@ void main() {
     final items = await repository.getAllItems();
     final saved = items.firstWhere((item) => item.id != existingItem.id);
     expect(saved.name, 'Greek Yogurt');
+    expect(saved.brand, 'Fage');
     expect(saved.category, ItemCategory.dairy);
     expect(saved.location, StorageLocation.freezer);
   });
@@ -277,6 +284,7 @@ void main() {
     final existingItem = Item(
       id: 'edit-1',
       name: 'Carrots',
+      brand: 'Fresh Farms',
       category: ItemCategory.produce,
       location: StorageLocation.fridge,
       quantity: 3,
@@ -301,8 +309,19 @@ void main() {
     // Ensure existing data is shown
     final nameField = find.byType(TextFormField).first;
     expect(tester.widget<TextFormField>(nameField).controller?.text, 'Carrots');
+    expect(
+      tester
+          .widget<TextFormField>(find.byKey(const Key('item_form_brand_field')))
+          .controller
+          ?.text,
+      'Fresh Farms',
+    );
 
     await tester.enterText(nameField, 'Baby Carrots');
+    await tester.enterText(
+      find.byKey(const Key('item_form_brand_field')),
+      'Local Roots',
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));
@@ -310,6 +329,7 @@ void main() {
 
     final updated = await repository.getItem(existingItem.id);
     expect(updated?.name, 'Baby Carrots');
+    expect(updated?.brand, 'Local Roots');
     expect(updated?.quantity, 3);
   });
 
@@ -382,7 +402,7 @@ void main() {
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Price Test');
 
-    final priceField = find.byType(TextFormField).at(1);
+    final priceField = find.byKey(const Key('item_form_price_field'));
     await tester.enterText(priceField, '-5');
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));
