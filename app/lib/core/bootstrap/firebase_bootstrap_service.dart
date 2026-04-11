@@ -1,9 +1,21 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import '../auth/firebase_auth_service.dart';
 import '../auth/secure_token_service.dart';
+
+/// Handle FCM background messages. Must be a top-level function.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Background messages arrive here when the app is terminated or in the
+  // background. Minimal processing only — avoid heavy I/O.
+  debugPrint(
+    '[FCM] Background message received: ${message.messageId} '
+    'title="${message.notification?.title}"',
+  );
+}
 
 /// Bootstrap Firebase services for telemetry, auth, and remote configuration.
 ///
@@ -13,6 +25,7 @@ import '../auth/secure_token_service.dart';
 /// - Secure Token Storage (persists ID tokens across app restarts)
 /// - Crash Reporting (firebase_crashlytics)
 /// - Remote Config (for feature flag remote overrides)
+/// - Cloud Messaging / FCM (push notifications for expiry alerts)
 class FirebaseBootstrapService {
   static Future<void> initialize() async {
     try {
@@ -73,12 +86,69 @@ class FirebaseBootstrapService {
       // Fetch and activate remote config
       await remoteConfig.fetchAndActivate();
 
+      // Initialize Firebase Cloud Messaging (FCM) for push notifications.
+      await _initializeFcm();
+
       debugPrint(
-        '[Firebase] Bootstrap complete: Core + Auth (anonymous, token cached) + Crashlytics + Remote Config initialized',
+        '[Firebase] Bootstrap complete: Core + Auth (anonymous, token cached) '
+        '+ Crashlytics + Remote Config + FCM initialized',
       );
     } catch (e) {
       debugPrint('[Firebase] Bootstrap failed: $e');
       // Continue app startup even if Firebase fails (graceful degradation)
     }
+  }
+
+  /// Set up FCM background handler, request permission, and log the device token.
+  static Future<void> _initializeFcm() async {
+    // Register the top-level background message handler.
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    final messaging = FirebaseMessaging.instance;
+
+    // Request notification permission (required on iOS; optional prompt on Android 13+).
+    final settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
+      final token = await messaging.getToken();
+      debugPrint('[FCM] Device token: $token');
+    } else {
+      debugPrint(
+        '[FCM] Notifications not authorized: ${settings.authorizationStatus}',
+      );
+    }
+
+    // Handle messages received while the app is in the foreground.
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint(
+        '[FCM] Foreground message: ${message.messageId} '
+        'title="${message.notification?.title}"',
+      );
+      // Local notification display for foreground messages is handled by the
+      // notification_service.dart layer; no direct UI push here.
+    });
+
+    // Handle taps on notifications that opened the app from terminated state.
+    final initialMessage = await messaging.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint(
+        '[FCM] App opened from terminated state via notification: '
+        '${initialMessage.messageId}',
+      );
+    }
+
+    // Handle notification taps when the app is in the background (not terminated).
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint(
+        '[FCM] App opened from background via notification: '
+        '${message.messageId}',
+      );
+    });
   }
 }

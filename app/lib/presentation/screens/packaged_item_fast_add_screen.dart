@@ -163,6 +163,9 @@ class _PackagedItemFastAddScreenState
   Future<void> _resolveBarcodeAndAdvance(String rawValue) async {
     final normalized = normalizeBarcodeValue(rawValue);
     if (normalized == null) {
+      _showSnack(
+        'Barcode format not supported. Please enter item details manually.',
+      );
       setState(() => _stage = _FastAddStage.barcodeMiss);
       return;
     }
@@ -227,6 +230,13 @@ class _PackagedItemFastAddScreenState
 
   void _advanceToConfirm() {
     setState(() => _stage = _FastAddStage.editConfirm);
+  }
+
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   // ─────────────────────────────── Confirm Stage ────────────────────────────

@@ -35,20 +35,20 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** April 11, 2026 — **Progress:** 9/22 issues complete (41%)
+**Last Updated:** April 11, 2026 — **Progress:** 13/22 issues complete (59%)
 
-Progress denominator note: the denominator (`22`) is the full planned-issue count listed in the `Issues` line above and reflected in the status table below.
+Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues as shown in table below.
 
 ### Issues & Completion
 
 | Issue | Title | Status | PR | Notes |
 |-------|-------|--------|----|----|
-| **130** | Feature flags framework (prepare for Pro) | ⏳ Not Started | — | No implementation detected in `app/` yet |
+| **130** | Feature flags framework (prepare for Pro) | ✅ Complete | — | `FeatureFlagsService` + Riverpod providers + Remote Config integration + local overrides via SharedPreferences; tests present |
 | **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
 | **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
 | **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
-| **196** | Live expiry OCR multi-angle capture | ⏳ Not Started | — | Follow-up to issue 142 for live camera, auto-capture, haptics, and 5-angle capture reliability |
-| **197** | Hybrid packaged-item fast add (barcode + expiry OCR) | ⏳ Not Started | — | Free-tier sub-10-second packaged-item flow using local barcode lookup plus expiry OCR |
+| **196** | Live expiry OCR multi-angle capture | ✅ Complete | — | `ExpiryOcrCaptureScreen` with live camera stream, auto-capture, haptic debounce, 5-photo cap, torch toggle, status panel moved outside camera viewport; `ExpiryOcrCaptureSession` unit tests |
+| **197** | Hybrid packaged-item fast add (barcode + expiry OCR) | ✅ Complete | — | `PackagedItemFastAddScreen` with 7-stage flow (barcode → result/miss → pkg-label → expiry → locked → confirm); lookup precedence: learned→seed→manual; learned mapping saved on confirm; 9 widget tests + 7 barcode lookup unit tests |
 | **198** | Shopping batch receipt capture | ⏳ Not Started | — | Free-tier shopping-batch metadata, single receipt photo attachment, item linking, and history views |
 | **199** | Canada seed barcode catalog curation | ⏳ Not Started | — | Curated Canada-first packaged-product seed catalog artifact, attribution, size budget, and packaging workflow |
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
@@ -58,10 +58,11 @@ Progress denominator note: the denominator (`22`) is the full planned-issue coun
 | **206** | Downloadable reference-data update packs | ⏳ Not Started | — | Remote manifest plus validated update packs for barcode catalogs, categories, locations, and other app-managed lists |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |
 | **220** | Convert purchased list items → inventory | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | Convert dialog with expiry date + optional location; telemetry tracking |
-| **230** | Offline-first verification suite | ⏳ Not Started | — | No verification suite in `app/test` |
+| **230** | Offline-first verification suite | ✅ Complete | — | `test/unit/offline_first_verification_test.dart`: 5 groups covering item Hive persistence, shopping list Hive, barcode catalog (local-only), expiry parser (pure Dart), receipt parser (pure Dart); all tests verify no network dependency |
 | **240** | Data export/delete (privacy baseline) | ✅ Complete | [#78](https://github.com/11895079/zerospoils/pull/78) | CSV/JSON export + delete-all with confirmation; BackupRestoreService; Settings → Privacy & Data section; telemetry events |
 | **250** | Telemetry instrumentation for core funnel | ✅ Complete | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing); merged |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
 | **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
-| **360** | Firebase integration (mobile tooling) | ⏳ Not Started | — | Crashlytics + Remote Config + FCM; implements M3/130 feature flags; Spark Plan (free tier) only |
+<<<<<<< HEAD
+| **360** | Firebase integration (mobile tooling) | ✅ Complete | — | Crashlytics + Remote Config + FCM foreground/background handlers + permission request + device token + onMessageOpenedApp; all integrated in `firebase_bootstrap_service.dart` |
 | **361** | Firebase App Distribution — Tester API | ⏳ Not Started | — | CI upload to App Distribution on beta tags; Tester SDK for in-app update checks and shake-to-feedback |
