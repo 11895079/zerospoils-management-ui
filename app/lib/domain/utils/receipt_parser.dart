@@ -52,6 +52,10 @@ class ReceiptParser {
   static final RegExp _moneyPattern = RegExp(r'\d+[\.,]\d{2}');
 
   List<ReceiptLineItem> parse(String rawText) {
+    return parseDetailed(rawText).items;
+  }
+
+  ReceiptParseResult parseDetailed(String rawText) {
     final lines = rawText
         .split(RegExp(r'\r?\n'))
         .map(_normalizeWhitespace)
@@ -59,10 +63,14 @@ class ReceiptParser {
         .map((line) => ReceiptOcrLine(text: line))
         .toList();
 
-    return parseOcrLines(lines);
+    return parseDetailedOcrLines(lines);
   }
 
   List<ReceiptLineItem> parseOcrLines(List<ReceiptOcrLine> rawLines) {
+    return parseDetailedOcrLines(rawLines).items;
+  }
+
+  ReceiptParseResult parseDetailedOcrLines(List<ReceiptOcrLine> rawLines) {
     final indexedLines = rawLines.asMap().entries.toList()
       ..sort((left, right) {
         final leftLine = left.value;
@@ -89,27 +97,53 @@ class ReceiptParser {
         return left.key.compareTo(right.key);
       });
 
-    final items = <ReceiptLineItem>[];
-    ReceiptOcrLine? pendingDescription;
+    final rows = _buildRows(indexedLines.map((entry) => entry.value).toList());
 
-    for (final entry in indexedLines) {
-      final line = entry.value;
-      final normalizedText = _normalizeWhitespace(line.text);
+    final items = <ReceiptLineItem>[];
+    final classifiedRows = <ReceiptClassifiedRow>[];
+    _ReceiptOcrRow? pendingDescription;
+
+    for (final row in rows) {
+      final normalizedText = row.normalizedText;
       if (normalizedText.isEmpty) {
         continue;
       }
 
-      if (_shouldIgnoreLine(normalizedText)) {
+      final classification = _classifyRow(normalizedText);
+      if (classification != ReceiptRowClassification.unknown) {
+        classifiedRows.add(
+          ReceiptClassifiedRow(
+            text: normalizedText,
+            photoIndex: row.photoIndex,
+            box: row.box,
+            classification: classification,
+          ),
+        );
         continue;
       }
 
       final prices = _extractPrices(normalizedText);
       if (prices.isEmpty) {
         if (_looksLikeProductDescription(normalizedText)) {
-          pendingDescription = ReceiptOcrLine(
-            text: _cleanDescription(normalizedText),
-            photoIndex: line.photoIndex,
-            box: line.box,
+          pendingDescription = row.copyWith(
+            normalizedText: _cleanDescription(normalizedText),
+          );
+          classifiedRows.add(
+            ReceiptClassifiedRow(
+              text: normalizedText,
+              photoIndex: row.photoIndex,
+              box: row.box,
+              classification: ReceiptRowClassification.unknown,
+            ),
+          );
+        } else {
+          classifiedRows.add(
+            ReceiptClassifiedRow(
+              text: normalizedText,
+              photoIndex: row.photoIndex,
+              box: row.box,
+              classification: ReceiptRowClassification.unknown,
+            ),
           );
         }
         continue;
@@ -120,35 +154,99 @@ class ReceiptParser {
 
       String? name;
       ReceiptOcrBox? ocrBox;
-      var photoIndex = line.photoIndex;
+      var photoIndex = row.photoIndex;
       if (inlineDescription != null &&
           _looksLikeProductDescription(inlineDescription)) {
         name = _cleanDescription(inlineDescription);
-        ocrBox = line.box;
+        ocrBox = row.box;
       } else if (pendingDescription != null &&
-          pendingDescription.photoIndex == line.photoIndex) {
-        name = _cleanDescription(pendingDescription.text);
-        ocrBox = _mergeBoxes(pendingDescription.box, line.box);
+          pendingDescription.photoIndex == row.photoIndex) {
+        name = _cleanDescription(pendingDescription.normalizedText);
+        ocrBox = _mergeBoxes(pendingDescription.box, row.box);
         photoIndex = pendingDescription.photoIndex;
       }
 
       pendingDescription = null;
 
       if (name == null || name.isEmpty) {
+        classifiedRows.add(
+          ReceiptClassifiedRow(
+            text: normalizedText,
+            photoIndex: row.photoIndex,
+            box: row.box,
+            classification: ReceiptRowClassification.unknown,
+          ),
+        );
         continue;
       }
 
-      items.add(
-        ReceiptLineItem(
-          name: name,
-          price: price,
-          photoIndex: photoIndex,
-          ocrBox: ocrBox,
+      final item = ReceiptLineItem(
+        name: name,
+        price: price,
+        photoIndex: photoIndex,
+        ocrBox: ocrBox,
+      );
+      items.add(item);
+      classifiedRows.add(
+        ReceiptClassifiedRow(
+          text: normalizedText,
+          photoIndex: row.photoIndex,
+          box: ocrBox ?? row.box,
+          classification: ReceiptRowClassification.saleItem,
+          extractedName: item.name,
+          extractedPrice: item.price,
         ),
       );
     }
 
-    return items;
+    return ReceiptParseResult(items: items, rows: classifiedRows);
+  }
+
+  List<_ReceiptOcrRow> _buildRows(List<ReceiptOcrLine> lines) {
+    final rows = <_ReceiptOcrRow>[];
+
+    for (final line in lines) {
+      final normalizedText = _normalizeWhitespace(line.text);
+      if (normalizedText.isEmpty) {
+        continue;
+      }
+
+      if (rows.isEmpty) {
+        rows.add(_ReceiptOcrRow.fromLine(line, normalizedText));
+        continue;
+      }
+
+      final current = rows.last;
+      if (_belongsToRow(current, line)) {
+        rows[rows.length - 1] = current.addLine(line, normalizedText);
+      } else {
+        rows.add(_ReceiptOcrRow.fromLine(line, normalizedText));
+      }
+    }
+
+    return rows;
+  }
+
+  bool _belongsToRow(_ReceiptOcrRow row, ReceiptOcrLine line) {
+    if (row.photoIndex != line.photoIndex) {
+      return false;
+    }
+
+    final rowBox = row.box;
+    final lineBox = line.box;
+    if (rowBox == null || lineBox == null) {
+      return false;
+    }
+
+    final rowCenterY = (rowBox.top + rowBox.bottom) / 2;
+    final lineCenterY = (lineBox.top + lineBox.bottom) / 2;
+    final tolerance = _rowJoinTolerance(rowBox.height, lineBox.height);
+    return (rowCenterY - lineCenterY).abs() <= tolerance;
+  }
+
+  double _rowJoinTolerance(double rowHeight, double lineHeight) {
+    final dominantHeight = rowHeight > lineHeight ? rowHeight : lineHeight;
+    return dominantHeight * 0.55 + 2;
   }
 
   ReceiptOcrBox? _mergeBoxes(ReceiptOcrBox? left, ReceiptOcrBox? right) {
@@ -165,34 +263,57 @@ class ReceiptParser {
     return value.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  bool _shouldIgnoreLine(String line) {
+  ReceiptRowClassification _classifyRow(String line) {
     final lower = line.toLowerCase();
     final normalized = lower.replaceAll(RegExp(r'[^a-z]+'), ' ').trim();
 
     if (_ignoredPhrases.any(lower.contains)) {
-      return true;
+      return ReceiptRowClassification.storeInfo;
     }
 
     if (_departmentHeadings.contains(normalized)) {
-      return true;
+      return ReceiptRowClassification.department;
+    }
+
+    if (lower.startsWith('saving') || lower.startsWith('savings')) {
+      return ReceiptRowClassification.savings;
+    }
+
+    if (lower.startsWith('subtotal') || lower.startsWith('total')) {
+      return ReceiptRowClassification.total;
+    }
+
+    if (lower.startsWith('hst') ||
+        lower.startsWith('gst') ||
+        lower.startsWith('vat') ||
+        ((lower.contains('hst') ||
+                lower.contains('gst') ||
+                lower.contains('vat')) &&
+            lower.contains('%'))) {
+      return ReceiptRowClassification.tax;
+    }
+
+    if (lower.startsWith('points') ||
+        lower.contains('reward') ||
+        lower.contains('bonus points')) {
+      return ReceiptRowClassification.loyalty;
+    }
+
+    if (lower.startsWith('credit') ||
+        lower.startsWith('debit') ||
+        lower.startsWith('cash')) {
+      return ReceiptRowClassification.payment;
     }
 
     if (_ignoredKeywords.any((keyword) => lower.startsWith(keyword))) {
-      return true;
-    }
-
-    if ((lower.contains('hst') ||
-            lower.contains('gst') ||
-            lower.contains('vat')) &&
-        lower.contains('%')) {
-      return true;
+      return ReceiptRowClassification.unknown;
     }
 
     if (RegExp(r'^[\d\s\-().]+$').hasMatch(line)) {
-      return true;
+      return ReceiptRowClassification.unknown;
     }
 
-    return false;
+    return ReceiptRowClassification.unknown;
   }
 
   List<double> _extractPrices(String line) {
@@ -255,5 +376,79 @@ class ReceiptParser {
         .replaceAll(RegExp(r'\b[HFBTN]\b\s*$'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
+  }
+}
+
+class _ReceiptOcrRow {
+  final int photoIndex;
+  final List<ReceiptOcrLine> lines;
+  final String normalizedText;
+  final ReceiptOcrBox? box;
+
+  const _ReceiptOcrRow({
+    required this.photoIndex,
+    required this.lines,
+    required this.normalizedText,
+    required this.box,
+  });
+
+  factory _ReceiptOcrRow.fromLine(ReceiptOcrLine line, String normalizedText) {
+    return _ReceiptOcrRow(
+      photoIndex: line.photoIndex,
+      lines: [line],
+      normalizedText: normalizedText,
+      box: line.box,
+    );
+  }
+
+  _ReceiptOcrRow addLine(ReceiptOcrLine line, String normalizedLineText) {
+    final mergedLines = [...lines, line]
+      ..sort((left, right) {
+        final leftBox = left.box;
+        final rightBox = right.box;
+        if (leftBox != null && rightBox != null) {
+          final topOrder = leftBox.top.compareTo(rightBox.top);
+          if (topOrder != 0) {
+            return topOrder;
+          }
+
+          final leftOrder = leftBox.left.compareTo(rightBox.left);
+          if (leftOrder != 0) {
+            return leftOrder;
+          }
+        }
+        return 0;
+      });
+
+    ReceiptOcrBox? mergedBox = box;
+    if (mergedBox == null) {
+      mergedBox = line.box;
+    } else if (line.box != null) {
+      mergedBox = mergedBox.union(line.box!);
+    }
+
+    final mergedText = mergedLines
+        .map((entry) => entry.text)
+        .map((entry) => entry.trim())
+        .where((entry) => entry.isNotEmpty)
+        .join(' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    return _ReceiptOcrRow(
+      photoIndex: photoIndex,
+      lines: mergedLines,
+      normalizedText: mergedText.isEmpty ? normalizedLineText : mergedText,
+      box: mergedBox,
+    );
+  }
+
+  _ReceiptOcrRow copyWith({String? normalizedText}) {
+    return _ReceiptOcrRow(
+      photoIndex: photoIndex,
+      lines: lines,
+      normalizedText: normalizedText ?? this.normalizedText,
+      box: box,
+    );
   }
 }

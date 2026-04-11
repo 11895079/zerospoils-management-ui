@@ -1,5 +1,17 @@
 import 'package:equatable/equatable.dart';
 
+enum ReceiptRowClassification {
+  saleItem,
+  tax,
+  total,
+  loyalty,
+  payment,
+  savings,
+  department,
+  storeInfo,
+  unknown,
+}
+
 class ReceiptOcrBox extends Equatable {
   final double left;
   final double top;
@@ -55,4 +67,50 @@ class ReceiptLineItem extends Equatable {
 
   @override
   List<Object?> get props => [name, price, photoIndex, ocrBox];
+}
+
+class ReceiptClassifiedRow extends Equatable {
+  final String text;
+  final int photoIndex;
+  final ReceiptOcrBox? box;
+  final ReceiptRowClassification classification;
+  final String? extractedName;
+  final double? extractedPrice;
+
+  const ReceiptClassifiedRow({
+    required this.text,
+    required this.photoIndex,
+    required this.box,
+    required this.classification,
+    this.extractedName,
+    this.extractedPrice,
+  });
+
+  bool get isAccepted => classification == ReceiptRowClassification.saleItem;
+
+  @override
+  List<Object?> get props => [
+    text,
+    photoIndex,
+    box,
+    classification,
+    extractedName,
+    extractedPrice,
+  ];
+}
+
+class ReceiptParseResult extends Equatable {
+  final List<ReceiptLineItem> items;
+  final List<ReceiptClassifiedRow> rows;
+
+  const ReceiptParseResult({required this.items, required this.rows});
+
+  List<ReceiptClassifiedRow> get acceptedRows =>
+      rows.where((row) => row.isAccepted).toList(growable: false);
+
+  List<ReceiptClassifiedRow> get rejectedRows =>
+      rows.where((row) => !row.isAccepted).toList(growable: false);
+
+  @override
+  List<Object?> get props => [items, rows];
 }
