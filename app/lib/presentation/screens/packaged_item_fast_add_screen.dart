@@ -10,7 +10,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
-import '../../core/ocr/expiry_ocr_capture_session.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
@@ -100,9 +99,6 @@ class _PackagedItemFastAddScreenState
   bool _barcodeIsCompleting = false;
 
   // Expiry state
-  final ExpiryOcrCaptureSession _expirySession = ExpiryOcrCaptureSession(
-    autoCaptureEnabled: false,
-  );
   ExpiryDateParseResult? _lockedExpiry;
 
   // Confirmation form state
