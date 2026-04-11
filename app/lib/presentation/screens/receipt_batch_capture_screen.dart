@@ -14,15 +14,23 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/vision/batch_goods_photo_service.dart';
 import '../../domain/models/receipt_batch.dart';
+import '../../domain/models/receipt_line_item.dart';
 import '../../domain/utils/receipt_parser.dart';
 import '../receipt_batch/receipt_review_item_merger.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
+import 'receipt_live_scan_screen.dart';
 import 'receipt_batch_review_screen.dart';
 
 class ReceiptBatchCaptureScreen extends ConsumerStatefulWidget {
   final ReceiptBatchSource source;
-  const ReceiptBatchCaptureScreen({super.key, required this.source});
+  final bool? debugShowGoodsPhotosOverride;
+
+  const ReceiptBatchCaptureScreen({
+    super.key,
+    required this.source,
+    this.debugShowGoodsPhotosOverride,
+  });
 
   @override
   ConsumerState<ReceiptBatchCaptureScreen> createState() =>
@@ -90,6 +98,37 @@ class _ReceiptBatchCaptureScreenState
     }
   }
 
+  Future<void> _launchLiveReceiptScan() async {
+    if (_processing || _pickingPhoto) {
+      return;
+    }
+    if (_receiptPhotos.length >= 5) {
+      _showSnack('Receipt photo limit reached (5 photos max)');
+      return;
+    }
+    if (kIsWeb) {
+      _showSnack('Live receipt scanning is not available on web yet');
+      return;
+    }
+
+    final photo = await Navigator.of(context).push<XFile>(
+      MaterialPageRoute(builder: (_) => const ReceiptLiveScanScreen()),
+    );
+
+    if (photo == null || !mounted) {
+      return;
+    }
+
+    setState(() => _receiptPhotos.add(photo));
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'receipt_live_scan_captured',
+      'properties': {
+        'batch_id': _batchId,
+        'photo_index': _receiptPhotos.length,
+      },
+    });
+  }
+
   Future<void> _addGoodsPhoto() async {
     if (_processing || _pickingPhoto) return;
     if (_goodsPhotos.length >= 3) {
@@ -134,25 +173,57 @@ class _ReceiptBatchCaptureScreenState
     setState(() => _processing = true);
     final parser = ReceiptParser();
     final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-    final allItems = <String>[];
     final start = DateTime.now();
 
     try {
-      for (final photo in _receiptPhotos) {
+      final parsedItems = <ParsedReceiptItem>[];
+      for (
+        var photoIndex = 0;
+        photoIndex < _receiptPhotos.length;
+        photoIndex++
+      ) {
+        final photo = _receiptPhotos[photoIndex];
         final input = InputImage.fromFilePath(photo.path);
         final result = await textRecognizer.processImage(input);
-        allItems.add(result.text);
-      }
 
-      final parsedItems = <ParsedReceiptItem>[];
-      for (final block in allItems) {
-        final items = parser.parse(block);
+        final ocrLines = result.blocks
+            .expand((block) => block.lines)
+            .map(
+              (line) => ReceiptOcrLine(
+                text: line.text,
+                photoIndex: photoIndex,
+                box: ReceiptOcrBox(
+                  left: line.boundingBox.left,
+                  top: line.boundingBox.top,
+                  right: line.boundingBox.right,
+                  bottom: line.boundingBox.bottom,
+                ),
+              ),
+            )
+            .toList();
+
+        final items = ocrLines.isEmpty
+            ? parser.parseOcrLines(
+                result.text
+                    .split(RegExp(r'\r?\n'))
+                    .map((line) => line.trim())
+                    .where((line) => line.isNotEmpty)
+                    .map(
+                      (line) =>
+                          ReceiptOcrLine(text: line, photoIndex: photoIndex),
+                    )
+                    .toList(),
+              )
+            : parser.parseOcrLines(ocrLines);
+
         for (final item in items) {
           parsedItems.add(
             ParsedReceiptItem(
               name: item.name,
               price: item.price,
               sourceLabel: 'Receipt OCR',
+              receiptPhotoIndex: item.photoIndex,
+              receiptBox: item.ocrBox,
             ),
           );
         }
@@ -230,6 +301,47 @@ class _ReceiptBatchCaptureScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final debugShowGoodsPhotos = widget.debugShowGoodsPhotosOverride;
+    if (debugShowGoodsPhotos != null) {
+      return Shortcuts(
+        shortcuts: const {
+          SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
+        },
+        child: Actions(
+          actions: {
+            DismissIntent: CallbackAction<DismissIntent>(
+              onInvoke: (intent) {
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).maybePop();
+                }
+                return null;
+              },
+            ),
+          },
+          child: Scaffold(
+            drawer: const AppDrawer(),
+            backgroundColor: theme.scaffoldBackgroundColor,
+            appBar: AppBar(
+              leading: Navigator.of(context).canPop()
+                  ? IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.of(context).maybePop(),
+                    )
+                  : null,
+              title: const Text('Batch Receipt Capture'),
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              child: _buildCaptureBody(
+                theme,
+                showGoodsPhotos: debugShowGoodsPhotos,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final batchPhotoCaptureEnabled = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
     );
@@ -355,6 +467,24 @@ class _ReceiptBatchCaptureScreenState
                   color: theme.textTheme.bodySmall?.color,
                 ),
               ),
+              if (!kIsWeb) ...[
+                const SizedBox(height: AppSpacing.md),
+                OutlinedButton.icon(
+                  key: const Key('receipt_batch_live_scan_button'),
+                  onPressed: _processing || _pickingPhoto
+                      ? null
+                      : _launchLiveReceiptScan,
+                  icon: const Icon(Icons.view_in_ar_outlined),
+                  label: const Text('Live AR Scan Receipt'),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Use the live scanner to preview line-item boxes before you capture the receipt photo.',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
+                  ),
+                ),
+              ],
               if (showGoodsPhotos) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Text(

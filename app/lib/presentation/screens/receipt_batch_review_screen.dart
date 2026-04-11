@@ -1,10 +1,13 @@
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../domain/models/item_model.dart' hide ShoppingListItem;
 import '../../domain/models/receipt_batch.dart';
+import '../../domain/models/receipt_line_item.dart';
 import '../../domain/models/shopping_list_item.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
@@ -15,12 +18,16 @@ class ParsedReceiptItem {
   final double price;
   final String sourceLabel;
   final String? matchExplanation;
+  final int? receiptPhotoIndex;
+  final ReceiptOcrBox? receiptBox;
 
   ParsedReceiptItem({
     required this.name,
     required this.price,
     this.sourceLabel = 'Receipt OCR',
     this.matchExplanation,
+    this.receiptPhotoIndex,
+    this.receiptBox,
   });
 }
 
@@ -67,6 +74,8 @@ class _ReceiptBatchReviewScreenState
             selected: true,
             sourceLabel: item.sourceLabel,
             matchExplanation: item.matchExplanation,
+            receiptPhotoIndex: item.receiptPhotoIndex,
+            receiptBox: item.receiptBox,
           ),
         )
         .toList();
@@ -268,6 +277,7 @@ class _ReceiptBatchReviewScreenState
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [
+          ..._buildOverlayCards(theme),
           if (widget.storeName != null ||
               widget.purchasedAt != null ||
               widget.totalAmount != null)
@@ -359,6 +369,43 @@ class _ReceiptBatchReviewScreenState
     }
     return segments.join(' · ');
   }
+
+  List<Widget> _buildOverlayCards(ThemeData theme) {
+    final grouped = <int, List<_EditableReceiptItem>>{};
+    for (final item in _items) {
+      final photoIndex = item.receiptPhotoIndex;
+      if (photoIndex == null || item.receiptBox == null) {
+        continue;
+      }
+      grouped.putIfAbsent(photoIndex, () => []).add(item);
+    }
+
+    if (grouped.isEmpty) {
+      return const [];
+    }
+
+    final widgets = <Widget>[];
+    final sortedKeys = grouped.keys.toList()..sort();
+    for (final photoIndex in sortedKeys) {
+      if (photoIndex < 0 || photoIndex >= widget.photoPaths.length) {
+        continue;
+      }
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: _ReceiptOcrOverlayCard(
+            key: Key('receipt_review_overlay_$photoIndex'),
+            theme: theme,
+            photoPath: widget.photoPaths[photoIndex],
+            photoIndex: photoIndex,
+            items: grouped[photoIndex]!,
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
 }
 
 class _EditableReceiptItem {
@@ -368,6 +415,8 @@ class _EditableReceiptItem {
   final bool selected;
   final String sourceLabel;
   final String? matchExplanation;
+  final int? receiptPhotoIndex;
+  final ReceiptOcrBox? receiptBox;
 
   _EditableReceiptItem({
     required this.name,
@@ -376,6 +425,8 @@ class _EditableReceiptItem {
     required this.selected,
     required this.sourceLabel,
     this.matchExplanation,
+    this.receiptPhotoIndex,
+    this.receiptBox,
   });
 
   _EditableReceiptItem copyWith({
@@ -385,6 +436,8 @@ class _EditableReceiptItem {
     bool? selected,
     String? sourceLabel,
     String? matchExplanation,
+    int? receiptPhotoIndex,
+    ReceiptOcrBox? receiptBox,
   }) {
     return _EditableReceiptItem(
       name: name ?? this.name,
@@ -393,6 +446,142 @@ class _EditableReceiptItem {
       selected: selected ?? this.selected,
       sourceLabel: sourceLabel ?? this.sourceLabel,
       matchExplanation: matchExplanation ?? this.matchExplanation,
+      receiptPhotoIndex: receiptPhotoIndex ?? this.receiptPhotoIndex,
+      receiptBox: receiptBox ?? this.receiptBox,
     );
+  }
+}
+
+class _ReceiptOcrOverlayCard extends StatelessWidget {
+  final ThemeData theme;
+  final String photoPath;
+  final int photoIndex;
+  final List<_EditableReceiptItem> items;
+
+  const _ReceiptOcrOverlayCard({
+    super.key,
+    required this.theme,
+    required this.photoPath,
+    required this.photoIndex,
+    required this.items,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final sourceWidth = _maxExtent((box) => box.right, fallback: 320);
+    final sourceHeight = _maxExtent((box) => box.bottom, fallback: 480);
+    final aspectRatio = sourceWidth <= 0 || sourceHeight <= 0
+        ? 0.67
+        : sourceWidth / sourceHeight;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Detected receipt line items',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Highlighted boxes show which OCR regions were treated as sale items.',
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            AspectRatio(
+              aspectRatio: aspectRatio,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(
+                            File(photoPath),
+                            fit: BoxFit.fill,
+                            errorBuilder: (_, _, _) => Center(
+                              child: Text(
+                                'Receipt preview unavailable',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      ...items.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final item = entry.value;
+                        final box = item.receiptBox!;
+                        return Positioned(
+                          key: Key(
+                            'receipt_review_overlay_box_${photoIndex}_$index',
+                          ),
+                          left: box.left / sourceWidth * constraints.maxWidth,
+                          top: box.top / sourceHeight * constraints.maxHeight,
+                          width: box.width / sourceWidth * constraints.maxWidth,
+                          height:
+                              box.height / sourceHeight * constraints.maxHeight,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: theme.colorScheme.primary,
+                                width: 2,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.14,
+                              ),
+                            ),
+                            alignment: Alignment.topLeft,
+                            padding: const EdgeInsets.all(4),
+                            child: Text(
+                              item.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onPrimaryContainer,
+                                backgroundColor:
+                                    theme.colorScheme.primaryContainer,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double _maxExtent(
+    double Function(ReceiptOcrBox box) selector, {
+    required double fallback,
+  }) {
+    var maxValue = 0.0;
+    for (final item in items) {
+      final box = item.receiptBox;
+      if (box == null) {
+        continue;
+      }
+      final value = selector(box);
+      if (value > maxValue) {
+        maxValue = value;
+      }
+    }
+    return maxValue > 0 ? maxValue : fallback;
   }
 }

@@ -52,6 +52,8 @@ class ReceiptReviewItemMerger {
         ParsedReceiptItem(
           name: item.name,
           price: item.price,
+          receiptPhotoIndex: item.receiptPhotoIndex,
+          receiptBox: item.receiptBox,
           sourceLabel: goodsMatch == null
               ? item.sourceLabel
               : 'Receipt OCR + goods photo',
