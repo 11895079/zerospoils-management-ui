@@ -97,6 +97,12 @@ android {
                 signingConfigs.getByName("debug")
             }
 
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
             // Enable Dart obfuscation via Flutter. Use with:
             // flutter build apk --release --obfuscate --split-debug-info=./debug-info/
             // Note: Obfuscation flag is passed via Flutter CLI, not here.
@@ -116,7 +122,7 @@ android {
 }
 
 configurations.all {
-    exclude(group = "com.google.android.play", module = "core-common")
+    exclude(group = "com.google.firebase", module = "firebase-iid")
 }
 
 dependencies {
@@ -125,7 +131,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
-    implementation("com.google.android.play:core:1.10.3")
     implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
     implementation("com.google.mlkit:text-recognition-devanagari:16.0.1")
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")
