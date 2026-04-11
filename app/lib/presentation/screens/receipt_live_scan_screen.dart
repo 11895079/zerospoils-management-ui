@@ -346,6 +346,8 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildScanStatusCard(theme),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildPreview(theme),
                   const SizedBox(height: AppSpacing.md),
                   Row(
@@ -456,42 +458,63 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
               items: _liveItems,
               imageSize: _imageSize,
             ),
-            Positioned(
-              top: AppSpacing.md,
-              left: AppSpacing.md,
-              right: AppSpacing.md,
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.62),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _liveItems.isEmpty
-                          ? 'Point the camera at receipt line items'
-                          : 'Live receipt AR active: ${_liveItems.length} item boxes',
-                      style: AppTextStyles.body.copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _liveText == null || _liveText!.isEmpty
-                          ? 'The scanner will highlight only sale items it recognizes.'
-                          : _liveText!,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildScanStatusCard(ThemeData theme) {
+    return Container(
+      key: const Key('receipt_live_scan_status_card'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            _liveItems.isEmpty
+                ? Icons.receipt_long_outlined
+                : Icons.check_circle_outline,
+            size: 18,
+            color: _liveItems.isEmpty
+                ? theme.colorScheme.onSurfaceVariant
+                : theme.colorScheme.primary,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _liveItems.isEmpty
+                      ? 'Point the camera at receipt line items'
+                      : 'Live AR active — ${_liveItems.length} item${_liveItems.length == 1 ? '' : 's'} detected',
+                  style: AppTextStyles.body,
+                ),
+                if (_liveText != null && _liveText!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    _liveText!,
+                    key: const Key('receipt_live_scan_ocr_text'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
