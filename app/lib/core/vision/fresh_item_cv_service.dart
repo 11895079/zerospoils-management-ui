@@ -53,7 +53,7 @@ class MlKitFreshItemCvService implements FreshItemCvService {
   MlKitFreshItemCvService({ImageLabeler? labeler, FreshItemCvMapper? mapper})
     : _labeler =
           labeler ??
-          ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: 0.55)),
+          ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: 0.45)),
       _mapper = mapper ?? const FreshItemCvMapper(),
       _ownsLabeler = labeler == null;
 
@@ -108,6 +108,8 @@ class FreshItemCvMapper {
     final suggestions = suggestionsByName.values.toList()
       ..sort((left, right) => right.confidence.compareTo(left.confidence));
 
+    _pruneGenericProduceFallbacks(suggestions);
+
     return FreshItemCvAnalysis(labels: sortedLabels, suggestions: suggestions);
   }
 
@@ -128,9 +130,11 @@ class FreshItemCvMapper {
       'lemon',
       'lime',
       'avocado',
+      'grape',
+      'grapes',
     ])) {
       return _rawSuggestion(
-        name: _titleCase(normalized),
+        name: _friendlyProduceName(normalized),
         category: ItemCategory.produce,
         label: label,
       );
@@ -265,7 +269,32 @@ class FreshItemCvMapper {
     return false;
   }
 
+  void _pruneGenericProduceFallbacks(List<FreshItemCvSuggestion> suggestions) {
+    final hasSpecificProduce = suggestions.any(
+      (suggestion) =>
+          suggestion.category == ItemCategory.produce &&
+          !_isGenericProduceSuggestion(suggestion.name),
+    );
+
+    if (!hasSpecificProduce) {
+      return;
+    }
+
+    suggestions.removeWhere(
+      (suggestion) =>
+          suggestion.category == ItemCategory.produce &&
+          _isGenericProduceSuggestion(suggestion.name),
+    );
+  }
+
+  bool _isGenericProduceSuggestion(String name) {
+    return name == 'Fresh produce' || name == 'Fresh fruit';
+  }
+
   String _friendlyProduceName(String label) {
+    if (label.contains('grape')) {
+      return 'Grapes';
+    }
     if (label.contains('fruit')) {
       return 'Fresh fruit';
     }
