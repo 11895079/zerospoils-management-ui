@@ -43,7 +43,7 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - [ ] Accessibility basics (form labels, photo preview alt text, batch list semantics)
 
 ## Out of scope
-- Receipt OCR for line item extraction (defer to M6 Pro tier after general OCR foundation)
+- Receipt OCR for line item extraction as a dependency for this flow; receipt OCR remains a separate, feature-flagged follow-up and batch capture must still work without it
 - Cloud sync of batches/receipts across devices (M6)
 - Multiple receipt photos per batch (limit 1 for MVP)
 - Receipt photo editing/cropping (raw photo only)

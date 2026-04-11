@@ -17,7 +17,7 @@
 
 **Acceptance:** All MVP screens complete; shopping list functional; offline suite passes; telemetry events logging; privacy baseline met; Firebase integrated for crashlytics/feature flags; ready for beta distribution.
 
-**Out of Scope:** Pro tier features (household sync, receipt OCR), IoT integrations, full recipe feature. Firebase Firestore/Cloud Functions (using local Hive/sqflite for M3; Supabase for Pro tier in M6).
+**Out of Scope:** Pro tier features (household sync), IoT integrations, full recipe feature, and countertop/fridge goods-photo batch detection. Firebase Firestore/Cloud Functions (using local Hive/sqflite for M3; Supabase for Pro tier in M6).
 
 **Issues:** 130, 180, 190, 195, 196, 197, 198, 199, 200, 201, 202, 205, 206, 210, 220, 230, 240, 250, 300, 350, 360, 361
 

@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils Wireframes - Shopping Batch and Fresh Item Vision</title>
+  <style>
+    :root {
+      --bg: #f3efe5;
+      --ink: #203126;
+      --muted: #627067;
+      --frame: #fffdf8;
+      --line: #d7cfbf;
+      --green: #2f8f57;
+      --green-deep: #1f6b41;
+      --orange: #db7b2b;
+      --sand: #f6eddc;
+      --rose: #f8ddd2;
+      --shadow: 0 18px 40px rgba(37, 44, 32, 0.14);
+      --radius: 28px;
+      --phone-w: 360px;
+      --phone-h: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, 'Times New Roman', serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.65), transparent 30%),
+        linear-gradient(180deg, #ede6d7 0%, var(--bg) 100%);
+      color: var(--ink);
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .hero-card,
+    .notes-card {
+      background: rgba(255, 253, 248, 0.88);
+      border: 1px solid rgba(122, 111, 95, 0.18);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 40px;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+
+    .hero p,
+    .notes-card p,
+    .annotation,
+    .mini-note,
+    li {
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .lead {
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .rule {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--sand);
+      border: 1px solid rgba(122, 111, 95, 0.16);
+    }
+
+    .rule strong,
+    .section-title {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--green-deep);
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .notes-card h2 {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .notes-card ul {
+      padding-left: 18px;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 28px;
+    }
+
+    .screen-block {
+      display: grid;
+      grid-template-columns: var(--phone-w) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      min-height: var(--phone-h);
+      background: var(--frame);
+      border: 10px solid #241f1c;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 18px;
+      background: #241f1c;
+      border-radius: 0 0 14px 14px;
+      z-index: 2;
+    }
+
+    .screen {
+      padding-top: 22px;
+      min-height: var(--phone-h);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.95), rgba(252,248,240,0.96)),
+        radial-gradient(circle at top right, rgba(47,143,87,0.08), transparent 34%);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--green) 0%, #5fb47a 100%);
+      color: white;
+      padding: 18px 20px 22px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .header h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+    }
+
+    .subhead {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.92;
+    }
+
+    .content {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+      padding: 14px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .field,
+    .chip,
+    .pill,
+    .cta,
+    .option,
+    .list-row,
+    .capture-tile,
+    .candidate-row {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .field {
+      padding: 11px 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .two-col,
+    .three-col {
+      display: grid;
+      gap: 10px;
+    }
+
+    .two-col {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .three-col {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .fab-sheet {
+      margin-top: auto;
+      background: #fffaf0;
+      border-top: 1px solid var(--line);
+      border-radius: 24px 24px 0 0;
+      padding: 18px;
+      box-shadow: 0 -12px 30px rgba(40, 36, 30, 0.08);
+    }
+
+    .option {
+      padding: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .option strong {
+      font-size: 15px;
+    }
+
+    .mini-note {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip,
+    .pill {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--green-deep);
+      background: #f6fbf7;
+    }
+
+    .pill.warn {
+      background: #fff3e8;
+      color: #94500d;
+    }
+
+    .pill.soft {
+      background: #f4f0ff;
+      color: #5d4498;
+    }
+
+    .capture-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .capture-tile {
+      min-height: 88px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      background: #fcfaf6;
+    }
+
+    .capture-tile.filled {
+      background: var(--sand);
+      color: var(--ink);
+      border-style: solid;
+    }
+
+    .capture-tile.goods {
+      background: #eef7f0;
+    }
+
+    .cta {
+      padding: 13px 14px;
+      font-weight: 700;
+      text-align: center;
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .cta.secondary {
+      background: white;
+      color: var(--green-deep);
+    }
+
+    .cta.soft {
+      background: var(--sand);
+      color: var(--ink);
+      border-color: rgba(122, 111, 95, 0.18);
+    }
+
+    .candidate-row,
+    .list-row {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .candidate-row {
+      grid-template-columns: 56px 1fr auto;
+      align-items: center;
+    }
+
+    .thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #dcebd8 0%, #f7efd7 100%);
+      border: 1px solid rgba(122,111,95,0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .confidence {
+      font-size: 12px;
+      color: var(--green-deep);
+      background: #eef7f0;
+      border-radius: 999px;
+      padding: 7px 9px;
+      border: 1px solid rgba(47,143,87,0.18);
+    }
+
+    .confidence.medium {
+      color: #94500d;
+      background: #fff3e8;
+      border-color: rgba(219,123,43,0.22);
+    }
+
+    .annotation-panel {
+      background: rgba(255, 253, 248, 0.9);
+      border: 1px solid rgba(122, 111, 95, 0.18);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .annotation-panel h4 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .annotation-panel ul {
+      padding-left: 18px;
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .annotation {
+      padding: 10px 12px;
+      border-left: 3px solid var(--green);
+      background: #f8fcf8;
+      border-radius: 0 12px 12px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .footer-note {
+      margin-top: 32px;
+      padding: 18px 20px;
+      border-radius: 20px;
+      background: #fffaf0;
+      border: 1px solid rgba(122, 111, 95, 0.18);
+      color: var(--muted);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .screen-block {
+        grid-template-columns: 1fr;
+      }
+
+      .phone {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <article class="hero-card">
+        <h1>Shopping Batch and Fresh Item Vision</h1>
+        <p class="lead">
+          This wireframe breaks the capture model into two clean product paths. The FAB should only offer <strong>Add Item</strong> and <strong>Add Shopping Batch</strong>. Receipt photos and goods photos both live inside the shopping batch workflow, while single fresh-item vision stays inside the add-item workflow.
+        </p>
+        <div class="rules">
+          <div class="rule">
+            <strong>FAB Rule</strong>
+            No separate top-level batch-photo entry. It belongs under shopping batch.
+          </div>
+          <div class="rule">
+            <strong>Batch Rule</strong>
+            A shopping batch must save without OCR. Photos and OCR are assists, not prerequisites.
+          </div>
+          <div class="rule">
+            <strong>Fresh Item Rule</strong>
+            Produce, meat, and cooked-food vision is a single-item flow, not part of receipt capture.
+          </div>
+        </div>
+      </article>
+
+      <aside class="notes-card">
+        <h2>Screen Set</h2>
+        <ul>
+          <li>Inventory screen with corrected FAB menu</li>
+          <li>Shopping batch workspace with metadata, receipt photos, and optional goods-photo capture</li>
+          <li>Batch review screen that merges receipt and goods suggestions for confirmation</li>
+          <li>Batch history/detail as the persistent home of shopping trips</li>
+          <li>Add item screen with a separate fresh-item camera assist</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="screens">
+      <section class="screen-block">
+        <div class="phone">
+          <div class="screen">
+            <header class="header">
+              <div class="eyebrow">Inventory</div>
+              <h3>Inventory List</h3>
+              <div class="subhead">Receipt batch is visible in the header. The FAB is simplified.</div>
+            </header>
+            <div class="content">
+              <div class="card stack">
+                <div class="field">Search inventory</div>
+                <div class="chip-row">
+                  <div class="chip">All</div>
+                  <div class="chip">Produce</div>
+                  <div class="chip">Prepared</div>
+                </div>
+              </div>
+
+              <div class="list-row">
+                <strong>Bananas</strong>
+                <div class="mini-note">Counter · 3 days left</div>
+              </div>
+              <div class="list-row">
+                <strong>Chicken Thighs</strong>
+                <div class="mini-note">Fridge · 2 days left</div>
+              </div>
+              <div class="list-row">
+                <strong>Cooked Rice</strong>
+                <div class="mini-note">Fridge · Prepared yesterday</div>
+              </div>
+
+              <div class="fab-sheet">
+                <div class="section-title">FAB Menu</div>
+                <div class="option">
+                  <div>
+                    <strong>Add Item</strong>
+                    <div class="mini-note">Manual, package scan, or fresh-item scan</div>
+                  </div>
+                  <span>+</span>
+                </div>
+                <div class="option">
+                  <div>
+                    <strong>Add Shopping Batch</strong>
+                    <div class="mini-note">Store, date, total, receipt photo, goods photo</div>
+                  </div>
+                  <span>🧾</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="annotation-panel">
+          <h4>1. Inventory Changes</h4>
+          <ul>
+            <li>The header receipt button can remain as a quick shortcut into shopping batches.</li>
+            <li>The FAB should not expose a separate batch-photo capture item.</li>
+            <li>Shopping batch is the parent workflow. Receipt photos and goods photos are capture tools inside it.</li>
+          </ul>
+          <div class="annotation">This is the key correction to the earlier layout: batch-photo capture is nested inside shopping batch, not shown as a parallel top-level mode.</div>
+        </aside>
+      </section>
+
+      <section class="screen-block">
+        <div class="phone">
+          <div class="screen">
+            <header class="header">
+              <div class="eyebrow">Shopping Batch</div>
+              <h3>Create Shopping Batch</h3>
+              <div class="subhead">Metadata first, then attach receipt and optional goods photos.</div>
+            </header>
+            <div class="content">
+              <div class="card stack">
+                <div class="field">Store name</div>
+                <div class="two-col">
+                  <div class="field">Purchase date</div>
+                  <div class="field">Total cost</div>
+                </div>
+                <div class="field">Payment method</div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Receipt Photos</div>
+                <div class="capture-grid">
+                  <div class="capture-tile filled">Receipt 1</div>
+                  <div class="capture-tile">Add photo</div>
+                  <div class="capture-tile">Add photo</div>
+                </div>
+                <div class="chip-row">
+                  <div class="pill soft">Optional for batch save</div>
+                  <div class="pill">Use for pricing</div>
+                </div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Goods Photos</div>
+                <div class="capture-grid">
+                  <div class="capture-tile goods">Countertop photo</div>
+                  <div class="capture-tile goods">Add goods photo</div>
+                  <div class="capture-tile goods">Add goods photo</div>
+                </div>
+                <div class="chip-row">
+                  <div class="pill warn">Flag-gated</div>
+                  <div class="pill">Suggest visible items</div>
+                </div>
+              </div>
+
+              <div class="cta">Continue to Review</div>
+              <div class="cta secondary">Save Batch Without Scanning</div>
+            </div>
+          </div>
+        </div>
+        <aside class="annotation-panel">
+          <h4>2. Shopping Batch Workspace</h4>
+          <ul>
+            <li>Receipt photo capture and goods-photo capture are siblings inside the batch workspace.</li>
+            <li>Receipt photos support pricing and optional OCR of line items.</li>
+            <li>Goods photos support visual item suggestions to help map abbreviated receipt lines.</li>
+            <li>The batch still saves even when neither capture mode is used.</li>
+          </ul>
+          <div class="annotation">If you want to reduce scope, this screen can ship with receipt photos enabled first and goods-photo tiles present but marked “Coming next”.</div>
+        </aside>
+      </section>
+
+      <section class="screen-block">
+        <div class="phone">
+          <div class="screen">
+            <header class="header">
+              <div class="eyebrow">Review</div>
+              <h3>Confirm Batch Items</h3>
+              <div class="subhead">Merge receipt suggestions, goods-photo suggestions, and manual edits in one place.</div>
+            </header>
+            <div class="content">
+              <div class="candidate-row">
+                <div class="thumb">🍌</div>
+                <div>
+                  <strong>Bananas</strong>
+                  <div class="mini-note">Goods photo matched receipt line: BNS 1.29</div>
+                </div>
+                <div class="confidence">92%</div>
+              </div>
+
+              <div class="candidate-row">
+                <div class="thumb">🍗</div>
+                <div>
+                  <strong>Chicken thighs</strong>
+                  <div class="mini-note">Goods photo only, price unresolved</div>
+                </div>
+                <div class="confidence medium">61%</div>
+              </div>
+
+              <div class="candidate-row">
+                <div class="thumb">🥫</div>
+                <div>
+                  <strong>Tomato soup</strong>
+                  <div class="mini-note">Receipt OCR only, no matching goods photo</div>
+                </div>
+                <div class="confidence medium">54%</div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Bulk Actions</div>
+                <div class="three-col">
+                  <div class="cta soft">Accept</div>
+                  <div class="cta soft">Edit</div>
+                  <div class="cta soft">Skip</div>
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div class="cta">Save to Inventory</div>
+                <div class="cta secondary">Save to Shopping List</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="annotation-panel">
+          <h4>3. Batch Review Logic</h4>
+          <ul>
+            <li>Receipt OCR is not the source of truth. It is just one source of candidates.</li>
+            <li>Goods photos help disambiguate shortened receipt names like “BNS”, “CHK THGHS”, or “ORG MLK”.</li>
+            <li>Anything uncertain is editable before save.</li>
+          </ul>
+          <div class="annotation">This is the screen where the shopping batch concept becomes valuable: it can combine pricing, image suggestions, and manual confirmation without pretending any one input is perfectly reliable.</div>
+        </aside>
+      </section>
+
+      <section class="screen-block">
+        <div class="phone">
+          <div class="screen">
+            <header class="header">
+              <div class="eyebrow">History</div>
+              <h3>Shopping Batch Detail</h3>
+              <div class="subhead">A single shopping trip becomes a durable object with receipt, goods photos, and linked items.</div>
+            </header>
+            <div class="content">
+              <div class="card stack">
+                <strong>Costco</strong>
+                <div class="two-col">
+                  <div class="field">Apr 10, 2026</div>
+                  <div class="field">$126.40</div>
+                </div>
+                <div class="field">Visa</div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Attachments</div>
+                <div class="two-col">
+                  <div class="capture-tile filled">Receipt</div>
+                  <div class="capture-tile goods">Goods photo</div>
+                </div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Linked Items</div>
+                <div class="list-row">
+                  <strong>Bananas</strong>
+                  <div class="mini-note">Inventory · Produce · $1.29</div>
+                </div>
+                <div class="list-row">
+                  <strong>Chicken thighs</strong>
+                  <div class="mini-note">Inventory · Meat · $11.20</div>
+                </div>
+                <div class="list-row">
+                  <strong>Tomato soup</strong>
+                  <div class="mini-note">Shopping List · Pantry · $2.69</div>
+                </div>
+              </div>
+
+              <div class="cta secondary">Link Existing Items</div>
+            </div>
+          </div>
+        </div>
+        <aside class="annotation-panel">
+          <h4>4. Batch Detail</h4>
+          <ul>
+            <li>This page is the long-term home of the shopping batch.</li>
+            <li>It should show both receipt and goods-photo assets if they were captured.</li>
+            <li>It also provides a recovery path when users want to link items later.</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="screen-block">
+        <div class="phone">
+          <div class="screen">
+            <header class="header">
+              <div class="eyebrow">Add Item</div>
+              <h3>Add Single Item</h3>
+              <div class="subhead">Fresh-item vision stays here, separate from shopping batch capture.</div>
+            </header>
+            <div class="content">
+              <div class="card stack">
+                <div class="section-title">Camera Assist</div>
+                <div class="option">
+                  <div>
+                    <strong>Scan Package</strong>
+                    <div class="mini-note">Packaged goods with barcode or package text</div>
+                  </div>
+                  <span>📦</span>
+                </div>
+                <div class="option">
+                  <div>
+                    <strong>Scan Fresh Item</strong>
+                    <div class="mini-note">Bananas, meat, leftovers, produce, cooked food</div>
+                  </div>
+                  <span>🍎</span>
+                </div>
+                <div class="option">
+                  <div>
+                    <strong>Scan Expiry</strong>
+                    <div class="mini-note">Label date only</div>
+                  </div>
+                  <span>📅</span>
+                </div>
+              </div>
+
+              <div class="card stack">
+                <div class="field">Name</div>
+                <div class="field">Brand</div>
+                <div class="two-col">
+                  <div class="field">Category</div>
+                  <div class="field">Type: Raw / Prepared</div>
+                </div>
+                <div class="two-col">
+                  <div class="field">Location</div>
+                  <div class="field">Batch (optional)</div>
+                </div>
+              </div>
+
+              <div class="card stack">
+                <div class="section-title">Fresh Item Suggestions</div>
+                <div class="candidate-row">
+                  <div class="thumb">🍌</div>
+                  <div>
+                    <strong>Banana</strong>
+                    <div class="mini-note">Produce · Raw · Counter</div>
+                  </div>
+                  <div class="confidence">90%</div>
+                </div>
+                <div class="chip-row">
+                  <div class="pill">Plantain</div>
+                  <div class="pill">Mango</div>
+                  <div class="pill warn">Edit manually</div>
+                </div>
+              </div>
+
+              <div class="cta">Save Item</div>
+            </div>
+          </div>
+        </div>
+        <aside class="annotation-panel">
+          <h4>5. Fresh Item Vision</h4>
+          <ul>
+            <li>This is the right home for fruit capture and non-barcoded food recognition.</li>
+            <li>It is intentionally separate from the shopping batch flow.</li>
+            <li>Fresh-item CV should suggest a shortlist and field hints, never silently save.</li>
+          </ul>
+          <div class="annotation">If you want a single sentence to govern the architecture: shopping batch is about a trip, fresh-item vision is about a single visible item.</div>
+        </aside>
+      </section>
+    </section>
+
+    <section class="footer-note">
+      <strong>Amendment points:</strong> You can use this file to decide whether goods-photo capture should ship immediately inside shopping batch or appear as a disabled/flagged sub-section first. The core structural choice shown here is that it is part of the shopping batch workflow, while fresh produce/meat/cooked-food recognition belongs on the add-item screen.
+    </section>
+  </main>
+</body>
+</html>
