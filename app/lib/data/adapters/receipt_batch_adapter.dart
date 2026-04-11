@@ -57,16 +57,47 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   ReceiptBatch read(BinaryReader reader) {
     final id = reader.readString();
     final createdAt = reader.read() as DateTime;
+    DateTime? purchasedAt;
+    try {
+      final hasPurchasedAt = reader.readBool();
+      purchasedAt = hasPurchasedAt ? reader.read() as DateTime : null;
+    } catch (_) {
+      purchasedAt = null;
+    }
+    String? storeName;
+    try {
+      final hasStoreName = reader.readBool();
+      storeName = hasStoreName ? reader.readString() : null;
+    } catch (_) {
+      storeName = null;
+    }
+    double? totalAmount;
+    try {
+      final hasTotalAmount = reader.readBool();
+      totalAmount = hasTotalAmount ? reader.readDouble() : null;
+    } catch (_) {
+      totalAmount = null;
+    }
     final sourceIndex = reader.readByte();
     final items = reader.readList().cast<ReceiptBatchItem>();
     final receiptImagePaths = reader.readList().cast<String>();
+    List<String> goodsImagePaths;
+    try {
+      goodsImagePaths = reader.readList().cast<String>();
+    } catch (_) {
+      goodsImagePaths = const [];
+    }
 
     return ReceiptBatch(
       id: id,
       createdAt: createdAt,
+      purchasedAt: purchasedAt,
+      storeName: storeName,
+      totalAmount: totalAmount,
       source: ReceiptBatchSource.values[sourceIndex],
       items: items,
       receiptImagePaths: receiptImagePaths,
+      goodsImagePaths: goodsImagePaths,
     );
   }
 
@@ -74,8 +105,21 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   void write(BinaryWriter writer, ReceiptBatch obj) {
     writer.writeString(obj.id);
     writer.write(obj.createdAt);
+    writer.writeBool(obj.purchasedAt != null);
+    if (obj.purchasedAt != null) {
+      writer.write(obj.purchasedAt);
+    }
+    writer.writeBool(obj.storeName != null && obj.storeName!.isNotEmpty);
+    if (obj.storeName != null && obj.storeName!.isNotEmpty) {
+      writer.writeString(obj.storeName!);
+    }
+    writer.writeBool(obj.totalAmount != null);
+    if (obj.totalAmount != null) {
+      writer.writeDouble(obj.totalAmount!);
+    }
     writer.writeByte(obj.source.index);
     writer.writeList(obj.items);
     writer.writeList(obj.receiptImagePaths);
+    writer.writeList(obj.goodsImagePaths);
   }
 }

@@ -85,7 +85,15 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
             itemBuilder: (context, index) {
               final batch = batches[index];
               final total = _currency(batch.totalSpend);
-              final date = DateFormat('MMM d').format(batch.createdAt);
+              final date = DateFormat(
+                'MMM d',
+              ).format(batch.purchasedAt ?? batch.createdAt);
+              final attachmentSummary = batch.goodsImagePaths.isEmpty
+                  ? '${batch.receiptImagePaths.length} receipts'
+                  : '${batch.receiptImagePaths.length} receipts · ${batch.goodsImagePaths.length} goods photos';
+              final title = batch.storeName == null || batch.storeName!.isEmpty
+                  ? date
+                  : '${batch.storeName} · $date';
               return InkWell(
                 key: ValueKey('receipt_batch_card_${batch.id}'),
                 onTap: () {
@@ -110,14 +118,14 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '$date · ${batch.receiptImagePaths.length} receipts',
+                        title,
                         style: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
-                        '${batch.items.length} items · $total total',
+                        '${batch.items.length} items · $total total · $attachmentSummary',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.textTheme.bodySmall?.color,
                         ),

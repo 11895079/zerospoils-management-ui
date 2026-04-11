@@ -13,22 +13,37 @@ import 'receipt_batches_screen.dart';
 class ParsedReceiptItem {
   final String name;
   final double price;
+  final String sourceLabel;
+  final String? matchExplanation;
 
-  ParsedReceiptItem({required this.name, required this.price});
+  ParsedReceiptItem({
+    required this.name,
+    required this.price,
+    this.sourceLabel = 'Receipt OCR',
+    this.matchExplanation,
+  });
 }
 
 class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final ReceiptBatchSource source;
   final List<String> photoPaths;
+  final List<String> goodsPhotoPaths;
   final List<ParsedReceiptItem> parsedItems;
   final String batchId;
+  final String? storeName;
+  final DateTime? purchasedAt;
+  final double? totalAmount;
 
   const ReceiptBatchReviewScreen({
     super.key,
     required this.source,
     required this.photoPaths,
+    this.goodsPhotoPaths = const [],
     required this.parsedItems,
     required this.batchId,
+    this.storeName,
+    this.purchasedAt,
+    this.totalAmount,
   });
 
   @override
@@ -50,6 +65,8 @@ class _ReceiptBatchReviewScreenState
             price: item.price,
             quantity: 1,
             selected: true,
+            sourceLabel: item.sourceLabel,
+            matchExplanation: item.matchExplanation,
           ),
         )
         .toList();
@@ -150,9 +167,13 @@ class _ReceiptBatchReviewScreenState
     final batch = ReceiptBatch(
       id: widget.batchId,
       createdAt: now,
+      purchasedAt: widget.purchasedAt,
+      storeName: widget.storeName,
+      totalAmount: widget.totalAmount,
       source: widget.source,
       items: batchItems,
       receiptImagePaths: widget.photoPaths,
+      goodsImagePaths: widget.goodsPhotoPaths,
     );
 
     final batchRepo = ref.read(receiptBatchRepositoryProvider);
@@ -247,6 +268,16 @@ class _ReceiptBatchReviewScreenState
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [
+          if (widget.storeName != null ||
+              widget.purchasedAt != null ||
+              widget.totalAmount != null)
+            Card(
+              child: ListTile(
+                key: const Key('receipt_batch_review_metadata'),
+                title: Text(widget.storeName ?? 'Shopping batch'),
+                subtitle: Text(_reviewMetadataSummary()),
+              ),
+            ),
           ..._items.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
@@ -255,7 +286,23 @@ class _ReceiptBatchReviewScreenState
               child: ListTile(
                 key: ValueKey('receipt_review_item_$index'),
                 title: Text(item.name),
-                subtitle: Text('Quantity ${item.quantity} · \$${item.price}'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Quantity ${item.quantity} · \$${item.price.toStringAsFixed(2)} · ${item.sourceLabel}',
+                    ),
+                    if (item.matchExplanation != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          item.matchExplanation!,
+                          key: Key('receipt_review_item_explanation_$index'),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ),
+                  ],
+                ),
                 leading: Checkbox(
                   value: item.selected,
                   onChanged: (value) {
@@ -294,6 +341,24 @@ class _ReceiptBatchReviewScreenState
       ),
     );
   }
+
+  String _reviewMetadataSummary() {
+    final segments = <String>[];
+    if (widget.purchasedAt != null) {
+      final date = widget.purchasedAt!;
+      final month = date.month.toString().padLeft(2, '0');
+      final day = date.day.toString().padLeft(2, '0');
+      segments.add('${date.year}-$month-$day');
+    }
+    if (widget.totalAmount != null) {
+      segments.add(r'$' + widget.totalAmount!.toStringAsFixed(2));
+    }
+    segments.add('${widget.photoPaths.length} receipts');
+    if (widget.goodsPhotoPaths.isNotEmpty) {
+      segments.add('${widget.goodsPhotoPaths.length} goods photos');
+    }
+    return segments.join(' · ');
+  }
 }
 
 class _EditableReceiptItem {
@@ -301,12 +366,16 @@ class _EditableReceiptItem {
   final double price;
   final int quantity;
   final bool selected;
+  final String sourceLabel;
+  final String? matchExplanation;
 
   _EditableReceiptItem({
     required this.name,
     required this.price,
     required this.quantity,
     required this.selected,
+    required this.sourceLabel,
+    this.matchExplanation,
   });
 
   _EditableReceiptItem copyWith({
@@ -314,12 +383,16 @@ class _EditableReceiptItem {
     double? price,
     int? quantity,
     bool? selected,
+    String? sourceLabel,
+    String? matchExplanation,
   }) {
     return _EditableReceiptItem(
       name: name ?? this.name,
       price: price ?? this.price,
       quantity: quantity ?? this.quantity,
       selected: selected ?? this.selected,
+      sourceLabel: sourceLabel ?? this.sourceLabel,
+      matchExplanation: matchExplanation ?? this.matchExplanation,
     );
   }
 }

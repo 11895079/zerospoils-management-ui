@@ -182,4 +182,54 @@ void main() {
     );
     expect(summaryDecoration.color, theme.cardColor);
   });
+
+  testWidgets('Batch detail screen shows goods photo count when present', (
+    WidgetTester tester,
+  ) async {
+    final batch = ReceiptBatch(
+      id: 'batch-1',
+      createdAt: DateTime(2026, 2, 9),
+      purchasedAt: DateTime(2026, 4, 10),
+      storeName: 'Costco',
+      totalAmount: 126.40,
+      source: ReceiptBatchSource.inventory,
+      items: [
+        ReceiptBatchItem(
+          id: 'r1',
+          name: 'Milk',
+          price: 4.99,
+          quantity: 1,
+          destination: ReceiptBatchDestination.inventory,
+          inventoryItemId: 'i1',
+        ),
+      ],
+      receiptImagePaths: const ['receipt-1.jpg'],
+      goodsImagePaths: const ['goods-1.jpg'],
+    );
+
+    final inventoryItems = [
+      Item(
+        id: 'i1',
+        name: 'Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        purchasePrice: 4.99,
+        status: ItemStatus.available,
+        createdAt: DateTime(2026, 2, 9),
+        updatedAt: DateTime(2026, 2, 9),
+      ),
+    ];
+
+    await pumpReceiptBatchDetailScreen(
+      tester,
+      batch: batch,
+      inventoryItems: inventoryItems,
+    );
+
+    expect(
+      find.text('Costco · Apr 10, 2026 · 1 receipts · 1 goods photos'),
+      findsOneWidget,
+    );
+    expect(find.text('1 items · \$126.40 total'), findsOneWidget);
+  });
 }

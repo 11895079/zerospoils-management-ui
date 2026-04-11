@@ -116,4 +116,30 @@ void main() {
     );
     expect(decoration.color, theme.cardColor);
   });
+
+  testWidgets('Receipt batches screen shows goods photo count when present', (
+    WidgetTester tester,
+  ) async {
+    final batches = [
+      ReceiptBatch(
+        id: 'batch-1',
+        createdAt: DateTime(2026, 2, 9),
+        purchasedAt: DateTime(2026, 4, 10),
+        storeName: 'Costco',
+        totalAmount: 126.40,
+        source: ReceiptBatchSource.shoppingList,
+        items: const [],
+        receiptImagePaths: const ['receipt-1.jpg'],
+        goodsImagePaths: const ['goods-1.jpg', 'goods-2.jpg'],
+      ),
+    ];
+
+    await pumpReceiptBatchesScreen(tester, batches: batches);
+
+    expect(find.text('Costco · Apr 10'), findsOneWidget);
+    expect(
+      find.text('0 items · \$126.40 total · 1 receipts · 2 goods photos'),
+      findsOneWidget,
+    );
+  });
 }
