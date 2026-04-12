@@ -1043,7 +1043,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     }
 
     final textDirection = Directionality.of(context);
-    final view = View.of(context);
 
     setState(() => _ocrInProgress = true);
 
@@ -1063,8 +1062,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             _cameraAssistedStage = _CameraAssistedStage.expiryLocked;
           }
         });
-        SemanticsService.sendAnnouncement(
-          view,
+        // ignore: deprecated_member_use
+        SemanticsService.announce(
           'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
           textDirection,
         );

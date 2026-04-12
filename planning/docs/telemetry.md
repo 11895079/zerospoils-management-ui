@@ -12,7 +12,7 @@ Define consistent event instrumentation for measuring adoption, retention, and v
    - `app_installed` - First app launch
    - `onboarding_completed` - User completes first-run setup
    - `item_added` - Item save submitted from manual, camera-assisted, shopping conversion, or receipt-batch entry
-   - `expiry_date_scanned` - OCR capture attempted (properties: `success` boolean, `format_detected` string)
+   - `expiry_date_scanned` - OCR capture attempted (properties: `scan_success` boolean, `date_format_detected` string)
    - `item_edited` - Item updated
    - `inventory_viewed` - User opens inventory list
    - `expiring_viewed` - User opens expiring soon screen
@@ -31,7 +31,7 @@ Define consistent event instrumentation for measuring adoption, retention, and v
 
 4. **Event-Specific Properties:**
    - **item_added:** `source`, `entry_method`, `camera_used`, `category`, `location`, `quantity`, `has_expiry_date`, `camera_barcode_accepted`, `camera_expiry_accepted`, `camera_barcode_source`, `camera_expiry_format`
-   - **expiry_date_scanned:** `success` (boolean), `format_detected` (string); use with `item_added.camera_expiry_accepted` to distinguish attempt vs accepted save. Duration is not currently emitted by the app.
+   - **expiry_date_scanned:** `scan_success` (boolean), `date_format_detected` (string); use with `item_added.camera_expiry_accepted` to distinguish attempt vs accepted save. Duration is not currently emitted by the app.
    - **item_wasted:** `category`, `location`, `waste_reason` (enum), `days_overdue` (int)
    - **reminder_opened:** `lead_time_days`, `time_of_day` ("morning" | "afternoon" | "evening")
    - **inventory_view_mode_changed:** `from` ("list" | "table" | "grid"), `to` ("list" | "table" | "grid"), `filters_applied` (boolean), `sort_key` (string | null), `result_count` (int)

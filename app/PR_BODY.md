@@ -50,7 +50,7 @@ This PR completes the free camera-assisted add flow cleanup and telemetry normal
 		- treat scan-attempt events as diagnostics, not save-truth
 	- Shopping-list conversion and receipt-batch inventory saves now emit the same normalized `item_added` contract
 	- Added repo docs with concrete dashboard SQL for manual vs camera adoption and camera trust from save events
-	- Aligned `planning/docs/telemetry.md` with the implemented `expiry_date_scanned` payload keys: `success` and `format_detected`
+	- Aligned `planning/docs/telemetry.md` with the implemented `expiry_date_scanned` payload keys: `scan_success` and `date_format_detected`
 
 - **Planning**
 	- Added M6 grooming issues for Pro geofenced grocery reminders and the supporting local store-affinity/preferences model
@@ -71,7 +71,7 @@ This PR completes the free camera-assisted add flow cleanup and telemetry normal
 - `receipt_batch_camera` is intentionally normalized as camera-based without claiming field-level barcode/expiry acceptance
 - Concrete dashboard queries for these semantics now live in `docs/item-entry-telemetry-analysis.md`
 ## Code Review Fixes (post-review)
-- Replaced non-existent `SemanticsService.sendAnnouncement` with correct `SemanticsService.announce` API
+- Replaced invalid `SemanticsService.sendAnnouncement(view, ...)` usage with `SemanticsService.announce(message, textDirection)` for SDK compatibility
 - Normalized `expiry_date_scanned` telemetry: `success`→`scan_success`, `format_detected`→`date_format_detected`
 - Removed dead unreachable `setState` block in `_capturePhoto`
 - Replaced eager full-res photo bytes with lazy `FutureBuilder` thumbnail loading
