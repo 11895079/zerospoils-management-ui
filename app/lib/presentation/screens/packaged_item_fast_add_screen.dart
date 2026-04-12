@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/theme/app_spacing.dart';
@@ -872,7 +871,7 @@ class _PackagedItemFastAddScreenState
   Widget _buildCategoryDropdown(ThemeData theme) {
     return DropdownButtonFormField<ItemCategory>(
       key: const Key('fast_add_category_dropdown'),
-      value: _selectedCategory,
+      initialValue: _selectedCategory,
       decoration: const InputDecoration(
         labelText: 'Category',
         border: OutlineInputBorder(),

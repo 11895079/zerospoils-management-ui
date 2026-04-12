@@ -44,7 +44,7 @@ void main() {
     setUpAll(() {
       tempDir = Directory.systemTemp.createTempSync('zs_offline_item_');
       Hive.init(tempDir.path);
-      for (final entry in _itemAdapters()) {
+      for (final entry in _itemAdapters().entries) {
         if (!Hive.isAdapterRegistered(entry.key)) {
           Hive.registerAdapter(entry.value);
         }
@@ -251,7 +251,7 @@ void main() {
     test('parses EXP-labelled date without network', () {
       final result = parser.parse(
         'Best Before EXP 2027-03-31\nGrade A',
-        preferredFormat: 'MM/DD/YYYY',
+        preferredDateFormat: 'MM/DD/YYYY',
       );
       expect(result, isNotNull);
       expect(result!.date.year, 2027);
@@ -261,7 +261,7 @@ void main() {
 
     test('prefers EXP label over MFG/manufactured date', () {
       const text = 'MFG 2025-01-15\nEXP 2026-09-30\nLot 42B';
-      final result = parser.parse(text, preferredFormat: 'MM/DD/YYYY');
+      final result = parser.parse(text, preferredDateFormat: 'MM/DD/YYYY');
       expect(result, isNotNull);
       expect(result!.date.year, 2026);
       expect(result.date.month, 9);
