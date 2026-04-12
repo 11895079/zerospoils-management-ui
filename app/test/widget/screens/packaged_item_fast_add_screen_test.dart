@@ -139,7 +139,10 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should be on confirm stage with empty name
-        expect(find.textContaining('Confirm item'), findsOneWidget);
+          expect(
+            find.byKey(const Key('fast_add_stage_label')),
+            findsOneWidget,
+          );
         expect(
           find.byKey(const Key('fast_add_confirm_name_field')),
           findsOneWidget,
