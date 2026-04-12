@@ -50,7 +50,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   late ExpiryOcrCaptureSession _captureSession;
 
   final List<XFile> _photos = [];
-  final Map<String, Uint8List> _photoThumbnailBytes = {};
+  final Map<String, Future<Uint8List>> _thumbnailFutures = {};
   final List<ExpiryDateParseResult> _capturedDetections = [];
 
   bool _initializing = true;
@@ -316,11 +316,6 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     try {
       await _stopImageStream();
       final photo = await controller.takePicture();
-      try {
-        _photoThumbnailBytes[photo.path] = await _encodeThumbnail(photo);
-      } catch (_) {
-        // Thumbnail encoding failed; the photo strip will show a placeholder.
-      }
       final analysis = await _analyzeCapturedPhoto(photo.path);
 
       _captureSession.registerPhotoCaptured();
@@ -588,19 +583,27 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                           const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final photo = _photos[index];
-                        final thumbnailBytes = _photoThumbnailBytes[photo.path];
+                        final thumbnailFuture = _thumbnailFutures.putIfAbsent(
+                          photo.path,
+                          () => _encodeThumbnail(photo),
+                        );
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
                           ),
-                          child: thumbnailBytes == null
-                              ? const SizedBox(width: 72, height: 72)
-                              : Image.memory(
-                                  thumbnailBytes,
-                                  width: 72,
-                                  height: 72,
-                                  fit: BoxFit.cover,
-                                ),
+                          child: FutureBuilder<Uint8List>(
+                            future: thumbnailFuture,
+                            builder: (context, snapshot) {
+                              return snapshot.hasData
+                                  ? Image.memory(
+                                      snapshot.data!,
+                                      width: 72,
+                                      height: 72,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const SizedBox(width: 72, height: 72);
+                            },
+                          ),
                         );
                       },
                     ),

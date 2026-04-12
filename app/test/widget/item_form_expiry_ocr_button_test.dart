@@ -303,7 +303,10 @@ void main() {
         find.byKey(const Key('camera_assisted_detected_barcode')),
         findsOneWidget,
       );
-      expect(find.text('0678000012345'), findsOneWidget);
+      final barcodeText = tester.widget<Text>(
+        find.byKey(const Key('camera_assisted_detected_barcode')),
+      );
+      expect(barcodeText.data, '0678000012345');
 
       final nameField = tester.widget<TextFormField>(
         find.byKey(const Key('item_form_name_field')),
