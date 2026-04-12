@@ -35,9 +35,9 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** April 11, 2026 — **Progress:** 13/22 issues complete (59%)
+**Last Updated:** April 12, 2026 — **Progress:** 14/22 issues complete (64%)
 
-Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues as shown in table below.
+Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
 ### Issues & Completion
 
@@ -63,6 +63,5 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **250** | Telemetry instrumentation for core funnel | ✅ Complete | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing); merged |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
 | **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
-<<<<<<< HEAD
-| **360** | Firebase integration (mobile tooling) | ✅ Complete | — | Crashlytics + Remote Config + FCM foreground/background handlers + permission request + device token + onMessageOpenedApp; all integrated in `firebase_bootstrap_service.dart` |
+| **360** | Firebase integration (mobile tooling) | ✅ Complete | [#96](https://github.com/11895079/zerospoils/pull/96) | Crashlytics + Remote Config + FCM foreground/background handlers + permission request + device token + onMessageOpenedApp; all integrated in `firebase_bootstrap_service.dart` |
 | **361** | Firebase App Distribution — Tester API | ⏳ Not Started | — | CI upload to App Distribution on beta tags; Tester SDK for in-app update checks and shake-to-feedback |

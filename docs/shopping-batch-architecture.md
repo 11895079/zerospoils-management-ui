@@ -110,10 +110,10 @@ flowchart TD
 
 ## Related docs
 
-- [docs/receipt-matcher-architecture.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-architecture.md)
-- [docs/receipt-matcher-runtime-sequence.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-runtime-sequence.md)
-- [docs/receipt-matcher-system-diagram.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-system-diagram.md)
-- [docs/receipt-matcher-sources.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-sources.md)
+- [docs/receipt-matcher-architecture.md](docs/receipt-matcher-architecture.md)
+- [docs/receipt-matcher-runtime-sequence.md](docs/receipt-matcher-runtime-sequence.md)
+- [docs/receipt-matcher-system-diagram.md](docs/receipt-matcher-system-diagram.md)
+- [docs/receipt-matcher-sources.md](docs/receipt-matcher-sources.md)
 
 ## Current implementation status
 
