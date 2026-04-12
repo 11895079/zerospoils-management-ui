@@ -369,14 +369,3 @@ sli.ShoppingListItem _makeShoppingItem(
     updatedAt: now,
   );
 }
-
-/// Returns a map of typeId → TypeAdapter for the Item model adapters.
-Map<int, dynamic> _itemAdapters() => {
-  0: ItemAdapter(),
-  1: ItemCategoryAdapter(),
-  2: StorageLocationAdapter(),
-  3: ItemStatusAdapter(),
-  4: WasteReasonAdapter(),
-  5: ItemTypeAdapter(),
-  6: UnitAdapter(),
-};
