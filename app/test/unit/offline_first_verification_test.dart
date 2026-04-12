@@ -45,11 +45,13 @@ void main() {
     setUpAll(() {
       tempDir = Directory.systemTemp.createTempSync('zs_offline_item_');
       Hive.init(tempDir.path);
-      for (final entry in _itemAdapters().entries) {
-        if (!Hive.isAdapterRegistered(entry.key)) {
-          Hive.registerAdapter(entry.value);
-        }
-      }
+      Hive.registerAdapter(ItemAdapter());
+      Hive.registerAdapter(ItemCategoryAdapter());
+      Hive.registerAdapter(StorageLocationAdapter());
+      Hive.registerAdapter(ItemStatusAdapter());
+      Hive.registerAdapter(WasteReasonAdapter());
+      Hive.registerAdapter(ItemTypeAdapter());
+      Hive.registerAdapter(UnitAdapter());
     });
 
     tearDownAll(() async {
