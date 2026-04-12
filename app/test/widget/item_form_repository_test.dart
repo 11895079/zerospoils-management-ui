@@ -120,7 +120,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Enter required fields
-    final nameField = find.byType(TextFormField).first;
+    final nameField = find.byKey(const Key('item_form_name_field'));
     await tester.enterText(nameField, 'Test Milk');
     await tester.enterText(
       find.byKey(const Key('item_form_brand_field')),
@@ -165,7 +165,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final nameField = find.byType(TextFormField).first;
+    final nameField = find.byKey(const Key('item_form_name_field'));
     await tester.enterText(nameField, 'Milk');
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));
@@ -307,7 +307,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Ensure existing data is shown
-    final nameField = find.byType(TextFormField).first;
+    final nameField = find.byKey(const Key('item_form_name_field'));
     expect(tester.widget<TextFormField>(nameField).controller?.text, 'Carrots');
     expect(
       tester
@@ -362,7 +362,7 @@ void main() {
           );
       expect(locationField.initialValue, StorageLocation.freezer);
 
-      final nameField = find.byType(TextFormField).first;
+      final nameField = find.byKey(const Key('item_form_name_field'));
       await tester.enterText(nameField, 'Tomato Soup');
       await tester.pumpAndSettle();
 
@@ -399,7 +399,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final nameField = find.byType(TextFormField).first;
+    final nameField = find.byKey(const Key('item_form_name_field'));
     await tester.enterText(nameField, 'Price Test');
 
     final priceField = find.byKey(const Key('item_form_price_field'));
