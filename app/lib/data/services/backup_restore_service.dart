@@ -207,12 +207,13 @@ class BackupRestoreService {
       // Build CSV with headers
       final buffer = StringBuffer();
       buffer.writeln(
-        'ID,Name,Category,Expiry Date,Prepared Date,Purchase Price,Location,Status,Created At,Updated At',
+        'ID,Name,Brand,Category,Expiry Date,Prepared Date,Purchase Price,Location,Status,Created At,Updated At',
       );
 
       for (final item in items) {
         final id = _escapeCSVValue(item.id);
         final name = _escapeCSVValue(item.name);
+        final brand = _escapeCSVValue(item.brand ?? '');
         final category = _escapeCSVValue(
           item.customCategoryName ?? item.category.displayName,
         );
@@ -225,7 +226,7 @@ class BackupRestoreService {
         final updatedAt = item.updatedAt.toString().split('.')[0];
 
         buffer.writeln(
-          '$id,$name,$category,$expiryDate,$preparedDate,$price,$location,$status,$createdAt,$updatedAt',
+          '$id,$name,$brand,$category,$expiryDate,$preparedDate,$price,$location,$status,$createdAt,$updatedAt',
         );
       }
 
@@ -563,6 +564,7 @@ class BackupRestoreService {
     return {
       'id': item.id,
       'name': item.name,
+      'brand': item.brand,
       'category': item.category.name,
       'custom_category_id': item.customCategoryId,
       'custom_category_name': item.customCategoryName,
@@ -586,6 +588,7 @@ class BackupRestoreService {
     return Item(
       id: json['id'] as String,
       name: json['name'] as String,
+      brand: json['brand'] as String?,
       category: ItemCategory.fromString(json['category'] as String),
       customCategoryId: json['custom_category_id'] as String?,
       customCategoryName: json['custom_category_name'] as String?,

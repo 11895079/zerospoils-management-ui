@@ -8,20 +8,27 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
 import '../../core/feature_flags/feature_flags_provider.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/vision/fresh_item_cv_service.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/models/user_category.dart';
 import '../../domain/utils/local_id_generator.dart';
 import '../widgets/app_button.dart';
 import '../widgets/item_icon.dart';
 import '../widgets/quantity_toggle.dart';
+import '../barcode/barcode_capture_launcher.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
+import '../fresh_item/fresh_item_capture_launcher.dart';
+import '../ocr/expiry_ocr_capture_launcher.dart';
+
+enum _CameraAssistedStage { barcodeReady, barcodeLocked, expiryLocked }
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
@@ -56,6 +63,26 @@ class _CategoryOption {
   int get hashCode => id.hashCode;
 }
 
+class _RecentItemDefaults {
+  final String name;
+  final String? brand;
+  final ItemCategory category;
+  final StorageLocation location;
+  final String? customCategoryId;
+  final String? customCategoryName;
+  final DateTime updatedAt;
+
+  const _RecentItemDefaults({
+    required this.name,
+    this.brand,
+    required this.category,
+    required this.location,
+    required this.updatedAt,
+    this.customCategoryId,
+    this.customCategoryName,
+  });
+}
+
 class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   static const List<Color> _categoryColors = [
     Color(0xFFFFD6A5),
@@ -70,6 +97,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _brandController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
   final _brandController = TextEditingController();
@@ -86,6 +114,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   bool _isLoading = false;
   bool _categoryTouched = false;
   bool _ocrInProgress = false;
+  bool _barcodeScanInProgress = false;
+  bool _freshItemCvInProgress = false;
+  _CameraAssistedStage _cameraAssistedStage = _CameraAssistedStage.barcodeReady;
+  String? _cameraBarcodeValue;
+  String? _cameraFreshItemSuggestionName;
+  String? _cameraFreshItemSuggestionSource;
+  String? _cameraSuggestedName;
+  String? _cameraSuggestionSource;
+  String? _cameraAcceptedExpiryFormat;
+  List<_RecentItemDefaults> _recentItemDefaults = const [];
+  List<String> _recentBrands = const [];
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -94,10 +133,13 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS);
 
+  bool get _supportsFreshItemCvPlatform => _supportsExpiryOcrPlatform;
+
   @override
   void initState() {
     super.initState();
     _loadUserCategories();
+    _loadRecentItemDefaults();
     if (_isEditMode) {
       _loadItem();
     }
@@ -137,6 +179,284 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     setState(() {
       _userCategories = categories..sort((a, b) => a.name.compareTo(b.name));
     });
+  }
+
+  Future<void> _loadRecentItemDefaults() async {
+    try {
+      final repository = ref.read(itemRepositoryProvider);
+      await repository.init();
+      final items = await repository.getAllItems();
+
+      final recentByName = <String, _RecentItemDefaults>{};
+      final sortedItems = [...items]
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+      for (final item in sortedItems) {
+        final normalizedName = item.name.trim().toLowerCase();
+        if (normalizedName.isEmpty ||
+            recentByName.containsKey(normalizedName)) {
+          continue;
+        }
+
+        recentByName[normalizedName] = _RecentItemDefaults(
+          name: item.name.trim(),
+          brand: item.brand?.trim(),
+          category: item.category,
+          location: item.location,
+          customCategoryId: item.customCategoryId,
+          customCategoryName: item.customCategoryName,
+          updatedAt: item.updatedAt,
+        );
+      }
+
+      final recentBrands = <String>[];
+      final seenBrands = <String>{};
+      for (final item in sortedItems) {
+        final brand = item.brand?.trim();
+        if (brand == null || brand.isEmpty) {
+          continue;
+        }
+
+        final normalizedBrand = brand.toLowerCase();
+        if (seenBrands.add(normalizedBrand)) {
+          recentBrands.add(brand);
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _recentItemDefaults = recentByName.values.toList()
+          ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        _recentBrands = recentBrands;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _recentItemDefaults = const [];
+        _recentBrands = const [];
+      });
+    }
+  }
+
+  List<_RecentItemDefaults> _recentSuggestionsForQuery(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty) {
+      return const [];
+    }
+
+    return _recentItemDefaults
+        .where((item) => item.name.toLowerCase().contains(normalizedQuery))
+        .take(3)
+        .toList();
+  }
+
+  List<String> _recentBrandSuggestions(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    final brands = normalizedQuery.isEmpty
+        ? _recentBrands
+        : _recentBrands
+              .where((brand) => brand.toLowerCase().contains(normalizedQuery))
+              .toList();
+
+    return brands.take(6).toList();
+  }
+
+  _RecentItemDefaults? _findRecentDefaultsForName(String? name) {
+    final normalizedName = name?.trim().toLowerCase();
+    if (normalizedName == null || normalizedName.isEmpty) {
+      return null;
+    }
+
+    for (final item in _recentItemDefaults) {
+      if (item.name.toLowerCase() == normalizedName) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  UserCategory? _resolveRecentUserCategory(_RecentItemDefaults defaults) {
+    final customCategoryId = defaults.customCategoryId;
+    if (customCategoryId == null) {
+      return null;
+    }
+
+    for (final category in _userCategories) {
+      if (category.id == customCategoryId) {
+        return category;
+      }
+    }
+
+    return UserCategory(
+      id: customCategoryId,
+      name: defaults.customCategoryName ?? 'Custom',
+      createdAt: DateTime.now(),
+    );
+  }
+
+  void _applyRecentItemDefaults(_RecentItemDefaults defaults) {
+    setState(() {
+      _nameController.text = defaults.name;
+      _brandController.text = defaults.brand ?? '';
+      _selectedCategory = defaults.category;
+      _selectedUserCategory = _resolveRecentUserCategory(defaults);
+      _selectedLocation = defaults.location;
+    });
+  }
+
+  void _applyRecentSuggestion(_RecentItemDefaults defaults) {
+    _applyRecentItemDefaults(defaults);
+  }
+
+  Future<void> _openBrandPicker() async {
+    final searchController = TextEditingController(text: _brandController.text);
+    var query = _brandController.text;
+
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setSheetState) {
+              final theme = Theme.of(context);
+              final trimmedQuery = query.trim();
+              final options = _recentBrandSuggestions(query);
+              final hasExactMatch =
+                  trimmedQuery.isNotEmpty &&
+                  options.any(
+                    (brand) =>
+                        brand.toLowerCase() == trimmedQuery.toLowerCase(),
+                  );
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: AppSpacing.lg,
+                  right: AppSpacing.lg,
+                  top: AppSpacing.md,
+                  bottom:
+                      MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Select brand', style: AppTextStyles.h3),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search brands',
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setSheetState(() => query = value);
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            if (trimmedQuery.isNotEmpty && !hasExactMatch)
+                              ListTile(
+                                leading: const Icon(Icons.add),
+                                title: Text('Use "$trimmedQuery"'),
+                                onTap: () =>
+                                    Navigator.pop(context, trimmedQuery),
+                              ),
+                            if (options.isNotEmpty) ...[
+                              Text(
+                                'Recent brands',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              ...options.map(
+                                (brand) => ListTile(
+                                  title: Text(brand),
+                                  onTap: () => Navigator.pop(context, brand),
+                                ),
+                              ),
+                            ],
+                            if (options.isEmpty && trimmedQuery.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                child: Text(
+                                  'No recent brands yet. Type one manually.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ),
+                            if (options.isEmpty && trimmedQuery.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                child: Text(
+                                  'No recent brands match your search.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      if (selected == null) {
+        return;
+      }
+
+      setState(() {
+        _brandController.text = selected;
+      });
+    } finally {
+      searchController.dispose();
+    }
+  }
+
+  String _entryMethodForSave() {
+    final barcodeAccepted = _cameraBarcodeValue != null;
+    final freshItemAccepted = _cameraFreshItemSuggestionName != null;
+    final expiryAccepted = _cameraAcceptedExpiryFormat != null;
+
+    if (barcodeAccepted && expiryAccepted) {
+      return 'camera_barcode_and_expiry';
+    }
+    if (barcodeAccepted) {
+      return 'camera_barcode';
+    }
+    if (freshItemAccepted && expiryAccepted) {
+      return 'camera_fresh_item_and_expiry';
+    }
+    if (freshItemAccepted) {
+      return 'camera_fresh_item';
+    }
+    if (expiryAccepted) {
+      return 'camera_expiry';
+    }
+    return 'manual';
   }
 
   void _maybeAutoSetCategory(String value) {
@@ -729,15 +1049,21 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     setState(() => _ocrInProgress = true);
 
     try {
-      final scanResult = await ref
-          .read(expiryDateOcrServiceProvider)
-          .scanExpiryDate(preferredDateFormat: preferredDateFormat);
+      final scanResult = await ref.read(expiryOcrCaptureLauncherProvider)(
+        context: context,
+        preferredDateFormat: preferredDateFormat,
+      );
       if (!mounted) return;
 
       if (scanResult.isSuccess) {
         final parsed = scanResult.parsed!;
-        setState(() => _selectedExpiryDate = parsed.date);
-        _showSnack('Expiry date detected');
+        setState(() {
+          _selectedExpiryDate = parsed.date;
+          _cameraAcceptedExpiryFormat = parsed.format;
+          if (_cameraBarcodeValue != null) {
+            _cameraAssistedStage = _CameraAssistedStage.expiryLocked;
+          }
+        });
         SemanticsService.sendAnnouncement(
           view,
           'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
@@ -789,6 +1115,237 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     }
   }
 
+  Future<void> _scanBarcode() async {
+    if (_barcodeScanInProgress) return;
+
+    setState(() => _barcodeScanInProgress = true);
+
+    try {
+      final result = await ref.read(barcodeCaptureLauncherProvider)(
+        context: context,
+      );
+      if (!mounted) return;
+
+      if (result.isSuccess) {
+        _applyBarcodeCapture(result);
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'camera_assisted_barcode_scanned',
+          'properties': {
+            'success': true,
+            'barcode_length': result.rawValue!.length,
+            'has_suggestion': result.suggestedName != null,
+            'source': result.source ?? 'unknown',
+          },
+        });
+        return;
+      }
+
+      switch (result.failure) {
+        case BarcodeCaptureFailure.cancelled:
+          return;
+        case BarcodeCaptureFailure.invalidBarcode:
+          _showSnack('Enter a valid 8 to 14 digit barcode');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'camera_assisted_barcode_scanned',
+            'properties': {'success': false, 'reason': 'invalid_barcode'},
+          });
+          return;
+        case null:
+          return;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _barcodeScanInProgress = false);
+      }
+    }
+  }
+
+  Future<void> _scanFreshItem() async {
+    if (_freshItemCvInProgress) return;
+    if (!_supportsFreshItemCvPlatform) {
+      _showSnack('Fresh item scan is not available on this platform yet');
+      return;
+    }
+
+    bool freshItemCvEnabled;
+    try {
+      freshItemCvEnabled = await ref.read(
+        isFlagEnabledProvider(FeatureFlagKey.freshItemCv).future,
+      );
+    } catch (_) {
+      freshItemCvEnabled = false;
+    }
+
+    if (!freshItemCvEnabled) {
+      _showSnack('Fresh item scan is currently unavailable');
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() => _freshItemCvInProgress = true);
+
+    try {
+      final result = await ref.read(freshItemCaptureLauncherProvider)(
+        context: context,
+      );
+      if (!mounted) return;
+
+      if (result.isSuccess) {
+        final selected = await _showFreshItemSuggestionPicker(
+          result.suggestions,
+        );
+        if (!mounted || selected == null) {
+          return;
+        }
+
+        _applyFreshItemSuggestion(selected);
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'fresh_item_cv_scanned',
+          'properties': {
+            'success': true,
+            'suggestion_count': result.suggestions.length,
+            'selected_name': selected.name,
+            'selected_category': selected.category.name,
+            'selected_type': selected.itemType.name,
+            'source': selected.source,
+          },
+        });
+        return;
+      }
+
+      switch (result.failure) {
+        case FreshItemCaptureFailure.cancelled:
+          return;
+        case FreshItemCaptureFailure.noItemDetected:
+          _showSnack('No recognizable fresh item detected');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'fresh_item_cv_scanned',
+            'properties': {'success': false, 'reason': 'no_item_detected'},
+          });
+          return;
+        case FreshItemCaptureFailure.unavailable:
+          _showSnack('Fresh item scan is not available on this platform yet');
+          return;
+        case FreshItemCaptureFailure.unknown:
+        case null:
+          _showSnack('Unable to identify the fresh item');
+          ref.read(telemetryClientProvider).enqueue({
+            'name': 'fresh_item_cv_scanned',
+            'properties': {'success': false, 'reason': 'error'},
+          });
+          return;
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _freshItemCvInProgress = false);
+      }
+    }
+  }
+
+  Future<FreshItemCvSuggestion?> _showFreshItemSuggestionPicker(
+    List<FreshItemCvSuggestion> suggestions,
+  ) async {
+    return showModalBottomSheet<FreshItemCvSuggestion>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Choose item suggestion', style: AppTextStyles.h3),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Pick the closest match to prefill name, category, type, and storage.',
+                  style: AppTextStyles.bodySmall,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                for (var index = 0; index < suggestions.length; index++)
+                  ListTile(
+                    key: Key('fresh_item_cv_suggestion_$index'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(suggestions[index].name),
+                    subtitle: Text(
+                      '${suggestions[index].category.displayName} • ${suggestions[index].location.displayName} • ${(suggestions[index].confidence * 100).round()}% match',
+                    ),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () => Navigator.of(context).pop(suggestions[index]),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _applyFreshItemSuggestion(FreshItemCvSuggestion suggestion) {
+    setState(() {
+      _nameController.text = suggestion.name;
+      _selectedCategory = suggestion.category;
+      _selectedUserCategory = null;
+      _selectedLocation = suggestion.location;
+      _selectedType = suggestion.itemType;
+      _cameraFreshItemSuggestionName = suggestion.name;
+      _cameraFreshItemSuggestionSource = suggestion.source;
+
+      if (suggestion.itemType == ItemType.prepared) {
+        _selectedPreparedDate ??= DateTime.now();
+      } else {
+        _selectedPreparedDate = null;
+      }
+    });
+  }
+
+  void _applyBarcodeCapture(BarcodeCaptureResult result) {
+    final suggestedName = result.suggestedName?.trim();
+    final previousSuggestedName = _cameraSuggestedName;
+    final currentName = _nameController.text.trim();
+    final recentDefaults = _findRecentDefaultsForName(suggestedName);
+    final shouldApplySuggestedName =
+        !_isEditMode &&
+        suggestedName != null &&
+        (currentName.isEmpty ||
+            (previousSuggestedName != null &&
+                currentName == previousSuggestedName));
+
+    if (shouldApplySuggestedName) {
+      _nameController.text = suggestedName;
+    }
+
+    final normalizedBarcode = normalizeBarcodeValue(result.rawValue!)!;
+
+    setState(() {
+      _cameraBarcodeValue = normalizedBarcode;
+      _cameraSuggestedName = suggestedName;
+      _cameraSuggestionSource = result.source;
+      _cameraAssistedStage = _CameraAssistedStage.barcodeLocked;
+
+      if (recentDefaults != null) {
+        _brandController.text = recentDefaults.brand ?? '';
+        if (!_categoryTouched) {
+          _selectedCategory = recentDefaults.category;
+          _selectedUserCategory = _resolveRecentUserCategory(recentDefaults);
+        }
+        _selectedLocation = recentDefaults.location;
+      } else if (!_categoryTouched) {
+        if (result.suggestedCategory != null) {
+          _selectedCategory = result.suggestedCategory!;
+          _selectedUserCategory = null;
+        } else if (suggestedName != null) {
+          final inferredCategory = _inferCategoryFromName(suggestedName);
+          if (inferredCategory != null) {
+            _selectedCategory = inferredCategory;
+            _selectedUserCategory = null;
+          }
+        }
+      }
+    });
+  }
+
   Future<bool> _showExpiryOcrGuidance() async {
     return await showDialog<bool>(
           context: context,
@@ -802,6 +1359,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 Text('Align the expiry text inside the camera frame.'),
                 SizedBox(height: 8),
                 Text('Use good lighting and hold the package steady.'),
+                SizedBox(height: 8),
+                Text(
+                  'Canadian labels may show BB/MA before the date instead of EXP.',
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'For embossed dates, tilt the package so side lighting creates shadow contrast.',
+                ),
                 SizedBox(height: 8),
                 Text('You can always edit the detected date before saving.'),
               ],
@@ -841,6 +1406,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         if (item != null) {
           setState(() {
             _nameController.text = item.name;
+            _brandController.text = item.brand ?? '';
             _selectedCategory = item.category;
             _selectedUserCategory = item.customCategoryId == null
                 ? null
@@ -887,10 +1453,16 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _brandController.dispose();
     _quantityController.dispose();
     _priceController.dispose();
     _brandController.dispose();
     super.dispose();
+  }
+
+  String? _normalizedBrand() {
+    final brand = _brandController.text.trim();
+    return brand.isEmpty ? null : brand;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -903,6 +1475,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     if (picked != null) {
       setState(() {
         _selectedExpiryDate = picked;
+        _cameraAcceptedExpiryFormat = null;
       });
     }
   }
@@ -918,6 +1491,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     try {
       final repository = ref.read(itemRepositoryProvider);
       await repository.init();
+      final entryMethod = _entryMethodForSave();
+      final cameraUsed = entryMethod != 'manual';
+      final cameraBarcodeAccepted = _cameraBarcodeValue != null;
+      final cameraFreshItemAccepted = _cameraFreshItemSuggestionName != null;
+      final cameraExpiryAccepted = _cameraAcceptedExpiryFormat != null;
 
       final quantity = int.tryParse(_quantityController.text);
       final price = _priceController.text.isEmpty
@@ -932,6 +1510,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ? widget.itemId!
             : LocalIdGenerator.next(prefix: 'item'),
         name: _nameController.text.trim(),
+        brand: _normalizedBrand(),
         category: _selectedCategory,
         customCategoryId: _selectedUserCategory?.id,
         customCategoryName: _selectedUserCategory?.name,
@@ -951,6 +1530,16 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
       await repository.saveItem(item);
 
+      if (_cameraBarcodeValue != null) {
+        await ref
+            .read(learnedBarcodeMappingStoreProvider)
+            .saveMapping(
+              rawValue: _cameraBarcodeValue!,
+              name: item.name,
+              category: item.category,
+            );
+      }
+
       // No longer disables demo mode on item save. Only settings screen can change demo mode.
 
       // Force refresh of inventory list
@@ -962,11 +1551,25 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         'name': _isEditMode ? 'item_updated' : 'item_added',
         'properties': {
           'item_id': item.id,
+          'source': entryMethod,
+          'entry_method': entryMethod,
+          'camera_used': cameraUsed,
           'category': item.categoryLabel,
           'is_custom_category': item.customCategoryId != null,
           'location': item.location.name,
           'quantity': item.quantity,
           'has_expiry': item.expiryDate != null,
+          'has_expiry_date': item.expiryDate != null,
+          'camera_barcode_accepted': cameraBarcodeAccepted,
+          'camera_fresh_item_accepted': cameraFreshItemAccepted,
+          'camera_expiry_accepted': cameraExpiryAccepted,
+          'camera_barcode_source': cameraBarcodeAccepted
+              ? (_cameraSuggestionSource ?? 'unknown')
+              : 'none',
+          'camera_fresh_item_source': cameraFreshItemAccepted
+              ? (_cameraFreshItemSuggestionSource ?? 'unknown')
+              : 'none',
+          'camera_expiry_format': _cameraAcceptedExpiryFormat ?? 'none',
         },
       });
       telemetry.enqueue({
@@ -976,6 +1579,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           'is_custom': item.customCategoryId != null,
         },
       });
+      if (_cameraBarcodeValue != null) {
+        telemetry.enqueue({
+          'name': 'camera_assisted_barcode_learned',
+          'properties': {
+            'barcode_length': _cameraBarcodeValue!.length,
+            'category': item.category.name,
+          },
+        });
+      }
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -1000,9 +1612,22 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     final expiryOcrEnabledAsync = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
     );
+    final freshItemCvEnabledAsync = ref.watch(
+      isFlagEnabledProvider(FeatureFlagKey.freshItemCv),
+    );
     final showExpiryOcrButton = expiryOcrEnabledAsync.maybeWhen(
       data: (enabled) => enabled && _supportsExpiryOcrPlatform,
       orElse: () => false,
+    );
+    final showFreshItemCvButton = freshItemCvEnabledAsync.maybeWhen(
+      data: (enabled) => enabled && _supportsFreshItemCvPlatform,
+      orElse: () => false,
+    );
+    final showCameraAssistedPanel =
+        showExpiryOcrButton || showFreshItemCvButton;
+    final recentSuggestions = _recentSuggestionsForQuery(_nameController.text);
+    final recentBrandSuggestions = _recentBrandSuggestions(
+      _brandController.text,
     );
 
     return Scaffold(
@@ -1016,26 +1641,108 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.pagePadding),
           children: [
+            if (showCameraAssistedPanel) ...[
+              _buildCameraAssistedAddPanel(
+                theme,
+                showExpiryOcrButton: showExpiryOcrButton,
+                showFreshItemCvButton: showFreshItemCvButton,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             _buildIconPreview(),
             const SizedBox(height: AppSpacing.lg),
             // Name field (required)
             _buildFormGroup(
               label: 'Name *',
-              child: TextFormField(
-                controller: _nameController,
-                decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
-                onChanged: (value) {
-                  if (!_isEditMode) {
-                    _maybeAutoSetCategory(value);
-                  }
-                  setState(() {});
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Name is required';
-                  }
-                  return null;
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    key: const Key('item_form_name_field'),
+                    controller: _nameController,
+                    decoration: _buildInputDecoration(hintText: 'e.g., Milk'),
+                    onChanged: (value) {
+                      if (!_isEditMode) {
+                        _maybeAutoSetCategory(value);
+                      }
+                      setState(() {});
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Name is required';
+                      }
+                      return null;
+                    },
+                  ),
+                  if (!_isEditMode && recentSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        for (
+                          var index = 0;
+                          index < recentSuggestions.length;
+                          index++
+                        )
+                          ActionChip(
+                            key: Key('recent_item_suggestion_$index'),
+                            label: Text(recentSuggestions[index].name),
+                            onPressed: () => _applyRecentSuggestion(
+                              recentSuggestions[index],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            _buildFormGroup(
+              label: 'Brand (optional)',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    key: const Key('item_form_brand_field'),
+                    controller: _brandController,
+                    decoration: _buildInputDecoration(
+                      hintText: 'e.g., Chobani',
+                      suffixIcon: IconButton(
+                        key: const Key('item_form_brand_picker_button'),
+                        tooltip: 'Search recent brands',
+                        onPressed: _openBrandPicker,
+                        icon: const Icon(Icons.arrow_drop_down),
+                      ),
+                    ),
+                    onChanged: (_) => setState(() {}),
+                  ),
+                  if (recentBrandSuggestions.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
+                      children: [
+                        for (
+                          var index = 0;
+                          index < recentBrandSuggestions.length;
+                          index++
+                        )
+                          ActionChip(
+                            key: Key('recent_brand_suggestion_$index'),
+                            label: Text(recentBrandSuggestions[index]),
+                            onPressed: () {
+                              setState(() {
+                                _brandController.text =
+                                    recentBrandSuggestions[index];
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
             ),
 
@@ -1132,12 +1839,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 7),
                       );
+                      _cameraAcceptedExpiryFormat = null;
                     } else {
                       _selectedPreparedDate = DateTime.now();
                       _selectedLocation = StorageLocation.freezer;
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 30),
                       );
+                      _cameraAcceptedExpiryFormat = null;
                     }
                   });
                 },
@@ -1428,12 +2137,280 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
   }
 
+  Widget _buildCameraAssistedAddPanel(
+    ThemeData theme, {
+    required bool showExpiryOcrButton,
+    required bool showFreshItemCvButton,
+  }) {
+    final barcodeLocked =
+        _cameraAssistedStage == _CameraAssistedStage.barcodeLocked ||
+        _cameraAssistedStage == _CameraAssistedStage.expiryLocked;
+    final expiryLocked =
+        _cameraAssistedStage == _CameraAssistedStage.expiryLocked;
+    final hasFreshItemSuggestion = _cameraFreshItemSuggestionName != null;
+    final statusTitle = expiryLocked
+        ? 'Expiry locked'
+        : barcodeLocked
+        ? 'Barcode locked'
+        : hasFreshItemSuggestion
+        ? 'Fresh item identified'
+        : 'Scan barcode or fresh item';
+    final statusMessage = expiryLocked
+        ? 'Expiry has been captured. You can review the date below or rescan before saving.'
+        : barcodeLocked
+        ? 'Review the detected item details, then capture expiry from this panel next.'
+        : hasFreshItemSuggestion
+        ? 'Review the suggested item details below before saving or rescan for a different match.'
+        : 'Use barcode for packaged items or fresh item scan for loose produce, meat, and prepared foods.';
+
+    return Container(
+      key: const Key('camera_assisted_add_panel'),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.camera_alt_outlined, color: theme.colorScheme.primary),
+              const SizedBox(width: AppSpacing.sm),
+              Text('Camera-assisted add', style: AppTextStyles.h3),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            key: const Key('camera_assisted_barcode_stage'),
+            height: 180,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            child: Center(
+              child: _barcodeScanInProgress
+                  ? const CircularProgressIndicator()
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          barcodeLocked
+                              ? Icons.qr_code_2
+                              : hasFreshItemSuggestion
+                              ? Icons.eco_outlined
+                              : Icons.photo_camera_back_outlined,
+                          size: 36,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          barcodeLocked
+                              ? 'Barcode captured for this item'
+                              : hasFreshItemSuggestion
+                              ? 'Fresh item suggestion ready'
+                              : 'Barcode stage ready',
+                          style: AppTextStyles.body.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (_cameraBarcodeValue != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            _cameraBarcodeValue!,
+                            key: const Key('camera_assisted_detected_barcode'),
+                            style: AppTextStyles.body.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              key: const Key('camera_assisted_scan_barcode_button'),
+              onPressed: _barcodeScanInProgress ? null : _scanBarcode,
+              icon: Icon(
+                barcodeLocked
+                    ? Icons.center_focus_strong
+                    : Icons.qr_code_scanner,
+              ),
+              label: Text(barcodeLocked ? 'Rescan barcode' : 'Scan barcode'),
+            ),
+          ),
+          if (showFreshItemCvButton) ...[
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const Key('camera_assisted_scan_fresh_item_button'),
+                onPressed: _freshItemCvInProgress ? null : _scanFreshItem,
+                icon: _freshItemCvInProgress
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        hasFreshItemSuggestion
+                            ? Icons.center_focus_strong
+                            : Icons.eco_outlined,
+                      ),
+                label: Text(
+                  hasFreshItemSuggestion
+                      ? 'Rescan fresh item'
+                      : 'Identify fresh item',
+                ),
+              ),
+            ),
+          ],
+          if (barcodeLocked && showExpiryOcrButton) ...[
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const Key('camera_assisted_scan_expiry_button'),
+                onPressed: _ocrInProgress ? null : _scanExpiryDate,
+                icon: Icon(
+                  expiryLocked
+                      ? Icons.calendar_month
+                      : Icons.document_scanner_outlined,
+                ),
+                label: Text(
+                  expiryLocked ? 'Rescan expiry' : 'Scan expiry next',
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            statusTitle,
+            key: Key(
+              expiryLocked
+                  ? 'camera_assisted_status_expiry_locked'
+                  : barcodeLocked
+                  ? 'camera_assisted_status_barcode_locked'
+                  : hasFreshItemSuggestion
+                  ? 'camera_assisted_status_fresh_item_detected'
+                  : 'camera_assisted_status_barcode_ready',
+            ),
+            style: AppTextStyles.body,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            statusMessage,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
+          ),
+          if (_cameraBarcodeValue != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Barcode: $_cameraBarcodeValue',
+                    key: const Key('camera_assisted_detected_barcode_summary'),
+                    style: AppTextStyles.body,
+                  ),
+                  if (_cameraSuggestedName != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Suggested item: $_cameraSuggestedName',
+                      key: const Key('camera_assisted_detected_name'),
+                      style: AppTextStyles.body,
+                    ),
+                  ],
+                  if (_cameraSuggestionSource != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Source: $_cameraSuggestionSource',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (_cameraFreshItemSuggestionName != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Fresh item: $_cameraFreshItemSuggestionName',
+                    key: const Key('camera_assisted_detected_fresh_item'),
+                    style: AppTextStyles.body,
+                  ),
+                  if (_cameraFreshItemSuggestionSource != null) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Source: $_cameraFreshItemSuggestionSource',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+          if (_selectedExpiryDate != null && barcodeLocked) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Detected expiry: ${_selectedExpiryDate!.year.toString().padLeft(4, '0')}-${_selectedExpiryDate!.month.toString().padLeft(2, '0')}-${_selectedExpiryDate!.day.toString().padLeft(2, '0')}',
+              key: const Key('camera_assisted_detected_expiry'),
+              style: AppTextStyles.body,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            showExpiryOcrButton
+                ? 'Expiry scan starts after barcode and will auto-lock once the date is stable.'
+                : 'Fresh item suggestions prefill the form so you can confirm details faster.',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildIconPreview() {
     final theme = Theme.of(context);
     final name = _nameController.text.trim();
     final displayName = name.isEmpty
         ? (_isEditMode ? 'Item' : 'New item')
         : name;
+    final brand = _normalizedBrand();
+    final subtitle = brand == null
+        ? (_selectedUserCategory?.name ?? _selectedCategory.displayName)
+        : '$brand • ${_selectedUserCategory?.name ?? _selectedCategory.displayName}';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -1464,7 +2441,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _selectedUserCategory?.name ?? _selectedCategory.displayName,
+                  subtitle,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: theme.textTheme.bodySmall?.color,
                   ),
@@ -1494,11 +2471,15 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration({required String hintText}) {
+  InputDecoration _buildInputDecoration({
+    required String hintText,
+    Widget? suffixIcon,
+  }) {
     final theme = Theme.of(context);
 
     return InputDecoration(
       hintText: hintText,
+      suffixIcon: suffixIcon,
       hintStyle: theme.textTheme.bodyMedium?.copyWith(
         color: theme.textTheme.bodySmall?.color,
       ),

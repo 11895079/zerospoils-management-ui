@@ -5,6 +5,7 @@ library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/receipt_batch_repository.dart';
@@ -55,6 +56,13 @@ final receiptBatchRepositoryProvider = Provider<ReceiptBatchRepository>((ref) {
 final userCategoryRepositoryProvider = Provider<UserCategoryRepository>((ref) {
   return UserCategoryRepository();
 });
+
+/// Learned barcode mapping store provider
+final learnedBarcodeMappingStoreProvider = Provider<LearnedBarcodeMappingStore>(
+  (ref) {
+    return LearnedBarcodeMappingStore();
+  },
+);
 
 /// Progress stats provider (aggregates items + telemetry locally)
 final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {

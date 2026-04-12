@@ -1,12 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
+import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
+import 'package:zerospoils/data/repositories/user_category_repository.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/screens/inventory_screen.dart';
+import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/item_card.dart';
 import 'package:zerospoils/presentation/widgets/item_icon.dart';
@@ -40,8 +46,22 @@ class MockTelemetryClient extends TelemetryClient {
   }
 }
 
+class FakeUserCategoryRepository extends UserCategoryRepository {
+  final List<UserCategory> categories;
+
+  FakeUserCategoryRepository({this.categories = const []});
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<UserCategory>> getAll() async =>
+      List<UserCategory>.from(categories);
+}
+
 void main() {
   late MockItemRepository mockRepository;
+  late FakeUserCategoryRepository fakeUserCategoryRepository;
   Item buildTestItem() {
     final now = DateTime.now();
     return Item(
@@ -57,6 +77,7 @@ void main() {
 
   setUp(() {
     mockRepository = MockItemRepository();
+    fakeUserCategoryRepository = FakeUserCategoryRepository();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -64,6 +85,7 @@ void main() {
     WidgetTester tester, {
     InventoryFilterState? filterState,
     ThemeMode themeMode = ThemeMode.light,
+    List<Override> overrides = const [],
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -73,9 +95,13 @@ void main() {
             // Bypass Hive init - return mock items directly
             return mockRepository.items;
           }),
+          userCategoryRepositoryProvider.overrideWithValue(
+            fakeUserCategoryRepository,
+          ),
           if (filterState != null)
             inventoryFilterProvider.overrideWith((ref) => filterState),
           telemetryClientProvider.overrideWithValue(MockTelemetryClient()),
+          ...overrides,
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
@@ -620,4 +646,86 @@ void main() {
     // Verify FAB exists (navigation requires GoRouter context, tested in integration tests)
     expect(find.byType(FloatingActionButton), findsOneWidget);
   });
+
+  testWidgets('FAB opens item form directly', (tester) async {
+    mockRepository.items = [];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byKey(const Key('inventory_add_fab')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ItemFormScreen), findsOneWidget);
+  });
+
+  testWidgets('FAB opens item form directly on mobile', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    mockRepository.items = [];
+
+    try {
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.expiryDateOcr,
+          ).overrideWith((ref) async => true),
+        ],
+      );
+
+      await tester.tap(find.byKey(const Key('inventory_add_fab')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ItemFormScreen), findsOneWidget);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
+
+  testWidgets(
+    'receipt batch button is shown when receipt batch capture flag is enabled',
+    (tester) async {
+      mockRepository.items = [buildTestItem()];
+
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptBatchCapture,
+          ).overrideWith((ref) async => true),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => false),
+        ],
+      );
+
+      expect(
+        find.byKey(const Key('inventory_receipt_batch_button')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'receipt batch button is hidden when receipt batch capture flag is disabled even if batch photo capture is enabled',
+    (tester) async {
+      mockRepository.items = [buildTestItem()];
+
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptBatchCapture,
+          ).overrideWith((ref) async => false),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => true),
+        ],
+      );
+
+      expect(
+        find.byKey(const Key('inventory_receipt_batch_button')),
+        findsNothing,
+      );
+    },
+  );
 }

@@ -300,7 +300,15 @@ void main() {
     );
     expect(convertButton.onPressed, isNull);
 
-    await tester.tap(find.byKey(const Key('item_entry_expiry_1w')));
+    final expiryOneWeekButton = find.byKey(const Key('item_entry_expiry_1w'));
+    await tester.ensureVisible(expiryOneWeekButton);
+    await tester.tap(expiryOneWeekButton);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('item_entry_brand_field')),
+      'Fairlife',
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.add_circle_outline).first);
@@ -321,6 +329,7 @@ void main() {
     expect(find.byKey(const Key('shopping_item_tile_1')), findsNothing);
     final inventoryItems = await itemRepository.getAllItems();
     expect(inventoryItems.length, 1);
+    expect(inventoryItems.first.brand, 'Fairlife');
     expect(inventoryItems.first.quantity, 2);
   });
 
@@ -404,14 +413,18 @@ void main() {
     await tester.tap(find.byKey(const Key('shopping_convert_batch_button')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('item_entry_expiry_1w')));
+    final firstExpiryButton = find.byKey(const Key('item_entry_expiry_1w'));
+    await tester.ensureVisible(firstExpiryButton);
+    await tester.tap(firstExpiryButton);
     await tester.pumpAndSettle();
     final firstSave = find.byKey(const Key('item_entry_save'));
     await tester.ensureVisible(firstSave);
     await tester.tap(firstSave);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('item_entry_expiry_1w')));
+    final secondExpiryButton = find.byKey(const Key('item_entry_expiry_1w'));
+    await tester.ensureVisible(secondExpiryButton);
+    await tester.tap(secondExpiryButton);
     await tester.pumpAndSettle();
     final secondSave = find.byKey(const Key('item_entry_save'));
     await tester.ensureVisible(secondSave);
@@ -468,7 +481,9 @@ void main() {
     await tester.tap(find.byKey(const Key('shopping_convert_batch_button')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('item_entry_expiry_1w')));
+    final applyAllExpiryButton = find.byKey(const Key('item_entry_expiry_1w'));
+    await tester.ensureVisible(applyAllExpiryButton);
+    await tester.tap(applyAllExpiryButton);
     await tester.pumpAndSettle();
     final applyAll = find.byKey(const Key('item_entry_apply_all'));
     await tester.ensureVisible(applyAll);
