@@ -26,7 +26,7 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/receipt_line_item.dart';
-import 'package:zerospoils/domain/models/shopping_list_item.dart';
+import 'package:zerospoils/domain/models/shopping_list_item.dart' as sli;
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
 import 'package:zerospoils/domain/utils/receipt_parser.dart';
 
@@ -270,7 +270,7 @@ void main() {
     test('returns null for text without any date', () {
       final result = parser.parse(
         'No dates here at all',
-        preferredFormat: 'MM/DD/YYYY',
+        preferredDateFormat: 'MM/DD/YYYY',
       );
       expect(result, isNull);
     });
@@ -341,23 +341,23 @@ Item _makeItem(String id, String name, ItemCategory category) {
     name: name,
     category: category,
     location: StorageLocation.fridge,
-    status: ItemStatus.active,
-    itemType: ItemType.raw,
+    status: ItemStatus.available,
+    type: ItemType.raw,
     quantity: 1,
-    unit: Unit.piece,
+    unit: Unit.count,
     expiryDate: DateTime(2027, 6, 1),
-    addedAt: DateTime(2026, 1, 1),
+    createdAt: DateTime(2026, 1, 1),
     updatedAt: DateTime(2026, 1, 1),
   );
 }
 
-ShoppingListItem _makeShoppingItem(
+sli.ShoppingListItem _makeShoppingItem(
   String id,
   String name, {
   bool purchased = false,
 }) {
   final now = DateTime(2026, 4, 1);
-  return ShoppingListItem(
+  return sli.ShoppingListItem(
     id: id,
     name: name,
     isPurchased: purchased,
