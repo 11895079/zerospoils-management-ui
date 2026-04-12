@@ -97,9 +97,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _brandController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
+  final _brandController = TextEditingController();
 
   ItemCategory _selectedCategory = ItemCategory.produce;
   UserCategory? _selectedUserCategory;

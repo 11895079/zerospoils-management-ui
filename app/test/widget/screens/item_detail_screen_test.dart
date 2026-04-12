@@ -459,5 +459,53 @@ void main() {
       expect(find.byKey(const Key('item_detail_expiry')), findsOneWidget);
       expect(find.byKey(const Key('item_detail_status')), findsOneWidget);
     });
+
+    testWidgets('shows brand row when item has a brand', (
+      WidgetTester tester,
+    ) async {
+      final testItem = Item(
+        id: 'item-brand',
+        name: 'Organic Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        brand: 'Organic Valley',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      mockRepository.addMockItem(testItem);
+
+      await tester.pumpWidget(createTestWidget('item-brand'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('item_detail_brand')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_brand_value')), findsOneWidget);
+      expect(find.text('Organic Valley'), findsWidgets);
+    });
+
+    testWidgets('hides brand row when item has no brand', (
+      WidgetTester tester,
+    ) async {
+      final testItem = Item(
+        id: 'item-nobrand',
+        name: 'Generic Milk',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      mockRepository.addMockItem(testItem);
+
+      await tester.pumpWidget(createTestWidget('item-nobrand'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('item_detail_brand')), findsNothing);
+      expect(find.byKey(const Key('item_detail_brand_value')), findsOneWidget);
+      final brandValueText = tester.widget<Text>(
+        find.byKey(const Key('item_detail_brand_value')),
+      );
+      expect(brandValueText.data, '—');
+    });
   });
 }

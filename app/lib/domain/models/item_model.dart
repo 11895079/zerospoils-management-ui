@@ -160,8 +160,6 @@ class Item extends Equatable {
   final String id;
   @HiveField(1)
   final String name;
-  @HiveField(17)
-  final String? brand;
   @HiveField(2)
   final ItemCategory category;
   @HiveField(3)
@@ -192,11 +190,13 @@ class Item extends Equatable {
   final DateTime createdAt;
   @HiveField(13)
   final DateTime updatedAt;
+  @HiveField(17)
+  /// Optional manufacturer or brand name for the product (e.g., "Organic Valley").
+  final String? brand;
 
   const Item({
     required this.id,
     required this.name,
-    this.brand,
     required this.category,
     this.type = ItemType.raw,
     this.preparedDate,
@@ -212,13 +212,13 @@ class Item extends Equatable {
     this.wastePercentage,
     required this.createdAt,
     required this.updatedAt,
+    this.brand,
   });
 
   /// Create a copy of Item with optional field overrides
   Item copyWith({
     String? id,
     String? name,
-    String? brand,
     ItemCategory? category,
     ItemType? type,
     DateTime? preparedDate,
@@ -234,6 +234,7 @@ class Item extends Equatable {
     int? wastePercentage,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? brand,
   }) {
     return Item(
       id: id ?? this.id,
@@ -288,7 +289,6 @@ class Item extends Equatable {
   List<Object?> get props => [
     id,
     name,
-    brand,
     category,
     type,
     preparedDate,
@@ -302,6 +302,9 @@ class Item extends Equatable {
     wastePercentage,
     createdAt,
     updatedAt,
+    brand,
+    customCategoryId,
+    customCategoryName,
   ];
 }
 
