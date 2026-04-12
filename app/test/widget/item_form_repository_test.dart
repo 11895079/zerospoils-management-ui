@@ -285,7 +285,7 @@ void main() {
     final nameField = find.byType(TextFormField).first;
     await tester.enterText(nameField, 'Price Test');
 
-    final priceField = find.byType(TextFormField).at(1);
+    final priceField = find.byKey(const Key('item_form_price_field'));
     await tester.enterText(priceField, '-5');
 
     await tester.tap(find.byKey(const Key('item_form_save_button')));

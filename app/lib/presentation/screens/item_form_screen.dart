@@ -1045,7 +1045,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               child: TextFormField(
                 key: const Key('item_form_brand_field'),
                 controller: _brandController,
-                decoration: _buildInputDecoration(hintText: 'e.g., Organic Valley'),
+                decoration: _buildInputDecoration(
+                  hintText: 'e.g., Organic Valley',
+                ),
               ),
             ),
 
