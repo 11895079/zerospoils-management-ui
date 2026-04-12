@@ -35,7 +35,6 @@ class ItemAdapter extends TypeAdapter<Item> {
       createdAt: fields[12] as DateTime,
       updatedAt: fields[13] as DateTime,
       wastePercentage: fields[14] as int?,
-      brand: fields[17] as String?,
     );
   }
 
@@ -78,9 +77,7 @@ class ItemAdapter extends TypeAdapter<Item> {
       ..writeByte(15)
       ..write(obj.customCategoryId)
       ..writeByte(16)
-      ..write(obj.customCategoryName)
-      ..writeByte(17)
-      ..write(obj.brand);
+      ..write(obj.customCategoryName);
   }
 
   @override

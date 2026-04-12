@@ -97,7 +97,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _brandController = TextEditingController();
   final _quantityController = TextEditingController();
   final _priceController = TextEditingController();
   final _brandController = TextEditingController();
@@ -1456,7 +1455,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     _brandController.dispose();
     _quantityController.dispose();
     _priceController.dispose();
-    _brandController.dispose();
     super.dispose();
   }
 
@@ -1501,9 +1499,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       final price = _priceController.text.isEmpty
           ? null
           : double.tryParse(_priceController.text.replaceAll(r'$', ''));
-      final brand = _brandController.text.trim().isEmpty
-          ? null
-          : _brandController.text.trim();
 
       final item = Item(
         id: _isEditMode
@@ -1525,7 +1520,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         wasteReason: null,
         createdAt: _existingCreatedAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
-        brand: brand,
       );
 
       await repository.saveItem(item);
@@ -1743,18 +1737,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                     ),
                   ],
                 ],
-              ),
-            ),
-
-            // Brand field (optional)
-            _buildFormGroup(
-              label: 'Brand (optional)',
-              child: TextFormField(
-                key: const Key('item_form_brand_field'),
-                controller: _brandController,
-                decoration: _buildInputDecoration(
-                  hintText: 'e.g., Organic Valley',
-                ),
               ),
             ),
 
