@@ -21,6 +21,7 @@ import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Optional
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -49,7 +50,7 @@ def _normalise_timestamp(raw: str) -> str:
     return raw
 
 
-def _row_to_record(row: dict, screenshot_dir: Path | None) -> dict | None:
+def _row_to_record(row: dict, screenshot_dir: Optional[Path]) -> Optional[dict]:
     """Convert a CSV row from Firebase Console export to a normalised record.
 
     Returns None if the row lacks required fields.
@@ -84,7 +85,7 @@ def _row_to_record(row: dict, screenshot_dir: Path | None) -> dict | None:
         ts_prefix = submitted_at.replace(":", "-").replace("T", "-")[:16]
         candidates = list(screenshot_dir.glob(f"*{ts_prefix}*.png"))
         if candidates:
-            screenshot_reference = str(candidates[0].relative_to(Path(".")))
+            screenshot_reference = os.path.relpath(candidates[0], start=Path.cwd())
 
     return {
         "platform": platform,
@@ -107,6 +108,11 @@ def _deduplication_key(record: dict) -> str:
     return f"{record['platform']}|{record['build_number']}|{record['submitted_at']}|{msg_hash}"
 
 
+def _feedback_id(record: dict) -> str:
+    """Stable identifier for linking triage records to issues."""
+    return hashlib.sha256(_deduplication_key(record).encode()).hexdigest()[:20]
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Core normalisation
 # ──────────────────────────────────────────────────────────────────────────────
@@ -114,8 +120,8 @@ def _deduplication_key(record: dict) -> str:
 
 def normalize(
     input_path: Path,
-    screenshot_dir: Path | None,
-    existing_records: list[dict] | None = None,
+    screenshot_dir: Optional[Path],
+    existing_records: Optional[list[dict]] = None,
 ) -> list[dict]:
     """Read CSV and return deduplicated normalised records.
 
@@ -139,6 +145,7 @@ def normalize(
             key = _deduplication_key(record)
             if key in seen_keys:
                 continue
+            record["feedback_id"] = _feedback_id(record)
             seen_keys.add(key)
             results.append(record)
 
@@ -150,7 +157,7 @@ def normalize(
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[list[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         description="Normalise Firebase App Distribution tester feedback CSV."
     )

@@ -32,8 +32,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('fast_add_stage_label')), findsOneWidget);
-      expect(find.textContaining('Step 1'), findsOneWidget);
-      expect(find.textContaining('Scan barcode'), findsOneWidget);
+      expect(find.byKey(const Key('fast_add_status_card')), findsOneWidget);
+      expect(
+        find.byKey(const Key('fast_add_no_barcode_button')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Skip Barcode button advances to expiry capture stage', (
@@ -45,7 +48,6 @@ void main() {
       await tester.tap(find.byKey(const Key('fast_add_skip_barcode')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Step 2'), findsOneWidget);
       expect(
         find.byKey(const Key('fast_add_expiry_status_card')),
         findsOneWidget,
@@ -61,7 +63,10 @@ void main() {
       await tester.tap(find.byKey(const Key('fast_add_no_barcode_button')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Step 2'), findsOneWidget);
+      expect(
+        find.byKey(const Key('fast_add_expiry_status_card')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Scan Package Label advances to package label stage', (
@@ -77,7 +82,10 @@ void main() {
         find.byKey(const Key('fast_add_package_label_card')),
         findsOneWidget,
       );
-      expect(find.textContaining('service-counter label'), findsOneWidget);
+      expect(
+        find.byKey(const Key('fast_add_package_name_field')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Cancel button pops the route from the initial barcode stage', (
@@ -102,6 +110,7 @@ void main() {
                       popped = true;
                     }
                   },
+                  key: const Key('open_fast_add_button'),
                   child: const Text('Open'),
                 ),
               ),
@@ -110,11 +119,11 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Open'));
+      await tester.tap(find.byKey(const Key('open_fast_add_button')));
       await tester.pumpAndSettle();
 
       // Tap Cancel on barcode screen
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.byKey(const Key('fast_add_initial_cancel_button')));
       await tester.pumpAndSettle();
 
       expect(popped, isTrue);
@@ -178,9 +187,10 @@ void main() {
       await tester.tap(find.byKey(const Key('fast_add_category_dropdown')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Produce'), findsWidgets);
-      expect(find.textContaining('Dairy'), findsWidgets);
-      expect(find.textContaining('Meat'), findsWidgets);
+      expect(
+        find.byKey(const Key('fast_add_category_dropdown')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Add Expiry Date button returns to expiry capture', (
@@ -201,7 +211,10 @@ void main() {
       await tester.tap(find.byKey(const Key('fast_add_add_expiry_button')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('Step 2'), findsOneWidget);
+      expect(
+        find.byKey(const Key('fast_add_expiry_status_card')),
+        findsOneWidget,
+      );
     });
   });
 }

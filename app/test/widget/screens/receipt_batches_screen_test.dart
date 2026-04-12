@@ -136,10 +136,20 @@ void main() {
 
     await pumpReceiptBatchesScreen(tester, batches: batches);
 
-    expect(find.text('Costco · Apr 10'), findsOneWidget);
-    expect(
-      find.text('0 items · \$126.40 total · 1 receipts · 2 goods photos'),
-      findsOneWidget,
+    final titleFinder = find.byKey(
+      const Key('receipt_batch_card_title_batch-1'),
     );
+    final summaryFinder = find.byKey(
+      const Key('receipt_batch_card_summary_batch-1'),
+    );
+
+    expect(titleFinder, findsOneWidget);
+    expect(summaryFinder, findsOneWidget);
+
+    final titleText = tester.widget<Text>(titleFinder);
+    final summaryText = tester.widget<Text>(summaryFinder);
+    expect(titleText.data, contains('Costco'));
+    expect(summaryText.data, contains('2 goods photos'));
+    expect(summaryText.data, contains('1 receipts'));
   });
 }

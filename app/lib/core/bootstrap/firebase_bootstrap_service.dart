@@ -9,6 +9,10 @@ import '../auth/secure_token_service.dart';
 /// Handle FCM background messages. Must be a top-level function.
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp();
+  }
+
   // Background messages arrive here when the app is terminated or in the
   // background. Minimal processing only — avoid heavy I/O.
   debugPrint(
@@ -117,7 +121,14 @@ class FirebaseBootstrapService {
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
       final token = await messaging.getToken();
-      debugPrint('[FCM] Device token: $token');
+      if (kDebugMode) {
+        final redactedToken = token == null
+            ? 'null'
+            : token.length <= 12
+            ? '[redacted]'
+            : '${token.substring(0, 8)}...${token.substring(token.length - 4)}';
+        debugPrint('[FCM] Device token (redacted): $redactedToken');
+      }
     } else {
       debugPrint(
         '[FCM] Notifications not authorized: ${settings.authorizationStatus}',

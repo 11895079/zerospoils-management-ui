@@ -405,6 +405,7 @@ class _PackagedItemFastAddScreenState
           SizedBox(
             width: double.infinity,
             child: TextButton(
+              key: const Key('fast_add_initial_cancel_button'),
               onPressed: () => Navigator.of(
                 context,
               ).pop(const PackagedItemFastAddResult.cancelled()),

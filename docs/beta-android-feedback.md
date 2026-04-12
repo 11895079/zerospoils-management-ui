@@ -37,6 +37,7 @@ Each tester feedback record is normalised into the following schema. Fields mark
 
 ```json
 {
+  "feedback_id": "f2a9b61ddbe79f0bb4e2",
   "platform": "android",
   "build_version": "1.2.3",
   "build_number": "42",
@@ -51,6 +52,7 @@ Each tester feedback record is normalised into the following schema. Fields mark
 
 | Field | Type | Notes |
 |---|---|---|
+| `feedback_id` * | string | Stable ID derived from the composite deduplication key |
 | `platform` * | string | `android` or `ios` |
 | `build_version` * | string | Semantic version string from the build (e.g. `1.2.3`) |
 | `build_number` * | string | Monotonic build number (Android `versionCode` / iOS `CFBundleVersion`) |
@@ -129,7 +131,8 @@ Output is a JSON array of normalised feedback objects conforming to the schema i
 For each `new` record in the triage JSON that warrants a bug report or feature request:
 1. Review the message and screenshot
 2. File a GitHub issue with label `tester-feedback` and milestone `MX`
-3. Link the `feedback_id` in the issue body for traceability
+3. Link the composite deduplication key in the issue body for traceability: `platform|build_number|submitted_at|message_hash`
+  Prefer linking `feedback_id` directly, and include the composite key only when debugging dedup collisions.
 4. Update `triage_status` to `in_progress` in the triage JSON
 
 ### Step 5 — Archive triage output

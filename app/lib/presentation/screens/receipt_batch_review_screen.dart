@@ -1,7 +1,5 @@
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_spacing.dart';
@@ -11,6 +9,7 @@ import '../../domain/models/receipt_line_item.dart';
 import '../../domain/models/shopping_list_item.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
+import '../widgets/local_image_preview.dart';
 import 'receipt_batches_screen.dart';
 
 class ParsedReceiptItem {
@@ -505,15 +504,9 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            File(photoPath),
+                          child: buildLocalImagePreview(
+                            photoPath,
                             fit: BoxFit.fill,
-                            errorBuilder: (_, _, _) => Center(
-                              child: Text(
-                                'Receipt preview unavailable',
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ),
                           ),
                         ),
                       ),

@@ -118,6 +118,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
+                        key: Key('receipt_batch_card_title_${batch.id}'),
                         title,
                         style: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w600,
@@ -125,6 +126,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
+                        key: Key('receipt_batch_card_summary_${batch.id}'),
                         '${batch.items.length} items · $total total · $attachmentSummary',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.textTheme.bodySmall?.color,

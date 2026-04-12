@@ -57,36 +57,37 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   ReceiptBatch read(BinaryReader reader) {
     final id = reader.readString();
     final createdAt = reader.read() as DateTime;
-    DateTime? purchasedAt;
-    try {
-      final hasPurchasedAt = reader.readBool();
-      purchasedAt = hasPurchasedAt ? reader.read() as DateTime : null;
-    } catch (_) {
-      purchasedAt = null;
+    final next = reader.read();
+
+    // Backward compatibility for legacy records:
+    // legacy layout wrote source index immediately after createdAt.
+    if (next is int && next >= 0 && next < ReceiptBatchSource.values.length) {
+      final sourceIndex = next;
+      final items = reader.readList().cast<ReceiptBatchItem>();
+      final receiptImagePaths = reader.readList().cast<String>();
+
+      return ReceiptBatch(
+        id: id,
+        createdAt: createdAt,
+        source: ReceiptBatchSource.values[sourceIndex],
+        items: items,
+        receiptImagePaths: receiptImagePaths,
+      );
     }
-    String? storeName;
-    try {
-      final hasStoreName = reader.readBool();
-      storeName = hasStoreName ? reader.readString() : null;
-    } catch (_) {
-      storeName = null;
-    }
-    double? totalAmount;
-    try {
-      final hasTotalAmount = reader.readBool();
-      totalAmount = hasTotalAmount ? reader.readDouble() : null;
-    } catch (_) {
-      totalAmount = null;
-    }
+
+    final hasPurchasedAt = next == true;
+    final purchasedAt = hasPurchasedAt ? reader.read() as DateTime : null;
+
+    final hasStoreName = reader.readBool();
+    final storeName = hasStoreName ? reader.readString() : null;
+
+    final hasTotalAmount = reader.readBool();
+    final totalAmount = hasTotalAmount ? reader.readDouble() : null;
+
     final sourceIndex = reader.readByte();
     final items = reader.readList().cast<ReceiptBatchItem>();
     final receiptImagePaths = reader.readList().cast<String>();
-    List<String> goodsImagePaths;
-    try {
-      goodsImagePaths = reader.readList().cast<String>();
-    } catch (_) {
-      goodsImagePaths = const [];
-    }
+    final goodsImagePaths = reader.readList().cast<String>();
 
     return ReceiptBatch(
       id: id,

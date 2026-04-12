@@ -4,8 +4,8 @@ This document describes the design and runtime flow for the receipt-to-goods mat
 
 Related diagrams:
 
-- [docs/receipt-matcher-runtime-sequence.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-runtime-sequence.md)
-- [docs/receipt-matcher-system-diagram.md](c:/Projects/zerospoils/etc/zerospoils_github_issues_pack/docs/receipt-matcher-system-diagram.md)
+- [docs/receipt-matcher-runtime-sequence.md](docs/receipt-matcher-runtime-sequence.md)
+- [docs/receipt-matcher-system-diagram.md](docs/receipt-matcher-system-diagram.md)
 
 ## Scope
 
