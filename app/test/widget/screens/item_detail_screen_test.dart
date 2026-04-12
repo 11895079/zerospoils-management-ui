@@ -479,6 +479,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('item_detail_brand')), findsOneWidget);
+      expect(find.byKey(const Key('item_detail_brand_value')), findsOneWidget);
+      expect(find.text('Organic Valley'), findsWidgets);
     });
 
     testWidgets('hides brand row when item has no brand', (
@@ -499,6 +501,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('item_detail_brand')), findsNothing);
+      expect(find.byKey(const Key('item_detail_brand_value')), findsOneWidget);
+      final brandValueText = tester.widget<Text>(
+        find.byKey(const Key('item_detail_brand_value')),
+      );
+      expect(brandValueText.data, '—');
     });
   });
 }

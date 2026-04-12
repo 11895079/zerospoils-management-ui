@@ -1427,7 +1427,6 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             }
             _selectedExpiryDate = item.expiryDate;
             _existingCreatedAt = item.createdAt;
-            _brandController.text = item.brand ?? '';
             _isLoading = false;
           });
         } else {

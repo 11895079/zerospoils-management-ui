@@ -225,20 +225,6 @@ class ItemCard extends StatelessWidget {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      if (item.brand?.isNotEmpty ?? false) ...[
-                                        Text(
-                                          ' · ',
-                                          style: textTheme.bodySmall?.copyWith(
-                                            color: secondaryTextColor,
-                                          ),
-                                        ),
-                                        Text(
-                                          item.brand!,
-                                          style: textTheme.bodySmall?.copyWith(
-                                            color: secondaryTextColor,
-                                          ),
-                                        ),
-                                      ],
                                     ],
                                   ),
                                 ],
