@@ -585,7 +585,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                         final photo = _photos[index];
                         final thumbnailFuture = _thumbnailFutures.putIfAbsent(
                           photo.path,
-                          photo.readAsBytes,
+                          () => _encodeThumbnail(photo),
                         );
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(
