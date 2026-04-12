@@ -35,7 +35,7 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 - Confirmed purchase item lines are ranked by their on-screen position (top-to-bottom, left-to-right) and presented to the user in the review step in reading order
 - Users can still promote an excluded line back to a purchase item and demote a purchase item to excluded in the review step
 - The classification pipeline runs fully on-device without any network dependency
-- The feature is gated behind the existing `receipt_batch_capture` feature flag and is off by default on web (web shows "not available on web yet" in the batch capture flow)
+- The feature is gated behind the existing `batch_photo_capture` feature flag and is off by default on web (web shows "not available on web yet" in the batch capture flow)
 - Telemetry captures the number of lines detected, lines kept, lines excluded, and any manual user overrides in the review step
 
 ---
@@ -122,4 +122,4 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 - M3/198 shopping batch receipt capture (receipt photo capture flow and `ShoppingBatch` entity)
 - M3/195 package OCR multi-field extraction (on-device ML Kit / Vision text recognition setup)
 - M3/196 live expiry OCR (live camera preview stream with bounding-box drawing patterns)
-- M3/130 feature flags framework (`receipt_batch_capture` flag)
+- M3/130 feature flags framework (`batch_photo_capture` flag)

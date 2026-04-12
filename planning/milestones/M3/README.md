@@ -37,6 +37,8 @@
 
 **Last Updated:** April 11, 2026 — **Progress:** 9/22 issues complete (41%)
 
+Progress denominator note: the denominator (`22`) is the full planned-issue count listed in the `Issues` line above and reflected in the status table below.
+
 ### Issues & Completion
 
 | Issue | Title | Status | PR | Notes |

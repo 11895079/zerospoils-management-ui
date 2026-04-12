@@ -40,7 +40,7 @@ Integrate Firebase App Distribution into the CI/CD pipeline for beta build deliv
 - [ ] Firebase App Distribution is configured in the Firebase Console with at least one tester group (`beta-internal`)
 - [ ] CI workflow (`build-and-distribute.yml` or equivalent) uploads APK/AAB and IPA to App Distribution on tag push matching `v*-beta.*`
 - [ ] Release notes are attached automatically to each distributed build (extracted from `CHANGELOG.md` or `git log`)
-- [ ] `firebase_app_distribution` Flutter package (or Tester SDK native integration) added to `pubspec.yaml` under `dev_dependencies` or behind a build-flavour condition
+- [ ] `firebase_app_distribution` Flutter package (or Tester SDK native integration) added as a regular runtime dependency; beta/debug entrypoints initialize it while release entrypoints avoid referencing it
 - [ ] Tester SDK compiled into `debug` and `beta` flavours only; production builds verified to exclude Tester SDK code paths
 - [ ] In-app update check runs on app launch for beta builds; shows update dialog when a newer build is available
 - [ ] Shake-to-feedback (or debug-drawer feedback button) triggers Firebase App Distribution feedback capture UI on beta builds

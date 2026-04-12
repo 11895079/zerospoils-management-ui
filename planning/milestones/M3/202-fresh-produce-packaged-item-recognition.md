@@ -64,15 +64,15 @@ Extend the on-device package recognition pipeline to correctly identify and extr
 ## Implementation notes
 
 - Fresh produce sticker detection heuristic (no network required):
-  - Heuristic A (primary trigger — either condition independently activates fresh-produce mode): price-per-weight pattern present (e.g., `$X.XX/kg`, `X.XX $/KG`, `$X.XX/LB`) AND no UPC barcode detected in the same frame
-  - Heuristic B (confidence booster — used when Heuristic A alone scores below threshold): product description keyword match (fish/meat/seafood/poultry keyword list) AND sticker layout (single-column dense text); Heuristic B lowers the minimum extracted-field threshold from 2 to 1 before triggering fresh-produce mode, so a single high-confidence field (e.g., product name + weight/kg pattern) is enough to proceed; it does not independently trigger fresh-produce mode without at least one price-per-weight or product-keyword signal
+  - Heuristic A (primary trigger): price-per-weight pattern present (e.g., `$X.XX/kg`, `X.XX $/KG`, `$X.XX/LB`) AND no UPC barcode detected in the same frame
+  - Heuristic B (confidence booster — used when Heuristic A alone scores below threshold): product description keyword match (fish/meat/seafood/poultry keyword list) AND sticker layout (single-column dense text); Heuristic B increases confidence and helps ranking/review hints, but it does not override the minimum extracted-field threshold and does not independently trigger fresh-produce mode
 - Field extraction patterns for sticker format:
   - Product description: largest or topmost text block (before weight/price lines); strip store name prefix if present
   - Net weight: `\d+\.?\d*\s*(KG|G|LB|LBS|OZ)` (case-insensitive)
   - Price per kg: `\$\d+\.\d{2}\s*/\s*(KG|LB|100G)` or equivalent
   - Total price: last price-pattern match near the bottom of the sticker; or field labelled `TOTAL` / `PRICE`
   - Pack date / best-before: `(PACKED ON|PACK DATE|BEST BEFORE|BB|USE BY|BEST BY)\s*[:\-]?\s*\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}` — re-use M3/196 date parsing logic
-- Category keyword lists (maintain in a dedicated JSON configuration file — e.g., `assets/config/fresh_produce_categories.json` — so additions and regional variations can be updated without a code change or new release; load at app startup and cache in memory):
+- Category keyword lists (maintain in a dedicated JSON configuration file — e.g., `assets/config/fresh_produce_categories.json` — so additions and regional variations can be updated without code changes; for no-release updates, distribute refreshed keyword data through downloadable update packs in M3/206; load at app startup and cache in memory):
   - `fish_seafood`: salmon, halibut, tilapia, cod, tuna, shrimp, lobster, crab, scallop, trout, bass, snapper, mahi, swordfish, squid, clam, oyster, mussel
   - `meat_poultry`: beef, chicken, pork, lamb, turkey, bison, veal, duck, goose, venison, steak, roast, ribs, chop, tenderloin, ground, mince, sausage, bacon, ham
   - `deli_prepared`: prosciutto, salami, pepperoni, pastrami, mortadella, bologna, liverwurst
