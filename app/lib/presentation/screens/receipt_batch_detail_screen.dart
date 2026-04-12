@@ -63,7 +63,12 @@ class _ReceiptBatchDetailScreenState
           final consumed = _currency(stats.consumedValue);
           final wasted = _currency(stats.wastedValue);
           final remaining = _currency(stats.remainingValue);
-          final date = DateFormat('MMM d, yyyy').format(batch.createdAt);
+          final date = DateFormat(
+            'MMM d, yyyy',
+          ).format(batch.purchasedAt ?? batch.createdAt);
+          final attachmentSummary = batch.goodsImagePaths.isEmpty
+              ? '${batch.receiptImagePaths.length} receipts'
+              : '${batch.receiptImagePaths.length} receipts · ${batch.goodsImagePaths.length} goods photos';
 
           return ListView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -80,7 +85,9 @@ class _ReceiptBatchDetailScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$date · ${batch.receiptImagePaths.length} receipts',
+                      batch.storeName == null || batch.storeName!.isEmpty
+                          ? '$date · $attachmentSummary'
+                          : '${batch.storeName} · $date · $attachmentSummary',
                       style: AppTextStyles.body.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

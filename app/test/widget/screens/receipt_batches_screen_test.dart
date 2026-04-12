@@ -116,4 +116,40 @@ void main() {
     );
     expect(decoration.color, theme.cardColor);
   });
+
+  testWidgets('Receipt batches screen shows goods photo count when present', (
+    WidgetTester tester,
+  ) async {
+    final batches = [
+      ReceiptBatch(
+        id: 'batch-1',
+        createdAt: DateTime(2026, 2, 9),
+        purchasedAt: DateTime(2026, 4, 10),
+        storeName: 'Costco',
+        totalAmount: 126.40,
+        source: ReceiptBatchSource.shoppingList,
+        items: const [],
+        receiptImagePaths: const ['receipt-1.jpg'],
+        goodsImagePaths: const ['goods-1.jpg', 'goods-2.jpg'],
+      ),
+    ];
+
+    await pumpReceiptBatchesScreen(tester, batches: batches);
+
+    final titleFinder = find.byKey(
+      const Key('receipt_batch_card_title_batch-1'),
+    );
+    final summaryFinder = find.byKey(
+      const Key('receipt_batch_card_summary_batch-1'),
+    );
+
+    expect(titleFinder, findsOneWidget);
+    expect(summaryFinder, findsOneWidget);
+
+    final titleText = tester.widget<Text>(titleFinder);
+    final summaryText = tester.widget<Text>(summaryFinder);
+    expect(titleText.data, contains('Costco'));
+    expect(summaryText.data, contains('2 goods photos'));
+    expect(summaryText.data, contains('1 receipts'));
+  });
 }

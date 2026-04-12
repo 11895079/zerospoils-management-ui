@@ -680,4 +680,52 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     }
   });
+
+  testWidgets(
+    'receipt batch button is shown when receipt batch capture flag is enabled',
+    (tester) async {
+      mockRepository.items = [buildTestItem()];
+
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptBatchCapture,
+          ).overrideWith((ref) async => true),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => false),
+        ],
+      );
+
+      expect(
+        find.byKey(const Key('inventory_receipt_batch_button')),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
+    'receipt batch button is hidden when receipt batch capture flag is disabled even if batch photo capture is enabled',
+    (tester) async {
+      mockRepository.items = [buildTestItem()];
+
+      await pumpInventoryScreen(
+        tester,
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptBatchCapture,
+          ).overrideWith((ref) async => false),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => true),
+        ],
+      );
+
+      expect(
+        find.byKey(const Key('inventory_receipt_batch_button')),
+        findsNothing,
+      );
+    },
+  );
 }

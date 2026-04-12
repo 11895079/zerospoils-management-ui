@@ -10,7 +10,7 @@ ZeroSpoils MVP is a **cross-platform mobile app** (iOS & Android) that helps hou
 
 **Target Users:** Busy parents, young professionals, eco-conscious households in Canada  
 **Geographic Focus:** Canada (high food prices, smartphone penetration, sustainability awareness)  
-**Business Model:** Freemium (free MVP core, Pro tier adds receipt OCR, household sync, advanced analytics)
+**Business Model:** Freemium (free MVP core, with feature-flagged receipt capture/OCR paths; Pro tier adds household sync, advanced analytics, and higher-cost vision automation)
 
 ---
 
@@ -94,14 +94,14 @@ ZeroSpoils MVP is a **cross-platform mobile app** (iOS & Android) that helps hou
 ## Non-Goals (Explicitly Out of Scope)
 
 ### Deferred to Pro Tier
-- **Receipt OCR** – Extracting line items, prices, or expiry data directly from receipt images remains deferred to the Pro roadmap
+- **Receipt OCR** – Receipt extraction can be rolled out behind feature flags in the free tier; advanced/cloud-assisted receipt intelligence remains a later roadmap item
 - **Household Sync / Multi-User Accounts** – Family account support and real-time sync (M3/M4 roadmap)
 - **Advanced Analytics Dashboard** – Charts, trends, money saved calculators (M5 roadmap)
 - **Meal Planning** – Recipe suggestions and meal plan scheduling (M6 roadmap)
 
 ### Deferred to Future / Out of Scope Long-Term
 - **Standalone Barcode-Only Inventory Flow** – Not the core differentiation; the limited M3 packaged-item fast-add path may use local barcode lookup paired with expiry OCR, but cloud catalog sync remains future work
-- **Computer-Vision Batch Photo Capture** – Tabletop/fridge multi-item photo recognition remains future or Pro work; free-tier M3 may still include shopping batch capture with receipt-photo attachment and manual item linking
+- **Computer-Vision Batch Photo Capture** – Tabletop/fridge multi-item photo recognition remains future or Pro work; this is distinct from free-tier shopping batch capture with receipt-photo attachment and manual item linking
 - **IoT Integrations** – NFC tags, smart shelves, Bluetooth scales (M7 roadmap)
 - **Web App** – Initial launch is mobile-only; web may follow post-MVP
 - **Internationalization** – MVP supports English only; French, Spanish, etc. deferred

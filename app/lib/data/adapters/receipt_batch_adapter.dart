@@ -57,16 +57,48 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   ReceiptBatch read(BinaryReader reader) {
     final id = reader.readString();
     final createdAt = reader.read() as DateTime;
+    final next = reader.read();
+
+    // Backward compatibility for legacy records:
+    // legacy layout wrote source index immediately after createdAt.
+    if (next is int && next >= 0 && next < ReceiptBatchSource.values.length) {
+      final sourceIndex = next;
+      final items = reader.readList().cast<ReceiptBatchItem>();
+      final receiptImagePaths = reader.readList().cast<String>();
+
+      return ReceiptBatch(
+        id: id,
+        createdAt: createdAt,
+        source: ReceiptBatchSource.values[sourceIndex],
+        items: items,
+        receiptImagePaths: receiptImagePaths,
+      );
+    }
+
+    final hasPurchasedAt = next == true;
+    final purchasedAt = hasPurchasedAt ? reader.read() as DateTime : null;
+
+    final hasStoreName = reader.readBool();
+    final storeName = hasStoreName ? reader.readString() : null;
+
+    final hasTotalAmount = reader.readBool();
+    final totalAmount = hasTotalAmount ? reader.readDouble() : null;
+
     final sourceIndex = reader.readByte();
     final items = reader.readList().cast<ReceiptBatchItem>();
     final receiptImagePaths = reader.readList().cast<String>();
+    final goodsImagePaths = reader.readList().cast<String>();
 
     return ReceiptBatch(
       id: id,
       createdAt: createdAt,
+      purchasedAt: purchasedAt,
+      storeName: storeName,
+      totalAmount: totalAmount,
       source: ReceiptBatchSource.values[sourceIndex],
       items: items,
       receiptImagePaths: receiptImagePaths,
+      goodsImagePaths: goodsImagePaths,
     );
   }
 
@@ -74,8 +106,21 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
   void write(BinaryWriter writer, ReceiptBatch obj) {
     writer.writeString(obj.id);
     writer.write(obj.createdAt);
+    writer.writeBool(obj.purchasedAt != null);
+    if (obj.purchasedAt != null) {
+      writer.write(obj.purchasedAt);
+    }
+    writer.writeBool(obj.storeName != null && obj.storeName!.isNotEmpty);
+    if (obj.storeName != null && obj.storeName!.isNotEmpty) {
+      writer.writeString(obj.storeName!);
+    }
+    writer.writeBool(obj.totalAmount != null);
+    if (obj.totalAmount != null) {
+      writer.writeDouble(obj.totalAmount!);
+    }
     writer.writeByte(obj.source.index);
     writer.writeList(obj.items);
     writer.writeList(obj.receiptImagePaths);
+    writer.writeList(obj.goodsImagePaths);
   }
 }

@@ -58,37 +58,64 @@ class ReceiptBatchItem extends Equatable {
 class ReceiptBatch extends Equatable {
   final String id;
   final DateTime createdAt;
+  final DateTime? purchasedAt;
+  final String? storeName;
+  final double? totalAmount;
   final ReceiptBatchSource source;
   final List<ReceiptBatchItem> items;
   final List<String> receiptImagePaths;
+  final List<String> goodsImagePaths;
 
   const ReceiptBatch({
     required this.id,
     required this.createdAt,
+    this.purchasedAt,
+    this.storeName,
+    this.totalAmount,
     required this.source,
     required this.items,
     this.receiptImagePaths = const [],
+    this.goodsImagePaths = const [],
   });
 
   double get totalSpend =>
+      totalAmount ??
       items.fold(0, (sum, item) => sum + (item.price * item.quantity));
 
   ReceiptBatch copyWith({
     String? id,
     DateTime? createdAt,
+    DateTime? purchasedAt,
+    String? storeName,
+    double? totalAmount,
     ReceiptBatchSource? source,
     List<ReceiptBatchItem>? items,
     List<String>? receiptImagePaths,
+    List<String>? goodsImagePaths,
   }) {
     return ReceiptBatch(
       id: id ?? this.id,
       createdAt: createdAt ?? this.createdAt,
+      purchasedAt: purchasedAt ?? this.purchasedAt,
+      storeName: storeName ?? this.storeName,
+      totalAmount: totalAmount ?? this.totalAmount,
       source: source ?? this.source,
       items: items ?? this.items,
       receiptImagePaths: receiptImagePaths ?? this.receiptImagePaths,
+      goodsImagePaths: goodsImagePaths ?? this.goodsImagePaths,
     );
   }
 
   @override
-  List<Object?> get props => [id, createdAt, source, items, receiptImagePaths];
+  List<Object?> get props => [
+    id,
+    createdAt,
+    purchasedAt,
+    storeName,
+    totalAmount,
+    source,
+    items,
+    receiptImagePaths,
+    goodsImagePaths,
+  ];
 }
