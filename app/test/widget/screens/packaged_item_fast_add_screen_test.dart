@@ -217,4 +217,58 @@ void main() {
       );
     });
   });
+
+  group('PackagedItemFastAddScreen — package label extraction', () {
+    testWidgets(
+      'extracting package label text prefills name and locks expiry',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrapWithApp(const PackagedItemFastAddScreen()),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_label_button')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key('fast_add_package_label_text_field')),
+          'ATLANTIC SALMON FILLET\n'
+          '0.742 KG @ 24.99/KG\n'
+          'TOTAL 18.54\n'
+          'BEST BEFORE 04/24/2026',
+        );
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_extract_button')),
+        );
+        await tester.pumpAndSettle();
+
+        final nameField = tester.widget<TextField>(
+          find.byKey(const Key('fast_add_package_name_field')),
+        );
+        expect(nameField.controller?.text, 'Atlantic Salmon Fillet');
+        expect(
+          find.byKey(const Key('fast_add_package_extracted_summary')),
+          findsOneWidget,
+        );
+
+        final continueButton = find.byKey(
+          const Key('fast_add_package_label_continue'),
+        );
+        await tester.ensureVisible(continueButton);
+        await tester.tap(continueButton);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('fast_add_expiry_locked_card')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('fast_add_locked_expiry_label')),
+          findsOneWidget,
+        );
+      },
+    );
+  });
 }

@@ -13,6 +13,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/utils/expiry_date_parser.dart';
+import '../../domain/utils/fresh_produce_ocr_parser.dart';
 import '../di/repository_providers.dart';
 
 /// Result returned when the fast-add flow completes or is cancelled.
@@ -22,6 +23,9 @@ class PackagedItemFastAddResult {
     this.category,
     this.expiryDate,
     this.rawBarcode,
+    this.purchasePrice,
+    this.packageWeightValue,
+    this.packageWeightUnit,
     this.failure,
   });
 
@@ -30,11 +34,17 @@ class PackagedItemFastAddResult {
     required ItemCategory category,
     DateTime? expiryDate,
     String? rawBarcode,
+    double? purchasePrice,
+    double? packageWeightValue,
+    Unit? packageWeightUnit,
   }) : this._(
          name: name,
          category: category,
          expiryDate: expiryDate,
          rawBarcode: rawBarcode,
+         purchasePrice: purchasePrice,
+         packageWeightValue: packageWeightValue,
+         packageWeightUnit: packageWeightUnit,
        );
 
   const PackagedItemFastAddResult.cancelled()
@@ -44,6 +54,9 @@ class PackagedItemFastAddResult {
   final ItemCategory? category;
   final DateTime? expiryDate;
   final String? rawBarcode;
+  final double? purchasePrice;
+  final double? packageWeightValue;
+  final Unit? packageWeightUnit;
   final PackagedItemFastAddFailure? failure;
 
   bool get isSuccess => name != null;
@@ -90,6 +103,9 @@ class PackagedItemFastAddScreen extends ConsumerStatefulWidget {
 
 class _PackagedItemFastAddScreenState
     extends ConsumerState<PackagedItemFastAddScreen> {
+  static const FreshProduceOcrParser _freshProduceParser =
+      FreshProduceOcrParser();
+
   _FastAddStage _stage = _FastAddStage.barcodeScanning;
 
   // Barcode state
@@ -102,7 +118,11 @@ class _PackagedItemFastAddScreenState
 
   // Confirmation form state
   late TextEditingController _nameController;
+  late TextEditingController _packageLabelTextController;
   ItemCategory _selectedCategory = ItemCategory.other;
+  double? _detectedPurchasePrice;
+  double? _detectedWeightValue;
+  Unit? _detectedWeightUnit;
 
   MobileScannerController? _scannerController;
 
@@ -110,6 +130,7 @@ class _PackagedItemFastAddScreenState
   void initState() {
     super.initState();
     _nameController = TextEditingController();
+    _packageLabelTextController = TextEditingController();
     if (_isMobile) {
       _scannerController = MobileScannerController(
         detectionSpeed: DetectionSpeed.noDuplicates,
@@ -129,6 +150,7 @@ class _PackagedItemFastAddScreenState
   void dispose() {
     _scannerController?.dispose();
     _nameController.dispose();
+    _packageLabelTextController.dispose();
     super.dispose();
   }
 
@@ -187,11 +209,57 @@ class _PackagedItemFastAddScreenState
   }
 
   void _skipToExpiry() {
-    setState(() => _stage = _FastAddStage.expiryCapture);
+    setState(() {
+      _stage = _lockedExpiry == null
+          ? _FastAddStage.expiryCapture
+          : _FastAddStage.expiryLocked;
+    });
   }
 
   void _usePackageLabelScan() {
     setState(() => _stage = _FastAddStage.packageLabelScan);
+  }
+
+  void _extractPackageLabelHints() {
+    final rawText = _packageLabelTextController.text.trim();
+    if (rawText.isEmpty) {
+      _showSnack('Add package label text first, then extract hints.');
+      return;
+    }
+
+    final parsed = _freshProduceParser.parseLabel(
+      rawText,
+      hasBarcodeDetected: _rawBarcode != null,
+    );
+
+    if (parsed.productDescription != null) {
+      _nameController.text = parsed.productDescription!;
+    }
+
+    setState(() {
+      _detectedPurchasePrice = parsed.totalPrice;
+      _detectedWeightValue = parsed.netWeightValue;
+      _detectedWeightUnit = parsed.netWeightUnit;
+
+      if (parsed.classification != FreshProduceClassification.other) {
+        _selectedCategory = parsed.suggestedCategory;
+      }
+
+      if (parsed.bestBeforeDate != null) {
+        _lockedExpiry = ExpiryDateParseResult(
+          date: parsed.bestBeforeDate!,
+          format: 'PACKAGE_LABEL',
+        );
+      }
+    });
+
+    if (parsed.shouldFallbackToGenericOcr) {
+      _showSnack(
+        'Could only extract partial label hints. Review before saving.',
+      );
+    } else {
+      _showSnack('Package label hints applied. Review and continue.');
+    }
   }
 
   void _retryBarcodeScanning() {
@@ -263,6 +331,9 @@ class _PackagedItemFastAddScreenState
         category: _selectedCategory,
         expiryDate: _lockedExpiry?.date,
         rawBarcode: barcode,
+        purchasePrice: _detectedPurchasePrice,
+        packageWeightValue: _detectedWeightValue,
+        packageWeightUnit: _detectedWeightUnit,
       ),
     );
   }
@@ -591,72 +662,113 @@ class _PackagedItemFastAddScreenState
 
   Widget _buildPackageLabelStage(ThemeData theme) {
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            key: const Key('fast_add_package_label_card'),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              key: const Key('fast_add_package_label_card'),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.document_scanner_outlined, size: 20),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'Point the camera at the service-counter label to extract name, weight, and price hints.',
+                      style: AppTextStyles.body,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.document_scanner_outlined, size: 20),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    'Point the camera at the service-counter label to extract name, weight, and price hints.',
-                    style: AppTextStyles.body,
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Tap the fields below to correct any OCR hints before continuing.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const Key('fast_add_package_name_field'),
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'Product name',
+                hintText: 'e.g. Salmon Fillet',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const Key('fast_add_package_label_text_field'),
+              controller: _packageLabelTextController,
+              minLines: 3,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                labelText: 'Package label text (OCR)',
+                hintText: 'Paste or type captured label text here',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                key: const Key('fast_add_package_extract_button'),
+                onPressed: _extractPackageLabelHints,
+                icon: const Icon(Icons.auto_fix_high_outlined),
+                label: const Text('Extract Label Hints'),
+              ),
+            ),
+            if (_detectedWeightValue != null || _detectedPurchasePrice != null)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: Text(
+                  [
+                    if (_detectedWeightValue != null &&
+                        _detectedWeightUnit != null)
+                      'Weight: ${_detectedWeightValue!.toStringAsFixed(3)} ${_detectedWeightUnit!.displayName}',
+                    if (_detectedPurchasePrice != null)
+                      'Price: ${_detectedPurchasePrice!.toStringAsFixed(2)}',
+                  ].join(' • '),
+                  key: const Key('fast_add_package_extracted_summary'),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
-              ],
+              ),
+            const SizedBox(height: AppSpacing.md),
+            _buildCategoryDropdown(theme),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                key: const Key('fast_add_package_label_continue'),
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  _skipToExpiry();
+                },
+                icon: const Icon(Icons.event_outlined),
+                label: const Text('Continue to Expiry Scan'),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'Tap the fields below to correct any OCR hints before continuing.',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: theme.textTheme.bodySmall?.color,
+            const SizedBox(height: AppSpacing.sm),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: _retryBarcodeScanning,
+                child: const Text('Back to Barcode Scan'),
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextField(
-            key: const Key('fast_add_package_name_field'),
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Product name',
-              hintText: 'e.g. Salmon Fillet',
-              border: OutlineInputBorder(),
-            ),
-            textCapitalization: TextCapitalization.words,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildCategoryDropdown(theme),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              key: const Key('fast_add_package_label_continue'),
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-                _skipToExpiry();
-              },
-              icon: const Icon(Icons.event_outlined),
-              label: const Text('Continue to Expiry Scan'),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: _retryBarcodeScanning,
-              child: const Text('Back to Barcode Scan'),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
