@@ -495,6 +495,7 @@ void main() {
       final item = Item(
         id: 'item-1',
         name: 'Milk',
+        brand: 'Fairlife',
         category: ItemCategory.dairy,
         location: StorageLocation.fridge,
         quantity: 2,
@@ -519,9 +520,10 @@ void main() {
 
       // Verify CSV content
       final csv = await File(exportPath).readAsString();
-      expect(csv.contains('ID,Name,Category'), true);
+      expect(csv.contains('ID,Name,Brand,Category'), true);
       expect(csv.contains('item-1'), true);
       expect(csv.contains('Milk'), true);
+      expect(csv.contains('Fairlife'), true);
       expect(csv.contains('Dairy'), true);
       expect(csv.contains('2026-03-15'), true);
       expect(csv.contains('fridge'), true);
@@ -537,7 +539,7 @@ void main() {
       expect(result.metadata?.itemCount, 0);
 
       final csv = await File(exportPath).readAsString();
-      expect(csv.contains('ID,Name,Category'), true);
+      expect(csv.contains('ID,Name,Brand,Category'), true);
       // Should only have header, no data rows
       expect(csv.split('\n').length, 2); // Header + empty line
     });

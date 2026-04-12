@@ -14,6 +14,7 @@
 4. [How Data Flows](#how-data-flows)
 5. [Understanding the Code](#understanding-the-code)
 6. [Common Patterns](#common-patterns)
+7. [Feature Architecture Notes](#feature-architecture-notes)
 
 ---
 
@@ -40,6 +41,15 @@ ZeroSpoils uses **clean architecture** with clear separation of concerns. Think 
 - 🔄 **Maintainable**: Changes in one layer don't break others
 - 👥 **Scalable**: Easy to add features without tangling code
 - 📱 **Offline-first**: Data lives on device, can sync later
+
+## Feature Architecture Notes
+
+For focused feature-level architecture and diagrams, see:
+
+- [docs/shopping-batch-architecture.md](docs/shopping-batch-architecture.md)
+- [docs/receipt-matcher-architecture.md](docs/receipt-matcher-architecture.md)
+- [docs/receipt-matcher-runtime-sequence.md](docs/receipt-matcher-runtime-sequence.md)
+- [docs/receipt-matcher-system-diagram.md](docs/receipt-matcher-system-diagram.md)
 
 ---
 

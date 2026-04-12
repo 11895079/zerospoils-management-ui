@@ -1,6 +1,6 @@
 # Milestone M6 — Pro Tier Features
 
-**Objective:** Launch subscription-based Pro tier with household sync, receipt OCR, advanced analytics, and batch photo capture.
+**Objective:** Launch subscription-based Pro tier with household sync, advanced analytics, higher-cost receipt intelligence, and batch photo capture.
 
 **Backend Architecture:**
 - **Supabase:** Pro tier backend database (PostgreSQL for relational queries, auth, RLS, real-time sync)

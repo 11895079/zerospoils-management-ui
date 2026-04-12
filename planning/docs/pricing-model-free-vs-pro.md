@@ -53,7 +53,7 @@
 | **Multi-Device Sync** | Cloud backup + sync across iOS/Android/Web | ❌ | ✅ | M6: [Issue 470](../issues/470-pro-household-accounts-auth-shared-household-model.md) |
 | **Household Sharing** | Share inventory/shopping with family (role-based access) | ❌ | ✅ | M6: [Issue 470](../issues/470-pro-household-accounts-auth-shared-household-model.md) |
 | **Shopping Batch Capture** | Save store/date/total and attach one receipt photo, then link items to that shopping trip | ✅ | ✅ | M3: [Issue 198](../milestones/M3/198-shopping-batch-receipt-capture.md) |
-| **Receipt OCR (Batch/Single)** | Scan receipts to auto-extract items, prices, and expiry dates | ❌ | ✅ | M6: [Issue 430](../issues/430-pro-receipt-capture-ux-photo-import-with-consent-messaging.md) |
+| **Receipt OCR (Batch/Single)** | Scan receipts to auto-extract items, prices, and expiry dates | ✅ | ✅ | Feature-flagged rollout; advanced capture UX continues in M6: [Issue 430](../issues/430-pro-receipt-capture-ux-photo-import-with-consent-messaging.md) |
 | **Batch Photo Capture** | Take fridge photo, detect multiple items at once | ❌ | ✅ | M6: [Issue 430](../milestones/M6/430-batch-item-detection-poc.md) |
 | **Advanced Analytics** | Money saved trends, waste by category over time, environmental impact | ❌ | ✅ | M6: [Issue 490](../issues/490-pro-advanced-insights-dashboard-money-saved-items-saved-trends.md) |
 | **Recipe Suggestions (Basic)** | Local recipe suggestions using expiring items (bundled catalog) | ✅ | ✅ | M6: [POC 185](../milestones/M6/185-recipe-suggestions-poc.md) → M5: [Full 185](../milestones/M5/185-recipe-suggestions-prioritize-expiring-items.md) |

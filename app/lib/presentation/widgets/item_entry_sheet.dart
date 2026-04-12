@@ -18,6 +18,7 @@ import 'quantity_toggle.dart';
 class ItemEntrySeed {
   const ItemEntrySeed({
     required this.name,
+    this.brand,
     this.category,
     this.quantity,
     this.unit,
@@ -27,6 +28,7 @@ class ItemEntrySeed {
   });
 
   final String name;
+  final String? brand;
   final ItemCategory? category;
   final int? quantity;
   final Unit? unit;
@@ -38,6 +40,7 @@ class ItemEntrySeed {
 class ItemEntryResult {
   const ItemEntryResult({
     required this.name,
+    required this.brand,
     required this.category,
     required this.location,
     required this.quantity,
@@ -53,6 +56,7 @@ class ItemEntryResult {
   const ItemEntryResult.skipped()
     : skipped = true,
       name = '',
+      brand = null,
       category = ItemCategory.other,
       location = StorageLocation.fridge,
       quantity = 1,
@@ -66,6 +70,7 @@ class ItemEntryResult {
 
   final bool skipped;
   final String name;
+  final String? brand;
   final ItemCategory category;
   final StorageLocation location;
   final int quantity;
@@ -102,6 +107,7 @@ class ItemEntrySheet extends ConsumerStatefulWidget {
 
 class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
   late final TextEditingController _nameController;
+  late final TextEditingController _brandController;
   late final TextEditingController _priceController;
   ItemCategory _category = ItemCategory.produce;
   ItemType _type = ItemType.raw;
@@ -112,6 +118,7 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
   DateTime? _expiryDate;
   bool _applyToAll = false;
   bool _ocrInProgress = false;
+  List<String> _recentBrands = const [];
 
   bool get _supportsExpiryOcrPlatform =>
       !kIsWeb &&
@@ -122,6 +129,7 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.seed?.name ?? '');
+    _brandController = TextEditingController(text: widget.seed?.brand ?? '');
     _priceController = TextEditingController(
       text: widget.seed?.purchasePrice == null
           ? ''
@@ -132,13 +140,174 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
     _unit = widget.seed?.unit ?? Unit.count;
     _type = widget.seed?.type ?? ItemType.raw;
     _preparedDate = widget.seed?.preparedDate;
+    _loadRecentBrands();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _brandController.dispose();
     _priceController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadRecentBrands() async {
+    try {
+      final repository = ref.read(itemRepositoryProvider);
+      await repository.init();
+      final items = await repository.getAllItems();
+      final sortedItems = [...items]
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      final seenBrands = <String>{};
+      final recentBrands = <String>[];
+
+      for (final item in sortedItems) {
+        final brand = item.brand?.trim();
+        if (brand == null || brand.isEmpty) {
+          continue;
+        }
+
+        final normalizedBrand = brand.toLowerCase();
+        if (seenBrands.add(normalizedBrand)) {
+          recentBrands.add(brand);
+        }
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _recentBrands = recentBrands;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _recentBrands = const [];
+      });
+    }
+  }
+
+  List<String> _recentBrandSuggestions(String query) {
+    final normalizedQuery = query.trim().toLowerCase();
+    final brands = normalizedQuery.isEmpty
+        ? _recentBrands
+        : _recentBrands
+              .where((brand) => brand.toLowerCase().contains(normalizedQuery))
+              .toList();
+
+    return brands.take(6).toList();
+  }
+
+  Future<void> _openBrandPicker() async {
+    final searchController = TextEditingController(text: _brandController.text);
+    var query = _brandController.text;
+
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setSheetState) {
+              final theme = Theme.of(context);
+              final trimmedQuery = query.trim();
+              final options = _recentBrandSuggestions(query);
+              final hasExactMatch =
+                  trimmedQuery.isNotEmpty &&
+                  options.any(
+                    (brand) =>
+                        brand.toLowerCase() == trimmedQuery.toLowerCase(),
+                  );
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: AppSpacing.lg,
+                  right: AppSpacing.lg,
+                  top: AppSpacing.md,
+                  bottom:
+                      MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Select brand', style: AppTextStyles.h4),
+                      const SizedBox(height: AppSpacing.sm),
+                      TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search brands',
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setSheetState(() => query = value);
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            if (trimmedQuery.isNotEmpty && !hasExactMatch)
+                              ListTile(
+                                leading: const Icon(Icons.add),
+                                title: Text('Use "$trimmedQuery"'),
+                                onTap: () =>
+                                    Navigator.pop(context, trimmedQuery),
+                              ),
+                            if (options.isNotEmpty)
+                              ...options.map(
+                                (brand) => ListTile(
+                                  title: Text(brand),
+                                  onTap: () => Navigator.pop(context, brand),
+                                ),
+                              ),
+                            if (options.isEmpty && trimmedQuery.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: AppSpacing.lg,
+                                ),
+                                child: Text(
+                                  'No recent brands yet. Type one manually.',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodySmall?.color,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+
+      if (selected == null) {
+        return;
+      }
+
+      setState(() {
+        _brandController.text = selected;
+      });
+    } finally {
+      searchController.dispose();
+    }
+  }
+
+  String? _normalizedBrand() {
+    final brand = _brandController.text.trim();
+    return brand.isEmpty ? null : brand;
   }
 
   bool get _canSave {
@@ -308,6 +477,9 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
       data: (enabled) => enabled && _supportsExpiryOcrPlatform,
       orElse: () => false,
     );
+    final recentBrandSuggestions = _recentBrandSuggestions(
+      _brandController.text,
+    );
     return Padding(
       key: const Key('item_entry_sheet'),
       padding: EdgeInsets.only(
@@ -339,6 +511,45 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
               decoration: const InputDecoration(labelText: 'Item name'),
               textInputAction: TextInputAction.next,
             ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              key: const Key('item_entry_brand_field'),
+              controller: _brandController,
+              decoration: InputDecoration(
+                labelText: 'Brand (optional)',
+                suffixIcon: IconButton(
+                  key: const Key('item_entry_brand_picker_button'),
+                  tooltip: 'Search recent brands',
+                  onPressed: _openBrandPicker,
+                  icon: const Icon(Icons.arrow_drop_down),
+                ),
+              ),
+              textInputAction: TextInputAction.next,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (recentBrandSuggestions.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  for (
+                    var index = 0;
+                    index < recentBrandSuggestions.length;
+                    index++
+                  )
+                    ActionChip(
+                      key: Key('item_entry_brand_suggestion_$index'),
+                      label: Text(recentBrandSuggestions[index]),
+                      onPressed: () {
+                        setState(() {
+                          _brandController.text = recentBrandSuggestions[index];
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             DropdownButtonFormField<ItemCategory>(
               key: const Key('item_entry_category'),
@@ -628,6 +839,7 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
                               Navigator.of(context).pop(
                                 ItemEntryResult(
                                   name: _nameController.text.trim(),
+                                  brand: _normalizedBrand(),
                                   category: _category,
                                   location: _location,
                                   quantity: _quantity,
@@ -663,6 +875,7 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
                             Navigator.of(context).pop(
                               ItemEntryResult(
                                 name: _nameController.text.trim(),
+                                brand: _normalizedBrand(),
                                 category: _category,
                                 location: _location,
                                 quantity: _quantity,

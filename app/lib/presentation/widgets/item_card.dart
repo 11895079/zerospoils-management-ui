@@ -202,6 +202,20 @@ class ItemCard extends StatelessWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 2),
+                                  if (item.brand?.trim().isNotEmpty ==
+                                      true) ...[
+                                    Text(
+                                      key: Key('item_card_brand_${item.id}'),
+                                      item.brand!.trim(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textTheme.bodySmall?.copyWith(
+                                        color: secondaryTextColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                  ],
                                   Row(
                                     children: [
                                       Text(

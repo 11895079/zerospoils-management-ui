@@ -26,11 +26,17 @@ abstract class FeatureFlagKey {
   /// Cloud analytics export: send event data to backend
   static const FeatureFlagKey cloudAnalyticsExport = _CloudAnalyticsExport();
 
+  /// Shopping batch capture: store trip metadata and optional receipt photo.
+  static const FeatureFlagKey receiptBatchCapture = _ReceiptBatchCapture();
+
   /// Receipt OCR: extract items from receipt photos
   static const FeatureFlagKey receiptOcr = _ReceiptOcr();
 
   /// Batch photo capture: scan multiple receipts in one session
   static const FeatureFlagKey batchPhotoCapture = _BatchPhotoCapture();
+
+  /// Fresh item CV: identify loose produce, meat, and prepared foods
+  static const FeatureFlagKey freshItemCv = _FreshItemCv();
 
   /// Household sync: collaborate with household members
   static const FeatureFlagKey householdSync = _HouseholdSync();
@@ -45,8 +51,10 @@ abstract class FeatureFlagKey {
   static List<FeatureFlagKey> get all => [
     cloudSync,
     cloudAnalyticsExport,
+    receiptBatchCapture,
     receiptOcr,
     batchPhotoCapture,
+    freshItemCv,
     householdSync,
     iotHooks,
     expiryDateOcr,
@@ -75,6 +83,18 @@ class _CloudAnalyticsExport extends FeatureFlagKey {
       );
 }
 
+class _ReceiptBatchCapture extends FeatureFlagKey {
+  const _ReceiptBatchCapture()
+    : super(
+        key: 'receipt_batch_capture',
+        description:
+            'Save shopping batches with metadata and optional receipt photos',
+        defaultValue: true,
+        targetMilestone: 'M3',
+        costNotes: 'Local-only storage; no network cost for MVP',
+      );
+}
+
 class _ReceiptOcr extends FeatureFlagKey {
   const _ReceiptOcr()
     : super(
@@ -94,6 +114,18 @@ class _BatchPhotoCapture extends FeatureFlagKey {
         defaultValue: false,
         targetMilestone: 'M5+',
         costNotes: 'Depends on receipt_ocr; scales with volume',
+      );
+}
+
+class _FreshItemCv extends FeatureFlagKey {
+  const _FreshItemCv()
+    : super(
+        key: 'fresh_item_cv',
+        description:
+            'Identify loose produce, meat, and prepared foods with on-device CV',
+        defaultValue: true,
+        targetMilestone: 'M4',
+        costNotes: 'On-device ML Kit image labeling; no network cost',
       );
 }
 

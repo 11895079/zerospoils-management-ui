@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
+import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/presentation/screens/receipt_batch_capture_screen.dart';
 import 'package:zerospoils/presentation/screens/receipt_batch_review_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/item_entry_sheet.dart';
 
-Widget buildDarkHarness(Widget child) {
+Widget buildDarkHarness(Widget child, {List<Override> overrides = const []}) {
   return ProviderScope(
+    overrides: overrides,
     child: MaterialApp(
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -25,6 +28,11 @@ void main() {
     await tester.pumpWidget(
       buildDarkHarness(
         const ReceiptBatchCaptureScreen(source: ReceiptBatchSource.inventory),
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => false),
+        ],
       ),
     );
     await tester.pumpAndSettle();
@@ -52,6 +60,9 @@ void main() {
           photoPaths: const ['receipt-1.jpg'],
           parsedItems: [ParsedReceiptItem(name: 'Milk', price: 4.99)],
           batchId: 'batch-1',
+          storeName: 'Costco',
+          purchasedAt: DateTime(2026, 4, 10),
+          totalAmount: 126.40,
         ),
       ),
     );
@@ -73,6 +84,10 @@ void main() {
       theme.cardTheme.color ?? theme.cardColor,
     );
     expect(editIcon.color, theme.colorScheme.onSurfaceVariant);
+    expect(
+      find.byKey(const Key('receipt_batch_review_metadata')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Item entry sheet uses dark theme secondary text', (

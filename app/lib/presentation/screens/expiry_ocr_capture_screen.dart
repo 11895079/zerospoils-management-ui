@@ -2,6 +2,7 @@ library;
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,8 @@ class ExpiryOcrCaptureScreen extends StatefulWidget {
 
 class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   static const int _maxPhotos = 5;
+  // Thumbnail dimension used when storing preview images; keeps memory low.
+  static const int _thumbnailDimension = 200;
   static const Map<DeviceOrientation, int> _orientations = {
     DeviceOrientation.portraitUp: 0,
     DeviceOrientation.landscapeLeft: 90,
@@ -357,6 +360,34 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
     }
   }
 
+  /// Decodes [photo] and scales it down so the longest edge fits within
+  /// [_thumbnailDimension] pixels before re-encoding as PNG. Storing only small
+  /// thumbnails instead of full-resolution bytes avoids multi-MB allocations per
+  /// captured frame.
+  ///
+  /// Throws if the image cannot be decoded or encoded, letting callers decide
+  /// how to handle failures (e.g. skip storing the thumbnail).
+  Future<Uint8List> _encodeThumbnail(XFile photo) async {
+    final fullBytes = await photo.readAsBytes();
+    final codec = await ui.instantiateImageCodec(
+      fullBytes,
+      targetWidth: _thumbnailDimension,
+    );
+    try {
+      final frame = await codec.getNextFrame();
+      final byteData = await frame.image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      frame.image.dispose();
+      if (byteData == null) {
+        throw StateError('Failed to encode thumbnail PNG');
+      }
+      return byteData.buffer.asUint8List();
+    } finally {
+      codec.dispose();
+    }
+  }
+
   Future<ExpiryDateOcrScanResult> _analyzeCapturedPhoto(String path) async {
     final textRecognizer = _textRecognizer;
     if (textRecognizer == null) {
@@ -488,6 +519,8 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildDetectionStatusCard(theme),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildPreview(theme),
                   const SizedBox(height: AppSpacing.md),
                   Row(
@@ -653,108 +686,101 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                 ),
               ),
             ),
-            Positioned(
-              top: AppSpacing.md,
-              left: AppSpacing.md,
-              right: AppSpacing.md,
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.65),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _liveDetection == null
-                          ? 'Point the camera at the expiry text'
-                          : 'Detected expiry: ${_liveDetection!.date.toLocal().toString().split(' ')[0]}',
-                      style: AppTextStyles.body.copyWith(color: Colors.white),
-                    ),
-                    if (_liveInsights.productName != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Product: ${_liveInsights.productName}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                    if (_liveInsights.brandName != null ||
-                        _liveInsights.productType != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        [
-                          if (_liveInsights.brandName != null)
-                            'Brand: ${_liveInsights.brandName}',
-                          if (_liveInsights.productType != null)
-                            'Type: ${_liveInsights.productType}',
-                        ].join('  •  '),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                    if (_liveInsights.storageHint != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        _liveInsights.storageHint!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.caption.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                    if (_liveInsights.keywords.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Keywords: ${_liveInsights.keywords.take(3).join(', ')}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.caption.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _liveText == null || _liveText!.isEmpty
-                          ? 'The app will vibrate when it recognizes a valid expiry date.'
-                          : _liveText!,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: AppSpacing.md,
-              left: AppSpacing.md,
-              right: AppSpacing.md,
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.55),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                ),
-                child: Text(
-                  'Aim at the expiry label, then tilt the package to capture up to five angles. For embossed dates, use side lighting or the torch.',
-                  style: AppTextStyles.bodySmall.copyWith(color: Colors.white),
-                ),
-              ),
-            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDetectionStatusCard(ThemeData theme) {
+    final detected = _liveDetection != null;
+    final dateLabel = detected
+        ? _liveDetection!.date.toLocal().toString().split(' ')[0]
+        : null;
+
+    return Container(
+      key: const Key('expiry_ocr_status_card'),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: detected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outlineVariant,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            detected
+                ? Icons.event_available_outlined
+                : Icons.calendar_today_outlined,
+            size: 18,
+            color: detected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  detected
+                      ? 'Expiry detected: $dateLabel'
+                      : 'Point the camera at the expiry date',
+                  style: AppTextStyles.body,
+                ),
+                if (_liveInsights.productName != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    'Product: ${_liveInsights.productName}',
+                    key: const Key('expiry_ocr_product_hint'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+                if (_liveInsights.brandName != null ||
+                    _liveInsights.productType != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    [
+                      if (_liveInsights.brandName != null)
+                        'Brand: ${_liveInsights.brandName}',
+                      if (_liveInsights.productType != null)
+                        'Type: ${_liveInsights.productType}',
+                    ].join('  •  '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+                if (_liveText != null && _liveText!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    _liveText!,
+                    key: const Key('expiry_ocr_live_text'),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.caption.copyWith(
+                      color: theme.textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

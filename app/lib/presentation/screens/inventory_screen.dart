@@ -715,10 +715,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         actions: [
           Consumer(
             builder: (context, ref, child) {
-              final batchPhotoEnabled = ref.watch(
-                isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
+              final receiptBatchEnabled = ref.watch(
+                isFlagEnabledProvider(FeatureFlagKey.receiptBatchCapture),
               );
-              return batchPhotoEnabled.when(
+              return receiptBatchEnabled.when(
                 data: (enabled) => enabled
                     ? IconButton(
                         key: const Key('inventory_receipt_batch_button'),

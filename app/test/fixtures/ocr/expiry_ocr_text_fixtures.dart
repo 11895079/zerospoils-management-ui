@@ -61,4 +61,28 @@ YEAR/MONTH/DAY · ANNEE/MOIS/JOUR
 27APR22A
 Use this number in correspondence related to this product.
 ''';
+
+  static const String bestIfUsedByLabel = '''
+BEST IF USED BY
+APR 22 2026
+KEEP REFRIGERATED
+''';
+
+  static const String compactNumericExpiryStamp = '''
+EXPIRATION DATE
+20270422
+LOT 4C91
+''';
+
+  static const String yearlessUseOrFreezeBy = '''
+USE OR FREEZE BY
+APR 22
+KEEP FROZEN
+''';
+
+  static const String spanishBestBeforeMonthAbbrev = '''
+CONSUMIR PREFERENTEMENTE ANTES DE
+22 ABR 2026
+MANTENGASE REFRIGERADO
+''';
 }

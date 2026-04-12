@@ -96,8 +96,10 @@ void main() {
       test('flags return default values when no override set', () {
         expect(service.isEnabled(FeatureFlagKey.cloudSync), false);
         expect(service.isEnabled(FeatureFlagKey.cloudAnalyticsExport), false);
+        expect(service.isEnabled(FeatureFlagKey.receiptBatchCapture), true);
         expect(service.isEnabled(FeatureFlagKey.receiptOcr), false);
         expect(service.isEnabled(FeatureFlagKey.batchPhotoCapture), false);
+        expect(service.isEnabled(FeatureFlagKey.freshItemCv), true);
         expect(service.isEnabled(FeatureFlagKey.householdSync), false);
         expect(service.isEnabled(FeatureFlagKey.iotHooks), false);
         expect(service.isEnabled(FeatureFlagKey.expiryDateOcr), true);
@@ -184,9 +186,11 @@ void main() {
       test('returns all flags with their current values', () {
         final flags = service.getAllFlags();
 
-        expect(flags.keys.length, 7);
+        expect(flags.keys.length, 9);
         expect(flags[FeatureFlagKey.cloudSync], false);
+        expect(flags[FeatureFlagKey.receiptBatchCapture], true);
         expect(flags[FeatureFlagKey.receiptOcr], false);
+        expect(flags[FeatureFlagKey.freshItemCv], true);
         expect(flags[FeatureFlagKey.expiryDateOcr], true);
       });
 

@@ -106,19 +106,18 @@ git checkout -b feature/item-inventory
 
 ## Project Status & Hours Tracking
 
-**Last Updated:** January 24, 2026
+**Last Updated:** April 12, 2026
 
 ### Cumulative Human Hours Invested
 | Phase | Hours | Status | Notes |
 |-------|-------|--------|-------|
 | Planning & Documentation | ~40h | ✅ Complete | Repo setup, design tokens, data model, telemetry schemas, UX docs |
-| M1/090 Flutter Skeleton | ~20h | ✅ 95% Complete | App compiles, routing, DI, telemetry, tests pass; deep link integration test pending; Flutter CI workflow active on PRs |
-| M2/100 Hive Storage | ~14h | ✅ Complete | Repository CRUD, migrations, Hive codegen adapters (@HiveType/@HiveField), 34/34 tests passing |
-| M2/140 Add Item Screen | ~8h | ✅ Complete | Form with prepared type toggle, price validation, date picker, accessibility |
-| Testing & Polish | ~4h | ✅ Complete | Deprecated API fixes, widget tests (19/19 passing), accessibility improvements |
-| **Total** | **~86h** | **75% to M2** | Core MVP loop (add → view → use) scaffold complete |
+| M1 Flutter Skeleton | ~20h | ✅ Complete | App compiles, routing, DI, telemetry, CI; all M1 issues closed |
+| M2 Core Features | ~50h | ✅ Complete | Hive storage, add item, inventory list, item detail, shopping list, notifications, settings, dark mode, Android signing, backup/restore, export/delete |
+| M3 MVP Quality (in progress) | ~60h | 🔄 64% (14/22) | Telemetry, feature flags, reminder prefs, notification scheduling, OCR, packaged-item fast-add, Firebase (Crashlytics+Remote Config+FCM), offline suite, badges foundation; PR #96 merged |
+| **Total** | **~170h** | **M3 in progress** | Full MVP feature set taking shape; beta distribution in progress |
 
-**Next Milestones:** M2/150 (Inventory List), M2/170 (Item Detail), M1 gap (deep link test)
+**Next Milestones:** M3/198 (Shopping batch receipt capture), M3/201 (Receipt AR overlay), M3/202 (Fresh produce recognition), M3/350 (Zesto Phase 1), M3/361 (Firebase App Distribution)
 
 ## CI/CD Strategy
 
