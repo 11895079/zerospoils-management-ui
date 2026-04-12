@@ -178,6 +178,7 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
     }
 
     final textDirection = Directionality.of(context);
+    final view = View.of(context);
 
     setState(() => _ocrInProgress = true);
 
@@ -192,7 +193,8 @@ class _ItemEntrySheetState extends ConsumerState<ItemEntrySheet> {
         final parsed = scanResult.parsed!;
         setState(() => _expiryDate = parsed.date);
         _showSnack('Expiry date detected');
-        SemanticsService.announce(
+        SemanticsService.sendAnnouncement(
+          view,
           'Expiry date detected: ${parsed.date.month}/${parsed.date.day}/${parsed.date.year}',
           textDirection,
         );

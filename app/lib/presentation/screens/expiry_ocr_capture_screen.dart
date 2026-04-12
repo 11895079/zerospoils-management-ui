@@ -550,11 +550,10 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                           const SizedBox(width: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final photo = _photos[index];
-                        final thumbnailFuture =
-                            _thumbnailFutures.putIfAbsent(
-                              photo.path,
-                              photo.readAsBytes,
-                            );
+                        final thumbnailFuture = _thumbnailFutures.putIfAbsent(
+                          photo.path,
+                          photo.readAsBytes,
+                        );
                         return ClipRRect(
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
