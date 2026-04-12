@@ -1,4 +1,5 @@
 /// Offline-First Verification Suite (M3/230)
+// ignore_for_file: dangling_library_doc_comments
 ///
 /// Verifies that the core data paths in ZeroSpoils work correctly without any
 /// network access. Each group targets a distinct slice of offline behaviour:
