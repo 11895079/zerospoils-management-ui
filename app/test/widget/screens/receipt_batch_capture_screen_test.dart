@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
+import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/presentation/screens/receipt_batch_capture_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
@@ -18,6 +20,35 @@ void main() {
           home: ReceiptBatchCaptureScreen(
             source: ReceiptBatchSource.inventory,
             debugShowGoodsPhotosOverride: batchPhotoEnabled,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> pumpCaptureScreenWithFlags(
+    WidgetTester tester, {
+    required bool receiptOcrEnabled,
+    required bool batchPhotoEnabled,
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => receiptOcrEnabled),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => batchPhotoEnabled),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: const ReceiptBatchCaptureScreen(
+            source: ReceiptBatchSource.inventory,
           ),
         ),
       ),
@@ -82,5 +113,25 @@ void main() {
       find.byKey(const Key('receipt_batch_live_scan_button')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('review button stays disabled when receipt OCR flag is off', (
+    tester,
+  ) async {
+    await pumpCaptureScreenWithFlags(
+      tester,
+      receiptOcrEnabled: false,
+      batchPhotoEnabled: false,
+    );
+
+    expect(
+      find.byKey(const Key('receipt_batch_ocr_disabled_notice')),
+      findsOneWidget,
+    );
+
+    final reviewButton = tester.widget<ElevatedButton>(
+      find.byKey(const Key('receipt_batch_review_button')),
+    );
+    expect(reviewButton.onPressed, isNull);
   });
 }

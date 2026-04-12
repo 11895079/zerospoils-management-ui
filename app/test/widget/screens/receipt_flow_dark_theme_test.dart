@@ -32,6 +32,9 @@ void main() {
           isFlagEnabledProvider(
             FeatureFlagKey.batchPhotoCapture,
           ).overrideWith((ref) async => false),
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => true),
         ],
       ),
     );

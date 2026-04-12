@@ -335,6 +335,7 @@ class _ReceiptBatchCaptureScreenState
               child: _buildCaptureBody(
                 theme,
                 showGoodsPhotos: debugShowGoodsPhotos,
+                receiptOcrEnabled: true,
               ),
             ),
           ),
@@ -376,9 +377,30 @@ class _ReceiptBatchCaptureScreenState
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             child: batchPhotoCaptureEnabled.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _buildCaptureBody(theme, showGoodsPhotos: false),
-              data: (enabled) =>
-                  _buildCaptureBody(theme, showGoodsPhotos: enabled),
+              error: (_, _) => _buildCaptureBody(
+                theme,
+                showGoodsPhotos: false,
+                receiptOcrEnabled: false,
+              ),
+              data: (enabled) {
+                final receiptOcrEnabled = ref.watch(
+                  isFlagEnabledProvider(FeatureFlagKey.receiptOcr),
+                );
+                return receiptOcrEnabled.when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (_, _) => _buildCaptureBody(
+                    theme,
+                    showGoodsPhotos: enabled,
+                    receiptOcrEnabled: false,
+                  ),
+                  data: (ocrEnabled) => _buildCaptureBody(
+                    theme,
+                    showGoodsPhotos: enabled,
+                    receiptOcrEnabled: ocrEnabled,
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -386,7 +408,11 @@ class _ReceiptBatchCaptureScreenState
     );
   }
 
-  Widget _buildCaptureBody(ThemeData theme, {required bool showGoodsPhotos}) {
+  Widget _buildCaptureBody(
+    ThemeData theme, {
+    required bool showGoodsPhotos,
+    required bool receiptOcrEnabled,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -519,11 +545,33 @@ class _ReceiptBatchCaptureScreenState
             ],
           ),
         ),
+        if (!receiptOcrEnabled) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            key: const Key('receipt_batch_ocr_disabled_notice'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: Text(
+              'Receipt OCR is disabled. Enable the receipt_ocr feature flag to process receipt photos.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _processing || _pickingPhoto ? null : _processReceipts,
+            key: const Key('receipt_batch_review_button'),
+            onPressed: _processing || _pickingPhoto || !receiptOcrEnabled
+                ? null
+                : _processReceipts,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: theme.colorScheme.onPrimary,

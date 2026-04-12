@@ -52,7 +52,7 @@ class FreshProduceOcrParser {
   );
 
   static final RegExp _netWeightPattern = RegExp(
-    r'(\d+(?:\.\d+)?)\s*(kg|g|lb|lbs|oz)\b',
+    r'(\d+(?:[\.,]\d+)?)\s*(kg|g|lb|lbs|oz)\b',
     caseSensitive: false,
   );
 
@@ -208,7 +208,8 @@ class FreshProduceOcrParser {
       return (null, null);
     }
 
-    final value = double.tryParse(match.group(1) ?? '');
+    final rawValue = (match.group(1) ?? '').replaceAll(',', '.');
+    final value = double.tryParse(rawValue);
     final unitRaw = (match.group(2) ?? '').toLowerCase();
     final unit = switch (unitRaw) {
       'kg' => Unit.kg,
@@ -233,7 +234,7 @@ class FreshProduceOcrParser {
   double? _extractTotalPrice(List<String> lines) {
     for (final line in lines) {
       final lower = line.toLowerCase();
-      if (!_containsAny(lower, const ['total', 'price'])) {
+      if (!_containsAny(lower, const ['total', 'price', 'amount'])) {
         continue;
       }
       if (_pricePerWeightPattern.hasMatch(lower)) {

@@ -87,6 +87,8 @@ class TelemetryClient {
         ? Map<String, dynamic>.from(rawProperties)
         : <String, dynamic>{};
 
+    normalizedProperties.putIfAbsent('platform', _defaultPlatformName);
+
     final normalizedEvent = Map<String, dynamic>.from(event)
       ..['properties'] = normalizedProperties;
 
@@ -117,6 +119,21 @@ class TelemetryClient {
     if (kDebugMode) {
       debugPrint('Telemetry event enqueued: ${normalizedEvent['name']}');
     }
+  }
+
+  String _defaultPlatformName() {
+    if (kIsWeb) {
+      return 'web';
+    }
+
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => 'android',
+      TargetPlatform.iOS => 'ios',
+      TargetPlatform.macOS => 'macos',
+      TargetPlatform.windows => 'windows',
+      TargetPlatform.linux => 'linux',
+      TargetPlatform.fuchsia => 'fuchsia',
+    };
   }
 
   /// Validate event schema (debug builds only)

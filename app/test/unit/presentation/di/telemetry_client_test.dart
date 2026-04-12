@@ -38,5 +38,23 @@ void main() {
       expect(events.length, 1);
       expect(events.first['name'], 'reminder_opened');
     });
+
+    test('injects platform property for core events when missing', () async {
+      final client = TelemetryClient(consentEnabled: true, eventStore: store);
+
+      client.enqueue({
+        'name': 'item_added',
+        'properties': {'entry_method': 'manual'},
+      });
+
+      final events = await store.getAll();
+      expect(events.length, 1);
+      final properties = Map<String, dynamic>.from(
+        events.first['properties'] as Map,
+      );
+      expect(properties['platform'], isNotNull);
+      expect(properties['platform'], isNotEmpty);
+      expect(properties['entry_method'], 'manual');
+    });
   });
 }

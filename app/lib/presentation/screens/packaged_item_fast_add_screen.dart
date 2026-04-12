@@ -232,8 +232,15 @@ class _PackagedItemFastAddScreenState
       hasBarcodeDetected: _rawBarcode != null,
     );
 
-    if (parsed.productDescription != null) {
-      _nameController.text = parsed.productDescription!;
+    final extractedName = parsed.productDescription?.trim();
+    final currentName = _nameController.text.trim();
+    final hasNameConflict =
+        extractedName != null &&
+        currentName.isNotEmpty &&
+        currentName.toLowerCase() != extractedName.toLowerCase();
+
+    if (!hasNameConflict && extractedName != null) {
+      _nameController.text = extractedName;
     }
 
     setState(() {
@@ -257,6 +264,8 @@ class _PackagedItemFastAddScreenState
       _showSnack(
         'Could only extract partial label hints. Review before saving.',
       );
+    } else if (hasNameConflict) {
+      _showSnack('Kept existing name. Review extracted label hints below.');
     } else {
       _showSnack('Package label hints applied. Review and continue.');
     }
