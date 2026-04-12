@@ -12,16 +12,16 @@ Define and implement a repeatable workflow for collecting Firebase App Distribut
 - Feedback review does not depend on ad hoc console scraping or copy/paste from multiple places
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Document the Firebase App Distribution tester-feedback workflow in `docs/beta-android-feedback.md`, including supported Firebase capabilities and any API limitations
-- [ ] Decide and document the retrieval path for tester feedback: official API, console export, email relay, or a scripted fallback if direct API coverage is limited
-- [ ] Define a normalized feedback schema covering `platform`, `build_version`, `build_number`, `release_channel`, `message`, `screenshot_reference`, `submitted_at`, and `triage_status`
-- [ ] Provide a lightweight script or operational runbook to fetch or export feedback and transform it into the normalized schema
-- [ ] Document how normalized feedback maps into GitHub issues, milestone tracking, or another triage surface used by the team
-- [ ] Tester instructions for Firebase-distributed builds include feedback-submission guidance and what details to include
-- [ ] Security and privacy guidance covers access control, retention, and removal of unnecessary personal identifiers
-- [ ] Unit or script-level tests added where transformation logic exists
-- [ ] Operational logging or telemetry added only where needed to confirm retrieval or transformation success
-- [ ] Offline-first behavior verified where applicable for the in-app side of the feedback path
+- [x] Document the Firebase App Distribution tester-feedback workflow in `docs/beta-android-feedback.md`, including supported Firebase capabilities and any API limitations
+- [x] Decide and document the retrieval path for tester feedback: documented as manual CSV export + `scripts/normalize_firebase_feedback.py` transform
+- [x] Define a normalized feedback schema covering `platform`, `build_version`, `build_number`, `release_channel`, `message`, `screenshot_reference`, `submitted_at`, `triage_status`, and `feedback_id`
+- [x] Provide a lightweight script (`scripts/normalize_firebase_feedback.py`) to fetch or export feedback and transform it into the normalized schema
+- [x] Document how normalized feedback maps into GitHub issues, milestone tracking, or another triage surface used by the team
+- [x] Tester instructions for Firebase-distributed builds include feedback-submission guidance and what details to include
+- [x] Security and privacy guidance covers access control, retention, and removal of unnecessary personal identifiers
+- [x] Unit or script-level tests added where transformation logic exists — `scripts/test_normalize_firebase_feedback.py`
+- [ ] Operational logging or telemetry added only where needed to confirm retrieval or transformation success — not applicable to offline script
+- [ ] Offline-first behavior verified where applicable for the in-app side of the feedback path — in-app feedback entry not in scope for this issue (M4/280)
 
 ## Out of scope
 - Replacing the in-app feedback entry point defined in M4/280 and M4/285

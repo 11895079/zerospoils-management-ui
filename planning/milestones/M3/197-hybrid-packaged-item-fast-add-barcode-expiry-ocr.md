@@ -20,31 +20,31 @@ Deliver a hybrid packaged-item fast-add flow that uses barcode scanning for prod
 - Works offline without a required remote product catalog lookup
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Add a packaged-item fast-add entry point to the inventory add flow and full item form on supported mobile platforms
+- [x] Add a packaged-item fast-add entry point to the inventory add flow and full item form on supported mobile platforms
 - [ ] Add a user setting that enables or disables camera-assisted add-item capture on supported mobile platforms
-- [ ] Camera-assisted mode uses a single embedded top-of-form camera panel rather than separate barcode and expiry scanner screens
-- [ ] Barcode scanning starts immediately on fast-add open and detects common UPC/EAN/GTIN formats on-device
-- [ ] Implement lookup precedence of `learned local mappings -> available reference catalog -> manual fallback`, with no remote dependency required for save
-- [ ] Initial release path supports an empty reference catalog so the feature can ship before curated data packs are ready
-- [ ] Implement a local barcode lookup store that can return and persist confirmed product metadata: `name`, `brand`, `category`, `quantity_hint`, `unit_hint`, `region`, `source`, and `last_confirmed_at`
-- [ ] Camera panel presents staged guidance: barcode first, expiry second
-- [ ] Barcode hit path shows inline extraction feedback for product identity before expiry capture begins
-- [ ] Barcode hit path pre-fills the compact confirmation sheet without requiring the full manual form for the common case
-- [ ] Barcode miss path shows a clear "Product not found" state within the same flow and allows manual entry plus optional expiry OCR or package-label OCR without losing progress
-- [ ] Service-counter packaged labels for meat, seafood, deli, or other random-weight items can be scanned through a `Scan Package Label` fallback in the same fast-add session
-- [ ] Fast-add can launch or continue the existing live expiry OCR flow in the same packaged-item session
-- [ ] Expiry capture auto-locks only after the detected expiry value remains stable for a short confidence window, then the camera panel pauses, collapses, or closes to conserve device resources
-- [ ] Saving a confirmed item learns or updates the local barcode mapping for future offline scans and overrides bundled seed values when user-confirmed data differs
-- [ ] Compact confirmation sheet keeps the number of required manual inputs to the minimum necessary for save
-- [ ] Telemetry events emitted for `packaged_item_fast_add_opened`, `barcode_lookup_completed`, `packaged_item_fast_add_saved`, and `barcode_mapping_learned` with properties covering lookup source (`learned` | `seed` | `manual`), hit/miss, expiry prefill, stage transitions, camera-assist enabled state, and duration
+- [x] Camera-assisted mode uses a single embedded top-of-form camera panel rather than separate barcode and expiry scanner screens
+- [x] Barcode scanning starts immediately on fast-add open and detects common UPC/EAN/GTIN formats on-device
+- [x] Implement lookup precedence of `learned local mappings -> available reference catalog -> manual fallback`, with no remote dependency required for save
+- [x] Initial release path supports an empty reference catalog so the feature can ship before curated data packs are ready
+- [x] Implement a local barcode lookup store that can return and persist confirmed product metadata: `name`, `brand`, `category`, `quantity_hint`, `unit_hint`, `region`, `source`, and `last_confirmed_at`
+- [x] Camera panel presents staged guidance: barcode first, expiry second
+- [x] Barcode hit path shows inline extraction feedback for product identity before expiry capture begins
+- [x] Barcode hit path pre-fills the compact confirmation sheet without requiring the full manual form for the common case
+- [x] Barcode miss path shows a clear "Product not found" state within the same flow and allows manual entry plus optional expiry OCR or package-label OCR without losing progress
+- [x] Service-counter packaged labels for meat, seafood, deli, or other random-weight items can be scanned through a `Scan Package Label` fallback in the same fast-add session
+- [x] Fast-add can launch or continue the existing live expiry OCR flow in the same packaged-item session
+- [x] Expiry capture auto-locks only after the detected expiry value remains stable for a short confidence window, then the camera panel pauses, collapses, or closes to conserve device resources
+- [x] Saving a confirmed item learns or updates the local barcode mapping for future offline scans and overrides bundled seed values when user-confirmed data differs
+- [x] Compact confirmation sheet keeps the number of required manual inputs to the minimum necessary for save
+- [x] Telemetry events emitted for `packaged_item_fast_add_opened`, `barcode_lookup_completed`, `packaged_item_fast_add_saved`, and `barcode_mapping_learned` with properties covering lookup source (`learned` | `seed` | `manual`), hit/miss, expiry prefill, stage transitions, camera-assist enabled state, and duration
 - [ ] Manual validation confirms a known barcode + visible expiry happy path can be completed in under 10 seconds on a reference Android device
-- [ ] Unknown-barcode flow remains usable offline and never traps the user in the scanner
-- [ ] Packaged-item fast add remains a focused single-item flow and does not depend on the separate shopping batch capture path to succeed
+- [x] Unknown-barcode flow remains usable offline and never traps the user in the scanner
+- [x] Packaged-item fast add remains a focused single-item flow and does not depend on the separate shopping batch capture path to succeed
 - [ ] If a bundled or downloaded reference catalog is used, packaging keeps install size and storage growth within an acceptable range for MVP by shipping curated subsets instead of raw dumps
-- [ ] Unit/widget/integration tests added or updated for barcode lookup, miss fallback, expiry handoff, and learned barcode reuse
-- [ ] Telemetry added/updated with event names and key properties documented
-- [ ] Offline-first behavior verified (barcode lookup and learned mappings usable with no network access)
-- [ ] Accessibility basics covered: scanner guidance readable, controls reachable, success/failure states announced, and compact confirmation fields labeled
+- [x] Unit/widget/integration tests added or updated for barcode lookup, miss fallback, expiry handoff, and learned barcode reuse
+- [x] Telemetry added/updated with event names and key properties documented
+- [x] Offline-first behavior verified (barcode lookup and learned mappings usable with no network access)
+- [x] Accessibility basics covered: scanner guidance readable, controls reachable, success/failure states announced, and compact confirmation fields labeled
 
 ## Out of scope
 - Mandatory online lookup or cloud-synced product catalog for MVP save flow
