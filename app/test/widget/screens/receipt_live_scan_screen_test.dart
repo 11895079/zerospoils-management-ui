@@ -50,44 +50,43 @@ void main() {
     expect(find.text('12 GRAIN BREAD'), findsOneWidget);
   });
 
-  testWidgets(
-    'status card is rendered outside the camera preview area',
-    (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          home: const ReceiptLiveScanScreen(
-            skipCameraInitialization: true,
-            debugImageSize: Size(320, 640),
-            debugOverlayItems: [],
-          ),
+  testWidgets('status card is rendered outside the camera preview area', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const ReceiptLiveScanScreen(
+          skipCameraInitialization: true,
+          debugImageSize: Size(320, 640),
+          debugOverlayItems: [],
         ),
-      );
+      ),
+    );
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      // Status card must exist outside the camera preview stack.
-      expect(
-        find.byKey(const Key('receipt_live_scan_status_card')),
-        findsOneWidget,
-      );
+    // Status card must exist outside the camera preview stack.
+    expect(
+      find.byKey(const Key('receipt_live_scan_status_card')),
+      findsOneWidget,
+    );
 
-      // The status card should be above the camera preview, not inside the
-      // ReceiptLiveOcrOverlay Stack. Verify by checking the card does NOT appear
-      // inside the overlay widget subtree.
-      final overlayFinder = find.byKey(const Key('receipt_live_scan_overlay'));
-      expect(overlayFinder, findsOneWidget);
+    // The status card should be above the camera preview, not inside the
+    // ReceiptLiveOcrOverlay Stack. Verify by checking the card does NOT appear
+    // inside the overlay widget subtree.
+    final overlayFinder = find.byKey(const Key('receipt_live_scan_overlay'));
+    expect(overlayFinder, findsOneWidget);
 
-      final statusCardFinder = find.byKey(
-        const Key('receipt_live_scan_status_card'),
-      );
-      expect(
-        find.descendant(of: overlayFinder, matching: statusCardFinder),
-        findsNothing,
-      );
-    },
-  );
+    final statusCardFinder = find.byKey(
+      const Key('receipt_live_scan_status_card'),
+    );
+    expect(
+      find.descendant(of: overlayFinder, matching: statusCardFinder),
+      findsNothing,
+    );
+  });
 
   testWidgets('status card shows item count when items are present', (
     tester,

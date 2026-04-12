@@ -28,9 +28,7 @@ void main() {
     testWidgets('opens on barcode scanning stage and shows step label', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('fast_add_stage_label')), findsOneWidget);
@@ -41,24 +39,23 @@ void main() {
     testWidgets('Skip Barcode button advances to expiry capture stage', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('fast_add_skip_barcode')));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Step 2'), findsOneWidget);
-      expect(find.byKey(const Key('fast_add_expiry_status_card')), findsOneWidget);
+      expect(
+        find.byKey(const Key('fast_add_expiry_status_card')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('No Barcode button advances to expiry capture stage', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('fast_add_no_barcode_button')));
@@ -70,14 +67,10 @@ void main() {
     testWidgets('Scan Package Label advances to package label stage', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
-      await tester.tap(
-        find.byKey(const Key('fast_add_package_label_button')),
-      );
+      await tester.tap(find.byKey(const Key('fast_add_package_label_button')));
       await tester.pumpAndSettle();
 
       expect(
@@ -99,12 +92,12 @@ void main() {
               body: Builder(
                 builder: (context) => ElevatedButton(
                   onPressed: () async {
-                    final result =
-                        await Navigator.of(context).push<PackagedItemFastAddResult>(
-                      MaterialPageRoute(
-                        builder: (_) => const PackagedItemFastAddScreen(),
-                      ),
-                    );
+                    final result = await Navigator.of(context)
+                        .push<PackagedItemFastAddResult>(
+                          MaterialPageRoute(
+                            builder: (_) => const PackagedItemFastAddScreen(),
+                          ),
+                        );
                     if (result != null && !result.isSuccess) {
                       popped = true;
                     }
@@ -155,9 +148,7 @@ void main() {
     );
 
     testWidgets('save button disabled when name is empty', (tester) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       // Navigate to confirm without entering a name
@@ -175,9 +166,7 @@ void main() {
 
   group('PackagedItemFastAddScreen — confirm stage', () {
     testWidgets('category dropdown shows all categories', (tester) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('fast_add_skip_barcode')));
@@ -197,9 +186,7 @@ void main() {
     testWidgets('Add Expiry Date button returns to expiry capture', (
       tester,
     ) async {
-      await tester.pumpWidget(
-        _wrapWithApp(const PackagedItemFastAddScreen()),
-      );
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('fast_add_skip_barcode')));

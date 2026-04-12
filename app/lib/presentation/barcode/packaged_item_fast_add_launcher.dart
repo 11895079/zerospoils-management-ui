@@ -10,14 +10,15 @@ typedef PackagedItemFastAddLauncher =
 
 final packagedItemFastAddLauncherProvider =
     Provider<PackagedItemFastAddLauncher>((ref) {
-  return ({required BuildContext context}) async {
-    final result = await Navigator.of(context).push<PackagedItemFastAddResult>(
-      MaterialPageRoute(
-        builder: (_) => const PackagedItemFastAddScreen(),
-        fullscreenDialog: true,
-      ),
-    );
+      return ({required BuildContext context}) async {
+        final result = await Navigator.of(context)
+            .push<PackagedItemFastAddResult>(
+              MaterialPageRoute(
+                builder: (_) => const PackagedItemFastAddScreen(),
+                fullscreenDialog: true,
+              ),
+            );
 
-    return result ?? const PackagedItemFastAddResult.cancelled();
-  };
-});
+        return result ?? const PackagedItemFastAddResult.cancelled();
+      };
+    });

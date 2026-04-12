@@ -72,13 +72,16 @@ void main() {
     expect(seedSuggestion?.source, 'seed_catalog');
   });
 
-  test('returns null for unknown barcodes not in learned or seed catalog', () async {
-    const unknownBarcode = '09999999999999';
-    final learned = await store.getSuggestion(unknownBarcode);
-    final seed = lookupBarcodeSuggestion(unknownBarcode);
-    expect(learned, isNull);
-    expect(seed, isNull);
-  });
+  test(
+    'returns null for unknown barcodes not in learned or seed catalog',
+    () async {
+      const unknownBarcode = '09999999999999';
+      final learned = await store.getSuggestion(unknownBarcode);
+      final seed = lookupBarcodeSuggestion(unknownBarcode);
+      expect(learned, isNull);
+      expect(seed, isNull);
+    },
+  );
 
   test('saved mapping persists across store instances', () async {
     await store.saveMapping(

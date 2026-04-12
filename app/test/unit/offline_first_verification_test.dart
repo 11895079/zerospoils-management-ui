@@ -75,21 +75,27 @@ void main() {
       expect(result.category, ItemCategory.dairy);
     });
 
-    test('items persist across repository re-instantiation (simulated restart)',
-        () async {
-      final item = _makeItem('offline-2', 'Sourdough Bread', ItemCategory.grains);
-      await repository.saveItem(item);
-      await repository.close();
+    test(
+      'items persist across repository re-instantiation (simulated restart)',
+      () async {
+        final item = _makeItem(
+          'offline-2',
+          'Sourdough Bread',
+          ItemCategory.grains,
+        );
+        await repository.saveItem(item);
+        await repository.close();
 
-      // Simulate a cold restart by creating a new repository instance
-      // against the same Hive directory.
-      final secondRepo = HiveItemRepository();
-      await secondRepo.init();
-      final result = await secondRepo.getItem('offline-2');
+        // Simulate a cold restart by creating a new repository instance
+        // against the same Hive directory.
+        final secondRepo = HiveItemRepository();
+        await secondRepo.init();
+        final result = await secondRepo.getItem('offline-2');
 
-      expect(result, isNotNull);
-      expect(result!.name, 'Sourdough Bread');
-    });
+        expect(result, isNotNull);
+        expect(result!.name, 'Sourdough Bread');
+      },
+    );
 
     test('deleted item is no longer returned offline', () async {
       final item = _makeItem('offline-3', 'Old Yogurt', ItemCategory.dairy);
@@ -129,14 +135,17 @@ void main() {
       await tearDownTestHive();
     });
 
-    test('shopping list item saved offline is readable without network', () async {
-      final item = _makeShoppingItem('sl-1', 'Whole Milk');
-      await repository.saveShoppingListItem(item);
+    test(
+      'shopping list item saved offline is readable without network',
+      () async {
+        final item = _makeShoppingItem('sl-1', 'Whole Milk');
+        await repository.saveShoppingListItem(item);
 
-      final result = await repository.getItem('sl-1');
-      expect(result, isNotNull);
-      expect(result!.name, 'Whole Milk');
-    });
+        final result = await repository.getItem('sl-1');
+        expect(result, isNotNull);
+        expect(result!.name, 'Whole Milk');
+      },
+    );
 
     test('purchased filter works offline', () async {
       await repository.saveShoppingListItem(_makeShoppingItem('sl-2', 'Eggs'));
@@ -169,46 +178,58 @@ void main() {
       store = LearnedBarcodeMappingStore();
     });
 
-    test('seed catalog returns suggestion for known barcode without network', () {
-      final suggestion = lookupBarcodeSuggestion('0678000012345');
-      expect(suggestion, isNotNull);
-      expect(suggestion!.source, 'seed_catalog');
-    });
+    test(
+      'seed catalog returns suggestion for known barcode without network',
+      () {
+        final suggestion = lookupBarcodeSuggestion('0678000012345');
+        expect(suggestion, isNotNull);
+        expect(suggestion!.source, 'seed_catalog');
+      },
+    );
 
-    test('seed catalog returns null for unknown barcode (no network fallback)', () {
-      final suggestion = lookupBarcodeSuggestion('00000000000000');
-      expect(suggestion, isNull);
-    });
+    test(
+      'seed catalog returns null for unknown barcode (no network fallback)',
+      () {
+        final suggestion = lookupBarcodeSuggestion('00000000000000');
+        expect(suggestion, isNull);
+      },
+    );
 
-    test('learned mapping stored offline is readable without network', () async {
-      await store.saveMapping(
-        rawValue: '0678000012345',
-        name: 'Vanilla Yogurt',
-        category: ItemCategory.dairy,
-      );
+    test(
+      'learned mapping stored offline is readable without network',
+      () async {
+        await store.saveMapping(
+          rawValue: '0678000012345',
+          name: 'Vanilla Yogurt',
+          category: ItemCategory.dairy,
+        );
 
-      final suggestion = await store.getSuggestion('0678000012345');
-      expect(suggestion, isNotNull);
-      expect(suggestion!.name, 'Vanilla Yogurt');
-      expect(suggestion.source, 'learned_local');
-    });
+        final suggestion = await store.getSuggestion('0678000012345');
+        expect(suggestion, isNotNull);
+        expect(suggestion!.name, 'Vanilla Yogurt');
+        expect(suggestion.source, 'learned_local');
+      },
+    );
 
-    test('learned mapping takes precedence over seed catalog offline', () async {
-      const barcode = '0678000012345';
-      await store.saveMapping(
-        rawValue: barcode,
-        name: 'User Yogurt Override',
-        category: ItemCategory.dairy,
-      );
+    test(
+      'learned mapping takes precedence over seed catalog offline',
+      () async {
+        const barcode = '0678000012345';
+        await store.saveMapping(
+          rawValue: barcode,
+          name: 'User Yogurt Override',
+          category: ItemCategory.dairy,
+        );
 
-      final learned = await store.getSuggestion(barcode);
-      final seed = lookupBarcodeSuggestion(barcode);
+        final learned = await store.getSuggestion(barcode);
+        final seed = lookupBarcodeSuggestion(barcode);
 
-      // Simulates offline lookup precedence: learned first
-      final effective = learned ?? seed;
-      expect(effective!.name, 'User Yogurt Override');
-      expect(effective.source, 'learned_local');
-    });
+        // Simulates offline lookup precedence: learned first
+        final effective = learned ?? seed;
+        expect(effective!.name, 'User Yogurt Override');
+        expect(effective.source, 'learned_local');
+      },
+    );
 
     test('normalizeBarcodeValue rejects short values', () {
       expect(normalizeBarcodeValue('123'), isNull);
@@ -284,8 +305,7 @@ HST                     0.65
 TOTAL                   5.64
 POINTS EARNED             50
 ''');
-      final itemNames =
-          result.items.map((i) => i.name.toUpperCase()).toList();
+      final itemNames = result.items.map((i) => i.name.toUpperCase()).toList();
       expect(itemNames, everyElement(isNot(contains('HST'))));
       expect(itemNames, everyElement(isNot(contains('TOTAL'))));
       expect(itemNames, everyElement(isNot(contains('POINTS'))));
@@ -349,11 +369,11 @@ ShoppingListItem _makeShoppingItem(
 
 /// Returns a map of typeId → TypeAdapter for the Item model adapters.
 Map<int, dynamic> _itemAdapters() => {
-      0: ItemAdapter(),
-      1: ItemCategoryAdapter(),
-      2: StorageLocationAdapter(),
-      3: ItemStatusAdapter(),
-      4: WasteReasonAdapter(),
-      5: ItemTypeAdapter(),
-      6: UnitAdapter(),
-    };
+  0: ItemAdapter(),
+  1: ItemCategoryAdapter(),
+  2: StorageLocationAdapter(),
+  3: ItemStatusAdapter(),
+  4: WasteReasonAdapter(),
+  5: ItemTypeAdapter(),
+  6: UnitAdapter(),
+};

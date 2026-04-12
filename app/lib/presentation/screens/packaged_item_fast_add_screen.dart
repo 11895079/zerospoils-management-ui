@@ -230,9 +230,9 @@ class _PackagedItemFastAddScreenState
 
   void _showSnack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   // ─────────────────────────────── Confirm Stage ────────────────────────────
@@ -305,8 +305,7 @@ class _PackagedItemFastAddScreenState
       _FastAddStage.barcodeScanning => 'Step 1 of 3 — Scan barcode',
       _FastAddStage.barcodeResult => 'Step 1 of 3 — Product found',
       _FastAddStage.barcodeMiss => 'Step 1 of 3 — Barcode not found',
-      _FastAddStage.packageLabelScan =>
-        'Step 1 of 3 — Scanning package label',
+      _FastAddStage.packageLabelScan => 'Step 1 of 3 — Scanning package label',
       _FastAddStage.expiryCapture => 'Step 2 of 3 — Scan expiry date',
       _FastAddStage.expiryLocked => 'Step 2 of 3 — Expiry locked',
       _FastAddStage.editConfirm => 'Step 3 of 3 — Confirm item',
@@ -407,9 +406,9 @@ class _PackagedItemFastAddScreenState
           SizedBox(
             width: double.infinity,
             child: TextButton(
-              onPressed: () => Navigator.of(context).pop(
-                const PackagedItemFastAddResult.cancelled(),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).pop(const PackagedItemFastAddResult.cancelled()),
               child: const Text('Cancel'),
             ),
           ),
@@ -826,8 +825,7 @@ class _PackagedItemFastAddScreenState
                     const Spacer(),
                     TextButton(
                       key: const Key('fast_add_clear_expiry'),
-                      onPressed: () =>
-                          setState(() => _lockedExpiry = null),
+                      onPressed: () => setState(() => _lockedExpiry = null),
                       child: const Text('Clear'),
                     ),
                   ],
@@ -836,9 +834,8 @@ class _PackagedItemFastAddScreenState
             else
               OutlinedButton.icon(
                 key: const Key('fast_add_add_expiry_button'),
-                onPressed: () => setState(
-                  () => _stage = _FastAddStage.expiryCapture,
-                ),
+                onPressed: () =>
+                    setState(() => _stage = _FastAddStage.expiryCapture),
                 icon: const Icon(Icons.add_outlined),
                 label: const Text('Add Expiry Date'),
               ),
@@ -858,9 +855,9 @@ class _PackagedItemFastAddScreenState
               width: double.infinity,
               child: TextButton(
                 key: const Key('fast_add_cancel_button'),
-                onPressed: () => Navigator.of(context).pop(
-                  const PackagedItemFastAddResult.cancelled(),
-                ),
+                onPressed: () => Navigator.of(
+                  context,
+                ).pop(const PackagedItemFastAddResult.cancelled()),
                 child: const Text('Cancel'),
               ),
             ),
