@@ -302,7 +302,15 @@ class _ReceiptBatchCaptureScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final debugShowGoodsPhotos = widget.debugShowGoodsPhotosOverride;
+    final receiptOcrEnabled = ref.watch(
+      isFlagEnabledProvider(FeatureFlagKey.receiptOcr),
+    );
     if (debugShowGoodsPhotos != null) {
+      final receiptOcrEnabledValue = receiptOcrEnabled.when(
+        loading: () => null,
+        error: (_, _) => false,
+        data: (enabled) => enabled,
+      );
       return Shortcuts(
         shortcuts: const {
           SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -332,11 +340,13 @@ class _ReceiptBatchCaptureScreenState
             ),
             body: Padding(
               padding: const EdgeInsets.all(AppSpacing.pagePadding),
-              child: _buildCaptureBody(
-                theme,
-                showGoodsPhotos: debugShowGoodsPhotos,
-                receiptOcrEnabled: true,
-              ),
+              child: receiptOcrEnabledValue == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildCaptureBody(
+                      theme,
+                      showGoodsPhotos: debugShowGoodsPhotos,
+                      receiptOcrEnabled: receiptOcrEnabledValue,
+                    ),
             ),
           ),
         ),
@@ -346,6 +356,17 @@ class _ReceiptBatchCaptureScreenState
     final batchPhotoCaptureEnabled = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
     );
+    final showGoodsPhotos = batchPhotoCaptureEnabled.when(
+      loading: () => null,
+      error: (_, _) => false,
+      data: (enabled) => enabled,
+    );
+    final receiptOcrEnabledValue = receiptOcrEnabled.when(
+      loading: () => null,
+      error: (_, _) => false,
+      data: (enabled) => enabled,
+    );
+
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -375,33 +396,13 @@ class _ReceiptBatchCaptureScreenState
           ),
           body: Padding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: batchPhotoCaptureEnabled.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _buildCaptureBody(
-                theme,
-                showGoodsPhotos: false,
-                receiptOcrEnabled: false,
-              ),
-              data: (enabled) {
-                final receiptOcrEnabled = ref.watch(
-                  isFlagEnabledProvider(FeatureFlagKey.receiptOcr),
-                );
-                return receiptOcrEnabled.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (_, _) => _buildCaptureBody(
+            child: showGoodsPhotos == null || receiptOcrEnabledValue == null
+                ? const Center(child: CircularProgressIndicator())
+                : _buildCaptureBody(
                     theme,
-                    showGoodsPhotos: enabled,
-                    receiptOcrEnabled: false,
+                    showGoodsPhotos: showGoodsPhotos,
+                    receiptOcrEnabled: receiptOcrEnabledValue,
                   ),
-                  data: (ocrEnabled) => _buildCaptureBody(
-                    theme,
-                    showGoodsPhotos: enabled,
-                    receiptOcrEnabled: ocrEnabled,
-                  ),
-                );
-              },
-            ),
           ),
         ),
       ),

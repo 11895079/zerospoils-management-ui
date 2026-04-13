@@ -14,6 +14,11 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => true),
+        ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
@@ -133,5 +138,77 @@ void main() {
       find.byKey(const Key('receipt_batch_review_button')),
     );
     expect(reviewButton.onPressed, isNull);
+  });
+
+  testWidgets('debug goods-photo override still respects receipt OCR flag', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => false),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: const ReceiptBatchCaptureScreen(
+            source: ReceiptBatchSource.inventory,
+            debugShowGoodsPhotosOverride: true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('receipt_batch_ocr_disabled_notice')),
+      findsOneWidget,
+    );
+
+    final reviewButton = tester.widget<ElevatedButton>(
+      find.byKey(const Key('receipt_batch_review_button')),
+    );
+    expect(reviewButton.onPressed, isNull);
+  });
+
+  testWidgets('batch photo flag error does not force OCR gating off', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => throw Exception('failed to load')),
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => true),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: const ReceiptBatchCaptureScreen(
+            source: ReceiptBatchSource.inventory,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('receipt_batch_ocr_disabled_notice')),
+      findsNothing,
+    );
+
+    final reviewButton = tester.widget<ElevatedButton>(
+      find.byKey(const Key('receipt_batch_review_button')),
+    );
+    expect(reviewButton.onPressed, isNotNull);
   });
 }
