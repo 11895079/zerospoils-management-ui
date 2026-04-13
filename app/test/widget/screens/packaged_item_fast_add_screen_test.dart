@@ -270,5 +270,112 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'keeps existing manual name when extracted label name conflicts',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrapWithApp(const PackagedItemFastAddScreen()),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_label_button')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key('fast_add_package_name_field')),
+          'Rotisserie Chicken',
+        );
+        await tester.enterText(
+          find.byKey(const Key('fast_add_package_label_text_field')),
+          'ATLANTIC SALMON FILLET\n'
+          '0.742 KG @ 24.99/KG\n'
+          'TOTAL 18.54\n'
+          'BEST BEFORE 04/24/2026',
+        );
+
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_extract_button')),
+        );
+        await tester.pumpAndSettle();
+
+        final nameField = tester.widget<TextField>(
+          find.byKey(const Key('fast_add_package_name_field')),
+        );
+        expect(nameField.controller?.text, 'Rotisserie Chicken');
+      },
+    );
+
+    testWidgets(
+      'saving after extraction returns detected price and weight values',
+      (tester) async {
+        PackagedItemFastAddResult? savedResult;
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              theme: AppTheme.lightTheme,
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => ElevatedButton(
+                    key: const Key('open_fast_add_for_save_test'),
+                    onPressed: () async {
+                      savedResult = await Navigator.of(context)
+                          .push<PackagedItemFastAddResult>(
+                            MaterialPageRoute(
+                              builder: (_) => const PackagedItemFastAddScreen(),
+                            ),
+                          );
+                    },
+                    child: const Text('Open'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.byKey(const Key('open_fast_add_for_save_test')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_label_button')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key('fast_add_package_label_text_field')),
+          'ATLANTIC SALMON FILLET\n'
+          '0.742 KG @ 24.99/KG\n'
+          'TOTAL 18.54\n'
+          'BEST BEFORE 04/24/2026',
+        );
+        await tester.tap(
+          find.byKey(const Key('fast_add_package_extract_button')),
+        );
+        await tester.pumpAndSettle();
+
+        final continueButton = find.byKey(
+          const Key('fast_add_package_label_continue'),
+        );
+        await tester.ensureVisible(continueButton);
+        await tester.tap(continueButton);
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('fast_add_expiry_locked_continue')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('fast_add_save_button')));
+        await tester.pumpAndSettle();
+
+        expect(savedResult, isNotNull);
+        expect(savedResult!.isSuccess, isTrue);
+        expect(savedResult!.purchasePrice, closeTo(18.54, 0.001));
+        expect(savedResult!.packageWeightValue, closeTo(0.742, 0.0001));
+      },
+    );
   });
 }

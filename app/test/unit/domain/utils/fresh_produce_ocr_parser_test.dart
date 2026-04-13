@@ -84,5 +84,44 @@ void main() {
         expect(result.shouldFallbackToGenericOcr, isTrue);
       },
     );
+
+    test('parses comma-decimal net weight and amount-labeled total price', () {
+      const text =
+          'BEEF STRIPLOIN\n'
+          '0,742 KG @ 24.99/KG\n'
+          'AMOUNT 18.54\n'
+          'BEST BEFORE 04/24/2026';
+
+      final result = parser.parseLabel(
+        text,
+        hasBarcodeDetected: false,
+        now: DateTime(2026, 1, 1),
+      );
+
+      expect(result.netWeightValue, closeTo(0.742, 0.0001));
+      expect(result.netWeightUnit, Unit.kg);
+      expect(result.totalPrice, closeTo(18.54, 0.001));
+    });
+
+    test(
+      'parses best-before date when label and date are on separate lines',
+      () {
+        const text =
+            'ATLANTIC SALMON FILLET\n'
+            '0.742 KG @ 24.99/KG\n'
+            'PACK DATE 04/21/2026\n'
+            'BEST BEFORE\n'
+            '04/24/2026';
+
+        final result = parser.parseLabel(
+          text,
+          hasBarcodeDetected: false,
+          now: DateTime(2026, 1, 1),
+        );
+
+        expect(result.packDate, DateTime(2026, 4, 21));
+        expect(result.bestBeforeDate, DateTime(2026, 4, 24));
+      },
+    );
   });
 }

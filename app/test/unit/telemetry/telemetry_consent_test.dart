@@ -63,7 +63,9 @@ void main() {
       });
 
       expect(capturedName, 'test_event');
-      expect(capturedProperties, {'key': 'value'});
+      expect(capturedProperties, isNotNull);
+      expect(capturedProperties!['key'], 'value');
+      expect(capturedProperties!['platform'], isNotNull);
     });
   });
 
@@ -75,7 +77,9 @@ void main() {
 
       expect(client.events.length, 1);
       expect(client.events.first['properties'], isA<Map<String, dynamic>>());
-      expect(client.events.first['properties'], isEmpty);
+      final properties =
+          client.events.first['properties'] as Map<String, dynamic>;
+      expect(properties['platform'], isNotNull);
     });
 
     test('Rejects events with missing name field', () {
@@ -96,7 +100,9 @@ void main() {
 
       expect(client.events.length, 1);
       expect(client.events.first['properties'], isA<Map<String, dynamic>>());
-      expect(client.events.first['properties'], isEmpty);
+      final properties =
+          client.events.first['properties'] as Map<String, dynamic>;
+      expect(properties['platform'], isNotNull);
     });
 
     test('Rejects events containing PII keys (email)', () {

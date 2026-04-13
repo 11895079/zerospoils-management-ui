@@ -302,7 +302,15 @@ class _ReceiptBatchCaptureScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final debugShowGoodsPhotos = widget.debugShowGoodsPhotosOverride;
+    final receiptOcrEnabled = ref.watch(
+      isFlagEnabledProvider(FeatureFlagKey.receiptOcr),
+    );
     if (debugShowGoodsPhotos != null) {
+      final receiptOcrEnabledValue = receiptOcrEnabled.when(
+        loading: () => null,
+        error: (_, _) => false,
+        data: (enabled) => enabled,
+      );
       return Shortcuts(
         shortcuts: const {
           SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -332,10 +340,13 @@ class _ReceiptBatchCaptureScreenState
             ),
             body: Padding(
               padding: const EdgeInsets.all(AppSpacing.pagePadding),
-              child: _buildCaptureBody(
-                theme,
-                showGoodsPhotos: debugShowGoodsPhotos,
-              ),
+              child: receiptOcrEnabledValue == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildCaptureBody(
+                      theme,
+                      showGoodsPhotos: debugShowGoodsPhotos,
+                      receiptOcrEnabled: receiptOcrEnabledValue,
+                    ),
             ),
           ),
         ),
@@ -345,6 +356,17 @@ class _ReceiptBatchCaptureScreenState
     final batchPhotoCaptureEnabled = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.batchPhotoCapture),
     );
+    final showGoodsPhotos = batchPhotoCaptureEnabled.when(
+      loading: () => null,
+      error: (_, _) => false,
+      data: (enabled) => enabled,
+    );
+    final receiptOcrEnabledValue = receiptOcrEnabled.when(
+      loading: () => null,
+      error: (_, _) => false,
+      data: (enabled) => enabled,
+    );
+
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
@@ -374,19 +396,24 @@ class _ReceiptBatchCaptureScreenState
           ),
           body: Padding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: batchPhotoCaptureEnabled.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => _buildCaptureBody(theme, showGoodsPhotos: false),
-              data: (enabled) =>
-                  _buildCaptureBody(theme, showGoodsPhotos: enabled),
-            ),
+            child: showGoodsPhotos == null || receiptOcrEnabledValue == null
+                ? const Center(child: CircularProgressIndicator())
+                : _buildCaptureBody(
+                    theme,
+                    showGoodsPhotos: showGoodsPhotos,
+                    receiptOcrEnabled: receiptOcrEnabledValue,
+                  ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCaptureBody(ThemeData theme, {required bool showGoodsPhotos}) {
+  Widget _buildCaptureBody(
+    ThemeData theme, {
+    required bool showGoodsPhotos,
+    required bool receiptOcrEnabled,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -519,11 +546,33 @@ class _ReceiptBatchCaptureScreenState
             ],
           ),
         ),
+        if (!receiptOcrEnabled) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            key: const Key('receipt_batch_ocr_disabled_notice'),
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: Text(
+              'Receipt OCR is disabled. Enable the receipt_ocr feature flag to process receipt photos.',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: theme.textTheme.bodySmall?.color,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _processing || _pickingPhoto ? null : _processReceipts,
+            key: const Key('receipt_batch_review_button'),
+            onPressed: _processing || _pickingPhoto || !receiptOcrEnabled
+                ? null
+                : _processReceipts,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: theme.colorScheme.onPrimary,
