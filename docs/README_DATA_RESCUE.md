@@ -1,223 +1,30 @@
-# Your ZeroSpoils Data - Step by Step Rescue Plan
+# ZeroSpoils Data Rescue Index
 
-## What You Need To Do
+Use this page as the entry point for Android update, signing, and recovery tasks. The detailed step-by-step instructions live in the specialized guides below.
 
-Hey! Here's your complete plan to save your data and fix the update issue permanently.
+## Which Guide To Use
 
----
+1. Use [docs/APK_UPDATE_FIX.md](./APK_UPDATE_FIX.md) if you want the shortest path to diagnose why Android updates require uninstalling first.
+2. Use [docs/MANUAL_DATA_BACKUP.md](./MANUAL_DATA_BACKUP.md) if the installed app does not expose backup and restore in Settings and you need to preserve existing local data before uninstalling.
+3. Use [docs/ANDROID_SIGNING_GUIDE.md](./ANDROID_SIGNING_GUIDE.md) to set up stable release signing so future APK updates work without forced uninstall.
+4. Use [docs/DATA_BACKUP_GUIDE.md](./DATA_BACKUP_GUIDE.md) for the built-in JSON export and restore flow in current app versions.
 
-## 🚨 IMMEDIATE ACTION (Save Your Current Data)
+## Recommended Order
 
-If your installed version does not expose backup/restore in Settings (or you are not sure it worked), manually extract your data from your phone before uninstalling.
+1. Preserve current data first.
+2. Fix signing next.
+3. Restore data after installing the newly signed build.
+4. Use the built-in backup flow for future updates.
 
-### What You'll Need:
-- ⏱️ Time: 20-30 minutes (first time)
-- 💻 Your computer (Windows/Mac/Linux)
-- 📱 Your Android phone with the app installed
-- 🔌 USB cable to connect them
-- 📋 The app data you want to save
+## Quick Decision Guide
 
-### Step-by-Step Instructions:
+- Installed app has no backup and restore UI: start with [docs/MANUAL_DATA_BACKUP.md](./MANUAL_DATA_BACKUP.md).
+- Installed app already supports export and restore: start with [docs/DATA_BACKUP_GUIDE.md](./DATA_BACKUP_GUIDE.md).
+- New APK still requires uninstall before install: review [docs/APK_UPDATE_FIX.md](./APK_UPDATE_FIX.md) and then complete [docs/ANDROID_SIGNING_GUIDE.md](./ANDROID_SIGNING_GUIDE.md).
 
-**📖 Open this guide and follow it carefully:**  
-[`docs/MANUAL_DATA_BACKUP.md`](./MANUAL_DATA_BACKUP.md)
+## Scope
 
-**Quick overview of what you'll do:**
-
-1. **Enable USB Debugging on your phone** (5 min)
-   - Settings → About Phone → Tap "Build Number" 7 times
-   - Settings → Developer Options → Enable "USB Debugging"
-
-2. **Install ADB on your computer** (5 min)
-   - Download Android Platform Tools
-   - Or install via package manager (brew/choco/apt)
-
-3. **Connect phone and backup Hive database** (5 min)
-   ```bash
-   mkdir ~/zerospoils-backup
-   adb pull /data/data/com.zerospoils.zerospoils/app_flutter/ ~/zerospoils-backup/
-   ```
-
-4. **Verify backup files exist** (1 min)
-   ```bash
-   ls -lh ~/zerospoils-backup/items.hive
-   # Should show file size > 0 bytes
-   ```
-
-5. **Copy backup to safe locations** (2 min)
-   - Google Drive
-   - Email to yourself
-   - External USB drive
-
-6. **NOW it's safe to uninstall the old app**
-   ```bash
-   adb uninstall com.zerospoils.zerospoils
-   ```
-
----
-
-## 🔧 PERMANENT FIX (So This Never Happens Again)
-
-Set up proper Android release signing so future APK updates work smoothly.
-
-### What You'll Need:
-- ⏱️ Time: 10-15 minutes (one-time setup)
-- 💻 Your computer
-- 🔑 Ability to remember/store a strong password
-
-### Step-by-Step Instructions:
-
-**📖 Follow this guide:**  
-[`docs/ANDROID_SIGNING_GUIDE.md`](./ANDROID_SIGNING_GUIDE.md)
-
-**Quick overview of what you'll do:**
-
-1. **Generate a permanent keystore** (5 min)
-   ```bash
-   keytool -genkey -v -keystore ~/zerospoils-release-key.jks \
-     -alias zerospoils -keyalg RSA -keysize 2048 -validity 10000
-   ```
-   - Choose a **strong password** (save it in password manager!)
-   - Answer the questions (name, organization, etc.)
-   - **CRITICAL:** Store this keystore file safely - you can't update the app without it!
-
-2. **Create key.properties file** (2 min)
-   ```bash
-   cd app/android
-   cp key.properties.template key.properties
-   # Edit key.properties with your keystore info
-   ```
-
-3. **Build new release APK** (3 min)
-   ```bash
-   cd app
-   flutter build apk --release
-   ```
-
-4. **Install on your phone** (2 min)
-   ```bash
-   adb install build/app/outputs/flutter-apk/app-release.apk
-   ```
-
----
-
-## 📲 RESTORE YOUR DATA (After Installing New APK)
-
-Now put your data back into the newly installed app.
-
-### Using Manual Method (via ADB):
-
-**📖 Continue in:**  
-[`docs/MANUAL_DATA_BACKUP.md`](./MANUAL_DATA_BACKUP.md) - Part 7: Restore
-
-**Quick commands:**
-```bash
-cd ~/zerospoils-backup
-adb push items.hive /sdcard/Download/
-adb shell monkey -p com.zerospoils.zerospoils 1
-sleep 5
-adb shell am force-stop com.zerospoils.zerospoils
-adb shell run-as com.zerospoils.zerospoils cp /sdcard/Download/items.hive app_flutter/
-```
-
-**Then open the app and verify your items are there!**
-
----
-
-## 🎯 GOING FORWARD (Future Backups)
-
-The new app version has a built-in backup feature in Settings.
-
-### How to use it:
-
-**📖 See full guide:**  
-[`docs/DATA_BACKUP_GUIDE.md`](./DATA_BACKUP_GUIDE.md)
-
-**Quick usage:**
-
-1. **Backup your data (before each update):**
-   - Open ZeroSpoils app
-   - Tap Settings (gear icon)
-   - Scroll to "PRIVACY & DATA"
-   - Tap "Export My Data"
-   - Save to Downloads or Google Drive
-   - **Store this file safely!**
-
-2. **Restore if needed:**
-   - Open ZeroSpoils app
-   - Tap Settings
-   - Scroll to "PRIVACY & DATA"
-   - Tap "Restore Backup"
-   - Select your JSON backup file
-   - Confirm restore
-
----
-
-## ✅ Success Checklist
-
-Complete these in order:
-
-### Phase 1: Save Current Data
-- [ ] USB debugging enabled on phone
-- [ ] ADB installed and working (`adb devices` shows your phone)
-- [ ] Hive database backed up (`items.hive` file exists and is > 0 bytes)
-- [ ] Backup copied to 2+ safe locations (Google Drive, email, USB)
-- [ ] Verified backup files are accessible
-
-### Phase 2: Fix Signing Issue
-- [ ] Generated permanent keystore (`zerospoils-release-key.jks`)
-- [ ] Keystore stored securely with password in password manager
-- [ ] Created `app/android/key.properties` with credentials
-- [ ] Built release APK successfully
-- [ ] Verified APK file exists: `app/build/app/outputs/flutter-apk/app-release.apk`
-
-### Phase 3: Install & Restore
-- [ ] Old app uninstalled (after backup verified)
-- [ ] New APK installed on phone
-- [ ] Data restored using ADB push method
-- [ ] App opened and items verified present
-- [ ] Created new backup using built-in feature (Settings → Backup)
-
-### Phase 4: Future Proofing
-- [ ] Know where keystore file is stored
-- [ ] Have backup of keystore in secure location
-- [ ] Passwords saved in password manager
-- [ ] Understand how to use built-in backup feature
-- [ ] Regular backup schedule planned (weekly or before updates)
-
----
-
-## 🆘 If Something Goes Wrong
-
-### Data backup failed (items.hive is 0 bytes or missing)
-
-**Try:**
-1. Open the app and navigate through a few screens
-2. Force close the app
-3. Try the backup command again
-4. Alternative (legacy only): Use `adb backup` method if your device still supports it (see MANUAL_DATA_BACKUP.md)
-
-### Can't connect phone via ADB
-
-**Check:**
-- USB debugging is enabled
-- Approve "Allow USB debugging" prompt on phone
-- Try different USB cable or port
-- Run `adb kill-server && adb start-server`
-
-### Restore failed (data not appearing in app)
-
-**Try:**
-1. Close app completely
-2. Try alternative restore method (run-as vs temp storage)
-3. Verify backup files are not corrupted (check file sizes)
-4. Start over with restore commands
-
-### Keystore generation failed
-
-**Try:**
-- Verify keytool is installed: `keytool -version`
-- On Mac: keytool comes with Java, install Java if missing
+This file is intentionally short to avoid duplicating instructions already maintained in the detailed guides.
 - On Windows: Install JDK from Oracle or OpenJDK
 - Check you have write permissions in target directory
 

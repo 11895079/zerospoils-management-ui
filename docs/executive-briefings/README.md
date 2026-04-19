@@ -8,27 +8,27 @@ Periodic data-driven executive reports documenting development effort, impact, a
 
 **Cumulative Report (All Work to Date)**
 ```powershell
-python scripts/generate_executive_report.py
+python scripts/generate_executive_report.py --pdf
 ```
 
 **Date-Range Report**
 ```powershell
-python scripts/generate_executive_report.py --from 2026-01-15 --to 2026-02-14
+python scripts/generate_executive_report.py --from 2026-01-15 --to 2026-02-14 --pdf
 ```
 
 **From Date to Today**
 ```powershell
-python scripts/generate_executive_report.py --from 2026-02-01
+python scripts/generate_executive_report.py --from 2026-02-01 --pdf
 ```
 
 **Last 7 Days**
 ```powershell
-python scripts/generate_executive_report.py --latest
+python scripts/generate_executive_report.py --latest --pdf
 ```
 
 **Scoped to a Roadmap (Milestones)**
 ```powershell
-python scripts/generate_executive_report.py --roadmap M1,M2
+python scripts/generate_executive_report.py --roadmap M1,M2 --pdf
 ```
 
 **Print to Console (No File)**
@@ -36,18 +36,15 @@ python scripts/generate_executive_report.py --roadmap M1,M2
 python scripts/generate_executive_report.py --no-save
 ```
 
-**Export PDF**
-```powershell
-python scripts/generate_executive_report.py --pdf
-```
+All executive briefings should be generated with `--pdf` so the Markdown and PDF artifacts stay paired.
 
 ### Windows Users
 
 Use the batch script wrapper:
 ```batch
 scripts\generate_executive_report.bat
-scripts\generate_executive_report.bat --from 2026-02-01 --to 2026-02-14
-scripts\generate_executive_report.bat --latest
+scripts\generate_executive_report.bat --from 2026-02-01 --to 2026-02-14 --pdf
+scripts\generate_executive_report.bat --latest --pdf
 ```
 
 ## Report Contents
@@ -92,7 +89,7 @@ Each report includes:
 
 Auto-generated filenames follow this pattern:
 ```
-executive-report-<period>-YYYYMMDD-HHMMSS.md
+executive-report-<period>-YYYYMMDD-HHMMSS.{md|pdf}
 ```
 
 Examples:
@@ -102,7 +99,7 @@ Examples:
 ## Using Reports
 
 ### Email Sharing
-1. Generate report: `python scripts/generate_executive_report.py`
+1. Generate report: `python scripts/generate_executive_report.py --pdf`
 2. Open report in editor: `docs/executive-briefings/Executive_Report_*.md`
 3. Copy content into email or Markdown viewer
 4. Share with stakeholders
@@ -118,25 +115,25 @@ Examples:
 **Weekly (Every Friday)**
 ```powershell
 # Generate last 7 days
-python scripts/generate_executive_report.py --latest
+python scripts/generate_executive_report.py --latest --pdf
 ```
 
 **Monthly (First of Month)**
 ```powershell
 # Generate for previous month (example for February)
-python scripts/generate_executive_report.py --from 2026-02-01 --to 2026-02-28
+python scripts/generate_executive_report.py --from 2026-02-01 --to 2026-02-28 --pdf
 ```
 
 **Milestone Checkpoints**
 ```powershell
 # After completing a milestone (example: M1 completed on Jan 31)
-python scripts/generate_executive_report.py --from 2026-01-15 --to 2026-01-31
+python scripts/generate_executive_report.py --from 2026-01-15 --to 2026-01-31 --pdf
 ```
 
 **Retrospective Reports**
 ```powershell
 # Quarter report (Q1 2026)
-python scripts/generate_executive_report.py --from 2026-01-01 --to 2026-03-31
+python scripts/generate_executive_report.py --from 2026-01-01 --to 2026-03-31 --pdf
 ```
 
 ## Automation
@@ -159,7 +156,7 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - run: python scripts/generate_executive_report.py
+      - run: python scripts/generate_executive_report.py --pdf
       - uses: actions/upload-artifact@v3
         with:
           name: executive-reports
@@ -225,7 +222,7 @@ flutter test --coverage
 Ensure you're in the correct repository directory:
 ```powershell
 cd c:\Projects\zerospoils\etc\zerospoils_github_issues_pack
-python scripts/generate_executive_report.py
+python scripts/generate_executive_report.py --pdf
 ```
 
 ## Examples
@@ -234,14 +231,14 @@ python scripts/generate_executive_report.py
 
 Generate with:
 ```powershell
-python scripts/generate_executive_report.py --output "Cumulative_Project_Report.md"
+python scripts/generate_executive_report.py --pdf --output "Cumulative_Project_Report.md"
 ```
 
 ### Example Report: Weekly Update
 
 Generate with:
 ```powershell
-python scripts/generate_executive_report.py --latest --output "Weekly_Report_Feb14.md"
+python scripts/generate_executive_report.py --latest --pdf --output "Weekly_Report_Feb14.md"
 ```
 
 ### Example Report: Sprint Retrospective
@@ -251,6 +248,7 @@ Generate with:
 python scripts/generate_executive_report.py \
   --from 2026-02-07 \
   --to 2026-02-14 \
+  --pdf \
   --output "Sprint_Retrospective_Feb7-14.md"
 ```
 

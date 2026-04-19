@@ -4,8 +4,8 @@ This folder contains all issue definitions, milestones, and supporting documenta
 
 ## Structure
 
-- `issues/` – All individual issue files (numbered 000-590, 10-step increments)
-- `milestones/` – Issues organized by delivery milestone (M1-M7)
+- `issues/` – Standalone and backlog issue files that are not the active milestone source of truth
+- `milestones/` – Issues organized by delivery milestone (M1-M7); milestone folders and milestone READMEs are the authoritative planning view for active work
 - `docs/` – Architecture, design, and requirements documentation
 - `scripts/` – Automation helpers (label creation, milestone setup)
 - `AGENTS.md` – Instructions for AI coding agents
@@ -20,6 +20,10 @@ This folder contains all issue definitions, milestones, and supporting documenta
 - **M5+ (Advanced)** – Pro features, ML pipeline, sync
 
 See [milestones/](milestones/) for detailed README files for each milestone.
+
+## Numbering Note
+
+Issue numbers are maintained in 10-step increments within the planning system, but the current repository contains both standalone backlog files and milestone-scoped files. When a discrepancy exists, prefer the milestone copy and the milestone README status table.
 
 ## Issue Format
 
