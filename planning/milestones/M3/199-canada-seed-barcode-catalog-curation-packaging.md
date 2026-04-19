@@ -13,20 +13,31 @@ Create a Canada-first seed barcode catalog artifact, curation workflow, and pack
 - Quality checks catch malformed barcodes, duplicate records, missing required fields, and oversized output packs
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Define approved source inputs for the Canada-first seed catalog and document their license and attribution requirements
-- [ ] Define the normalized catalog schema used by the app: `barcode`, `product_name`, `brand`, `category_hint`, `quantity_hint`, `unit_hint`, `region`, `source`, `last_curated_at`
-- [ ] Build a repeatable curation script or pipeline that filters source data into a Canada-first packaged-food subset
-- [ ] Deduplicate conflicting barcode records and document tie-break rules for product name, quantity, and category selection
-- [ ] Reject malformed UPC/EAN/GTIN values and records missing required fields
-- [ ] Produce an app-ready seed artifact with version metadata and size reporting
-- [ ] Document install-size budget and maximum acceptable seed-pack size for MVP
-- [ ] Document how the seed artifact is bundled into the app and how it will later be reused by downloadable update packs
-- [ ] Document catalog coverage goals for the first Canada release (for example, common national grocery brands and high-frequency pantry/fridge categories)
-- [ ] Define a refresh cadence and ownership for future catalog rebuilds
-- [ ] Unit/script validation added for schema normalization, deduplication, malformed barcode rejection, and artifact generation
-- [ ] Telemetry or internal reporting requirements documented for future catalog hit-rate measurement
-- [ ] Offline-first behavior verified (catalog artifact usable with no network dependency)
+- [x] Define approved source inputs for the Canada-first seed catalog and document their license and attribution requirements
+- [x] Define the normalized catalog schema used by the app: `barcode`, `product_name`, `brand`, `category_hint`, `quantity_hint`, `unit_hint`, `region`, `source`, `last_curated_at`
+- [x] Build a repeatable curation script or pipeline that filters source data into a Canada-first packaged-food subset
+- [x] Deduplicate conflicting barcode records and document tie-break rules for product name, quantity, and category selection
+- [x] Reject malformed UPC/EAN/GTIN values and records missing required fields
+- [x] Produce an app-ready seed artifact with version metadata and size reporting
+- [x] Document install-size budget and maximum acceptable seed-pack size for MVP
+- [x] Document how the seed artifact is bundled into the app and how it will later be reused by downloadable update packs
+- [x] Document catalog coverage goals for the first Canada release (for example, common national grocery brands and high-frequency pantry/fridge categories)
+- [x] Define a refresh cadence and ownership for future catalog rebuilds
+- [x] Unit/script validation added for schema normalization, deduplication, malformed barcode rejection, and artifact generation
+- [x] Telemetry or internal reporting requirements documented for future catalog hit-rate measurement
+- [x] Offline-first behavior verified (catalog artifact usable with no network dependency)
 - [ ] Accessibility basics covered where relevant in documentation or admin tooling
+
+## Implementation status update (2026-04-13)
+
+- Added curation pipeline script: `scripts/curate_canada_seed_catalog.py`.
+- Added script-level tests: `scripts/test_curate_canada_seed_catalog.py`.
+- Added curated source input seed: `app/assets/reference-data/source/canada_seed_catalog_v2026-04-13.csv`.
+- Generated app-ready artifact and report:
+	- `app/assets/reference-data/barcode_seed_ca.v2.json`
+	- `app/assets/reference-data/barcode_seed_ca.v2.report.json`
+- Added catalog governance and packaging doc: `docs/canada-seed-barcode-catalog.md`.
+- Remaining work is runtime wiring/consumption and any accessibility notes for maintainer tooling.
 
 ## Out of scope
 - Implementing live barcode scan UI or expiry OCR capture

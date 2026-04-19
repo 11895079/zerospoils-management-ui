@@ -6,6 +6,8 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/barcode/learned_barcode_mapping_store.dart';
+import '../../core/barcode/local_barcode_catalog.dart';
+import '../../core/barcode/open_food_facts_client.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/receipt_batch_repository.dart';
@@ -63,6 +65,19 @@ final learnedBarcodeMappingStoreProvider = Provider<LearnedBarcodeMappingStore>(
     return LearnedBarcodeMappingStore();
   },
 );
+
+/// Seed barcode catalog loaded from the bundled JSON asset.
+/// Falls back to the compiled-in map for any barcode not in the JSON.
+final localBarcodeCatalogProvider = FutureProvider<LocalBarcodeCatalog>((ref) {
+  return LocalBarcodeCatalog.fromAsset();
+});
+
+/// OpenFoodFacts client for real-time barcode resolution when local lookup misses.
+final openFoodFactsClientProvider = Provider<OpenFoodFactsClient>((ref) {
+  final client = OpenFoodFactsClient();
+  ref.onDispose(client.close);
+  return client;
+});
 
 /// Progress stats provider (aggregates items + telemetry locally)
 final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {

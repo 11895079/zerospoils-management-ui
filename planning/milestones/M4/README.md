@@ -41,10 +41,10 @@
 | **290** | Crash reporting + basic performance monitoring | ⚠️ In Progress | — | Firebase Crashlytics and release symbol flow were added under M4/370 scope; `docs/ops.md` triage workflow remains outstanding |
 | **295** | Dark mode theme toggle | ⚠️ In Progress | — | Toggle is present in Settings but currently disabled (`Soon`) and does not switch app theme live |
 | **300** | Basic metrics dashboard (optional) | ⏳ Not Started | — | No `docs/metrics.md` dashboard artifact found yet |
-| **370** | Closed-testing backend security hardening (Firebase + Supabase) | ⚠️ In Review | [#85](https://github.com/11895079/zerospoils/pull/85) | Steps 1-6 are marked complete in the issue, with server-side endpoint gating still open |
+| **370** | Closed-testing backend security hardening (Firebase + Supabase) | ⚠️ In Progress | — | Steps 1-6 are marked complete in the issue; server-side endpoint gating still open; no PR open yet |
 
 ### Commentary
 
 - M4 delivery is active, with the bulk of concrete implementation progress currently concentrated in issue 370.
 - No M4 issue is fully closed yet against all documented acceptance criteria, so milestone completion remains at 0/10.
-- After PR #85 merges and server-side endpoint gating is completed, M4 completion should be re-baselined.
+- After server-side endpoint gating is completed and a PR is opened and merged for issue 370, M4 completion should be re-baselined.

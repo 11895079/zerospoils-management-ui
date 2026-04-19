@@ -253,7 +253,7 @@ void main() {
 
     final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
       const BarcodeCaptureResult.success(
-        rawValue: '0678000012345',
+        rawValue: '055000132152',
         suggestedName: 'Greek Yogurt',
         suggestedCategory: ItemCategory.dairy,
         source: 'seed_catalog',
@@ -306,7 +306,7 @@ void main() {
       final barcodeText = tester.widget<Text>(
         find.byKey(const Key('camera_assisted_detected_barcode')),
       );
-      expect(barcodeText.data, '0678000012345');
+      expect(barcodeText.data, '055000132152');
 
       final nameField = tester.widget<TextFormField>(
         find.byKey(const Key('item_form_name_field')),
@@ -324,7 +324,7 @@ void main() {
 
     final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
       const BarcodeCaptureResult.success(
-        rawValue: '0678000012345',
+        rawValue: '055000132152',
         suggestedName: 'Greek Yogurt',
         suggestedCategory: ItemCategory.dairy,
         source: 'seed_catalog',
@@ -443,7 +443,7 @@ void main() {
 
       final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
         const BarcodeCaptureResult.success(
-          rawValue: '0678000012345',
+          rawValue: '055000132152',
           suggestedName: 'Greek Yogurt',
           suggestedCategory: ItemCategory.dairy,
           source: 'seed_catalog',
@@ -528,7 +528,7 @@ void main() {
       final telemetry = TelemetryClient(consentEnabled: true);
       final fakeBarcodeLauncher = FakeBarcodeCaptureLauncher(
         const BarcodeCaptureResult.success(
-          rawValue: '0678000012345',
+          rawValue: '055000132152',
           suggestedName: 'Greek Yogurt',
           suggestedCategory: ItemCategory.dairy,
           source: 'seed_catalog',

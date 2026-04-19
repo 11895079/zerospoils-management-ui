@@ -184,7 +184,7 @@ void main() {
     test(
       'seed catalog returns suggestion for known barcode without network',
       () {
-        final suggestion = lookupBarcodeSuggestion('0678000012345');
+        final suggestion = lookupBarcodeSuggestion('055000132152');
         expect(suggestion, isNotNull);
         expect(suggestion!.source, 'seed_catalog');
       },
@@ -202,14 +202,14 @@ void main() {
       'learned mapping stored offline is readable without network',
       () async {
         await store.saveMapping(
-          rawValue: '0678000012345',
-          name: 'Vanilla Yogurt',
-          category: ItemCategory.dairy,
+          rawValue: '055000132152',
+          name: 'Instant Coffee Override',
+          category: ItemCategory.pantry,
         );
 
-        final suggestion = await store.getSuggestion('0678000012345');
+        final suggestion = await store.getSuggestion('055000132152');
         expect(suggestion, isNotNull);
-        expect(suggestion!.name, 'Vanilla Yogurt');
+        expect(suggestion!.name, 'Instant Coffee Override');
         expect(suggestion.source, 'learned_local');
       },
     );
@@ -217,11 +217,11 @@ void main() {
     test(
       'learned mapping takes precedence over seed catalog offline',
       () async {
-        const barcode = '0678000012345';
+        const barcode = '055000132152';
         await store.saveMapping(
           rawValue: barcode,
-          name: 'User Yogurt Override',
-          category: ItemCategory.dairy,
+          name: 'User Coffee Override',
+          category: ItemCategory.pantry,
         );
 
         final learned = await store.getSuggestion(barcode);
@@ -229,7 +229,7 @@ void main() {
 
         // Simulates offline lookup precedence: learned first
         final effective = learned ?? seed;
-        expect(effective!.name, 'User Yogurt Override');
+        expect(effective!.name, 'User Coffee Override');
         expect(effective.source, 'learned_local');
       },
     );
@@ -238,9 +238,20 @@ void main() {
       expect(normalizeBarcodeValue('123'), isNull);
     });
 
+    test('normalizeBarcodeValue rejects invalid GTIN checksum', () {
+      // 0678000012345 is length-valid but fails GTIN Luhn checksum
+      expect(normalizeBarcodeValue('0678000012345'), isNull);
+    });
+
     test('normalizeBarcodeValue accepts 8-14 digit values', () {
-      expect(normalizeBarcodeValue('12345678'), isNotNull);
-      expect(normalizeBarcodeValue('06783123456789'), isNotNull);
+      expect(
+        normalizeBarcodeValue('12345670'),
+        isNotNull,
+      ); // 8-digit EAN-8, valid checksum
+      expect(
+        normalizeBarcodeValue('00059161402208'),
+        isNotNull,
+      ); // 14-digit EAN-14, valid checksum
     });
   });
 
