@@ -96,30 +96,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     try {
       final telemetry = ref.read(telemetryClientProvider);
+      final service = BackupRestoreService(telemetry: telemetry);
+      final PreparedBackupExport preparedExport = format == 'json'
+          ? await service.prepareJsonExport()
+          : await service.prepareCsvExport();
 
-      // Let user choose destination
       final extension = format == 'json' ? 'json' : 'csv';
       final savePath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save $format export as',
-        fileName: 'zerospoils_export.$extension',
+        fileName: preparedExport.suggestedFileName,
         type: FileType.custom,
         allowedExtensions: [extension],
+        bytes: preparedExport.bytes,
       );
 
-      String resolvedPath;
+      final BackupResult result;
       if (savePath != null) {
-        resolvedPath = savePath;
+        result = BackupResult(
+          success: true,
+          filePath: savePath,
+          sizeBytes: preparedExport.bytes.length,
+          metadata: preparedExport.metadata,
+        );
       } else {
         final directory = await getApplicationDocumentsDirectory();
         final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-        resolvedPath =
+        final resolvedPath =
             '${directory.path}/zerospoils_export_$timestamp.$extension';
+        result = await service.writePreparedExport(preparedExport, resolvedPath);
       }
 
-      final service = BackupRestoreService(telemetry: telemetry);
-      final result = format == 'json'
-          ? await service.exportToJson(resolvedPath)
-          : await service.exportToCsv(resolvedPath);
+      telemetry.trackBackupSucceeded(
+        sizeBytes: result.sizeBytes,
+        itemCount: result.metadata?.itemCount ?? 0,
+        appVersion: result.metadata?.appVersion ?? 'unknown',
+      );
 
       // Persist export metadata
       final prefs = await SharedPreferences.getInstance();

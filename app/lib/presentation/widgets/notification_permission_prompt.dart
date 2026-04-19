@@ -1,53 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// Widget to request notification permissions on first run or via settings
-class NotificationPermissionPrompt extends ConsumerWidget {
-  final VoidCallback? onGranted;
-  final VoidCallback? onDenied;
+class NotificationPermissionPrompt extends StatelessWidget {
+  const NotificationPermissionPrompt({super.key});
 
-  const NotificationPermissionPrompt({
-    super.key,
-    this.onGranted,
-    this.onDenied,
-  });
+  Future<bool> _requestPermissions() async {
+    try {
+      final plugin = FlutterLocalNotificationsPlugin();
+      final androidResult = await plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+      final iosResult = await plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+      final macResult = await plugin
+          .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
 
-  Future<void> _requestPermissions(BuildContext context) async {
-    final plugin = FlutterLocalNotificationsPlugin();
-    // Android: No explicit permission request via plugin; handled by OS or use permission_handler if needed
-    // iOS
-    final iosResult = await plugin
-        .resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin
-        >()
-        ?.requestPermissions(alert: true, badge: true, sound: true);
-    // macOS
-    final macResult = await plugin
-        .resolvePlatformSpecificImplementation<
-          MacOSFlutterLocalNotificationsPlugin
-        >()
-        ?.requestPermissions(alert: true, badge: true, sound: true);
-    // If any platform grants permission, treat as granted
-    if (iosResult == true || macResult == true) {
-      if (onGranted != null) onGranted!();
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Notifications enabled!')));
-      }
-    } else {
-      if (onDenied != null) onDenied!();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Notifications permission denied.')),
-        );
-      }
+      return androidResult == true || iosResult == true || macResult == true;
+    } catch (_) {
+      return false;
     }
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return AlertDialog(
       key: const Key('notification_prompt'),
       title: const Text('Enable Notifications'),
@@ -57,20 +41,15 @@ class NotificationPermissionPrompt extends ConsumerWidget {
       actions: [
         TextButton(
           key: const Key('notification_prompt_cancel'),
-          onPressed: () {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) Navigator.of(context).pop();
-            });
-          },
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Not now'),
         ),
         ElevatedButton(
           key: const Key('notification_prompt_confirm'),
           onPressed: () async {
-            await _requestPermissions(context);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (context.mounted) Navigator.of(context).pop();
-            });
+            final granted = await _requestPermissions();
+            if (!context.mounted) return;
+            Navigator.of(context).pop(granted);
           },
           child: const Text('Enable'),
         ),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Widget to request camera permissions for expiry date OCR scanning
 class CameraPermissionPrompt extends StatefulWidget {
-  final VoidCallback? onGranted;
-  final VoidCallback? onDenied;
-
-  const CameraPermissionPrompt({super.key, this.onGranted, this.onDenied});
+  const CameraPermissionPrompt({super.key});
 
   @override
   State<CameraPermissionPrompt> createState() => _CameraPermissionPromptState();
@@ -14,37 +13,38 @@ class CameraPermissionPrompt extends StatefulWidget {
 class _CameraPermissionPromptState extends State<CameraPermissionPrompt> {
   bool _requesting = false;
 
+  Future<bool> _requestPermissionResult() async {
+    try {
+      final status = await Permission.camera
+          .request()
+          .timeout(const Duration(seconds: 2), onTimeout: () {
+            return PermissionStatus.denied;
+          });
+      if (status.isGranted || status.isLimited) {
+        return true;
+      }
+      if (status.isPermanentlyDenied || status.isRestricted) {
+        await openAppSettings();
+      }
+      return false;
+    } on MissingPluginException {
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _requestCameraPermission() async {
     setState(() {
       _requesting = true;
     });
 
     try {
-      // TODO: Integrate with permission_handler package for actual camera permission request
-      // In production, use:
-      // import 'package:permission_handler/permission_handler.dart';
-      // final status = await Permission.camera.request();
-      // if (status.isGranted) {
-      //   widget.onGranted?.call();
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Camera permission enabled')),
-      //   );
-      // } else if (status.isDenied) {
-      //   widget.onDenied?.call();
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(content: Text('Camera permission denied')),
-      //   );
-      // }
-
-      // Placeholder: Simulate permission granted
-      widget.onGranted?.call();
+      final granted = await _requestPermissionResult();
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Camera permission enabled')),
-      );
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(granted);
     } finally {
+      if (!context.mounted) return;
       if (mounted) {
         setState(() {
           _requesting = false;
@@ -54,8 +54,7 @@ class _CameraPermissionPromptState extends State<CameraPermissionPrompt> {
   }
 
   void _deferPermission() {
-    widget.onDenied?.call();
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(false);
   }
 
   @override

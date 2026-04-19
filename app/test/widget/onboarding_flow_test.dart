@@ -170,6 +170,56 @@ void main() {
       expect(find.byType(AlertDialog), findsNothing);
     });
 
+    testWidgets(
+      'Enabling notifications dismisses the dialog without blanking onboarding',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        );
+
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+
+        await tester.tap(
+          find.byKey(const Key('onboarding_notifications_button')),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('notification_prompt_confirm')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.byType(PageView), findsOneWidget);
+        expect(find.byKey(const Key('onboarding_continue_button')), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Enabling camera dismisses the dialog without blanking onboarding',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        );
+
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('onboarding_camera_button')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('camera_prompt_confirm')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AlertDialog), findsNothing);
+        expect(find.byType(PageView), findsOneWidget);
+        expect(find.byKey(const Key('onboarding_continue_button')), findsOneWidget);
+      },
+    );
+
     testWidgets('Welcome page displays key content elements', (
       WidgetTester tester,
     ) async {
