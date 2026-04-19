@@ -7,6 +7,7 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:hive/hive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -107,6 +108,18 @@ class BackupResult {
   });
 }
 
+class PreparedBackupExport {
+  final Uint8List bytes;
+  final BackupMetadata metadata;
+  final String suggestedFileName;
+
+  PreparedBackupExport({
+    required this.bytes,
+    required this.metadata,
+    required this.suggestedFileName,
+  });
+}
+
 /// Backup and restore service
 class BackupRestoreService {
   static const String _currentSchemaVersion = '1.0.0';
@@ -135,8 +148,23 @@ class BackupRestoreService {
     }
   }
 
-  /// Export all data to JSON file
-  Future<BackupResult> exportToJson(String filePath) async {
+  Future<BackupResult> writePreparedExport(
+    PreparedBackupExport export,
+    String filePath,
+  ) async {
+    final file = File(filePath);
+    await file.writeAsBytes(export.bytes, flush: true);
+    final sizeBytes = await file.length();
+
+    return BackupResult(
+      success: true,
+      filePath: filePath,
+      sizeBytes: sizeBytes,
+      metadata: export.metadata,
+    );
+  }
+
+  Future<PreparedBackupExport> prepareJsonExport() async {
     telemetry?.trackBackupStarted();
     try {
       final itemsBox = await _openBoxIfNeeded<Item>('items');
@@ -173,22 +201,14 @@ class BackupRestoreService {
         },
       };
 
-      final jsonString = const JsonEncoder.withIndent('  ').convert(backup);
-      final file = File(filePath);
-      await file.writeAsString(jsonString);
-      final sizeBytes = await file.length();
-
-      telemetry?.trackBackupSucceeded(
-        sizeBytes: sizeBytes,
-        itemCount: metadata.itemCount,
-        appVersion: metadata.appVersion,
+      final bytes = Uint8List.fromList(
+        utf8.encode(const JsonEncoder.withIndent('  ').convert(backup)),
       );
 
-      return BackupResult(
-        success: true,
-        filePath: filePath,
-        sizeBytes: sizeBytes,
+      return PreparedBackupExport(
+        bytes: bytes,
         metadata: metadata,
+        suggestedFileName: 'zerospoils_export.json',
       );
     } catch (e) {
       telemetry?.trackBackupFailed(reason: e.runtimeType.toString());
@@ -196,15 +216,13 @@ class BackupRestoreService {
     }
   }
 
-  /// Export inventory data to CSV file (human-readable format)
-  Future<BackupResult> exportToCsv(String filePath) async {
+  Future<PreparedBackupExport> prepareCsvExport() async {
     telemetry?.trackBackupStarted();
     try {
       final itemsBox = await _openBoxIfNeeded<Item>('items');
       final items = itemsBox.values.toList();
       final appVersion = await _getAppVersion();
 
-      // Build CSV with headers
       final buffer = StringBuffer();
       buffer.writeln(
         'ID,Name,Brand,Category,Expiry Date,Prepared Date,Purchase Price,Location,Status,Created At,Updated At',
@@ -230,11 +248,6 @@ class BackupRestoreService {
         );
       }
 
-      final csvString = buffer.toString();
-      final file = File(filePath);
-      await file.writeAsString(csvString);
-      final sizeBytes = await file.length();
-
       final metadata = BackupMetadata(
         backupVersion: _backupVersion,
         schemaVersion: _currentSchemaVersion,
@@ -243,22 +256,43 @@ class BackupRestoreService {
         itemCount: items.length,
       );
 
-      telemetry?.trackBackupSucceeded(
-        sizeBytes: sizeBytes,
-        itemCount: metadata.itemCount,
-        appVersion: metadata.appVersion,
-      );
-
-      return BackupResult(
-        success: true,
-        filePath: filePath,
-        sizeBytes: sizeBytes,
+      return PreparedBackupExport(
+        bytes: Uint8List.fromList(utf8.encode(buffer.toString())),
         metadata: metadata,
+        suggestedFileName: 'zerospoils_export.csv',
       );
     } catch (e) {
       telemetry?.trackBackupFailed(reason: e.runtimeType.toString());
       rethrow;
     }
+  }
+
+  /// Export all data to JSON file
+  Future<BackupResult> exportToJson(String filePath) async {
+    final export = await prepareJsonExport();
+    final result = await writePreparedExport(export, filePath);
+
+    telemetry?.trackBackupSucceeded(
+      sizeBytes: result.sizeBytes,
+      itemCount: export.metadata.itemCount,
+      appVersion: export.metadata.appVersion,
+    );
+
+    return result;
+  }
+
+  /// Export inventory data to CSV file (human-readable format)
+  Future<BackupResult> exportToCsv(String filePath) async {
+    final export = await prepareCsvExport();
+    final result = await writePreparedExport(export, filePath);
+
+    telemetry?.trackBackupSucceeded(
+      sizeBytes: result.sizeBytes,
+      itemCount: export.metadata.itemCount,
+      appVersion: export.metadata.appVersion,
+    );
+
+    return result;
   }
 
   /// Escape CSV values (handle commas, quotes, newlines)

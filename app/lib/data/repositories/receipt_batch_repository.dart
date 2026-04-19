@@ -10,14 +10,27 @@ abstract class ReceiptBatchRepository {
 
 class HiveReceiptBatchRepository implements ReceiptBatchRepository {
   static const String _boxName = 'receipt_batches';
+  final HiveInterface _hive;
   Box<ReceiptBatch>? _box;
+
+  HiveReceiptBatchRepository({HiveInterface? hive}) : _hive = hive ?? Hive;
 
   @override
   Future<void> init() async {
-    if (!Hive.isBoxOpen(_boxName)) {
-      _box = await Hive.openBox<ReceiptBatch>(_boxName);
-    } else {
-      _box = Hive.box<ReceiptBatch>(_boxName);
+    if (_box != null && _box!.isOpen) {
+      return;
+    }
+
+    if (_hive.isBoxOpen(_boxName)) {
+      _box = _hive.box<ReceiptBatch>(_boxName);
+      return;
+    }
+
+    try {
+      _box = await _hive.openBox<ReceiptBatch>(_boxName);
+    } catch (_) {
+      await _hive.deleteBoxFromDisk(_boxName);
+      _box = await _hive.openBox<ReceiptBatch>(_boxName);
     }
   }
 

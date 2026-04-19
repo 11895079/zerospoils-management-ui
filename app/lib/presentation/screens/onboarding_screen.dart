@@ -24,7 +24,6 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late PageController _pageController;
   int _currentPage = 0;
-  bool _onboardingComplete = false;
 
   @override
   void initState() {
@@ -54,11 +53,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     });
 
     if (!mounted) return;
-    setState(() {
-      _onboardingComplete = true;
-    });
-
-    // Navigate to home/add-item (only if GoRouter is available)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         try {
@@ -109,10 +103,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_onboardingComplete) {
-      return const SizedBox.shrink();
-    }
-
     final variant = ref.watch(onboardingVariantProvider);
     final numPages = _getNumPages();
 
@@ -254,18 +244,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             key: const Key('onboarding_notifications_button'),
             icon: const Icon(Icons.notifications),
             label: const Text('Enable Notifications'),
-            onPressed: () {
+            onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
                 'permission_type': 'notifications',
               });
-              showDialog(
+              final granted = await showDialog<bool>(
                 context: context,
-                builder: (_) => NotificationPermissionPrompt(
-                  onGranted: () => _onPermissionGranted('notifications'),
-                  onDenied: () =>
-                      _onPermissionDeferredOrDenied('notifications'),
-                ),
+                builder: (_) => const NotificationPermissionPrompt(),
               );
+              if (!mounted || granted == null) return;
+              if (granted) {
+                _onPermissionGranted('notifications');
+              } else {
+                _onPermissionDeferredOrDenied('notifications');
+              }
             },
           ),
           const SizedBox(height: 16),
@@ -273,17 +265,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             key: const Key('onboarding_camera_button'),
             icon: const Icon(Icons.camera_alt),
             label: const Text('Enable Camera'),
-            onPressed: () {
+            onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
                 'permission_type': 'camera',
               });
-              showDialog(
+              final granted = await showDialog<bool>(
                 context: context,
-                builder: (_) => CameraPermissionPrompt(
-                  onGranted: () => _onPermissionGranted('camera'),
-                  onDenied: () => _onPermissionDeferredOrDenied('camera'),
-                ),
+                builder: (_) => const CameraPermissionPrompt(),
               );
+              if (!mounted || granted == null) return;
+              if (granted) {
+                _onPermissionGranted('camera');
+              } else {
+                _onPermissionDeferredOrDenied('camera');
+              }
             },
           ),
           const SizedBox(height: 32),
