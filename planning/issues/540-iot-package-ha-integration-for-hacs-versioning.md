@@ -1,3 +1,5 @@
+# 540 — IoT Package HA Integration for HACS Versioning
+
 ## Context
 If the spike works, packaging increases discoverability and repeatability.
 

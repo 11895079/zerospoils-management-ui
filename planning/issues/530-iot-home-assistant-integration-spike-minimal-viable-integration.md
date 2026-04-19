@@ -1,3 +1,5 @@
+# 530 — IoT Home Assistant Integration Spike (Minimal Viable Integration)
+
 ## Context
 Validate effort and user value before committing to a full HA integration.
 

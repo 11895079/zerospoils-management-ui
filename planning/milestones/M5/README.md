@@ -20,6 +20,12 @@
 - Ops observability (crashes, key events, alerts) (390)
 - Incident response runbook (400)
 - Legal compliance review (cross-jurisdiction) (405)
+- App Store Optimization (ASO): keyword, metadata, category strategy (600)
+- App Store Connect submission workflow — Apple review prep (605)
+- Google Play staged rollout management (610)
+- Public TestFlight external beta (615)
+- Launch-day operations plan and war room playbook (620)
+- First-48h metrics dashboard and post-launch health monitoring (625)
 
 *User Engagement & Retention:*
 - Smart Replenishment: predict re-buy items from consumption history (155)
@@ -27,12 +33,26 @@
 - Zesto Phase 3: Tap-to-cycle contextual tips (370-zesto)
 - Zesto Phase 3: Unlockable mascot characters (375-zesto)
 - Zesto Phase 3: Settings controls for frequency/message types (380-zesto)
+- In-app review prompt strategy and implementation (655)
+- Onboarding funnel analytics and first-7-days improvement loop (660)
+
+*Community & Social Media:*
+- Social media account setup and brand presence (630)
+- Community platform launch: Discord server + r/ZeroSpoils subreddit (635)
+- Brand voice, tone, and content guidelines (640)
+- Content marketing calendar and short-form video pipeline (645)
+- Influencer/creator outreach, Product Hunt launch, press strategy (650)
+
+*Ad Monetization (free tier):*
+- Free tier ad strategy and AdMob spike — go/no-go decision (665)
+- Ad placement UX guidelines and brand-safe ad policy (670)
+- AdMob SDK integration: rewarded video + GDPR/ATT consent (675)
 
 **Acceptance:** App published to App Store and Google Play; privacy policy live; support workflow documented; monitoring and alerting configured; engagement features driving DAU/retention; ready for public users.
 
-**Out of Scope:** Pro tier features (household sync, receipt OCR, LLM-powered recipe suggestions), IoT integrations (deferred to M6/M7).
+**Out of Scope:** Pro tier features (household sync, receipt OCR, LLM-powered recipe suggestions), IoT integrations (deferred to M6/M7). Paid advertising campaigns. AdMob integration is gated on the spike (665) go/no-go decision.
 
-**Issues:** 155, 160, 310, 320, 330, 335, 340, 345, 350, 360, 365, 370, 370-zesto, 375, 375-zesto, 380, 380-zesto, 390, 400, 405
+**Issues:** 155, 160, 310, 320, 330, 335, 340, 345, 350, 360, 365, 370, 370-zesto, 375, 375-zesto, 380, 380-zesto, 390, 400, 405, 600, 605, 610, 615, 620, 625, 630, 635, 640, 645, 650, 655, 660, 665, 670, 675
 
 **Deferred to M6 Pro Tier:** 185 (Recipe suggestions — requires LLM infrastructure, tiered payment plan TBD)
 
@@ -42,7 +62,7 @@
 
 ## M5 Implementation Status
 
-**Last Updated:** March 7, 2026 — **Progress:** 0/20 planned issues complete (0%)**
+**Last Updated:** April 18, 2026 — **Progress:** 0/36 planned issues complete (0%)**
 
 **Note:** Recipe suggestions (185) deferred to M6 Pro tier (requires LLM infrastructure). M5 focuses on launch infrastructure + free-tier engagement features.
 
@@ -70,11 +90,27 @@
 | **390** | Ops observability baseline | ⚠️ In Progress | — | Crashlytics and launch-hardening work exists (M4/370), but M5 ops observability deliverables are not fully closed |
 | **400** | Incident response runbook | ⏳ Not Started | — | Incident response runbook completion not yet tracked |
 | **405** | Legal compliance review (cross-jurisdiction) | ⏳ Not Started | — | Compliance review artifact not yet marked complete |
-**M5 scope expanded:** Now includes user engagement/retention features (Smart Replenishment, Weekly Streaks, Zesto gamification) to drive DAU after public launch
-- **Recipe suggestions (185) deferred to M6 Pro tier:** No half-measures; LLM-powered personalization justifies premium tier
-- M5 currently has preparatory signals in Settings and release docs, but no issue is fully closed against all acceptance criteria
-- Most M5 work remains launch-operations and governance heavy, with new engagement features to be implemented after core launch infrastructure
-- **Key engagement strategy:** Free-tier features (Smart Replenishment, Streaks) drive habit formation; Pro tier (M6) offers premium LLM/ML features
+| **600** | ASO: keyword, metadata, category strategy | ⏳ Not Started | — | Separate from listing copy (320); drives organic search discoverability |
+| **605** | App Store Connect submission workflow | ⏳ Not Started | — | Screenshots, privacy labels, export compliance, age rating, review notes |
+| **610** | Google Play staged rollout management | ⏳ Not Started | — | 20%→50%→100% with documented promotion criteria and rollback threshold |
+| **615** | Public TestFlight external beta | ⏳ Not Started | — | 50–200 real-world testers, go/no-go decision criteria before 1.0 submission |
+| **620** | Launch-day operations plan and war room playbook | ⏳ Not Started | — | T-48h to T+24h sequence, role assignments, halt criteria, social post scheduling |
+| **625** | First-48h metrics dashboard and post-launch health monitoring | ⏳ Not Started | — | Firebase + Play Console + App Store Connect; crash alert thresholds pre-configured |
+| **630** | Social media account setup and brand presence | ⏳ Not Started | — | Instagram, TikTok, Reddit, X — handles secured, bios live, link-in-bio configured |
+| **635** | Community platform launch (Discord + r/ZeroSpoils) | ⏳ Not Started | — | Discord server with channel structure; minor app code change to add "Join Community" Settings entry |
+| **640** | Brand voice, tone, and content guidelines | ⏳ Not Started | — | Written doc: voice attributes, Zesto personality, vocabulary do/don't, tone by context |
+| **645** | Content marketing calendar and short-form video pipeline | ⏳ Not Started | — | 8-week calendar, 6–8 content format templates, first 4 weeks produced before launch |
+| **650** | Influencer/creator outreach, Product Hunt, press strategy | ⏳ Not Started | — | PH launch Tuesday–Thursday; 10 influencer contacts; 5 press pitches; outreach tracker |
+| **655** | In-app review prompt strategy and implementation | ⏳ Not Started | — | Native StoreKit/Play Review API; trigger: 3 sessions + 5 items + 90-day cooldown; Remote Config tunable |
+| **660** | Onboarding funnel analytics and first-7-days optimization | ⏳ Not Started | — | Full funnel instrumentation; D1 ≥40%, D7 ≥20% targets; month-1 improvement loop |
+| **665** | Free tier ad strategy and AdMob spike | ⏳ Not Started | — | Research + revenue projection + go/no-go recommendation before any SDK work |
+| **670** | Ad placement UX guidelines and brand-safe ad policy | ⏳ Not Started | — | Allowlist/denylist; rewarded video only at launch; gated on 665 "go" decision |
+| **675** | AdMob SDK integration: rewarded video + GDPR/ATT | ⏳ Not Started | — | Rewarded video tied to Zesto mascot unlock; UMP consent; ATT post-onboarding; gated on 665+670 |
 
-- M5 currently has preparatory signals in Settings and release docs, but no issue is fully closed against all acceptance criteria.
-- Most M5 work remains launch-operations and governance heavy, and should be tracked with explicit docs + PR links as implementation proceeds.
+### Commentary
+
+- **M5 scope expanded (April 2026):** Added launch mechanics (ASO, App Store Connect submission, Play staged rollout, external beta), community/social media track (accounts, Discord, brand voice, content calendar, influencer/PH/press), growth loops (review prompts, onboarding funnel analytics), and ad monetization track (strategy spike → UX policy → SDK integration).
+- **Zesto gamification is free tier:** Phases 1–3 (including unlockable mascot characters) are in M5, not Pro. The rewarded video ad mechanic (675) ties into Zesto mascot unlocks as an optional engagement/revenue driver.
+- **Ad monetization is gated:** Issues 670 and 675 only proceed if the spike (665) recommends a "go" decision. The UX policy (670) must be approved before any SDK code is written.
+- **Recipe suggestions (185) deferred to M6 Pro tier:** LLM-powered personalization justifies premium tier.
+- Most original M5 work remains launch-operations heavy; no original issue is fully closed against all acceptance criteria yet.
