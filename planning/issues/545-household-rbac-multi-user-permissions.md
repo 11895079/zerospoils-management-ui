@@ -1,4 +1,4 @@
-# 540 — Household RBAC & Multi-User Permissions (Pro Tier)
+# 545 — Household RBAC & Multi-User Permissions (Pro Tier)
 
 **Epic:** Pro / Multi-User Households  
 **Priority:** P3 (Future, M5+ — defer until we validate multi-user demand)  

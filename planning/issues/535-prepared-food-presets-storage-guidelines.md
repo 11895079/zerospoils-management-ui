@@ -1,4 +1,4 @@
-# 530 — Prepared Food Presets & Storage Guidelines
+# 535 — Prepared Food Presets & Storage Guidelines
 
 **Epic:** Pro / UX Polish  
 **Priority:** P2 (Nice-to-have for M4, enables faster data entry)  
