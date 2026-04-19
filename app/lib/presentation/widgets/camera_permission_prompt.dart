@@ -42,10 +42,9 @@ class _CameraPermissionPromptState extends State<CameraPermissionPrompt> {
 
     try {
       final granted = await _requestPermissionResult();
-      if (!context.mounted) return;
+      if (!mounted) return;
       Navigator.of(context).pop(granted);
     } finally {
-      if (!context.mounted) return;
       if (mounted) {
         setState(() {
           _requesting = false;
