@@ -192,7 +192,10 @@ void main() {
 
         expect(find.byType(AlertDialog), findsNothing);
         expect(find.byType(PageView), findsOneWidget);
-        expect(find.byKey(const Key('onboarding_continue_button')), findsOneWidget);
+        expect(
+          find.byKey(const Key('onboarding_continue_button')),
+          findsOneWidget,
+        );
       },
     );
 
@@ -216,7 +219,10 @@ void main() {
 
         expect(find.byType(AlertDialog), findsNothing);
         expect(find.byType(PageView), findsOneWidget);
-        expect(find.byKey(const Key('onboarding_continue_button')), findsOneWidget);
+        expect(
+          find.byKey(const Key('onboarding_continue_button')),
+          findsOneWidget,
+        );
       },
     );
 

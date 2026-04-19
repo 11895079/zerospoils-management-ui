@@ -48,28 +48,31 @@ void main() {
     }
   });
 
-  test('prepareCsvExport returns bytes and metadata without writing file', () async {
-    final itemsBox = await hive.openBox<Item>('items');
-    await itemsBox.put(
-      'item-1',
-      Item(
-        id: 'item-1',
-        name: 'Milk',
-        category: ItemCategory.dairy,
-        location: StorageLocation.fridge,
-        quantity: 1,
-        unit: Unit.liter,
-        status: ItemStatus.available,
-        createdAt: DateTime(2026, 4, 1),
-        updatedAt: DateTime(2026, 4, 1),
-      ),
-    );
+  test(
+    'prepareCsvExport returns bytes and metadata without writing file',
+    () async {
+      final itemsBox = await hive.openBox<Item>('items');
+      await itemsBox.put(
+        'item-1',
+        Item(
+          id: 'item-1',
+          name: 'Milk',
+          category: ItemCategory.dairy,
+          location: StorageLocation.fridge,
+          quantity: 1,
+          unit: Unit.liter,
+          status: ItemStatus.available,
+          createdAt: DateTime(2026, 4, 1),
+          updatedAt: DateTime(2026, 4, 1),
+        ),
+      );
 
-    final service = BackupRestoreService(hive: hive);
-    final export = await service.prepareCsvExport();
+      final service = BackupRestoreService(hive: hive);
+      final export = await service.prepareCsvExport();
 
-    expect(export.metadata.itemCount, 1);
-    expect(export.suggestedFileName, endsWith('.csv'));
-    expect(utf8.decode(export.bytes), contains('Milk'));
-  });
+      expect(export.metadata.itemCount, 1);
+      expect(export.suggestedFileName, endsWith('.csv'));
+      expect(utf8.decode(export.bytes), contains('Milk'));
+    },
+  );
 }

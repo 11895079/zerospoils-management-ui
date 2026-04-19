@@ -123,7 +123,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-');
         final resolvedPath =
             '${directory.path}/zerospoils_export_$timestamp.$extension';
-        result = await service.writePreparedExport(preparedExport, resolvedPath);
+        result = await service.writePreparedExport(
+          preparedExport,
+          resolvedPath,
+        );
       }
 
       telemetry.trackBackupSucceeded(

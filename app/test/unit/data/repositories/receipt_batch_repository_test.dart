@@ -45,9 +45,7 @@ class _FakeHiveInterface extends Fake implements HiveInterface {
 void main() {
   test('init recreates receipt batch box after open failure', () async {
     final fakeHive = _FakeHiveInterface(box: _FakeReceiptBatchBox());
-    final repository = HiveReceiptBatchRepository(
-      hive: fakeHive,
-    );
+    final repository = HiveReceiptBatchRepository(hive: fakeHive);
 
     await repository.init();
 

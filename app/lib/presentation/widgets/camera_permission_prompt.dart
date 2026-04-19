@@ -15,11 +15,12 @@ class _CameraPermissionPromptState extends State<CameraPermissionPrompt> {
 
   Future<bool> _requestPermissionResult() async {
     try {
-      final status = await Permission.camera
-          .request()
-          .timeout(const Duration(seconds: 2), onTimeout: () {
-            return PermissionStatus.denied;
-          });
+      final status = await Permission.camera.request().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          return PermissionStatus.denied;
+        },
+      );
       if (status.isGranted || status.isLimited) {
         return true;
       }
