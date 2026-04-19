@@ -1,0 +1,231 @@
+{
+  "metadata": {
+    "dataset_version": "2026-04-14",
+    "generated_at": "2026-04-14T10:29:55Z",
+    "record_count": 20,
+    "region": "ca",
+    "schema_version": 1
+  },
+  "records": [
+    {
+      "barcode": "0059161402208",
+      "brand": "Olympic",
+      "category_hint": "dairy",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Greek Plain Yogurt",
+      "quantity_hint": "1.75",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0059161701752",
+      "brand": "Olympic Biologique",
+      "category_hint": "dairy",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Plain Yogurt",
+      "quantity_hint": "1.75",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0059161701769",
+      "brand": "Olympic",
+      "category_hint": "dairy",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Vanilla Yogurt",
+      "quantity_hint": "1.75",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0059161702032",
+      "brand": "Olympic",
+      "category_hint": "dairy",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Yogourt Nature",
+      "quantity_hint": "650",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0059161702049",
+      "brand": "Olympic",
+      "category_hint": "dairy",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Vanilla",
+      "quantity_hint": "650",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0064200010122",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Garden Select Tomato and Basil",
+      "quantity_hint": "125",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "ml"
+    },
+    {
+      "barcode": "0064200010146",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Garden Select Garlic and Onion",
+      "quantity_hint": "600",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "ml"
+    },
+    {
+      "barcode": "0064200116206",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Penne Rigate",
+      "quantity_hint": "500",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0064200116442",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Spaghetti",
+      "quantity_hint": "500",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0064200116978",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Whole Wheat Spaghettini",
+      "quantity_hint": "375",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0064200160056",
+      "brand": "Catelli",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Gluten Free Macaroni",
+      "quantity_hint": "340",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0068100083095",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Extra Creamy Peanut Butter",
+      "quantity_hint": "1",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0068100083293",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Smooth Light Creamy Peanut Butter",
+      "quantity_hint": "1",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0068100084214",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Smooth Peanut Butter",
+      "quantity_hint": "500",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "0068100084238",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Crunchy Peanut Butter",
+      "quantity_hint": "1",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0068100084245",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Smooth Peanut Butter",
+      "quantity_hint": "1",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0068100084276",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Smooth Peanut Butter",
+      "quantity_hint": "2",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "kg"
+    },
+    {
+      "barcode": "0068100084665",
+      "brand": "Kraft",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Only Peanuts Smooth",
+      "quantity_hint": "750",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    },
+    {
+      "barcode": "030000316832",
+      "brand": "Quaker",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Instant Oatmeal Flavor Variety",
+      "quantity_hint": "18",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "ct"
+    },
+    {
+      "barcode": "055000132152",
+      "brand": "Nescafe",
+      "category_hint": "pantry",
+      "last_curated_at": "2026-04-14T10:29:55Z",
+      "product_name": "Instant Coffee",
+      "quantity_hint": "475",
+      "region": "ca",
+      "source": "openfoodfacts-manual-curation",
+      "unit_hint": "g"
+    }
+  ]
+}

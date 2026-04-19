@@ -189,7 +189,22 @@ class _PackagedItemFastAddScreenState
 
     final learnedStore = ref.read(learnedBarcodeMappingStoreProvider);
     final learnedSuggestion = await learnedStore.getSuggestion(normalized);
-    final suggestion = learnedSuggestion ?? lookupBarcodeSuggestion(normalized);
+    final catalog = await ref.read(localBarcodeCatalogProvider.future);
+    var suggestion = learnedSuggestion ?? catalog.lookup(normalized);
+
+    // Real-time fallback: resolve against OpenFoodFacts when local lookup misses.
+    if (suggestion == null) {
+      final offClient = ref.read(openFoodFactsClientProvider);
+      final remote = await offClient.lookup(normalized);
+      if (remote != null) {
+        await learnedStore.saveMapping(
+          rawValue: normalized,
+          name: remote.name,
+          category: remote.category,
+        );
+        suggestion = remote;
+      }
+    }
 
     if (!mounted) {
       return;

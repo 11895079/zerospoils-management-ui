@@ -61,7 +61,24 @@ final barcodeCaptureLauncherProvider = Provider<BarcodeCaptureLauncher>((ref) {
     final learnedSuggestion = await learnedMappingStore.getSuggestion(
       normalized,
     );
-    final suggestion = learnedSuggestion ?? lookupBarcodeSuggestion(normalized);
+    final catalog = await ref.read(localBarcodeCatalogProvider.future);
+    var suggestion = learnedSuggestion ?? catalog.lookup(normalized);
+
+    // Real-time fallback: resolve against OpenFoodFacts when local lookup misses.
+    if (suggestion == null) {
+      final offClient = ref.read(openFoodFactsClientProvider);
+      final remote = await offClient.lookup(normalized);
+      if (remote != null) {
+        // Cache the result locally so future scans of the same barcode are instant.
+        await learnedMappingStore.saveMapping(
+          rawValue: normalized,
+          name: remote.name,
+          category: remote.category,
+        );
+        suggestion = remote;
+      }
+    }
+
     return BarcodeCaptureResult.success(
       rawValue: normalized,
       suggestedName: suggestion?.name,
