@@ -132,9 +132,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/reference-data/barcode_seed_ca.v1.json
     - assets/reference-data/barcode_seed_ca.v2.json
-    - assets/reference-data/barcode_seed_ca.v1.report.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

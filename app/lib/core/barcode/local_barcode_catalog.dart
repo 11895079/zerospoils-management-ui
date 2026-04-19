@@ -47,6 +47,32 @@ BarcodeProductSuggestion? lookupBarcodeSuggestion(String rawValue) {
   return _seedCatalog[normalized];
 }
 
+/// Maps a category_hint string (including non-enum values from the seed JSON)
+/// to an [ItemCategory]. Extended hints like beverages, condiments, snacks,
+/// protein, frozen, and bakery are mapped to the closest app category.
+ItemCategory _categoryFromHint(String hint) {
+  switch (hint.toLowerCase()) {
+    case 'produce':
+      return ItemCategory.produce;
+    case 'dairy':
+      return ItemCategory.dairy;
+    case 'meat':
+    case 'protein':
+      return ItemCategory.meat;
+    case 'grains':
+    case 'bakery':
+      return ItemCategory.grains;
+    case 'pantry':
+    case 'beverages':
+    case 'condiments':
+    case 'snacks':
+      return ItemCategory.pantry;
+    case 'frozen':
+    default:
+      return ItemCategory.other;
+  }
+}
+
 /// Catalog that merges the compiled-in seed map with an asset-loaded overlay.
 /// The asset JSON is authoritative: any record it contains takes priority over
 /// the compiled-in map, so a fresh JSON asset alone can update suggestions OTA.
@@ -61,23 +87,38 @@ class LocalBarcodeCatalog {
 
   static Future<LocalBarcodeCatalog> fromAsset([AssetBundle? bundle]) async {
     final b = bundle ?? rootBundle;
-    final jsonStr = await b.loadString(_assetPath);
-    final decoded = jsonDecode(jsonStr) as Map<String, dynamic>;
-    final records = decoded['records'] as List<dynamic>;
-    final overlay = <String, BarcodeProductSuggestion>{};
-    for (final r in records) {
-      final map = r as Map<String, dynamic>;
-      final barcode = map['barcode'] as String?;
-      final name = map['product_name'] as String?;
-      if (barcode == null || name == null) continue;
-      final catHint = map['category_hint'] as String? ?? '';
-      overlay[barcode] = BarcodeProductSuggestion(
-        name: name,
-        category: ItemCategory.fromString(catHint),
-        source: map['source'] as String? ?? 'seed_catalog',
-      );
+    try {
+      final jsonStr = await b.loadString(_assetPath);
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is! Map<String, dynamic>) {
+        return LocalBarcodeCatalog._(overlay: const {});
+      }
+
+      final records = decoded['records'];
+      if (records is! List) {
+        return LocalBarcodeCatalog._(overlay: const {});
+      }
+
+      final overlay = <String, BarcodeProductSuggestion>{};
+      for (final r in records) {
+        if (r is! Map<String, dynamic>) continue;
+        final barcode = r['barcode'] as String?;
+        final name = r['product_name'] as String?;
+        final normalizedBarcode = barcode == null
+            ? null
+            : normalizeBarcodeValue(barcode);
+        if (normalizedBarcode == null || name == null) continue;
+        final catHint = r['category_hint'] as String? ?? '';
+        overlay[normalizedBarcode] = BarcodeProductSuggestion(
+          name: name,
+          category: _categoryFromHint(catHint),
+          source: r['source'] as String? ?? 'seed_catalog',
+        );
+      }
+      return LocalBarcodeCatalog._(overlay: overlay);
+    } catch (_) {
+      return LocalBarcodeCatalog._(overlay: const {});
     }
-    return LocalBarcodeCatalog._(overlay: overlay);
   }
 
   /// Look up a raw barcode value (normalizes + validates checksum internally).

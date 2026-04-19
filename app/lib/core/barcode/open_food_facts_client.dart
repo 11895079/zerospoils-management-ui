@@ -9,7 +9,8 @@ import 'local_barcode_catalog.dart';
 /// not found in the local seed catalog or learned mappings.
 ///
 /// API: https://world.openfoodfacts.org/api/v2/product/{barcode}.json?fields=...
-/// No API key required. Responses are public domain (ODBL).
+/// No API key required. OpenFoodFacts data is licensed under ODbL; use may
+/// require attribution and compliance with the ODbL terms.
 ///
 /// This is a read-only, best-effort lookup. Network failures return null and
 /// do not throw — callers must treat the result as optional.
@@ -120,4 +121,7 @@ class OpenFoodFactsClient {
     if (raw is List) return raw.whereType<String>().toList();
     return [];
   }
+
+  /// Closes the underlying HTTP client, releasing any held socket resources.
+  void close() => _http.close();
 }

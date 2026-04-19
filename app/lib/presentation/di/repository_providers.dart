@@ -74,7 +74,9 @@ final localBarcodeCatalogProvider = FutureProvider<LocalBarcodeCatalog>((ref) {
 
 /// OpenFoodFacts client for real-time barcode resolution when local lookup misses.
 final openFoodFactsClientProvider = Provider<OpenFoodFactsClient>((ref) {
-  return OpenFoodFactsClient();
+  final client = OpenFoodFactsClient();
+  ref.onDispose(client.close);
+  return client;
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)

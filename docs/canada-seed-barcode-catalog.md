@@ -52,8 +52,9 @@ Output:
 - Size report JSON with rejection and dedupe counters.
 
 ## Packaging and Reuse
-- Seed artifact path: `app/assets/reference-data/barcode_seed_ca.v1.json`.
-- Size report path: `app/assets/reference-data/barcode_seed_ca.v1.report.json`.
+- Seed artifact path: `app/assets/reference-data/barcode_seed_ca.v2.json`.
+- Size report path: `app/assets/reference-data/barcode_seed_ca.v2.report.json`.
+- App runtime currently consumes `app/assets/reference-data/barcode_seed_ca.v2.json` via `LocalBarcodeCatalog._assetPath`.
 - The same normalized artifact format is designed to be reused by M3/206 update packs.
 
 ## Install Size Budget

@@ -34,8 +34,8 @@ Create a Canada-first seed barcode catalog artifact, curation workflow, and pack
 - Added script-level tests: `scripts/test_curate_canada_seed_catalog.py`.
 - Added curated source input seed: `app/assets/reference-data/source/canada_seed_catalog_v2026-04-13.csv`.
 - Generated app-ready artifact and report:
-	- `app/assets/reference-data/barcode_seed_ca.v1.json`
-	- `app/assets/reference-data/barcode_seed_ca.v1.report.json`
+	- `app/assets/reference-data/barcode_seed_ca.v2.json`
+	- `app/assets/reference-data/barcode_seed_ca.v2.report.json`
 - Added catalog governance and packaging doc: `docs/canada-seed-barcode-catalog.md`.
 - Remaining work is runtime wiring/consumption and any accessibility notes for maintainer tooling.
 

@@ -224,6 +224,7 @@ def fetch_top_canada(
             if not code or not name or scans <= 0:
                 continue
 
+            qty, unit = _parse_quantity(qty_raw)
             all_products.append(
                 {
                     "barcode": code,
@@ -231,8 +232,8 @@ def fetch_top_canada(
                     "brand": brand,
                     "categories_tags": cats,
                     "category_hint": _category_hint_from_tags(cats),
-                    "quantity_hint": _parse_quantity(qty_raw)[0],
-                    "unit_hint": _parse_quantity(qty_raw)[1],
+                    "quantity_hint": qty,
+                    "unit_hint": unit,
                     "unique_scans_n": int(scans),
                 }
             )
@@ -241,10 +242,11 @@ def fetch_top_canada(
 
         # Check if we have enough to detect the elbow and stop early
         if len(all_products) >= min_results:
-            scan_counts = [p["unique_scans_n"] for p in all_products]
-            elbow = find_elbow_index(scan_counts, drop_threshold)
+            scan_counts = [p["unique_scans_n"] for p in all_products[min_results:]]
+            elbow_offset = find_elbow_index(scan_counts, drop_threshold)
+            elbow = min_results + elbow_offset
             if elbow < len(all_products):
-                # Elbow found — trim and stop fetching
+                # Elbow found after the minimum required results — trim and stop fetching
                 all_products = all_products[:elbow]
                 if verbose:
                     print(
