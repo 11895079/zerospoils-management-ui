@@ -90,12 +90,24 @@ def _clean(value: str) -> str:
     return re.sub(r"\s+", " ", (value or "").strip())
 
 
+def _open_dump(dump_path: Path):
+    """Open the dump file whether it is gzip-compressed or a plain CSV."""
+    suffix = dump_path.suffix.lower()
+    if suffix == ".gz":
+        gz = gzip.open(dump_path, "rb")
+        return io.TextIOWrapper(gz, encoding="utf-8", errors="replace", newline=""), gz
+    else:
+        # Plain (uncompressed) CSV — open directly
+        fh = dump_path.open("r", encoding="utf-8", errors="replace", newline="")
+        return fh, fh
+
+
 def stream_canadian_products(
     dump_path: Path,
     *,
     verbose: bool = True,
 ) -> list[dict[str, Any]]:
-    """Stream the gzip dump and return all Canadian products with scan counts."""
+    """Stream the dump (gzip or plain CSV) and return all Canadian products with scan counts."""
     products: list[dict[str, Any]] = []
     rows_read = 0
     canada_found = 0
@@ -105,9 +117,11 @@ def stream_canadian_products(
 
     start = time.monotonic()
 
-    with gzip.open(dump_path, "rb") as gz:
-        # Wrap in a text decoder; errors='replace' to handle encoding oddities
-        text_stream = io.TextIOWrapper(gz, encoding="utf-8", errors="replace", newline="")
+    # Raise the CSV field size limit — OFx rows can contain very long ingredient lists
+    csv.field_size_limit(10 * 1024 * 1024)  # 10 MB
+
+    text_stream, handle = _open_dump(dump_path)
+    try:
         reader = csv.DictReader(text_stream, delimiter=_SEPARATOR)
 
         # Validate expected columns exist
@@ -165,6 +179,8 @@ def stream_canadian_products(
                 }
             )
             canada_found += 1
+    finally:
+        handle.close()
 
     elapsed = time.monotonic() - start
     if verbose:
@@ -254,7 +270,7 @@ def run_cli(args: argparse.Namespace) -> int:
         print(f"ERROR: dump file not found: {dump_path}", file=sys.stderr)
         return 1
 
-    print(f"Streaming {dump_path.name} ({dump_path.stat().st_size / 1_073_741_824:.2f} GB compressed) …", file=sys.stderr)
+    print(f"Streaming {dump_path.name} ({dump_path.stat().st_size / 1_073_741_824:.2f} GB) …", file=sys.stderr)
 
     products = stream_canadian_products(dump_path, verbose=True)
 

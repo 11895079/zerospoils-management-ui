@@ -57,7 +57,7 @@ class LocalBarcodeCatalog {
 
   final Map<String, BarcodeProductSuggestion> _overlay;
 
-  static const _assetPath = 'assets/reference-data/barcode_seed_ca.v1.json';
+  static const _assetPath = 'assets/reference-data/barcode_seed_ca.v2.json';
 
   static Future<LocalBarcodeCatalog> fromAsset([AssetBundle? bundle]) async {
     final b = bundle ?? rootBundle;
