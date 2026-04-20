@@ -22,6 +22,24 @@ class ThrowingImagePicker extends ImagePicker {
   }
 }
 
+class ReturningImagePicker extends ImagePicker {
+  ReturningImagePicker(this.filePath);
+
+  final String filePath;
+
+  @override
+  Future<XFile?> pickImage({
+    required ImageSource source,
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    bool requestFullMetadata = true,
+  }) async {
+    return XFile(filePath);
+  }
+}
+
 void main() {
   group('MlKitExpiryDateOcrService', () {
     setUp(() {
@@ -57,6 +75,16 @@ void main() {
       final result = await service.scanExpiryDate();
 
       expect(result.failure, ExpiryDateOcrFailure.unknown);
+    });
+
+    test('returns noDateDetected when OCR finds no readable date text', () async {
+      final service = MlKitExpiryDateOcrService(
+        imagePicker: ReturningImagePicker('/tmp/nonexistent-expiry-image.jpg'),
+      );
+
+      final result = await service.scanExpiryDate();
+
+      expect(result.failure, ExpiryDateOcrFailure.noDateDetected);
     });
   });
 }
