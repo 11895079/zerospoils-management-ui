@@ -131,139 +131,139 @@ class ItemCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Opacity(
-                              opacity: isConsumedOrWasted ? 0.5 : 1.0,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          item.name,
-                                          style: textTheme.titleMedium
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                      ),
-                                      if (item.type == ItemType.prepared)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.sm,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.primary.withValues(
-                                              alpha: 0.1,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Prepared',
-                                            style: AppTextStyles.caption
-                                                .copyWith(
-                                                  color: AppColors.primary,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ),
-                                      if (hasWasteBadge) ...[
-                                        const SizedBox(width: AppSpacing.sm),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: AppSpacing.sm,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.danger.withValues(
-                                              alpha: 0.12,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Wasted ${item.wastePercentage}%',
-                                            style: AppTextStyles.caption
-                                                .copyWith(
-                                                  color: AppColors.danger,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 2),
-                                  if (item.brand?.trim().isNotEmpty ==
-                                      true) ...[
-                                    Text(
-                                      key: Key('item_card_brand_${item.id}'),
-                                      item.brand!.trim(),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: secondaryTextColor,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                  ],
-                                  Row(
-                                    children: [
-                                      Text(
-                                        item.unit.displayName,
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: secondaryTextColor,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                      Opacity(
+                        opacity: isConsumedOrWasted ? 0.5 : 1.0,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                          if (isConsumedOrWasted)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.sm,
-                                vertical: 2,
+                            if (item.type == ItemType.prepared ||
+                                hasWasteBadge ||
+                                isConsumedOrWasted)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Wrap(
+                                  spacing: AppSpacing.sm,
+                                  runSpacing: 2,
+                                  children: [
+                                    if (item.type == ItemType.prepared)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Prepared',
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    if (hasWasteBadge)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.danger.withValues(
+                                            alpha: 0.12,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Wasted ${item.wastePercentage}%',
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: AppColors.danger,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    if (isConsumedOrWasted)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: item.status ==
+                                                  ItemStatus.consumed
+                                              ? AppColors.textSecondary
+                                                  .withValues(alpha: 0.2)
+                                              : AppColors.danger.withValues(
+                                                  alpha: 0.2,
+                                                ),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          item.status == ItemStatus.consumed
+                                              ? 'Used'
+                                              : 'Wasted',
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: item.status ==
+                                                    ItemStatus.consumed
+                                                ? AppColors.textSecondary
+                                                : AppColors.danger,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                              decoration: BoxDecoration(
-                                color: item.status == ItemStatus.consumed
-                                    ? AppColors.textSecondary.withValues(
-                                        alpha: 0.2,
-                                      )
-                                    : AppColors.danger.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                item.status == ItemStatus.consumed
-                                    ? 'Used'
-                                    : 'Wasted',
-                                style: AppTextStyles.caption.copyWith(
-                                  color: item.status == ItemStatus.consumed
-                                      ? AppColors.textSecondary
-                                      : AppColors.danger,
+                            const SizedBox(height: 2),
+                            if (item.brand?.trim().isNotEmpty == true) ...[
+                              Text(
+                                key: Key('item_card_brand_${item.id}'),
+                                item.brand!.trim(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: secondaryTextColor,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              const SizedBox(height: 2),
+                            ],
+                            Text(
+                              item.unit.displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: secondaryTextColor,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                        ],
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Opacity(
                         opacity: isConsumedOrWasted ? 0.5 : 1.0,
                         child: Text(
                           _getLocationDisplay(item.location),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
                             color: secondaryTextColor,
                           ),
@@ -276,6 +276,8 @@ class ItemCard extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 _getExpiryDisplay(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: textTheme.bodyMedium?.copyWith(
                                   color: isExpired
                                       ? AppColors.danger
@@ -302,47 +304,53 @@ class ItemCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Cost (purchasePrice)
-                if (item.purchasePrice != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (item.purchasePrice != null)
+                    Text(
                       '\$${item.purchasePrice!.toStringAsFixed(2)}',
                       style: textTheme.bodyMedium?.copyWith(
                         color: secondaryTextColor,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                  QuantityToggle(
+                    quantity: item.quantity,
+                    isEnabled: !isConsumedOrWasted,
+                    onConfirm: (newQty) {
+                      if (onQuantityChanged != null && newQty != item.quantity) {
+                        onQuantityChanged!(newQty);
+                      }
+                    },
                   ),
-                // Number toggle for quantity
-                QuantityToggle(
-                  quantity: item.quantity,
-                  isEnabled: !isConsumedOrWasted,
-                  onConfirm: (newQty) {
-                    if (onQuantityChanged != null && newQty != item.quantity) {
-                      onQuantityChanged!(newQty);
-                    }
-                  },
-                ),
-                if (onEdit != null && !isConsumedOrWasted)
-                  GestureDetector(
-                    onTap: onEdit,
-                    child: Padding(
-                      key: Key('item_card_edit_${item.id}'),
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text('✏️', style: TextStyle(fontSize: 18)),
+                  if (onEdit != null && !isConsumedOrWasted)
+                    GestureDetector(
+                      onTap: onEdit,
+                      child: Padding(
+                        key: Key('item_card_edit_${item.id}'),
+                        padding: const EdgeInsets.all(8.0),
+                        child: const Text('✏️', style: TextStyle(fontSize: 18)),
+                      ),
                     ),
-                  ),
-                if (onDelete != null && !isConsumedOrWasted)
-                  GestureDetector(
-                    onTap: onDelete,
-                    child: Padding(
-                      key: Key('item_card_delete_${item.id}'),
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text('🗑️', style: TextStyle(fontSize: 18)),
+                  if (onDelete != null && !isConsumedOrWasted)
+                    GestureDetector(
+                      onTap: onDelete,
+                      child: Padding(
+                        key: Key('item_card_delete_${item.id}'),
+                        padding: const EdgeInsets.all(8.0),
+                        child: const Text('🗑️', style: TextStyle(fontSize: 18)),
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
             // Progress bar at bottom
             if (expiryProgress != null && !isConsumedOrWasted)

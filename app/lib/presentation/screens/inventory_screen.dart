@@ -1066,6 +1066,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       key: const Key('inventory_view_mode_list'),
       padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
       controller: _listController,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      ),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
@@ -1085,12 +1089,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = width >= 900
+        // Keep phone layouts at 2 columns; 3+ columns are for wider screens.
+        final columns = width >= 1100
             ? 4
-            : width >= 390
+            : width >= 700
             ? 3
             : 2;
-        final childAspectRatio = columns >= 3 ? 0.95 : 0.9;
+        final childAspectRatio = columns >= 3 ? 0.92 : 0.72;
 
         return GridView.builder(
           key: const Key('inventory_view_mode_grid'),
@@ -1100,6 +1105,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             bottom: AppSpacing.xxl,
           ),
           controller: _listController,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
             mainAxisSpacing: AppSpacing.md,
