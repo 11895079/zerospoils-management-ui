@@ -106,7 +106,13 @@ class MlKitExpiryDateOcrService implements ExpiryDateOcrService {
         ExpiryDateOcrFailure.unknown,
       );
     } finally {
-      await textRecognizer?.close();
+      if (textRecognizer != null) {
+        try {
+          await textRecognizer.close();
+        } catch (_) {
+          // Ignore plugin cleanup failures in test environments without channel bindings.
+        }
+      }
     }
   }
 

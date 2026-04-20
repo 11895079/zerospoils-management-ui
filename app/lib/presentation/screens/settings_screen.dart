@@ -788,7 +788,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              controller.dispose();
               Navigator.pop(context, false);
             },
             child: const Text('Cancel'),
@@ -803,7 +802,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 onPressed: isConfirmed
                     ? () {
-                        controller.dispose();
                         Navigator.pop(context, true);
                       }
                     : null,

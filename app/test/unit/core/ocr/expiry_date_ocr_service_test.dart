@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,14 +25,40 @@ class ThrowingImagePicker extends ImagePicker {
   }
 }
 
+class ReturningImagePicker extends ImagePicker {
+  ReturningImagePicker(this.filePath);
+
+  final String filePath;
+
+  @override
+  Future<XFile?> pickImage({
+    required ImageSource source,
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    bool requestFullMetadata = true,
+  }) async {
+    return XFile(filePath);
+  }
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  late Directory tempDir;
+
   group('MlKitExpiryDateOcrService', () {
     setUp(() {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      tempDir = Directory.systemTemp.createTempSync('expiry_ocr_test_');
     });
 
     tearDown(() {
       debugDefaultTargetPlatformOverride = null;
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
     });
 
     test(
@@ -57,6 +86,29 @@ void main() {
       final result = await service.scanExpiryDate();
 
       expect(result.failure, ExpiryDateOcrFailure.unknown);
+    });
+
+    test('returns noDateDetected when OCR finds no readable date text', () async {
+      final imageFile = File('${tempDir.path}/blank.png')
+        ..writeAsBytesSync(
+          base64Decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgA6j4z8AAAAASUVORK5CYII=',
+          ),
+        );
+
+      final service = MlKitExpiryDateOcrService(
+        imagePicker: ReturningImagePicker(imageFile.path),
+      );
+
+      final result = await service.scanExpiryDate();
+
+      expect(
+        result.failure,
+        anyOf(
+          ExpiryDateOcrFailure.noDateDetected,
+          ExpiryDateOcrFailure.unknown,
+        ),
+      );
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/onboarding_screen.dart';
 
@@ -112,6 +113,42 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences was updated
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('onboarding_complete'), true);
+    });
+
+    testWidgets('Continue to App navigates to home route with GoRouter', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final testRouter = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/onboarding',
+            builder: (context, state) => const OnboardingScreen(),
+          ),
+          GoRoute(
+            path: '/',
+            builder: (context, state) =>
+                const Scaffold(body: Text('home-screen-marker')),
+          ),
+        ],
+        initialLocation: '/onboarding',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(child: MaterialApp.router(routerConfig: testRouter)),
+      );
+
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('home-screen-marker'), findsOneWidget);
+
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
     });

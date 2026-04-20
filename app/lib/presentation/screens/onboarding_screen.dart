@@ -24,6 +24,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   late PageController _pageController;
   int _currentPage = 0;
+  bool _isCompletingOnboarding = false;
 
   @override
   void initState() {
@@ -44,6 +45,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _completeOnboarding() async {
+    if (_isCompletingOnboarding) return;
+    if (mounted) {
+      setState(() {
+        _isCompletingOnboarding = true;
+      });
+    }
+
     // Persist onboarding completion flag
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
@@ -53,16 +61,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     });
 
     if (!mounted) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        try {
-          context.go('/');
-        } catch (e) {
-          // No GoRouter in context (e.g., in unit tests)
-          debugPrint('GoRouter not available: $e');
-        }
-      }
-    });
+    final goRouter = GoRouter.maybeOf(context);
+    if (goRouter != null) {
+      goRouter.go('/');
+      return;
+    }
+
+    // In non-router contexts (e.g., some widget tests), just avoid throwing.
+    if (mounted) {
+      setState(() {
+        _isCompletingOnboarding = false;
+      });
+    }
   }
 
   void _skipOnboarding() {
@@ -284,7 +294,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           OutlinedButton(
             key: const Key('onboarding_continue_button'),
-            onPressed: _completeOnboarding,
+            onPressed: _isCompletingOnboarding ? null : _completeOnboarding,
             child: const Text('Continue to App'),
           ),
         ],

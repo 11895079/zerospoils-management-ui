@@ -1,0 +1,11 @@
+name: google_mlkit_text_recognition
+description: Simulator-safe stub for ML Kit text recognition.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
