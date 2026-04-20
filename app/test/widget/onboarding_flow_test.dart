@@ -138,9 +138,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp.router(routerConfig: testRouter),
-        ),
+        ProviderScope(child: MaterialApp.router(routerConfig: testRouter)),
       );
 
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);

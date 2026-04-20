@@ -77,14 +77,19 @@ void main() {
       expect(result.failure, ExpiryDateOcrFailure.unknown);
     });
 
-    test('returns noDateDetected when OCR finds no readable date text', () async {
-      final service = MlKitExpiryDateOcrService(
-        imagePicker: ReturningImagePicker('/tmp/nonexistent-expiry-image.jpg'),
-      );
+    test(
+      'returns noDateDetected when OCR finds no readable date text',
+      () async {
+        final service = MlKitExpiryDateOcrService(
+          imagePicker: ReturningImagePicker(
+            '/tmp/nonexistent-expiry-image.jpg',
+          ),
+        );
 
-      final result = await service.scanExpiryDate();
+        final result = await service.scanExpiryDate();
 
-      expect(result.failure, ExpiryDateOcrFailure.noDateDetected);
-    });
+        expect(result.failure, ExpiryDateOcrFailure.noDateDetected);
+      },
+    );
   });
 }

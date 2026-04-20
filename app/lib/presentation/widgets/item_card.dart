@@ -204,10 +204,10 @@ class ItemCard extends StatelessWidget {
                                           vertical: 2,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: item.status ==
-                                                  ItemStatus.consumed
+                                          color:
+                                              item.status == ItemStatus.consumed
                                               ? AppColors.textSecondary
-                                                  .withValues(alpha: 0.2)
+                                                    .withValues(alpha: 0.2)
                                               : AppColors.danger.withValues(
                                                   alpha: 0.2,
                                                 ),
@@ -220,7 +220,8 @@ class ItemCard extends StatelessWidget {
                                               ? 'Used'
                                               : 'Wasted',
                                           style: AppTextStyles.caption.copyWith(
-                                            color: item.status ==
+                                            color:
+                                                item.status ==
                                                     ItemStatus.consumed
                                                 ? AppColors.textSecondary
                                                 : AppColors.danger,
@@ -326,7 +327,8 @@ class ItemCard extends StatelessWidget {
                     quantity: item.quantity,
                     isEnabled: !isConsumedOrWasted,
                     onConfirm: (newQty) {
-                      if (onQuantityChanged != null && newQty != item.quantity) {
+                      if (onQuantityChanged != null &&
+                          newQty != item.quantity) {
                         onQuantityChanged!(newQty);
                       }
                     },
@@ -346,7 +348,10 @@ class ItemCard extends StatelessWidget {
                       child: Padding(
                         key: Key('item_card_delete_${item.id}'),
                         padding: const EdgeInsets.all(8.0),
-                        child: const Text('🗑️', style: TextStyle(fontSize: 18)),
+                        child: const Text(
+                          '🗑️',
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                     ),
                 ],
