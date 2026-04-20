@@ -121,6 +121,14 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.1
   flutter_local_notifications_platform_interface: ^10.0.0
 
+dependency_overrides:
+  # Temporary iOS simulator fallback: bypass native ML Kit pods until upstream
+  # arm64 simulator binaries are available.
+  google_mlkit_text_recognition:
+    path: tooling_stubs/google_mlkit_text_recognition
+  google_mlkit_image_labeling:
+    path: tooling_stubs/google_mlkit_image_labeling
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
