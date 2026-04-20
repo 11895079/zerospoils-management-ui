@@ -26,7 +26,15 @@ jobs:
         run: flutter --version
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          cat > pubspec_overrides.yaml <<'EOF'
+          dependency_overrides:
+            google_mlkit_text_recognition:
+              path: tooling_stubs/google_mlkit_text_recognition
+            google_mlkit_image_labeling:
+              path: tooling_stubs/google_mlkit_image_labeling
+          EOF
+          flutter pub get
 
       - name: Format check
         run: dart format --set-exit-if-changed lib test integration_test

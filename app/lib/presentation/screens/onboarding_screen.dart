@@ -46,7 +46,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _completeOnboarding() async {
     if (_isCompletingOnboarding) return;
-    _isCompletingOnboarding = true;
+    if (mounted) {
+      setState(() {
+        _isCompletingOnboarding = true;
+      });
+    }
 
     // Persist onboarding completion flag
     final prefs = await SharedPreferences.getInstance();
@@ -64,7 +68,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
 
     // In non-router contexts (e.g., some widget tests), just avoid throwing.
-    _isCompletingOnboarding = false;
+    if (mounted) {
+      setState(() {
+        _isCompletingOnboarding = false;
+      });
+    }
   }
 
   void _skipOnboarding() {

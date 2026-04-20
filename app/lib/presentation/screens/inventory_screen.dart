@@ -1062,13 +1062,17 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildInventoryListView(List<Item> items) {
+    final shouldUseBouncingScroll =
+        Theme.of(context).platform == TargetPlatform.iOS ||
+        Theme.of(context).platform == TargetPlatform.macOS;
+
     return ListView.builder(
       key: const Key('inventory_view_mode_list'),
       padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
       controller: _listController,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
+      physics: shouldUseBouncingScroll
+          ? const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+          : null,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -1086,6 +1090,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildInventoryGridView(List<Item> items) {
+    final shouldUseBouncingScroll =
+        Theme.of(context).platform == TargetPlatform.iOS ||
+        Theme.of(context).platform == TargetPlatform.macOS;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -1105,9 +1113,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             bottom: AppSpacing.xxl,
           ),
           controller: _listController,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
+          physics: shouldUseBouncingScroll
+              ? const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                )
+              : null,
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,

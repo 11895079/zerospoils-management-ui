@@ -334,25 +334,19 @@ class ItemCard extends StatelessWidget {
                     },
                   ),
                   if (onEdit != null && !isConsumedOrWasted)
-                    GestureDetector(
-                      onTap: onEdit,
-                      child: Padding(
-                        key: Key('item_card_edit_${item.id}'),
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text('✏️', style: TextStyle(fontSize: 18)),
-                      ),
+                    IconButton(
+                      key: Key('item_card_edit_${item.id}'),
+                      tooltip: 'Edit item',
+                      icon: const Icon(Icons.edit_outlined),
+                      onPressed: onEdit,
                     ),
                   if (onDelete != null && !isConsumedOrWasted)
-                    GestureDetector(
-                      onTap: onDelete,
-                      child: Padding(
-                        key: Key('item_card_delete_${item.id}'),
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text(
-                          '🗑️',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
+                    IconButton(
+                      key: Key('item_card_delete_${item.id}'),
+                      tooltip: 'Delete item',
+                      icon: const Icon(Icons.delete_outline),
+                      color: AppColors.danger,
+                      onPressed: onDelete,
                     ),
                 ],
               ),
