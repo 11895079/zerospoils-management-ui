@@ -156,7 +156,7 @@ class _LinkItemsToBatchDialogState
                       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? theme.primaryColor.withOpacity(0.1)
+                            ? theme.primaryColor.withValues(alpha: 0.1)
                             : theme.cardColor,
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusLg,

@@ -493,7 +493,7 @@ class _ReceiptBatchCaptureScreenState
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<PaymentMethod>(
                 key: const Key('receipt_batch_payment_method_field'),
-                value: _paymentMethod,
+                initialValue: _paymentMethod,
                 decoration: const InputDecoration(
                   labelText: 'Payment method',
                   hintText: 'Optional',
