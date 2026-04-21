@@ -89,6 +89,18 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
     final receiptImagePaths = reader.readList().cast<String>();
     final goodsImagePaths = reader.readList().cast<String>();
 
+    // v2+: optional payment method (absent in older records)
+    PaymentMethod? paymentMethod;
+    try {
+      final hasPayment = reader.readBool();
+      if (hasPayment) {
+        final index = reader.readByte();
+        if (index >= 0 && index < PaymentMethod.values.length) {
+          paymentMethod = PaymentMethod.values[index];
+        }
+      }
+    } catch (_) {}
+
     return ReceiptBatch(
       id: id,
       createdAt: createdAt,
@@ -99,6 +111,7 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
       items: items,
       receiptImagePaths: receiptImagePaths,
       goodsImagePaths: goodsImagePaths,
+      paymentMethod: paymentMethod,
     );
   }
 
@@ -122,5 +135,9 @@ class ReceiptBatchAdapter extends TypeAdapter<ReceiptBatch> {
     writer.writeList(obj.items);
     writer.writeList(obj.receiptImagePaths);
     writer.writeList(obj.goodsImagePaths);
+    writer.writeBool(obj.paymentMethod != null);
+    if (obj.paymentMethod != null) {
+      writer.writeByte(obj.paymentMethod!.index);
+    }
   }
 }

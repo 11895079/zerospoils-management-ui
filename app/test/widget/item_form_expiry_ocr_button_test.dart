@@ -256,6 +256,7 @@ void main() {
         rawValue: '055000132152',
         suggestedName: 'Greek Yogurt',
         suggestedCategory: ItemCategory.dairy,
+        suggestedBrand: 'Oikos',
         source: 'seed_catalog',
       ),
     );
@@ -312,6 +313,11 @@ void main() {
         find.byKey(const Key('item_form_name_field')),
       );
       expect(nameField.controller?.text, 'Greek Yogurt');
+
+      final brandField = tester.widget<TextFormField>(
+        find.byKey(const Key('item_form_brand_field')),
+      );
+      expect(brandField.controller?.text, 'Oikos');
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }

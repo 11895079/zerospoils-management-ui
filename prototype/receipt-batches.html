@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZeroSpoils - Receipt Batches</title>
+  <title>ZeroSpoils - Shopping History</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,10 +11,10 @@
     <header class="app-header">
       <div class="header-left">
         <button class="menu-btn" onclick="toggleDrawer(true)" aria-label="Open menu">☰</button>
-        <h1>Receipt Batches</h1>
+        <h1>Shopping History</h1>
       </div>
       <div class="header-right">
-        <a href="receipt-batch-capture.html" class="filter-btn" style="text-decoration:none;">New Batch</a>
+        <a href="shopping-batch-form.html" class="filter-btn" style="text-decoration:none;">+ New</a>
       </div>
     </header>
 
@@ -38,33 +38,48 @@
     <div class="content">
       <div class="section-label">This week</div>
       <a href="receipt-batch-detail.html" class="batch-card">
-        <div class="batch-title">Feb 9 · 5 receipts</div>
-        <div class="batch-meta">18 items · $112.40 total</div>
+        <div class="batch-title">🛒 Costco · Apr 19</div>
+        <div class="batch-meta">14 items · $138.20 · 💳 Credit</div>
         <div class="batch-stats">
-          <span>Consumed $64</span>
-          <span>Wasted $8</span>
-          <span>Remaining $40.40</span>
+          <span class="consumed">Consumed $40</span>
+          <span class="remaining">Remaining $98.20</span>
         </div>
       </a>
 
       <a href="receipt-batch-detail.html" class="batch-card">
-        <div class="batch-title">Feb 3 · 3 receipts</div>
-        <div class="batch-meta">12 items · $76.20 total</div>
+        <div class="batch-title">🛒 Trader Joe's · Apr 17</div>
+        <div class="batch-meta">8 items · $62.50 · 📱 Mobile</div>
         <div class="batch-stats">
-          <span>Consumed $41</span>
-          <span>Wasted $12</span>
-          <span>Remaining $23.20</span>
+          <span class="consumed">Consumed $28</span>
+          <span class="remaining">Remaining $34.50</span>
+        </div>
+      </a>
+
+      <div class="section-label">Last week</div>
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">🛒 Whole Foods · Apr 12</div>
+        <div class="batch-meta">11 items · $94.80 · 💵 Cash</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $72</span>
+          <span class="wasted">Wasted $8</span>
+          <span class="remaining">Remaining $14.80</span>
+        </div>
+      </a>
+
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">🛒 Safeway · Apr 9</div>
+        <div class="batch-meta">6 items · $45.10 · 🏦 Debit</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $45.10</span>
         </div>
       </a>
 
       <div class="section-label">Older</div>
       <a href="receipt-batch-detail.html" class="batch-card">
-        <div class="batch-title">Jan 28 · 4 receipts</div>
-        <div class="batch-meta">15 items · $98.10 total</div>
+        <div class="batch-title">🛒 Costco · Apr 5</div>
+        <div class="batch-meta">18 items · $162.00 · 💳 Credit</div>
         <div class="batch-stats">
-          <span>Consumed $55</span>
-          <span>Wasted $6</span>
-          <span>Remaining $37.10</span>
+          <span class="consumed">Consumed $162</span>
         </div>
       </a>
     </div>

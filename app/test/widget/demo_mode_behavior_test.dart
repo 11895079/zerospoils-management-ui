@@ -90,7 +90,9 @@ Item _sampleItem({String id = '1', String name = 'Milk'}) {
 
 void main() {
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'feature_flag_override_receipt_batch_capture': false,
+    });
   });
 
   testWidgets(
@@ -116,7 +118,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap delete icon, confirm dialog
-      await tester.tap(find.byKey(const Key('item_card_delete_1')));
+      final deleteButton = find.byKey(const Key('item_card_delete_1'));
+      expect(deleteButton, findsOneWidget);
+      await tester.ensureVisible(deleteButton);
+      await tester.tap(deleteButton);
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('inventory_delete_confirm')));
       await tester.pumpAndSettle();

@@ -6,14 +6,7 @@ import '../widgets/notification_permission_prompt.dart';
 import '../widgets/camera_permission_prompt.dart';
 import '../../presentation/di/service_locator.dart';
 
-/// Feature flag for onboarding flow length (A/B test)
-enum OnboardingVariant { short, long }
-
-final onboardingVariantProvider = StateProvider<OnboardingVariant>(
-  (ref) => OnboardingVariant.short,
-);
-
-/// Simple onboarding screen for ZeroSpoils
+/// Multi-step onboarding screen aligned with prototype flow.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -22,15 +15,40 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const int _numPages = 6;
+  static const String _onboardingPresetPrefsKey =
+      'onboarding_preferred_food_presets';
+  static const List<Map<String, String>> _presetOptions = [
+    {'id': 'jollof_rice', 'label': '🍚 Jollof rice'},
+    {'id': 'curry', 'label': '🍛 Curry'},
+    {'id': 'soup', 'label': '🥣 Soup'},
+    {'id': 'pasta_dishes', 'label': '🍝 Pasta dishes'},
+    {'id': 'stew', 'label': '🍲 Stew'},
+    {'id': 'beans', 'label': '🫘 Beans'},
+  ];
+
   late PageController _pageController;
   int _currentPage = 0;
   bool _isCompletingOnboarding = false;
+  bool _notificationPermissionGranted = false;
+  bool _cameraPermissionGranted = false;
+  Set<String> _selectedPresetIds = <String>{};
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _loadStoredPresetSelection();
     _emitTelemetry('onboarding_started', {});
+  }
+
+  Future<void> _loadStoredPresetSelection() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getStringList(_onboardingPresetPrefsKey) ?? const [];
+    if (!mounted) return;
+    setState(() {
+      _selectedPresetIds = stored.toSet();
+    });
   }
 
   @override
@@ -54,11 +72,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     // Persist onboarding completion flag
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+      _onboardingPresetPrefsKey,
+      _selectedPresetIds.toList(),
+    );
     await prefs.setBool('onboarding_complete', true);
 
-    _emitTelemetry('onboarding_completed', {
-      'variant': ref.read(onboardingVariantProvider).toString(),
-    });
+    _emitTelemetry('onboarding_completed', {'pages': _numPages});
 
     if (!mounted) return;
     final goRouter = GoRouter.maybeOf(context);
@@ -82,43 +102,63 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   void _onPermissionDeferredOrDenied(String permissionType) {
     _emitTelemetry('permission_deferred', {'permission_type': permissionType});
-    // Continue to next page or complete
-    if (_currentPage < _getNumPages() - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      _completeOnboarding();
-    }
+    // Keep users on the final page after permission action.
   }
 
   void _onPermissionGranted(String permissionType) {
     _emitTelemetry('permission_granted', {'permission_type': permissionType});
-    // Continue to next page or complete
-    if (_currentPage < _getNumPages() - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    } else {
-      _completeOnboarding();
-    }
+    if (!mounted) return;
+    setState(() {
+      if (permissionType == 'notifications') {
+        _notificationPermissionGranted = true;
+      } else if (permissionType == 'camera') {
+        _cameraPermissionGranted = true;
+      }
+    });
+    // Keep users on the final page after permission action.
   }
 
-  int _getNumPages() {
-    final variant = ref.watch(onboardingVariantProvider);
-    return variant == OnboardingVariant.short ? 2 : 3;
+  void _togglePreset(String presetId, bool selected) {
+    setState(() {
+      if (selected) {
+        _selectedPresetIds.add(presetId);
+      } else {
+        _selectedPresetIds.remove(presetId);
+      }
+    });
+  }
+
+  void _goNext() {
+    if (_currentPage >= _numPages - 1) {
+      return;
+    }
+    _pageController.nextPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _goBack() {
+    if (_currentPage <= 0) {
+      return;
+    }
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final variant = ref.watch(onboardingVariantProvider);
-    final numPages = _getNumPages();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome', key: Key('onboarding_appbar_title')),
+        leading: _currentPage == 0
+            ? null
+            : IconButton(
+                onPressed: _goBack,
+                icon: const Icon(Icons.arrow_back),
+              ),
         actions: [
           TextButton(
             onPressed: _skipOnboarding,
@@ -139,13 +179,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               },
               children: [
                 _buildWelcomePage(),
-                if (variant == OnboardingVariant.long)
-                  _buildValuePropositionPage(),
-                _buildPermissionsPage(),
+                _buildProblemPage(),
+                _buildSolutionPage(),
+                _buildWorkflowPage(),
+                _buildWastePage(),
+                _buildPermissionsAndPresetsPage(),
               ],
             ),
           ),
-          _buildBottomNav(numPages),
+          _buildBottomNav(),
         ],
       ),
     );
@@ -166,7 +208,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Track your food, reduce waste, and get notified before items expire.',
+            'Reduce food waste, save money, and organize your kitchen.',
             key: const Key('onboarding_welcome_body'),
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
@@ -177,90 +219,222 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Icon(Icons.check_circle, size: 80, color: Colors.green),
           ),
           Text(
-            'Never waste food again\n'
-            'Smart reminders\n'
-            'Simple & offline',
+            'Track inventory\nSmart reminders\nShopping flow + waste insights',
             key: const Key('onboarding_feature_list'),
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            key: const Key('onboarding_next_button_0'),
+            onPressed: _goNext,
+            child: const Text('Let\'s Get Started'),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildValuePropositionPage() {
+  Widget _buildProblemPage() {
     return Padding(
       padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: ListView(
         children: [
+          const SizedBox(height: 12),
           Text(
-            'How It Works',
+            'Did you know?',
             style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          _buildFeatureCard(
-            '📸',
-            'Add Items',
-            'Quickly add food to your inventory',
-          ),
           const SizedBox(height: 16),
-          _buildFeatureCard(
-            '⏰',
-            'Get Reminders',
-            'Be notified before items expire',
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                '~30% of groceries end up in the trash.\nThat is money, time, and resources wasted.',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+            ),
           ),
-          const SizedBox(height: 16),
-          _buildFeatureCard('📊', 'Track Waste', 'See what you\'re discarding'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureCard(String emoji, String title, String description) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(emoji, style: const TextStyle(fontSize: 32)),
-            const SizedBox(height: 8),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(description, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPermissionsPage() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+          const SizedBox(height: 12),
           Text(
-            'Permissions',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          Text(
-            'We need permission for notifications and camera to give you the best experience.',
+            'Ever forgotten what is in the fridge? Bought duplicates? Or lost leftovers in the back? We have all been there.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            key: const Key('onboarding_next_button_1'),
+            onPressed: _goNext,
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSolutionPage() {
+    Widget benefit(String emoji, String title, String detail) {
+      return Card(
+        child: ListTile(
+          leading: Text(emoji, style: const TextStyle(fontSize: 24)),
+          title: Text(title),
+          subtitle: Text(detail),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          Text(
+            'ZeroSpoils helps you',
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          benefit('✓', 'Track all your food', 'What you have and when it expires'),
+          benefit('✓', 'Plan shopping smarter', 'Avoid duplicate purchases'),
+          benefit('✓', 'Reduce waste proactively', 'Use items before they spoil'),
+          benefit('✓', 'Save money on takeout', 'Cook with what you already have'),
+          const SizedBox(height: 8),
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text(
+                'Result: Save money, reduce waste, better organized kitchen.',
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            key: const Key('onboarding_next_button_2'),
+            onPressed: _goNext,
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkflowPage() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          Text(
+            'Inventory + Shopping Workflow',
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('Add items you buy or prepare'),
+              subtitle: const Text('Use the + action to add individual items or shopping batches.'),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.shopping_cart_outlined),
+              title: const Text('Use shopping list before store trips'),
+              subtitle: const Text('Mark purchased items and move them into inventory.'),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: const Text('Capture receipt batches with OCR'),
+              subtitle: const Text('Automatically detect line items for review and save.'),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            key: const Key('onboarding_next_button_3'),
+            onPressed: _goNext,
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWastePage() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          Text(
+            'Reduce Waste',
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.check_circle_outline),
+              title: const Text('When you use an item'),
+              subtitle: const Text('Tap it and mark it consumed.'),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('When something goes bad'),
+              subtitle: const Text('Mark wasted and capture reason + percentage.'),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.insights_outlined),
+              title: const Text('Track improvement over time'),
+              subtitle: const Text('Use progress insights to reduce future waste.'),
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            key: const Key('onboarding_next_button_4'),
+            onPressed: _goNext,
+            child: const Text('Next'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPermissionsAndPresetsPage() {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: ListView(
+        children: [
+          Text(
+            'Permissions + Presets',
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Enable notifications and camera for reminders + faster entry. Pick prepared food presets to speed up expiry defaults.',
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
           ElevatedButton.icon(
             key: const Key('onboarding_notifications_button'),
-            icon: const Icon(Icons.notifications),
-            label: const Text('Enable Notifications'),
+            icon: Icon(
+              _notificationPermissionGranted
+                  ? Icons.check_circle
+                  : Icons.notifications,
+            ),
+            label: Text(
+              _notificationPermissionGranted
+                  ? 'Notifications Enabled'
+                  : 'Enable Notifications',
+            ),
             onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
                 'permission_type': 'notifications',
@@ -269,7 +443,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 context: context,
                 builder: (_) => const NotificationPermissionPrompt(),
               );
-              if (!mounted || granted == null) return;
+              if (!mounted || granted == null) {
+                return;
+              }
               if (granted) {
                 _onPermissionGranted('notifications');
               } else {
@@ -277,11 +453,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               }
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ElevatedButton.icon(
             key: const Key('onboarding_camera_button'),
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Enable Camera'),
+            icon: Icon(
+              _cameraPermissionGranted ? Icons.check_circle : Icons.camera_alt,
+            ),
+            label: Text(
+              _cameraPermissionGranted ? 'Camera Enabled' : 'Enable Camera',
+            ),
             onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
                 'permission_type': 'camera',
@@ -290,7 +470,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 context: context,
                 builder: (_) => const CameraPermissionPrompt(),
               );
-              if (!mounted || granted == null) return;
+              if (!mounted || granted == null) {
+                return;
+              }
               if (granted) {
                 _onPermissionGranted('camera');
               } else {
@@ -298,7 +480,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               }
             },
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _presetOptions
+                .map(
+                  (preset) => FilterChip(
+                    key: Key('onboarding_preset_chip_${preset['id']}'),
+                    label: Text(preset['label']!),
+                    selected: _selectedPresetIds.contains(preset['id']),
+                    onSelected: (selected) =>
+                        _togglePreset(preset['id']!, selected),
+                  ),
+                )
+                .toList(),
+          ),
+          const SizedBox(height: 24),
           OutlinedButton(
             key: const Key('onboarding_continue_button'),
             onPressed: _isCompletingOnboarding ? null : _completeOnboarding,
@@ -309,19 +507,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildBottomNav(int numPages) {
+  Widget _buildBottomNav() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            '${_currentPage + 1} of $numPages',
+            '${_currentPage + 1} of $_numPages',
             key: const Key('onboarding_page_indicator'),
           ),
           Row(
             children: List.generate(
-              numPages,
+              _numPages,
               (index) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Container(

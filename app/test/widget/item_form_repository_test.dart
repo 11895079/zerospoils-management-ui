@@ -5,7 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
+import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
@@ -52,6 +54,29 @@ class MockItemRepository extends HiveItemRepository {
   Future<void> close() async {
     // No-op for mock
   }
+}
+
+class MockReceiptBatchRepository implements ReceiptBatchRepository {
+  final List<ReceiptBatch> batches;
+
+  MockReceiptBatchRepository({required this.batches});
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<ReceiptBatch>> getAllBatches() async => batches;
+
+  @override
+  Future<ReceiptBatch?> getBatch(String id) async {
+    for (final batch in batches) {
+      if (batch.id == id) return batch;
+    }
+    return null;
+  }
+
+  @override
+  Future<void> saveBatch(ReceiptBatch batch) async {}
 }
 
 void main() {
@@ -146,6 +171,57 @@ void main() {
     expect(items.first.name, 'Test Milk');
     expect(items.first.brand, 'Fairlife');
     expect(items.first.quantity, 2);
+  });
+
+  testWidgets('saving item persists selected receipt batch id', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final batchRepository = MockReceiptBatchRepository(
+      batches: [
+        ReceiptBatch(
+          id: 'batch-1',
+          createdAt: DateTime(2026, 2, 15),
+          purchasedAt: DateTime(2026, 2, 15),
+          storeName: 'Costco',
+          source: ReceiptBatchSource.shoppingList,
+          items: const [],
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(repository),
+          receiptBatchRepositoryProvider.overrideWithValue(batchRepository),
+        ],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('item_form_name_field')),
+      'Linked item',
+    );
+
+    await tester.tap(find.byKey(const Key('item_form_batch_dropdown')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.textContaining('Costco').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final items = await repository.getAllItems();
+    expect(items.length, 1);
+    expect(items.first.receiptBatchId, 'batch-1');
   });
 
   testWidgets('auto-populates category for known items', (tester) async {

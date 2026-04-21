@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -114,10 +115,31 @@ void main() {
   ) async {
     await pumpCaptureScreen(tester, batchPhotoEnabled: false);
 
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receipt_batch_live_scan_button')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+
     expect(
       find.byKey(const Key('receipt_batch_live_scan_button')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('live receipt scan button is hidden on desktop platforms', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+
+    await pumpCaptureScreen(tester, batchPhotoEnabled: false);
+
+    expect(
+      find.byKey(const Key('receipt_batch_live_scan_button')),
+      findsNothing,
+    );
+
+    debugDefaultTargetPlatformOverride = null;
   });
 
   testWidgets('review button stays disabled when receipt OCR flag is off', (

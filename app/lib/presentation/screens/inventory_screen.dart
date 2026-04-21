@@ -64,6 +64,7 @@ class InventoryFilterState {
   final bool expiringSoonOnly;
   final bool hideConsumed;
   final bool preparedOnly;
+  final bool batchLinkedOnly;
   final DateTime? createdAfter;
   final DateTime? createdBefore;
   final String searchQuery;
@@ -75,6 +76,7 @@ class InventoryFilterState {
     this.expiringSoonOnly = false,
     this.hideConsumed = true,
     this.preparedOnly = false,
+    this.batchLinkedOnly = false,
     this.createdAfter,
     this.createdBefore,
     this.searchQuery = '',
@@ -87,6 +89,7 @@ class InventoryFilterState {
     bool? expiringSoonOnly,
     bool? hideConsumed,
     bool? preparedOnly,
+    bool? batchLinkedOnly,
     DateTime? createdAfter,
     DateTime? createdBefore,
     String? searchQuery,
@@ -98,6 +101,7 @@ class InventoryFilterState {
       expiringSoonOnly: expiringSoonOnly ?? this.expiringSoonOnly,
       hideConsumed: hideConsumed ?? this.hideConsumed,
       preparedOnly: preparedOnly ?? this.preparedOnly,
+      batchLinkedOnly: batchLinkedOnly ?? this.batchLinkedOnly,
       createdAfter: createdAfter ?? this.createdAfter,
       createdBefore: createdBefore ?? this.createdBefore,
       searchQuery: searchQuery ?? this.searchQuery,
@@ -112,6 +116,7 @@ class InventoryFilterState {
     if (expiringSoonOnly) count++;
     if (status == null && !hideConsumed) count++;
     if (preparedOnly) count++;
+    if (batchLinkedOnly) count++;
     if (createdAfter != null) count++;
     if (createdBefore != null) count++;
     return count;
@@ -248,7 +253,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       'properties': {},
     });
     if (!mounted) return;
-    context.pushNamed('receipt-batch-capture');
+    final router = GoRouter.maybeOf(context);
+    if (router == null) {
+      return;
+    }
+    router.pushNamed('receipt-batch-capture');
   }
 
   List<Item> _applyFilters(List<Item> items, InventoryFilterState filterState) {
@@ -290,6 +299,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       filtered = filtered
           .where((item) => item.type == ItemType.prepared)
           .toList();
+    }
+
+    if (filterState.batchLinkedOnly) {
+      filtered = filtered.where((item) => item.receiptBatchId != null).toList();
     }
 
     if (filterState.expiringSoonOnly) {
@@ -412,6 +425,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         var tempExpiringSoonOnly = currentState.expiringSoonOnly;
         var tempHideConsumed = currentState.hideConsumed;
         var tempPreparedOnly = currentState.preparedOnly;
+        var tempBatchLinkedOnly = currentState.batchLinkedOnly;
         DateTime? tempCreatedAfter = currentState.createdAfter;
         DateTime? tempCreatedBefore = currentState.createdBefore;
 
@@ -600,6 +614,22 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       SwitchListTile(
+                        key: const Key('inventory_filter_batch_linked_only'),
+                        value: tempBatchLinkedOnly,
+                        onChanged: (value) {
+                          setSheetState(() {
+                            tempBatchLinkedOnly = value;
+                          });
+                        },
+                        activeTrackColor: AppColors.primary,
+                        title: const Text('Batch-linked only'),
+                        subtitle: const Text(
+                          'Show only items linked to shopping batches',
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      SwitchListTile(
                         key: const Key('inventory_filter_hide_consumed'),
                         value: tempHideConsumed,
                         onChanged: (value) {
@@ -625,6 +655,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 tempExpiringSoonOnly = false;
                                 tempHideConsumed = true;
                                 tempPreparedOnly = false;
+                                tempBatchLinkedOnly = false;
                                 tempCreatedAfter = null;
                                 tempCreatedBefore = null;
                               });
@@ -656,6 +687,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 expiringSoonOnly: tempExpiringSoonOnly,
                                 hideConsumed: tempHideConsumed,
                                 preparedOnly: tempPreparedOnly,
+                                batchLinkedOnly: tempBatchLinkedOnly,
                                 createdAfter: tempCreatedAfter,
                                 createdBefore: tempCreatedBefore,
                                 searchQuery: _searchController.text,
@@ -668,6 +700,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'expiringSoonOnly': tempExpiringSoonOnly,
                                   'hideConsumed': tempHideConsumed,
                                   'preparedOnly': tempPreparedOnly,
+                                    'batchLinkedOnly': tempBatchLinkedOnly,
                                   'createdAfter': tempCreatedAfter
                                       ?.toIso8601String(),
                                   'createdBefore': tempCreatedBefore

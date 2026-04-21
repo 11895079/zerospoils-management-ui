@@ -94,6 +94,9 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
               final title = batch.storeName == null || batch.storeName!.isEmpty
                   ? date
                   : '${batch.storeName} · $date';
+                      final paymentSummary = batch.paymentMethod != null
+                        ? ' · ${batch.paymentMethod!.label}'
+                        : '';
               return InkWell(
                 key: ValueKey('receipt_batch_card_${batch.id}'),
                 onTap: () {
@@ -127,7 +130,7 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         key: Key('receipt_batch_card_summary_${batch.id}'),
-                        '${batch.items.length} items · $total total · $attachmentSummary',
+                        '${batch.items.length} items · $total total$paymentSummary · $attachmentSummary',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.textTheme.bodySmall?.color,
                         ),

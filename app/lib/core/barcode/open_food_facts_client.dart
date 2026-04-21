@@ -47,11 +47,13 @@ class OpenFoodFactsClient {
 
       final name = _extractName(product);
       if (name == null) return null;
+      final brand = _extractBrand(product);
 
       return BarcodeProductSuggestion(
         name: name,
         category: _inferCategory(product),
         source: 'openfoodfacts',
+        brand: brand,
       );
     } catch (_) {
       // Network unreachable, timeout, JSON parse error — degrade gracefully.
@@ -65,6 +67,13 @@ class OpenFoodFactsClient {
     final generic = product['generic_name'] as String?;
     if (generic != null && generic.trim().isNotEmpty) return generic.trim();
     return null;
+  }
+
+  String? _extractBrand(Map<String, dynamic> product) {
+    final brands = product['brands'] as String?;
+    if (brands == null || brands.trim().isEmpty) return null;
+    final primary = brands.split(',').first.trim();
+    return primary.isEmpty ? null : primary;
   }
 
   ItemCategory _inferCategory(Map<String, dynamic> product) {
