@@ -713,28 +713,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: const Text('Inventory'),
         elevation: 1,
         actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final receiptBatchEnabled = ref.watch(
-                isFlagEnabledProvider(FeatureFlagKey.receiptBatchCapture),
-              );
-              return receiptBatchEnabled.when(
-                data: (enabled) => enabled
-                    ? IconButton(
-                        key: const Key('inventory_receipt_batch_button'),
-                        tooltip: 'Batch receipt entry',
-                        onPressed: _openReceiptBatchCapture,
-                        icon: Icon(
-                          Icons.receipt_long,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-                loading: () => const SizedBox.shrink(),
-                error: (error, stackTrace) => const SizedBox.shrink(),
-              );
-            },
-          ),
           _buildViewModeToggle(viewMode, filterState, filteredCount),
           Stack(
             alignment: Alignment.center,
@@ -829,20 +807,69 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        key: const Key('inventory_add_fab'),
-        onPressed: _openAddItemForm,
-        backgroundColor: AppColors.primary,
-        shape: const CircleBorder(),
-        elevation: 4,
-        child: const Text(
-          '+',
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+      floatingActionButton: Consumer(
+        builder: (context, ref, child) {
+          final theme = Theme.of(context);
+          final receiptBatchEnabled = ref.watch(
+            isFlagEnabledProvider(FeatureFlagKey.receiptBatchCapture),
+          );
+          final batchEnabled = receiptBatchEnabled.maybeWhen(
+            data: (enabled) => enabled,
+            orElse: () => false,
+          );
+
+          if (!batchEnabled) {
+            return FloatingActionButton(
+              key: const Key('inventory_add_fab'),
+              onPressed: _openAddItemForm,
+              backgroundColor: AppColors.primary,
+              shape: const CircleBorder(),
+              elevation: 4,
+              child: const Text(
+                '+',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          }
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              FloatingActionButton.extended(
+                key: const Key('inventory_receipt_batch_button'),
+                heroTag: 'inventory_batch_fab',
+                onPressed: _openReceiptBatchCapture,
+                backgroundColor: theme.colorScheme.secondaryContainer,
+                foregroundColor: theme.colorScheme.onSecondaryContainer,
+                elevation: 2,
+                icon: const Icon(Icons.receipt_long),
+                label: const Text('Batch receipt'),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              FloatingActionButton(
+                key: const Key('inventory_add_fab'),
+                heroTag: 'inventory_add_fab',
+                onPressed: _openAddItemForm,
+                backgroundColor: AppColors.primary,
+                shape: const CircleBorder(),
+                elevation: 4,
+                child: const Text(
+                  '+',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

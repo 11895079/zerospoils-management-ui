@@ -643,8 +643,8 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    // Verify FAB exists (navigation requires GoRouter context, tested in integration tests)
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    // Verify add FAB exists (navigation requires GoRouter context, tested in integration tests)
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
   });
 
   testWidgets('FAB opens item form directly', (tester) async {
