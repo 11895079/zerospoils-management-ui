@@ -127,20 +127,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (page) {
-          setState(() {
-            _currentPage = page;
-          });
-        },
+      body: Column(
         children: [
-          _buildWelcomePage(),
-          if (variant == OnboardingVariant.long) _buildValuePropositionPage(),
-          _buildPermissionsPage(),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              children: [
+                _buildWelcomePage(),
+                if (variant == OnboardingVariant.long)
+                  _buildValuePropositionPage(),
+                _buildPermissionsPage(),
+              ],
+            ),
+          ),
+          _buildBottomNav(numPages),
         ],
       ),
-      bottomSheet: _buildBottomNav(numPages),
     );
   }
 
