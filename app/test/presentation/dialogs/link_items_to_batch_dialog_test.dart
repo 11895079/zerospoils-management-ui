@@ -95,9 +95,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );
@@ -132,10 +130,7 @@ void main() {
         updatedAt: now,
       );
 
-      mockItemRepository.items = {
-        'item-1': item1,
-        'item-2': item2,
-      };
+      mockItemRepository.items = {'item-1': item1, 'item-2': item2};
 
       await tester.pumpWidget(
         ProviderScope(
@@ -144,9 +139,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );
@@ -170,8 +163,9 @@ void main() {
       expect(linkButton, findsOneWidget);
     });
 
-    testWidgets('links selected items to batch on confirm',
-        (WidgetTester tester) async {
+    testWidgets('links selected items to batch on confirm', (
+      WidgetTester tester,
+    ) async {
       final now = DateTime.now();
       final item1 = Item(
         id: 'item-1',
@@ -192,10 +186,7 @@ void main() {
         receiptBatchId: null,
       );
 
-      mockItemRepository.items = {
-        'item-1': item1,
-        'item-2': item2,
-      };
+      mockItemRepository.items = {'item-1': item1, 'item-2': item2};
 
       await tester.pumpWidget(
         ProviderScope(
@@ -204,9 +195,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );
@@ -233,7 +222,9 @@ void main() {
       expect(notLinkedItem!.receiptBatchId, isNull);
     });
 
-    testWidgets('shows error when no items selected', (WidgetTester tester) async {
+    testWidgets('shows error when no items selected', (
+      WidgetTester tester,
+    ) async {
       final now = DateTime.now();
       final item1 = Item(
         id: 'item-1',
@@ -253,9 +244,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );
@@ -268,14 +257,12 @@ void main() {
       await tester.pumpAndSettle();
 
       // Should show error message
-      expect(
-        find.text('Select at least one item to link'),
-        findsOneWidget,
-      );
+      expect(find.text('Select at least one item to link'), findsOneWidget);
     });
 
-    testWidgets('shows message when no unlinked items available',
-        (WidgetTester tester) async {
+    testWidgets('shows message when no unlinked items available', (
+      WidgetTester tester,
+    ) async {
       mockItemRepository.items = {};
 
       await tester.pumpWidget(
@@ -285,19 +272,14 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );
 
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('No unlinked items available'),
-        findsOneWidget,
-      );
+      expect(find.text('No unlinked items available'), findsOneWidget);
     });
 
     testWidgets('closes dialog on cancel', (WidgetTester tester) async {
@@ -320,9 +302,7 @@ void main() {
           ],
           child: MaterialApp(
             theme: AppTheme.lightTheme,
-            home: Scaffold(
-              body: LinkItemsToBatchDialog(batch: testBatch),
-            ),
+            home: Scaffold(body: LinkItemsToBatchDialog(batch: testBatch)),
           ),
         ),
       );

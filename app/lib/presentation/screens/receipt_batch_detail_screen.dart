@@ -181,8 +181,7 @@ class _ReceiptBatchDetailScreenState
                         const SizedBox(width: AppSpacing.sm),
                     itemBuilder: (context, i) => ClipRRect(
                       key: Key('receipt_photo_$i'),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                       child: SizedBox(
                         width: 120,
                         child: buildLocalImagePreview(
@@ -262,7 +261,9 @@ class _ReceiptBatchDetailScreenState
                 key: const Key('batch_action_scan_receipt'),
                 leading: const Icon(Icons.document_scanner_outlined),
                 title: const Text('Scan another receipt'),
-                subtitle: const Text('Capture missed lines and merge into this batch'),
+                subtitle: const Text(
+                  'Capture missed lines and merge into this batch',
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                   _scanAnotherReceipt();
@@ -272,7 +273,9 @@ class _ReceiptBatchDetailScreenState
                 key: const Key('batch_action_link_existing'),
                 leading: const Icon(Icons.link_outlined),
                 title: const Text('Link existing item'),
-                subtitle: const Text('Attach an existing inventory item to this batch'),
+                subtitle: const Text(
+                  'Attach an existing inventory item to this batch',
+                ),
                 onTap: () {
                   Navigator.of(context).pop();
                   _linkExistingItem();
@@ -398,7 +401,9 @@ class _ReceiptBatchDetailScreenState
                   key: Key('line_action_edit_${lineItem.id}'),
                   leading: const Icon(Icons.edit_outlined),
                   title: const Text('Edit linked item'),
-                  subtitle: const Text('Update details for this receipt line item'),
+                  subtitle: const Text(
+                    'Update details for this receipt line item',
+                  ),
                   onTap: () {
                     Navigator.of(context).pop();
                     _openItemEditor(lineItem.inventoryItemId!);
@@ -408,7 +413,9 @@ class _ReceiptBatchDetailScreenState
                   key: Key('line_action_scan_${lineItem.id}'),
                   leading: const Icon(Icons.qr_code_scanner_outlined),
                   title: const Text('Scan barcode or product'),
-                  subtitle: const Text('Use barcode/CV to enrich product details'),
+                  subtitle: const Text(
+                    'Use barcode/CV to enrich product details',
+                  ),
                   onTap: () {
                     Navigator.of(context).pop();
                     _openItemEditor(lineItem.inventoryItemId!);
@@ -419,7 +426,9 @@ class _ReceiptBatchDetailScreenState
                   key: Key('line_action_create_link_${lineItem.id}'),
                   leading: const Icon(Icons.add_circle_outline),
                   title: const Text('Create and link item'),
-                  subtitle: const Text('Add this line as a fresh inventory item'),
+                  subtitle: const Text(
+                    'Add this line as a fresh inventory item',
+                  ),
                   onTap: () {
                     Navigator.of(context).pop();
                     _addNewItem(linkToLine: lineItem);
@@ -443,9 +452,9 @@ class _ReceiptBatchDetailScreenState
   }
 
   Future<void> _openItemEditor(String itemId) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => ItemFormScreen(itemId: itemId)),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => ItemFormScreen(itemId: itemId)));
     await _reload();
   }
 
@@ -478,7 +487,10 @@ class _ReceiptBatchDetailScreenState
     await _attachItemToLine(item: item, lineId: lineId);
   }
 
-  Future<void> _attachItemToLine({required Item item, required String lineId}) async {
+  Future<void> _attachItemToLine({
+    required Item item,
+    required String lineId,
+  }) async {
     final itemRepo = ref.read(itemRepositoryProvider);
     await itemRepo.init();
     final refreshed = await itemRepo.getItem(item.id);
@@ -506,7 +518,8 @@ class _ReceiptBatchDetailScreenState
           builder: (context, setSheetState) {
             final filtered = items
                 .where(
-                  (item) => item.name.toLowerCase().contains(query.toLowerCase()),
+                  (item) =>
+                      item.name.toLowerCase().contains(query.toLowerCase()),
                 )
                 .toList();
             return SafeArea(
@@ -515,7 +528,8 @@ class _ReceiptBatchDetailScreenState
                   left: AppSpacing.md,
                   right: AppSpacing.md,
                   top: AppSpacing.md,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.md,
+                  bottom:
+                      MediaQuery.of(context).viewInsets.bottom + AppSpacing.md,
                 ),
                 child: SizedBox(
                   height: 460,
@@ -587,7 +601,9 @@ class _ReceiptBatchDetailScreenState
             TextField(
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Price'),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             TextField(
               controller: quantityController,
@@ -606,12 +622,15 @@ class _ReceiptBatchDetailScreenState
               final name = nameController.text.trim();
               final price = double.tryParse(priceController.text.trim());
               final quantity = int.tryParse(quantityController.text.trim());
-              if (name.isEmpty || price == null || quantity == null || quantity <= 0) {
+              if (name.isEmpty ||
+                  price == null ||
+                  quantity == null ||
+                  quantity <= 0) {
                 return;
               }
-              Navigator.of(
-                context,
-              ).pop(_BatchLineDraft(name: name, price: price, quantity: quantity));
+              Navigator.of(context).pop(
+                _BatchLineDraft(name: name, price: price, quantity: quantity),
+              );
             },
             child: const Text('Add'),
           ),
@@ -621,7 +640,9 @@ class _ReceiptBatchDetailScreenState
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   String _statusLabel(ReceiptBatchItem item, Item? inventoryItem) {

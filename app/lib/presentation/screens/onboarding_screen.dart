@@ -295,10 +295,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          benefit('✓', 'Track all your food', 'What you have and when it expires'),
+          benefit(
+            '✓',
+            'Track all your food',
+            'What you have and when it expires',
+          ),
           benefit('✓', 'Plan shopping smarter', 'Avoid duplicate purchases'),
-          benefit('✓', 'Reduce waste proactively', 'Use items before they spoil'),
-          benefit('✓', 'Save money on takeout', 'Cook with what you already have'),
+          benefit(
+            '✓',
+            'Reduce waste proactively',
+            'Use items before they spoil',
+          ),
+          benefit(
+            '✓',
+            'Save money on takeout',
+            'Cook with what you already have',
+          ),
           const SizedBox(height: 8),
           Card(
             color: Theme.of(context).colorScheme.primaryContainer,
@@ -335,21 +347,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ListTile(
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('Add items you buy or prepare'),
-              subtitle: const Text('Use the + action to add individual items or shopping batches.'),
+              subtitle: const Text(
+                'Use the + action to add individual items or shopping batches.',
+              ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.shopping_cart_outlined),
               title: const Text('Use shopping list before store trips'),
-              subtitle: const Text('Mark purchased items and move them into inventory.'),
+              subtitle: const Text(
+                'Mark purchased items and move them into inventory.',
+              ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
               title: const Text('Capture receipt batches with OCR'),
-              subtitle: const Text('Automatically detect line items for review and save.'),
+              subtitle: const Text(
+                'Automatically detect line items for review and save.',
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -385,14 +403,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: ListTile(
               leading: const Icon(Icons.delete_outline),
               title: const Text('When something goes bad'),
-              subtitle: const Text('Mark wasted and capture reason + percentage.'),
+              subtitle: const Text(
+                'Mark wasted and capture reason + percentage.',
+              ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.insights_outlined),
               title: const Text('Track improvement over time'),
-              subtitle: const Text('Use progress insights to reduce future waste.'),
+              subtitle: const Text(
+                'Use progress insights to reduce future waste.',
+              ),
             ),
           ),
           const SizedBox(height: 20),

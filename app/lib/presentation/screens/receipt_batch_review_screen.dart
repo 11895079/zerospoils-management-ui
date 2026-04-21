@@ -102,8 +102,8 @@ class _ReceiptBatchReviewScreenState
     final batchRepo = ref.read(receiptBatchRepositoryProvider);
     await batchRepo.init();
     final existingBatch = widget.existingBatchId == null
-      ? null
-      : await batchRepo.getBatch(widget.existingBatchId!);
+        ? null
+        : await batchRepo.getBatch(widget.existingBatchId!);
     final effectiveBatchId = existingBatch?.id ?? widget.batchId;
 
     if (destination == ReceiptBatchDestination.shoppingList) {
@@ -206,7 +206,10 @@ class _ReceiptBatchReviewScreenState
               ...existingBatch.receiptImagePaths,
               ...widget.photoPaths,
             ],
-            goodsImagePaths: [...existingBatch.goodsImagePaths, ...widget.goodsPhotoPaths],
+            goodsImagePaths: [
+              ...existingBatch.goodsImagePaths,
+              ...widget.goodsPhotoPaths,
+            ],
             paymentMethod: widget.paymentMethod ?? existingBatch.paymentMethod,
           );
 

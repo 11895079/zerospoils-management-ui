@@ -29,18 +29,15 @@ void main() {
   group('OpenFoodFactsClient', () {
     test('returns suggestion for a known barcode (status 1)', () async {
       final client = OpenFoodFactsClient(
-        httpClient: _mockWith(
-          200,
-          {
-            'status': 1,
-            'product': {
-              'product_name': 'Instant Coffee',
-              'brands': 'Nescafe',
-              'categories_tags': <String>[],
-              'food_groups_tags': <String>[],
-            },
+        httpClient: _mockWith(200, {
+          'status': 1,
+          'product': {
+            'product_name': 'Instant Coffee',
+            'brands': 'Nescafe',
+            'categories_tags': <String>[],
+            'food_groups_tags': <String>[],
           },
-        ),
+        }),
       );
       final result = await client.lookup('055000132152');
       expect(result, isNotNull);

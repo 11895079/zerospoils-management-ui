@@ -54,13 +54,13 @@ class _ReceiptBatchCaptureScreenState
   bool _pickingPhoto = false;
   PaymentMethod? _paymentMethod;
 
-    bool get _usesDesktopPhotoPicker =>
+  bool get _usesDesktopPhotoPicker =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.linux);
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux);
 
-    bool get _supportsLiveReceiptScan =>
+  bool get _supportsLiveReceiptScan =>
       !kIsWeb &&
       defaultTargetPlatform != TargetPlatform.macOS &&
       defaultTargetPlatform != TargetPlatform.windows &&
@@ -500,10 +500,7 @@ class _ReceiptBatchCaptureScreenState
                 ),
                 items: PaymentMethod.values
                     .map(
-                      (m) => DropdownMenuItem(
-                        value: m,
-                        child: Text(m.label),
-                      ),
+                      (m) => DropdownMenuItem(value: m, child: Text(m.label)),
                     )
                     .toList(),
                 onChanged: _processing || _pickingPhoto

@@ -11,17 +11,15 @@ import '../di/repository_providers.dart';
 class LinkItemsToBatchDialog extends ConsumerStatefulWidget {
   final ReceiptBatch batch;
 
-  const LinkItemsToBatchDialog({
-    super.key,
-    required this.batch,
-  });
+  const LinkItemsToBatchDialog({super.key, required this.batch});
 
   @override
   ConsumerState<LinkItemsToBatchDialog> createState() =>
       _LinkItemsToBatchDialogState();
 }
 
-class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog> {
+class _LinkItemsToBatchDialogState
+    extends ConsumerState<LinkItemsToBatchDialog> {
   late Future<List<Item>> _unlinkedItemsFuture;
   final Set<String> _selectedItemIds = {};
   bool _isLinking = false;
@@ -36,7 +34,7 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
     final itemRepo = ref.read(itemRepositoryProvider);
     await itemRepo.init();
     final allItems = await itemRepo.getAllItems();
-    
+
     // Filter items that are not already linked to this batch
     return allItems
         .where((item) => item.receiptBatchId != widget.batch.id)
@@ -55,10 +53,10 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
 
     try {
       final itemRepo = ref.read(itemRepositoryProvider);
-      
+
       // Get all items to find the selected ones
       final allItems = await itemRepo.getAllItems();
-      
+
       for (final item in allItems) {
         if (_selectedItemIds.contains(item.id)) {
           // Update item with batch ID
@@ -79,9 +77,9 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error linking items: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error linking items: $e')));
       }
     } finally {
       if (mounted) {
@@ -93,7 +91,7 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Dialog(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -136,7 +134,7 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
                 }
 
                 final items = snapshot.data ?? [];
-                
+
                 if (items.isEmpty) {
                   return Center(
                     child: Text(
@@ -152,7 +150,7 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
                   itemBuilder: (context, index) {
                     final item = items[index];
                     final isSelected = _selectedItemIds.contains(item.id);
-                    
+
                     return Container(
                       key: Key('link_item_${item.id}'),
                       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -160,7 +158,9 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
                         color: isSelected
                             ? theme.primaryColor.withOpacity(0.1)
                             : theme.cardColor,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusLg,
+                        ),
                         border: Border.all(
                           color: isSelected
                               ? theme.primaryColor
@@ -200,7 +200,9 @@ class _LinkItemsToBatchDialogState extends ConsumerState<LinkItemsToBatchDialog>
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: _isLinking ? null : () => Navigator.of(context).pop(),
+                  onPressed: _isLinking
+                      ? null
+                      : () => Navigator.of(context).pop(),
                   child: const Text('Cancel'),
                 ),
                 const SizedBox(width: AppSpacing.sm),

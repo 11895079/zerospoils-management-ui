@@ -700,7 +700,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'expiringSoonOnly': tempExpiringSoonOnly,
                                   'hideConsumed': tempHideConsumed,
                                   'preparedOnly': tempPreparedOnly,
-                                    'batchLinkedOnly': tempBatchLinkedOnly,
+                                  'batchLinkedOnly': tempBatchLinkedOnly,
                                   'createdAfter': tempCreatedAfter
                                       ?.toIso8601String(),
                                   'createdBefore': tempCreatedBefore
