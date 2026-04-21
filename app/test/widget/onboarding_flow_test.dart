@@ -360,7 +360,9 @@ void main() {
 
       await _goToPermissionsPage(tester);
 
-      await tester.tap(find.byKey(const Key('onboarding_preset_chip_jollof_rice')));
+      await tester.tap(
+        find.byKey(const Key('onboarding_preset_chip_jollof_rice')),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('onboarding_preset_chip_curry')));
       await tester.pumpAndSettle();

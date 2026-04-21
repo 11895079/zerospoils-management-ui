@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+
 enum ReceiptBatchSource { inventory, shoppingList }
 
 enum PaymentMethod { cash, credit, debit, mobile, other }

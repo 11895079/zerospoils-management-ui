@@ -184,7 +184,10 @@ void main() {
 
       expect(find.byKey(const Key('item_detail_batch')), findsOneWidget);
       expect(find.textContaining('No Frills'), findsOneWidget);
-      expect(find.byKey(const Key('item_detail_open_batch_button')), findsOneWidget);
+      expect(
+        find.byKey(const Key('item_detail_open_batch_button')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows "Item not found" when item does not exist', (

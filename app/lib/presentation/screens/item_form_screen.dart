@@ -1572,8 +1572,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       final price = _priceController.text.isEmpty
           ? null
           : double.tryParse(_priceController.text.replaceAll(r'$', ''));
-        final selectedReceiptBatchId = _selectedReceiptBatchId;
-        final preserveBatchItemId =
+      final selectedReceiptBatchId = _selectedReceiptBatchId;
+      final preserveBatchItemId =
           _isEditMode && selectedReceiptBatchId == _loadedReceiptBatchId;
 
       final item = Item(
@@ -1594,8 +1594,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         purchasePrice: price,
         receiptBatchId: selectedReceiptBatchId,
         receiptBatchItemId: preserveBatchItemId
-          ? _existingReceiptBatchItemId
-          : null,
+            ? _existingReceiptBatchItemId
+            : null,
         status: ItemStatus.available,
         wasteReason: null,
         createdAt: _existingCreatedAt ?? DateTime.now(),
@@ -2102,7 +2102,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             ))
                           DropdownMenuItem<String?>(
                             value: _selectedReceiptBatchId,
-                            child: Text('Linked batch (${_selectedReceiptBatchId!})'),
+                            child: Text(
+                              'Linked batch (${_selectedReceiptBatchId!})',
+                            ),
                           ),
                       ],
                       onChanged: (value) {

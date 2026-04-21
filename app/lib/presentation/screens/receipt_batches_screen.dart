@@ -94,9 +94,9 @@ class _ReceiptBatchesScreenState extends ConsumerState<ReceiptBatchesScreen> {
               final title = batch.storeName == null || batch.storeName!.isEmpty
                   ? date
                   : '${batch.storeName} · $date';
-                      final paymentSummary = batch.paymentMethod != null
-                        ? ' · ${batch.paymentMethod!.label}'
-                        : '';
+              final paymentSummary = batch.paymentMethod != null
+                  ? ' · ${batch.paymentMethod!.label}'
+                  : '';
               return InkWell(
                 key: ValueKey('receipt_batch_card_${batch.id}'),
                 onTap: () {

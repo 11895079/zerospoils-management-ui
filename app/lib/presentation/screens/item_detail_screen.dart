@@ -667,7 +667,9 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                               'Shopping Batch',
                               _item!.receiptBatchId == null
                                   ? '—'
-                                  : (_linkedBatch?.storeName?.trim().isNotEmpty ==
+                                  : (_linkedBatch?.storeName
+                                                ?.trim()
+                                                .isNotEmpty ==
                                             true
                                         ? '${_linkedBatch!.storeName!.trim()} (${_item!.receiptBatchId})'
                                         : _item!.receiptBatchId!),
@@ -682,7 +684,9 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                                 child: Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    key: const Key('item_detail_open_batch_button'),
+                                    key: const Key(
+                                      'item_detail_open_batch_button',
+                                    ),
                                     onPressed: () {
                                       context.pushNamed(
                                         'receipt-batch-detail',
