@@ -12,6 +12,9 @@ import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../domain/models/receipt_batch.dart';
 import '../widgets/item_entry_sheet.dart';
 
 final shoppingListItemsProvider = FutureProvider<List<ShoppingListItem>>((
@@ -20,6 +23,12 @@ final shoppingListItemsProvider = FutureProvider<List<ShoppingListItem>>((
   final repository = ref.watch(shoppingListRepositoryProvider);
   await repository.init();
   return repository.getAllItems();
+});
+
+final _shoppingHistoryBatchesProvider = FutureProvider<List<ReceiptBatch>>((ref) async {
+  final repo = ref.watch(receiptBatchRepositoryProvider);
+  await repo.init();
+  return repo.getAllBatches();
 });
 
 class ShoppingListScreen extends ConsumerWidget {
@@ -33,19 +42,31 @@ class ShoppingListScreen extends ConsumerWidget {
 
     final itemsAsync = ref.watch(shoppingListItemsProvider);
 
-    return Scaffold(
-      key: const Key('screen_shopping_list'),
-      appBar: AppBar(
-        title: Text(
-          'Shopping List',
-          style: theme.appBarTheme.titleTextStyle?.copyWith(
-            fontWeight: FontWeight.w600,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        key: const Key('screen_shopping_list'),
+        appBar: AppBar(
+          title: Text(
+            'Shopping List',
+            style: theme.appBarTheme.titleTextStyle?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          elevation: 1,
+          bottom: const TabBar(
+            tabs: [
+              Tab(key: Key('shopping_list_tab'), text: 'List'),
+              Tab(key: Key('shopping_history_tab'), text: 'History 🧾'),
+            ],
           ),
         ),
-        elevation: 1,
-      ),
-      drawer: const AppDrawer(),
-      body: itemsAsync.when(
+        drawer: const AppDrawer(),
+        body: TabBarView(
+          children: [
+            // Tab 1: Shopping List
+            Builder(
+              builder: (context) => itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Text(
@@ -151,6 +172,12 @@ class ShoppingListScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+            ),
+            // Tab 2: Shopping History
+            const _ShoppingHistoryTab(),
+          ],
+        ),
       ),
     );
   }
@@ -630,6 +657,115 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ShoppingHistoryTab extends ConsumerWidget {
+  const _ShoppingHistoryTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final batchesAsync = ref.watch(_shoppingHistoryBatchesProvider);
+    final theme = Theme.of(context);
+
+    return batchesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text(
+          'Unable to load shopping history',
+          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        ),
+      ),
+      data: (batches) {
+        if (batches.isEmpty) {
+          return Center(
+            key: const Key('shopping_history_empty'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.receipt_long_outlined,
+                  size: 64,
+                  color: theme.textTheme.bodySmall?.color,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'No shopping trips recorded yet',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Sort most recent first
+        final sorted = List<ReceiptBatch>.from(batches)
+          ..sort((a, b) {
+            final aDate = a.purchasedAt ?? a.createdAt;
+            final bDate = b.purchasedAt ?? b.createdAt;
+            return bDate.compareTo(aDate);
+          });
+
+        return ListView.builder(
+          key: const Key('shopping_history_list'),
+          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+          itemCount: sorted.length,
+          itemBuilder: (context, index) {
+            final batch = sorted[index];
+            final date = DateFormat.yMMMd().format(
+              batch.purchasedAt ?? batch.createdAt,
+            );
+            final title = (batch.storeName != null &&
+                    batch.storeName!.isNotEmpty)
+                ? '${batch.storeName} · $date'
+                : date;
+            final total = batch.totalAmount != null
+                ? NumberFormat.simpleCurrency().format(batch.totalAmount)
+                : '${batch.items.length} items';
+            final paymentSummary = batch.paymentMethod != null
+                ? ' · ${batch.paymentMethod!.label}'
+                : '';
+
+            return GestureDetector(
+              key: Key('shopping_history_card_${batch.id}'),
+              onTap: () => context.pushNamed(
+                'receipt-batch-detail',
+                pathParameters: {'id': batch.id},
+              ),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  border: Border.all(color: theme.dividerColor),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '$total$paymentSummary',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

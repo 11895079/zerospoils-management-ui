@@ -36,9 +36,11 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final List<String> goodsPhotoPaths;
   final List<ParsedReceiptItem> parsedItems;
   final String batchId;
+  final String? existingBatchId;
   final String? storeName;
   final DateTime? purchasedAt;
   final double? totalAmount;
+  final PaymentMethod? paymentMethod;
 
   const ReceiptBatchReviewScreen({
     super.key,
@@ -47,9 +49,11 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
     this.goodsPhotoPaths = const [],
     required this.parsedItems,
     required this.batchId,
+    this.existingBatchId,
     this.storeName,
     this.purchasedAt,
     this.totalAmount,
+    this.paymentMethod,
   });
 
   @override
@@ -95,6 +99,12 @@ class _ReceiptBatchReviewScreenState
     }
 
     final batchItems = <ReceiptBatchItem>[];
+    final batchRepo = ref.read(receiptBatchRepositoryProvider);
+    await batchRepo.init();
+    final existingBatch = widget.existingBatchId == null
+      ? null
+      : await batchRepo.getBatch(widget.existingBatchId!);
+    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
 
     if (destination == ReceiptBatchDestination.shoppingList) {
       final shoppingRepo = ref.read(shoppingListRepositoryProvider);
@@ -135,6 +145,8 @@ class _ReceiptBatchReviewScreenState
           quantity: item.quantity,
           unit: Unit.count,
           purchasePrice: item.price,
+          receiptBatchId: effectiveBatchId,
+          receiptBatchItemId: id,
           status: ItemStatus.available,
           createdAt: now,
           updatedAt: now,
@@ -172,20 +184,32 @@ class _ReceiptBatchReviewScreenState
       }
     }
 
-    final batch = ReceiptBatch(
-      id: widget.batchId,
-      createdAt: now,
-      purchasedAt: widget.purchasedAt,
-      storeName: widget.storeName,
-      totalAmount: widget.totalAmount,
-      source: widget.source,
-      items: batchItems,
-      receiptImagePaths: widget.photoPaths,
-      goodsImagePaths: widget.goodsPhotoPaths,
-    );
+    final batch = existingBatch == null
+        ? ReceiptBatch(
+            id: widget.batchId,
+            createdAt: now,
+            purchasedAt: widget.purchasedAt,
+            storeName: widget.storeName,
+            totalAmount: widget.totalAmount,
+            source: widget.source,
+            items: batchItems,
+            receiptImagePaths: widget.photoPaths,
+            goodsImagePaths: widget.goodsPhotoPaths,
+            paymentMethod: widget.paymentMethod,
+          )
+        : existingBatch.copyWith(
+            purchasedAt: widget.purchasedAt ?? existingBatch.purchasedAt,
+            storeName: widget.storeName ?? existingBatch.storeName,
+            totalAmount: widget.totalAmount ?? existingBatch.totalAmount,
+            items: [...existingBatch.items, ...batchItems],
+            receiptImagePaths: [
+              ...existingBatch.receiptImagePaths,
+              ...widget.photoPaths,
+            ],
+            goodsImagePaths: [...existingBatch.goodsImagePaths, ...widget.goodsPhotoPaths],
+            paymentMethod: widget.paymentMethod ?? existingBatch.paymentMethod,
+          );
 
-    final batchRepo = ref.read(receiptBatchRepositoryProvider);
-    await batchRepo.init();
     await batchRepo.saveBatch(batch);
 
     ref.read(telemetryClientProvider).enqueue({
@@ -200,6 +224,10 @@ class _ReceiptBatchReviewScreenState
     ref.invalidate(receiptBatchesProvider);
 
     if (!mounted) return;
+    if (existingBatch != null) {
+      Navigator.of(context).pop(true);
+      return;
+    }
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const ReceiptBatchesScreen()),
       (route) => false,

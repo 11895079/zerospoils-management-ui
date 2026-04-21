@@ -15,6 +15,7 @@ import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../domain/models/receipt_batch.dart';
 import '../../core/vision/fresh_item_cv_service.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/models/user_category.dart';
@@ -32,8 +33,17 @@ enum _CameraAssistedStage { barcodeReady, barcodeLocked, expiryLocked }
 
 class ItemFormScreen extends ConsumerStatefulWidget {
   final String? itemId; // null for add, non-null for edit
+  final String? initialName;
+  final String? initialReceiptBatchId;
+  final double? initialPrice;
 
-  const ItemFormScreen({super.key, this.itemId});
+  const ItemFormScreen({
+    super.key,
+    this.itemId,
+    this.initialName,
+    this.initialReceiptBatchId,
+    this.initialPrice,
+  });
 
   @override
   ConsumerState<ItemFormScreen> createState() => _ItemFormScreenState();
@@ -115,6 +125,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   bool _ocrInProgress = false;
   bool _barcodeScanInProgress = false;
   bool _freshItemCvInProgress = false;
+  bool _loadingReceiptBatches = false;
   _CameraAssistedStage _cameraAssistedStage = _CameraAssistedStage.barcodeReady;
   String? _cameraBarcodeValue;
   String? _cameraFreshItemSuggestionName;
@@ -122,6 +133,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   String? _cameraSuggestedName;
   String? _cameraSuggestionSource;
   String? _cameraAcceptedExpiryFormat;
+  String? _selectedReceiptBatchId;
+  String? _loadedReceiptBatchId;
+  String? _existingReceiptBatchItemId;
+  List<ReceiptBatch> _availableReceiptBatches = const [];
   List<_RecentItemDefaults> _recentItemDefaults = const [];
   List<String> _recentBrands = const [];
 
@@ -139,9 +154,52 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     super.initState();
     _loadUserCategories();
     _loadRecentItemDefaults();
+    _loadReceiptBatches();
+    if (!_isEditMode) {
+      if (widget.initialName != null && widget.initialName!.trim().isNotEmpty) {
+        _nameController.text = widget.initialName!.trim();
+      }
+      if (widget.initialPrice != null && widget.initialPrice! >= 0) {
+        _priceController.text = widget.initialPrice!.toStringAsFixed(2);
+      }
+      _selectedReceiptBatchId = widget.initialReceiptBatchId;
+    }
     if (_isEditMode) {
       _loadItem();
     }
+  }
+
+  Future<void> _loadReceiptBatches() async {
+    setState(() => _loadingReceiptBatches = true);
+    try {
+      final batches = await Future<List<ReceiptBatch>>.sync(() async {
+        final repository = ref.read(receiptBatchRepositoryProvider);
+        await repository.init();
+        return repository.getAllBatches();
+      });
+      if (!mounted) return;
+      setState(() {
+        _availableReceiptBatches = batches;
+        _loadingReceiptBatches = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _availableReceiptBatches = const [];
+        _loadingReceiptBatches = false;
+      });
+    }
+  }
+
+  String _receiptBatchLabel(ReceiptBatch batch) {
+    final date = batch.purchasedAt ?? batch.createdAt;
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+    final dateLabel = '${date.year}-$month-$day';
+    if (batch.storeName != null && batch.storeName!.trim().isNotEmpty) {
+      return '${batch.storeName!.trim()} · $dateLabel';
+    }
+    return 'Batch · $dateLabel';
   }
 
   Color _randomPastelColor() {
@@ -1309,6 +1367,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
   void _applyBarcodeCapture(BarcodeCaptureResult result) {
     final suggestedName = result.suggestedName?.trim();
+    final suggestedBrand = result.suggestedBrand?.trim();
     final previousSuggestedName = _cameraSuggestedName;
     final currentName = _nameController.text.trim();
     final recentDefaults = _findRecentDefaultsForName(suggestedName);
@@ -1338,6 +1397,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           _selectedUserCategory = _resolveRecentUserCategory(recentDefaults);
         }
         _selectedLocation = recentDefaults.location;
+      } else if (_brandController.text.trim().isEmpty &&
+          suggestedBrand != null &&
+          suggestedBrand.isNotEmpty) {
+        _brandController.text = suggestedBrand;
       } else if (!_categoryTouched) {
         if (result.suggestedCategory != null) {
           _selectedCategory = result.suggestedCategory!;
@@ -1434,6 +1497,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               _priceController.text = item.purchasePrice!.toStringAsFixed(2);
             }
             _selectedExpiryDate = item.expiryDate;
+            _selectedReceiptBatchId = item.receiptBatchId;
+            _loadedReceiptBatchId = item.receiptBatchId;
+            _existingReceiptBatchItemId = item.receiptBatchItemId;
             _existingCreatedAt = item.createdAt;
             _isLoading = false;
           });
@@ -1506,6 +1572,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       final price = _priceController.text.isEmpty
           ? null
           : double.tryParse(_priceController.text.replaceAll(r'$', ''));
+        final selectedReceiptBatchId = _selectedReceiptBatchId;
+        final preserveBatchItemId =
+          _isEditMode && selectedReceiptBatchId == _loadedReceiptBatchId;
 
       final item = Item(
         id: _isEditMode
@@ -1523,6 +1592,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         unit: _selectedUnit,
         expiryDate: _selectedExpiryDate,
         purchasePrice: price,
+        receiptBatchId: selectedReceiptBatchId,
+        receiptBatchItemId: preserveBatchItemId
+          ? _existingReceiptBatchItemId
+          : null,
         status: ItemStatus.available,
         wasteReason: null,
         createdAt: _existingCreatedAt ?? DateTime.now(),
@@ -1538,6 +1611,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               rawValue: _cameraBarcodeValue!,
               name: item.name,
               category: item.category,
+              brand: item.brand,
             );
       }
 
@@ -1595,7 +1669,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${item.name} saved successfully')),
         );
-        Navigator.pop(context);
+        Navigator.pop(context, item);
       }
     } catch (e) {
       if (mounted) {
@@ -1995,6 +2069,46 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                   return null;
                 },
               ),
+            ),
+
+            // Optional receipt batch linkage
+            _buildFormGroup(
+              label: 'Shopping Batch (optional)',
+              child: _loadingReceiptBatches
+                  ? Text(
+                      'Loading shopping batches...',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    )
+                  : DropdownButtonFormField<String?>(
+                      key: const Key('item_form_batch_dropdown'),
+                      initialValue: _selectedReceiptBatchId,
+                      decoration: _buildInputDecoration(
+                        hintText: 'Select batch',
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('No batch'),
+                        ),
+                        ..._availableReceiptBatches.map(
+                          (batch) => DropdownMenuItem<String?>(
+                            value: batch.id,
+                            child: Text(_receiptBatchLabel(batch)),
+                          ),
+                        ),
+                        if (_selectedReceiptBatchId != null &&
+                            !_availableReceiptBatches.any(
+                              (batch) => batch.id == _selectedReceiptBatchId,
+                            ))
+                          DropdownMenuItem<String?>(
+                            value: _selectedReceiptBatchId,
+                            child: Text('Linked batch (${_selectedReceiptBatchId!})'),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        setState(() => _selectedReceiptBatchId = value);
+                      },
+                    ),
             ),
 
             // Expiry date picker with camera button

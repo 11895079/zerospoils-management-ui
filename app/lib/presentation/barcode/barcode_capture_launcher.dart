@@ -13,6 +13,7 @@ class BarcodeCaptureResult {
     required this.rawValue,
     this.suggestedName,
     this.suggestedCategory,
+    this.suggestedBrand,
     this.source,
   }) : failure = null;
 
@@ -20,11 +21,13 @@ class BarcodeCaptureResult {
     : rawValue = null,
       suggestedName = null,
       suggestedCategory = null,
+      suggestedBrand = null,
       source = null;
 
   final String? rawValue;
   final String? suggestedName;
   final ItemCategory? suggestedCategory;
+  final String? suggestedBrand;
   final String? source;
   final BarcodeCaptureFailure? failure;
 
@@ -74,6 +77,7 @@ final barcodeCaptureLauncherProvider = Provider<BarcodeCaptureLauncher>((ref) {
           rawValue: normalized,
           name: remote.name,
           category: remote.category,
+          brand: remote.brand,
         );
         suggestion = remote;
       }
@@ -83,6 +87,7 @@ final barcodeCaptureLauncherProvider = Provider<BarcodeCaptureLauncher>((ref) {
       rawValue: normalized,
       suggestedName: suggestion?.name,
       suggestedCategory: suggestion?.category,
+      suggestedBrand: suggestion?.brand,
       source: suggestion?.source ?? 'camera_scan',
     );
   };

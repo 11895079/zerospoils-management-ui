@@ -1141,6 +1141,339 @@ body {
   100% { transform: scale(1); opacity: 1; }
 }
 
+/* === DUAL FAB (Inventory - M3/198) === */
+.fab-stack {
+  position: absolute;
+  bottom: 80px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 10;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  background: #2f9e44;
+  color: white;
+  border-radius: 50%;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(47, 158, 68, 0.4);
+  transition: transform 0.2s;
+  line-height: 1;
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+.fab-extended {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  height: 40px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(47, 158, 68, 0.25);
+  border: 1px solid #a5d6a7;
+  transition: transform 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.fab-extended:active {
+  transform: scale(0.97);
+}
+
+.fab-extended-icon {
+  font-size: 18px;
+}
+
+/* === SPEED DIAL OVERLAY === */
+.speed-dial-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 8;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+}
+.speed-dial-backdrop.open { opacity: 1; visibility: visible; }
+
+.speed-dial-menu {
+  position: absolute;
+  bottom: 148px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 12;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.speed-dial-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.speed-dial-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.speed-dial-label {
+  background: rgba(255,255,255,0.95);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  white-space: nowrap;
+}
+
+.speed-dial-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #2f9e44;
+  color: white;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 0 3px 8px rgba(47,158,68,0.35);
+  transition: transform 0.15s;
+}
+.speed-dial-btn:active { transform: scale(0.94); }
+.speed-dial-btn.secondary { background: #74c69d; }
+
+.fab-main-open {
+  transform: rotate(45deg);
+}
+
+/* === BATCH CARDS (Shopping History) === */
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #888;
+  padding: 16px 20px 8px;
+}
+
+.batch-card {
+  display: block;
+  margin: 0 20px 12px;
+  padding: 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.batch-card:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+.batch-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.batch-meta {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.batch-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.batch-stats span {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #555;
+}
+
+.batch-stats .consumed { background: #e8f5e9; color: #2e7d32; }
+.batch-stats .wasted   { background: #ffebee; color: #c62828; }
+.batch-stats .remaining { background: #e3f2fd; color: #1565c0; }
+
+/* === BATCH DETAIL === */
+.batch-summary-card {
+  margin: 16px 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #2f9e44;
+}
+
+.batch-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.batch-price {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+/* === RECEIPT PHOTO PREVIEW === */
+.receipt-photo-section {
+  margin: 0 20px 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: #bbb;
+  font-size: 36px;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.receipt-photo-label {
+  font-size: 12px;
+  color: #aaa;
+}
+
+/* === CAPTURE GRID (OCR receipt capture) === */
+.capture-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+
+.capture-slot {
+  aspect-ratio: 1;
+  background: #f0f0f0;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.capture-slot.filled {
+  background: #e8f5e9;
+  border-color: #2f9e44;
+  color: #2f9e44;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* === PAYMENT METHOD CHIPS === */
+.payment-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payment-chip {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.payment-chip.active {
+  background: #2f9e44;
+  color: white;
+  border-color: #2f9e44;
+}
+
+/* === SHOPPING HISTORY TAB TOGGLE === */
+.tab-row {
+  display: flex;
+  border-bottom: 2px solid #e0e0e0;
+  background: white;
+  flex-shrink: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 14px 8px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.tab-btn.active {
+  color: #2f9e44;
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #2f9e44;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* === LINK ROW (item → batch link) === */
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: #2f9e44;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link-row .link-icon { font-size: 16px; }
+
 /* === RESPONSIVE === */
 @media (max-width: 420px) {
   body {
