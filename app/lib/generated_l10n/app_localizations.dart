@@ -1,0 +1,1119 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations_en.dart';
+import 'app_localizations_fr.dart';
+
+// ignore_for_file: type=lint
+
+/// Callers can lookup localized strings with an instance of AppLocalizations
+/// returned by `AppLocalizations.of(context)`.
+///
+/// Applications need to include `AppLocalizations.delegate()` in their app's
+/// `localizationDelegates` list, and the locales they support in the app's
+/// `supportedLocales` list. For example:
+///
+/// ```dart
+/// import 'generated_l10n/app_localizations.dart';
+///
+/// return MaterialApp(
+///   localizationsDelegates: AppLocalizations.localizationsDelegates,
+///   supportedLocales: AppLocalizations.supportedLocales,
+///   home: MyApplicationHome(),
+/// );
+/// ```
+///
+/// ## Update pubspec.yaml
+///
+/// Please make sure to update your pubspec.yaml to include the following
+/// packages:
+///
+/// ```yaml
+/// dependencies:
+///   # Internationalization support.
+///   flutter_localizations:
+///     sdk: flutter
+///   intl: any # Use the pinned version from flutter_localizations
+///
+///   # Rest of dependencies
+/// ```
+///
+/// ## iOS Applications
+///
+/// iOS applications define key application metadata, including supported
+/// locales, in an Info.plist file that is built into the application bundle.
+/// To configure the locales supported by your app, you’ll need to edit this
+/// file.
+///
+/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// Then, in the Project Navigator, open the Info.plist file under the Runner
+/// project’s Runner folder.
+///
+/// Next, select the Information Property List item, select Add Item from the
+/// Editor menu, then select Localizations from the pop-up menu.
+///
+/// Select and expand the newly-created Localizations item then, for each
+/// locale your application supports, add a new item and select the locale
+/// you wish to add from the pop-up menu in the Value field. This list should
+/// be consistent with the languages listed in the AppLocalizations.supportedLocales
+/// property.
+abstract class AppLocalizations {
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+
+  final String localeName;
+
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
+  }
+
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
+
+  /// A list of this localizations delegate along with the default localizations
+  /// delegates.
+  ///
+  /// Returns a list of localizations delegates containing this delegate along with
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
+
+  /// A list of this localizations delegate's supported locales.
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('fr', 'CA'),
+    Locale('fr'),
+  ];
+
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ZeroSpoils'**
+  String get appTitle;
+
+  /// No description provided for @appDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce household food waste'**
+  String get appDescription;
+
+  /// No description provided for @navigationInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get navigationInventory;
+
+  /// No description provided for @navigationShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get navigationShoppingList;
+
+  /// No description provided for @navigationShoppingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get navigationShoppingHistory;
+
+  /// No description provided for @navigationSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navigationSettings;
+
+  /// No description provided for @screenTitleInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get screenTitleInventory;
+
+  /// No description provided for @screenTitleShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping List'**
+  String get screenTitleShoppingList;
+
+  /// No description provided for @screenTitleShoppingHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping History'**
+  String get screenTitleShoppingHistory;
+
+  /// No description provided for @screenTitleSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get screenTitleSettings;
+
+  /// No description provided for @screenTitleItemDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Item Details'**
+  String get screenTitleItemDetail;
+
+  /// No description provided for @screenTitleAddItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Item'**
+  String get screenTitleAddItem;
+
+  /// No description provided for @screenTitleEditItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Item'**
+  String get screenTitleEditItem;
+
+  /// No description provided for @screenTitleReceiptBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping Batch'**
+  String get screenTitleReceiptBatch;
+
+  /// No description provided for @screenTitleProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get screenTitleProgress;
+
+  /// No description provided for @screenTitleOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to ZeroSpoils'**
+  String get screenTitleOnboarding;
+
+  /// No description provided for @buttonAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get buttonAdd;
+
+  /// No description provided for @buttonEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get buttonEdit;
+
+  /// No description provided for @buttonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get buttonDelete;
+
+  /// No description provided for @buttonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get buttonSave;
+
+  /// No description provided for @buttonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get buttonCancel;
+
+  /// No description provided for @buttonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get buttonClose;
+
+  /// No description provided for @buttonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get buttonConfirm;
+
+  /// No description provided for @buttonNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get buttonNext;
+
+  /// No description provided for @buttonBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get buttonBack;
+
+  /// No description provided for @buttonYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get buttonYes;
+
+  /// No description provided for @buttonNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get buttonNo;
+
+  /// No description provided for @buttonMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get buttonMaybeLater;
+
+  /// No description provided for @buttonEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get buttonEnable;
+
+  /// No description provided for @buttonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get buttonDone;
+
+  /// No description provided for @buttonContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get buttonContinue;
+
+  /// No description provided for @buttonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get buttonRetry;
+
+  /// No description provided for @buttonSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get buttonSearch;
+
+  /// No description provided for @buttonFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get buttonFilter;
+
+  /// No description provided for @buttonSort.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get buttonSort;
+
+  /// No description provided for @buttonClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get buttonClear;
+
+  /// No description provided for @buttonExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get buttonExport;
+
+  /// No description provided for @buttonImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get buttonImport;
+
+  /// No description provided for @labelCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get labelCategory;
+
+  /// No description provided for @labelLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get labelLocation;
+
+  /// No description provided for @labelExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get labelExpiry;
+
+  /// No description provided for @labelQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get labelQuantity;
+
+  /// No description provided for @labelStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get labelStatus;
+
+  /// No description provided for @labelPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get labelPrice;
+
+  /// No description provided for @labelStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get labelStore;
+
+  /// No description provided for @labelDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get labelDate;
+
+  /// No description provided for @labelNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get labelNotes;
+
+  /// No description provided for @labelPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get labelPaymentMethod;
+
+  /// No description provided for @labelBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get labelBarcode;
+
+  /// No description provided for @labelSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get labelSearch;
+
+  /// No description provided for @labelFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get labelFilter;
+
+  /// No description provided for @labelAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get labelAll;
+
+  /// No description provided for @statusAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get statusAvailable;
+
+  /// No description provided for @statusConsumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumed'**
+  String get statusConsumed;
+
+  /// No description provided for @statusWasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wasted'**
+  String get statusWasted;
+
+  /// No description provided for @statusPrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepared'**
+  String get statusPrepared;
+
+  /// No description provided for @statusFresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh'**
+  String get statusFresh;
+
+  /// No description provided for @statusPackaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Packaged'**
+  String get statusPackaged;
+
+  /// No description provided for @categoryProduce.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce'**
+  String get categoryProduce;
+
+  /// No description provided for @categoryDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy'**
+  String get categoryDairy;
+
+  /// No description provided for @categoryMeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Meat'**
+  String get categoryMeat;
+
+  /// No description provided for @categoryFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get categoryFrozen;
+
+  /// No description provided for @categoryPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get categoryPantry;
+
+  /// No description provided for @categoryBeverages.
+  ///
+  /// In en, this message translates to:
+  /// **'Beverages'**
+  String get categoryBeverages;
+
+  /// No description provided for @categoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get categoryOther;
+
+  /// No description provided for @locationFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'Fridge'**
+  String get locationFridge;
+
+  /// No description provided for @locationFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get locationFreezer;
+
+  /// No description provided for @locationPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pantry'**
+  String get locationPantry;
+
+  /// No description provided for @locationCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter'**
+  String get locationCounter;
+
+  /// No description provided for @locationOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get locationOther;
+
+  /// No description provided for @paymentMethodCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get paymentMethodCash;
+
+  /// No description provided for @paymentMethodDebit.
+  ///
+  /// In en, this message translates to:
+  /// **'Debit'**
+  String get paymentMethodDebit;
+
+  /// No description provided for @paymentMethodCredit.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit'**
+  String get paymentMethodCredit;
+
+  /// No description provided for @paymentMethodMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Payment'**
+  String get paymentMethodMobile;
+
+  /// No description provided for @errorUnableToLoadItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load items'**
+  String get errorUnableToLoadItems;
+
+  /// No description provided for @errorNoItemsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No items found'**
+  String get errorNoItemsFound;
+
+  /// No description provided for @errorUnexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred'**
+  String get errorUnexpectedError;
+
+  /// No description provided for @errorPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get errorPermissionDenied;
+
+  /// No description provided for @errorCameraPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission is required'**
+  String get errorCameraPermissionRequired;
+
+  /// No description provided for @errorStoragePermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage permission is required'**
+  String get errorStoragePermissionRequired;
+
+  /// No description provided for @errorInvalidInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid input'**
+  String get errorInvalidInput;
+
+  /// No description provided for @errorItemNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Item not found'**
+  String get errorItemNotFound;
+
+  /// No description provided for @errorDuplicateItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item already exists'**
+  String get errorDuplicateItem;
+
+  /// No description provided for @messageEmptyInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'No items in your inventory yet. Add one to get started.'**
+  String get messageEmptyInventory;
+
+  /// No description provided for @messageEmptyShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shopping list is empty. Add items you need to buy.'**
+  String get messageEmptyShoppingList;
+
+  /// No description provided for @messageNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get messageNoResults;
+
+  /// No description provided for @messageConfirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this item?'**
+  String get messageConfirmDelete;
+
+  /// No description provided for @messageConfirmDeleteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all items?'**
+  String get messageConfirmDeleteAll;
+
+  /// No description provided for @messageSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved successfully'**
+  String get messageSaveSuccess;
+
+  /// No description provided for @messageDeleteSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted successfully'**
+  String get messageDeleteSuccess;
+
+  /// No description provided for @messageDuplicatePreventedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is already in your inventory'**
+  String get messageDuplicatePreventedMessage;
+
+  /// No description provided for @dialogTitleCameraPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Camera'**
+  String get dialogTitleCameraPermission;
+
+  /// No description provided for @dialogMessageCameraPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'ZeroSpoils needs camera access to scan barcodes and capture receipts.'**
+  String get dialogMessageCameraPermission;
+
+  /// No description provided for @dialogTitleConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Action'**
+  String get dialogTitleConfirmAction;
+
+  /// No description provided for @dialogTitleDeleteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Item'**
+  String get dialogTitleDeleteConfirmation;
+
+  /// No description provided for @toastItemAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Item added'**
+  String get toastItemAdded;
+
+  /// No description provided for @toastItemUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Item updated'**
+  String get toastItemUpdated;
+
+  /// No description provided for @toastItemDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Item deleted'**
+  String get toastItemDeleted;
+
+  /// No description provided for @toastCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get toastCopiedToClipboard;
+
+  /// No description provided for @toastErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get toastErrorOccurred;
+
+  /// No description provided for @hintSearchItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Search items...'**
+  String get hintSearchItems;
+
+  /// No description provided for @hintItemName.
+  ///
+  /// In en, this message translates to:
+  /// **'Item name'**
+  String get hintItemName;
+
+  /// No description provided for @hintNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes...'**
+  String get hintNotes;
+
+  /// No description provided for @settingsReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsReminders;
+
+  /// No description provided for @settingsNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotifications;
+
+  /// No description provided for @settingsFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback & Sounds'**
+  String get settingsFeedback;
+
+  /// No description provided for @settingsAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsAbout;
+
+  /// No description provided for @settingsPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Data'**
+  String get settingsPrivacy;
+
+  /// No description provided for @settingsDarkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get settingsDarkMode;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsDateFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Format'**
+  String get settingsDateFormat;
+
+  /// No description provided for @settingsVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get settingsVersion;
+
+  /// No description provided for @settingsExportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Data'**
+  String get settingsExportData;
+
+  /// No description provided for @settingsImportData.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Data'**
+  String get settingsImportData;
+
+  /// No description provided for @settingsDeleteAllData.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Data'**
+  String get settingsDeleteAllData;
+
+  /// No description provided for @feedbackHapticFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic Feedback'**
+  String get feedbackHapticFeedback;
+
+  /// No description provided for @feedbackHapticFeedbackDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable vibration on user interactions'**
+  String get feedbackHapticFeedbackDescription;
+
+  /// No description provided for @feedbackAudioFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Feedback'**
+  String get feedbackAudioFeedback;
+
+  /// No description provided for @feedbackAudioFeedbackDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable sound effects on interactions'**
+  String get feedbackAudioFeedbackDescription;
+
+  /// No description provided for @feedbackOcrBarcodeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode Scan Success'**
+  String get feedbackOcrBarcodeSuccess;
+
+  /// No description provided for @feedbackOcrBarcodeSuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate and beep when barcode is recognized'**
+  String get feedbackOcrBarcodeSuccessDescription;
+
+  /// No description provided for @feedbackOcrExpirySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date Recognition'**
+  String get feedbackOcrExpirySuccess;
+
+  /// No description provided for @feedbackOcrExpirySuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate and beep when expiry date is captured'**
+  String get feedbackOcrExpirySuccessDescription;
+
+  /// No description provided for @feedbackOcrReceiptSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Recognition'**
+  String get feedbackOcrReceiptSuccess;
+
+  /// No description provided for @feedbackOcrReceiptSuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate and beep when receipt items are extracted'**
+  String get feedbackOcrReceiptSuccessDescription;
+
+  /// No description provided for @feedbackOcrProduceSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Produce Label Recognition'**
+  String get feedbackOcrProduceSuccess;
+
+  /// No description provided for @feedbackOcrProduceSuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate and beep when produce sticker is read'**
+  String get feedbackOcrProduceSuccessDescription;
+
+  /// No description provided for @feedbackBeepVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Beep Volume'**
+  String get feedbackBeepVolume;
+
+  /// No description provided for @feedbackBeepVolumeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust POS-style beep volume (0-100%)'**
+  String get feedbackBeepVolumeDescription;
+
+  /// No description provided for @feedbackHapticIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic Intensity'**
+  String get feedbackHapticIntensity;
+
+  /// No description provided for @feedbackHapticIntensityDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust vibration intensity (Light, Medium, Heavy)'**
+  String get feedbackHapticIntensityDescription;
+
+  /// No description provided for @remindersTurnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders turned on'**
+  String get remindersTurnedOn;
+
+  /// No description provided for @remindersTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders turned off'**
+  String get remindersTurnedOff;
+
+  /// No description provided for @remindersLeadTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lead Time'**
+  String get remindersLeadTime;
+
+  /// No description provided for @remindersSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get remindersSound;
+
+  /// No description provided for @remindersVibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get remindersVibration;
+
+  /// No description provided for @shoppingBatchCapture.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping Batch'**
+  String get shoppingBatchCapture;
+
+  /// No description provided for @shoppingBatchStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get shoppingBatchStore;
+
+  /// No description provided for @shoppingBatchDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get shoppingBatchDate;
+
+  /// No description provided for @shoppingBatchCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Cost'**
+  String get shoppingBatchCost;
+
+  /// No description provided for @shoppingBatchReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt Photo'**
+  String get shoppingBatchReceipt;
+
+  /// No description provided for @shoppingBatchLinkedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked Items'**
+  String get shoppingBatchLinkedItems;
+
+  /// No description provided for @shoppingBatchTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get shoppingBatchTakePhoto;
+
+  /// No description provided for @shoppingBatchChoosePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from Library'**
+  String get shoppingBatchChoosePhoto;
+
+  /// No description provided for @shoppingBatchLinkItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Link Items'**
+  String get shoppingBatchLinkItems;
+
+  /// No description provided for @shoppingBatchReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get shoppingBatchReview;
+
+  /// No description provided for @privacyExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export your data as CSV or JSON'**
+  String get privacyExport;
+
+  /// No description provided for @privacyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all data permanently'**
+  String get privacyDelete;
+
+  /// No description provided for @privacyDeleteWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone'**
+  String get privacyDeleteWarning;
+
+  /// No description provided for @aboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About ZeroSpoils'**
+  String get aboutTitle;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A simple app to help you reduce food waste at home'**
+  String get aboutDescription;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersion;
+
+  /// No description provided for @aboutDeveloper.
+  ///
+  /// In en, this message translates to:
+  /// **'Developed with ❤️'**
+  String get aboutDeveloper;
+
+  /// No description provided for @expiryTodayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires today'**
+  String get expiryTodayLabel;
+
+  /// No description provided for @expiringSoonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon'**
+  String get expiringSoonLabel;
+
+  /// No description provided for @expiryThresholdDays.
+  ///
+  /// In en, this message translates to:
+  /// **'within {days} days'**
+  String expiryThresholdDays(int days);
+
+  /// No description provided for @daysUntilExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String daysUntilExpiry(int days);
+
+  /// No description provided for @itemQuantityFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty: {quantity}'**
+  String itemQuantityFormat(String quantity);
+
+  /// No description provided for @formattedPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{currency}{amount}'**
+  String formattedPrice(String currency, double amount);
+
+  /// No description provided for @noData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get noData;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  Future<AppLocalizations> load(Locale locale) {
+    return SynchronousFuture<AppLocalizations>(lookupAppLocalizations(locale));
+  }
+
+  @override
+  bool isSupported(Locale locale) =>
+      <String>['en', 'fr'].contains(locale.languageCode);
+
+  @override
+  bool shouldReload(_AppLocalizationsDelegate old) => false;
+}
+
+AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+country codes are specified.
+  switch (locale.languageCode) {
+    case 'fr':
+      {
+        switch (locale.countryCode) {
+          case 'CA':
+            return AppLocalizationsFrCa();
+        }
+        break;
+      }
+  }
+
+  // Lookup logic when only language code is specified.
+  switch (locale.languageCode) {
+    case 'en':
+      return AppLocalizationsEn();
+    case 'fr':
+      return AppLocalizationsFr();
+  }
+
+  throw FlutterError(
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
+}
