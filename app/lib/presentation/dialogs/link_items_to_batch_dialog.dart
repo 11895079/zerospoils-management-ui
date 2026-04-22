@@ -36,9 +36,7 @@ class _LinkItemsToBatchDialogState
     final allItems = await itemRepo.getAllItems();
 
     // Filter items that are not linked to any batch (truly unlinked)
-    return allItems
-        .where((item) => item.receiptBatchId == null)
-        .toList();
+    return allItems.where((item) => item.receiptBatchId == null).toList();
   }
 
   Future<void> _linkSelectedItems() async {
