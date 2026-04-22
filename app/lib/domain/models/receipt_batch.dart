@@ -2,6 +2,25 @@ import 'package:equatable/equatable.dart';
 
 enum ReceiptBatchSource { inventory, shoppingList }
 
+enum PaymentMethod { cash, credit, debit, mobile, other }
+
+extension PaymentMethodLabel on PaymentMethod {
+  String get label {
+    switch (this) {
+      case PaymentMethod.cash:
+        return 'Cash';
+      case PaymentMethod.credit:
+        return 'Credit';
+      case PaymentMethod.debit:
+        return 'Debit';
+      case PaymentMethod.mobile:
+        return 'Mobile Pay';
+      case PaymentMethod.other:
+        return 'Other';
+    }
+  }
+}
+
 enum ReceiptBatchDestination { inventory, shoppingList }
 
 class ReceiptBatchItem extends Equatable {
@@ -65,6 +84,7 @@ class ReceiptBatch extends Equatable {
   final List<ReceiptBatchItem> items;
   final List<String> receiptImagePaths;
   final List<String> goodsImagePaths;
+  final PaymentMethod? paymentMethod;
 
   const ReceiptBatch({
     required this.id,
@@ -76,6 +96,7 @@ class ReceiptBatch extends Equatable {
     required this.items,
     this.receiptImagePaths = const [],
     this.goodsImagePaths = const [],
+    this.paymentMethod,
   });
 
   double get totalSpend =>
@@ -92,6 +113,7 @@ class ReceiptBatch extends Equatable {
     List<ReceiptBatchItem>? items,
     List<String>? receiptImagePaths,
     List<String>? goodsImagePaths,
+    PaymentMethod? paymentMethod,
   }) {
     return ReceiptBatch(
       id: id ?? this.id,
@@ -103,6 +125,7 @@ class ReceiptBatch extends Equatable {
       items: items ?? this.items,
       receiptImagePaths: receiptImagePaths ?? this.receiptImagePaths,
       goodsImagePaths: goodsImagePaths ?? this.goodsImagePaths,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
 
@@ -117,5 +140,6 @@ class ReceiptBatch extends Equatable {
     items,
     receiptImagePaths,
     goodsImagePaths,
+    paymentMethod,
   ];
 }

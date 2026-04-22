@@ -6,8 +6,10 @@ import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
 import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/core/vision/fresh_item_cv_service.dart';
 import 'package:zerospoils/data/repositories/user_category_repository.dart';
+import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
+import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/presentation/fresh_item/fresh_item_capture_launcher.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
@@ -27,6 +29,20 @@ class FakeFreshItemCaptureLauncher {
 class FakeUserCategoryRepository extends UserCategoryRepository {
   @override
   Future<List<UserCategory>> getAll() async => [];
+}
+
+class FakeReceiptBatchRepository implements ReceiptBatchRepository {
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<ReceiptBatch>> getAllBatches() async => [];
+
+  @override
+  Future<ReceiptBatch?> getBatch(String id) async => null;
+
+  @override
+  Future<void> saveBatch(ReceiptBatch batch) async {}
 }
 
 void main() {
@@ -55,6 +71,9 @@ void main() {
             ).overrideWith((ref) async => true),
             userCategoryRepositoryProvider.overrideWithValue(
               FakeUserCategoryRepository(),
+            ),
+            receiptBatchRepositoryProvider.overrideWithValue(
+              FakeReceiptBatchRepository(),
             ),
           ],
           child: const MaterialApp(home: ItemFormScreen()),
@@ -135,6 +154,9 @@ void main() {
             ).overrideWith((ref) async => true),
             userCategoryRepositoryProvider.overrideWithValue(
               FakeUserCategoryRepository(),
+            ),
+            receiptBatchRepositoryProvider.overrideWithValue(
+              FakeReceiptBatchRepository(),
             ),
             freshItemCaptureLauncherProvider.overrideWithValue(launcher.call),
           ],

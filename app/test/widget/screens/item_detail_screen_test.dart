@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
+import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     hide itemRepositoryProvider;
 import 'package:zerospoils/presentation/di/repository_providers.dart';
@@ -58,14 +60,38 @@ class MockTelemetryClient extends TelemetryClient {
   }
 }
 
+class MockReceiptBatchRepository implements ReceiptBatchRepository {
+  final Map<String, ReceiptBatch> _batches = {};
+
+  void addBatch(ReceiptBatch batch) {
+    _batches[batch.id] = batch;
+  }
+
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<ReceiptBatch>> getAllBatches() async => _batches.values.toList();
+
+  @override
+  Future<ReceiptBatch?> getBatch(String id) async => _batches[id];
+
+  @override
+  Future<void> saveBatch(ReceiptBatch batch) async {
+    _batches[batch.id] = batch;
+  }
+}
+
 void main() {
   group('ItemDetailScreen', () {
     late MockItemRepository mockRepository;
     late MockTelemetryClient mockTelemetry;
+    late MockReceiptBatchRepository mockReceiptBatchRepository;
 
     setUp(() {
       mockRepository = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      mockReceiptBatchRepository = MockReceiptBatchRepository();
     });
 
     Widget createThemedTestWidget(
@@ -75,6 +101,9 @@ void main() {
       return ProviderScope(
         overrides: [
           itemRepositoryProvider.overrideWithValue(mockRepository),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            mockReceiptBatchRepository,
+          ),
           telemetryClientProvider.overrideWithValue(mockTelemetry),
         ],
         child: MaterialApp(
@@ -124,6 +153,41 @@ void main() {
       expect(find.byKey(const Key('item_detail_location')), findsOneWidget);
       expect(find.byKey(const Key('item_detail_quantity')), findsOneWidget);
       expect(find.byKey(const Key('item_detail_added')), findsOneWidget);
+    });
+
+    testWidgets('shows linked shopping batch details for linked items', (
+      WidgetTester tester,
+    ) async {
+      final testItem = Item(
+        id: 'item-1',
+        name: 'Linked Yogurt',
+        category: ItemCategory.dairy,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        receiptBatchId: 'batch-123',
+        createdAt: DateTime(2026, 1, 20),
+        updatedAt: DateTime(2026, 1, 20),
+      );
+      mockRepository.addMockItem(testItem);
+      mockReceiptBatchRepository.addBatch(
+        ReceiptBatch(
+          id: 'batch-123',
+          createdAt: DateTime(2026, 1, 19),
+          storeName: 'No Frills',
+          source: ReceiptBatchSource.shoppingList,
+          items: const [],
+        ),
+      );
+
+      await tester.pumpWidget(createTestWidget('item-1'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('item_detail_batch')), findsOneWidget);
+      expect(find.textContaining('No Frills'), findsOneWidget);
+      expect(
+        find.byKey(const Key('item_detail_open_batch_button')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows "Item not found" when item does not exist', (

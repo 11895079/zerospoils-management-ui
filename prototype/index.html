@@ -140,8 +140,23 @@
       </div>
     </div>
 
-    <!-- FAB -->
-    <a href="add-item.html" class="fab" title="Add item">+</a>
+    <!-- Speed-dial FAB (M3/198: Add Individual Item OR Add Shopping Batch) -->
+    <div class="speed-dial-backdrop" id="sdBackdrop" onclick="closeDial()"></div>
+
+    <div class="speed-dial-menu" id="sdMenu">
+      <div class="speed-dial-item">
+        <span class="speed-dial-label">Add individual item</span>
+        <a href="add-item.html" class="speed-dial-btn secondary" title="Add individual item">🥕</a>
+      </div>
+      <div class="speed-dial-item">
+        <span class="speed-dial-label">Add shopping batch</span>
+        <a href="shopping-batch-form.html" class="speed-dial-btn" title="Add shopping batch">🛒</a>
+      </div>
+    </div>
+
+    <div class="fab-stack">
+      <button id="fabMain" class="fab" onclick="toggleDial()" title="Add" aria-label="Add item or batch" style="border:none;cursor:pointer;font-size:28px;line-height:1;">＋</button>
+    </div>
 
     <!-- Bottom Nav -->
     <nav class="bottom-nav">
@@ -369,6 +384,21 @@
         drawer.classList.remove('open');
         backdrop.classList.remove('show');
       }
+    }
+
+    // Speed-dial FAB
+    let dialOpen = false;
+    function toggleDial() {
+      dialOpen = !dialOpen;
+      document.getElementById('sdMenu').classList.toggle('open', dialOpen);
+      document.getElementById('sdBackdrop').classList.toggle('open', dialOpen);
+      document.getElementById('fabMain').style.transform = dialOpen ? 'rotate(45deg)' : '';
+    }
+    function closeDial() {
+      dialOpen = false;
+      document.getElementById('sdMenu').classList.remove('open');
+      document.getElementById('sdBackdrop').classList.remove('open');
+      document.getElementById('fabMain').style.transform = '';
     }
   </script>
 </body>

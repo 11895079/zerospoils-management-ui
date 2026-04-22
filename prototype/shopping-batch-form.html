@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZeroSpoils - New Shopping Batch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-frame">
+    <!-- Header -->
+    <header class="app-header detail-header">
+      <div class="header-left">
+        <a href="shopping-list.html" class="back-btn">‹ Back</a>
+        <h1 style="font-size:18px;color:#333;">New Shopping Batch</h1>
+      </div>
+    </header>
+
+    <!-- Form -->
+    <div class="form-content">
+      <form class="add-item-form" onsubmit="saveBatch(event)">
+
+        <!-- Store Name -->
+        <div class="form-group">
+          <label for="storeName">Store</label>
+          <input type="text" id="storeName" placeholder="e.g. Costco, Trader Joe's…" autocomplete="off" />
+          <!-- Quick-pick recent stores -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;" id="recentStores">
+            <button type="button" class="payment-chip" onclick="pickStore('Costco')">Costco</button>
+            <button type="button" class="payment-chip" onclick="pickStore('Trader Joe\'s')">Trader Joe's</button>
+            <button type="button" class="payment-chip" onclick="pickStore('Whole Foods')">Whole Foods</button>
+            <button type="button" class="payment-chip" onclick="pickStore('Safeway')">Safeway</button>
+          </div>
+        </div>
+
+        <!-- Purchase Date -->
+        <div class="form-group">
+          <label for="purchaseDate">Purchase Date</label>
+          <input type="date" id="purchaseDate" />
+        </div>
+
+        <!-- Total Cost -->
+        <div class="form-group">
+          <label for="totalCost">Total Cost (optional)</label>
+          <input type="text" id="totalCost" placeholder="$0.00" inputmode="decimal" />
+        </div>
+
+        <!-- Payment Method -->
+        <div class="form-group">
+          <label>Payment Method</label>
+          <div class="payment-chips" id="paymentChips">
+            <button type="button" class="payment-chip" onclick="pickPayment(this)">💵 Cash</button>
+            <button type="button" class="payment-chip active" onclick="pickPayment(this)">💳 Credit</button>
+            <button type="button" class="payment-chip" onclick="pickPayment(this)">🏦 Debit</button>
+            <button type="button" class="payment-chip" onclick="pickPayment(this)">📱 Mobile</button>
+            <button type="button" class="payment-chip" onclick="pickPayment(this)">Other</button>
+          </div>
+        </div>
+
+        <!-- Receipt Photo (optional, max 1) -->
+        <div class="form-group">
+          <label>Receipt Photo <span style="font-weight:400;color:#999;">(optional)</span></label>
+          <div class="receipt-photo-section" id="photoSlot" onclick="addPhoto()" style="cursor:pointer;">
+            <span id="photoIcon">📷</span>
+            <span class="receipt-photo-label" id="photoLabel">Tap to add receipt photo</span>
+          </div>
+          <p class="help-text">One photo max — for your records only, no OCR processing.</p>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label for="batchNotes">Notes <span style="font-weight:400;color:#999;">(optional)</span></label>
+          <textarea id="batchNotes" rows="2" placeholder="e.g. weekly shop, restocking pantry…" style="resize:none;"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <button type="submit" class="btn btn-primary">Save Batch</button>
+        <a href="shopping-list.html" class="btn btn-secondary" style="text-align:center;margin-top:8px;">Cancel</a>
+
+      </form>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <a href="index.html">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label">Inventory</div>
+      </a>
+      <a href="expiring-soon.html">
+        <div class="nav-icon">⏰</div>
+        <div class="nav-label">Expiring</div>
+      </a>
+      <a href="shopping-list.html" class="active">
+        <div class="nav-icon">🛒</div>
+        <div class="nav-label">Shopping</div>
+      </a>
+      <a href="progress.html">
+        <div class="nav-icon">📊</div>
+        <div class="nav-label">Progress</div>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // Default date to today
+    document.getElementById('purchaseDate').value = new Date().toISOString().split('T')[0];
+
+    function pickStore(name) {
+      document.getElementById('storeName').value = name;
+    }
+
+    function pickPayment(btn) {
+      document.querySelectorAll('#paymentChips .payment-chip').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    let hasPhoto = false;
+    function addPhoto() {
+      if (hasPhoto) return;
+      hasPhoto = true;
+      const slot = document.getElementById('photoSlot');
+      slot.innerHTML = '<span style="font-size:48px;">🧾</span><span class="receipt-photo-label" style="color:#2f9e44;font-weight:600;">Receipt added ✓</span>';
+      slot.style.border = '2px solid #2f9e44';
+      slot.style.background = '#f0fff4';
+      slot.style.cursor = 'default';
+    }
+
+    function saveBatch(e) {
+      e.preventDefault();
+      const store = document.getElementById('storeName').value.trim() || 'Unknown store';
+      const date = document.getElementById('purchaseDate').value || 'Today';
+      showToast(`Batch saved: ${store} · ${date}`);
+      setTimeout(() => window.location.href = 'receipt-batch-detail.html', 1200);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+  </script>
+</body>
+</html>

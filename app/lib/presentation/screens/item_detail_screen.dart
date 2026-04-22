@@ -12,6 +12,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/models/receipt_batch.dart';
 import '../../core/notifications/reminder_attribution_store.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
@@ -31,6 +32,7 @@ class ItemDetailScreen extends ConsumerStatefulWidget {
 class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
   bool _isLoading = true;
   Item? _item;
+  ReceiptBatch? _linkedBatch;
   String? _errorMessage;
 
   @override
@@ -56,10 +58,17 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       final repository = ref.read(itemRepositoryProvider);
       await repository.init();
       final item = await repository.getItem(widget.itemId);
+      ReceiptBatch? linkedBatch;
+      if (item?.receiptBatchId != null) {
+        final batchRepository = ref.read(receiptBatchRepositoryProvider);
+        await batchRepository.init();
+        linkedBatch = await batchRepository.getBatch(item!.receiptBatchId!);
+      }
 
       if (mounted) {
         setState(() {
           _item = item;
+          _linkedBatch = linkedBatch;
           _isLoading = false;
         });
       }
@@ -653,6 +662,44 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                               ),
                               valueKey: const Key('item_detail_added'),
                             ),
+                            const Divider(height: 1),
+                            _buildInfoRow(
+                              'Shopping Batch',
+                              _item!.receiptBatchId == null
+                                  ? '—'
+                                  : (_linkedBatch?.storeName
+                                                ?.trim()
+                                                .isNotEmpty ==
+                                            true
+                                        ? '${_linkedBatch!.storeName!.trim()} (${_item!.receiptBatchId})'
+                                        : _item!.receiptBatchId!),
+                              valueKey: const Key('item_detail_batch'),
+                            ),
+                            if (_item!.receiptBatchId != null) ...[
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.xs,
+                                  bottom: AppSpacing.sm,
+                                ),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    key: const Key(
+                                      'item_detail_open_batch_button',
+                                    ),
+                                    onPressed: () {
+                                      context.pushNamed(
+                                        'receipt-batch-detail',
+                                        pathParameters: {
+                                          'id': _item!.receiptBatchId!,
+                                        },
+                                      );
+                                    },
+                                    child: const Text('View Batch'),
+                                  ),
+                                ),
+                              ),
+                            ],
                             const Divider(height: 1),
                             if (_item!.expiryDate != null) ...[
                               _buildInfoRow(

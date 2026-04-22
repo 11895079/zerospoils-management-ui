@@ -25,11 +25,13 @@ import 'receipt_batch_review_screen.dart';
 class ReceiptBatchCaptureScreen extends ConsumerStatefulWidget {
   final ReceiptBatchSource source;
   final bool? debugShowGoodsPhotosOverride;
+  final String? existingBatchId;
 
   const ReceiptBatchCaptureScreen({
     super.key,
     required this.source,
     this.debugShowGoodsPhotosOverride,
+    this.existingBatchId,
   });
 
   @override
@@ -50,11 +52,24 @@ class _ReceiptBatchCaptureScreenState
   DateTime _purchaseDate = DateTime.now();
   bool _processing = false;
   bool _pickingPhoto = false;
+  PaymentMethod? _paymentMethod;
+
+  bool get _usesDesktopPhotoPicker =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.linux);
+
+  bool get _supportsLiveReceiptScan =>
+      !kIsWeb &&
+      defaultTargetPlatform != TargetPlatform.macOS &&
+      defaultTargetPlatform != TargetPlatform.windows &&
+      defaultTargetPlatform != TargetPlatform.linux;
 
   @override
   void initState() {
     super.initState();
-    _batchId = _buildBatchId();
+    _batchId = widget.existingBatchId ?? _buildBatchId();
     ref.read(telemetryClientProvider).enqueue({
       'name': 'receipt_batch_started',
       'properties': {'source_screen': widget.source.name, 'batch_id': _batchId},
@@ -78,7 +93,9 @@ class _ReceiptBatchCaptureScreenState
     setState(() => _pickingPhoto = true);
     try {
       final photo = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: _usesDesktopPhotoPicker
+            ? ImageSource.gallery
+            : ImageSource.camera,
         imageQuality: 85,
       );
 
@@ -106,8 +123,12 @@ class _ReceiptBatchCaptureScreenState
       _showSnack('Receipt photo limit reached (5 photos max)');
       return;
     }
-    if (kIsWeb) {
-      _showSnack('Live receipt scanning is not available on web yet');
+    if (!_supportsLiveReceiptScan) {
+      _showSnack(
+        kIsWeb
+            ? 'Live receipt scanning is not available on web yet'
+            : 'Live receipt scanning is not available on this platform yet',
+      );
       return;
     }
 
@@ -139,7 +160,9 @@ class _ReceiptBatchCaptureScreenState
     setState(() => _pickingPhoto = true);
     try {
       final photo = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: _usesDesktopPhotoPicker
+            ? ImageSource.gallery
+            : ImageSource.camera,
         imageQuality: 85,
       );
 
@@ -260,7 +283,7 @@ class _ReceiptBatchCaptureScreenState
       });
 
       if (!mounted) return;
-      Navigator.of(context).push(
+      final saved = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => ReceiptBatchReviewScreen(
             source: widget.source,
@@ -268,12 +291,18 @@ class _ReceiptBatchCaptureScreenState
             goodsPhotoPaths: _goodsPhotos.map((e) => e.path).toList(),
             parsedItems: mergedItems,
             batchId: _batchId,
+            existingBatchId: widget.existingBatchId,
             storeName: _normalizedStoreName(),
             purchasedAt: _purchaseDate,
             totalAmount: _parsedBatchTotal(),
+            paymentMethod: _paymentMethod,
           ),
         ),
       );
+      if (!mounted) return;
+      if (saved == true && widget.existingBatchId != null) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e) {
       ref.read(telemetryClientProvider).enqueue({
         'name': 'receipt_batch_failed',
@@ -465,6 +494,23 @@ class _ReceiptBatchCaptureScreenState
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.md),
+              DropdownButtonFormField<PaymentMethod>(
+                key: const Key('receipt_batch_payment_method_field'),
+                initialValue: _paymentMethod,
+                decoration: const InputDecoration(
+                  labelText: 'Payment method',
+                  hintText: 'Optional',
+                ),
+                items: PaymentMethod.values
+                    .map(
+                      (m) => DropdownMenuItem(value: m, child: Text(m.label)),
+                    )
+                    .toList(),
+                onChanged: _processing || _pickingPhoto
+                    ? null
+                    : (value) => setState(() => _paymentMethod = value),
+              ),
               const SizedBox(height: AppSpacing.lg),
               Text(
                 'Receipt Photos (${_receiptPhotos.length}/5)',
@@ -494,7 +540,7 @@ class _ReceiptBatchCaptureScreenState
                   color: theme.textTheme.bodySmall?.color,
                 ),
               ),
-              if (!kIsWeb) ...[
+              if (_supportsLiveReceiptScan) ...[
                 const SizedBox(height: AppSpacing.md),
                 OutlinedButton.icon(
                   key: const Key('receipt_batch_live_scan_button'),

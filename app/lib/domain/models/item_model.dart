@@ -193,6 +193,12 @@ class Item extends Equatable {
   @HiveField(17)
   /// Optional manufacturer or brand name for the product (e.g., "Organic Valley").
   final String? brand;
+  @HiveField(18)
+  /// Optional batch id when this item originated from or was linked to a shopping batch.
+  final String? receiptBatchId;
+  @HiveField(19)
+  /// Optional batch item id to trace back to a specific parsed line item in a batch.
+  final String? receiptBatchItemId;
 
   const Item({
     required this.id,
@@ -213,6 +219,8 @@ class Item extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.brand,
+    this.receiptBatchId,
+    this.receiptBatchItemId,
   });
 
   /// Create a copy of Item with optional field overrides
@@ -235,11 +243,15 @@ class Item extends Equatable {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? brand,
+    String? receiptBatchId,
+    String? receiptBatchItemId,
   }) {
     return Item(
       id: id ?? this.id,
       name: name ?? this.name,
       brand: brand ?? this.brand,
+      receiptBatchId: receiptBatchId ?? this.receiptBatchId,
+      receiptBatchItemId: receiptBatchItemId ?? this.receiptBatchItemId,
       category: category ?? this.category,
       type: type ?? this.type,
       preparedDate: preparedDate ?? this.preparedDate,
@@ -303,6 +315,8 @@ class Item extends Equatable {
     createdAt,
     updatedAt,
     brand,
+    receiptBatchId,
+    receiptBatchItemId,
     customCategoryId,
     customCategoryName,
   ];

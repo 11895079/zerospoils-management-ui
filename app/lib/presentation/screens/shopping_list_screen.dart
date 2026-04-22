@@ -12,6 +12,9 @@ import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import '../../domain/models/receipt_batch.dart';
 import '../widgets/item_entry_sheet.dart';
 
 final shoppingListItemsProvider = FutureProvider<List<ShoppingListItem>>((
@@ -20,6 +23,14 @@ final shoppingListItemsProvider = FutureProvider<List<ShoppingListItem>>((
   final repository = ref.watch(shoppingListRepositoryProvider);
   await repository.init();
   return repository.getAllItems();
+});
+
+final _shoppingHistoryBatchesProvider = FutureProvider<List<ReceiptBatch>>((
+  ref,
+) async {
+  final repo = ref.watch(receiptBatchRepositoryProvider);
+  await repo.init();
+  return repo.getAllBatches();
 });
 
 class ShoppingListScreen extends ConsumerWidget {
@@ -33,124 +44,156 @@ class ShoppingListScreen extends ConsumerWidget {
 
     final itemsAsync = ref.watch(shoppingListItemsProvider);
 
-    return Scaffold(
-      key: const Key('screen_shopping_list'),
-      appBar: AppBar(
-        title: Text(
-          'Shopping List',
-          style: theme.appBarTheme.titleTextStyle?.copyWith(
-            fontWeight: FontWeight.w600,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        key: const Key('screen_shopping_list'),
+        appBar: AppBar(
+          title: Text(
+            'Shopping List',
+            style: theme.appBarTheme.titleTextStyle?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        elevation: 1,
-      ),
-      drawer: const AppDrawer(),
-      body: itemsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text(
-            'Unable to load shopping list',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-          ),
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return _EmptyState(onAdd: () => _showAddItemSheet(context, ref));
-          }
-
-          final unpurchased = items.where((item) => !item.isPurchased).toList();
-          final purchased = items.where((item) => item.isPurchased).toList();
-
-          return ListView(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            children: [
-              _SectionHeader(
-                key: const Key('shopping_unpurchased_section'),
-                title: 'Next Shop',
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              ...unpurchased.map(
-                (item) => _ShoppingItemTile(
-                  key: Key('shopping_item_tile_${item.id}'),
-                  item: item,
-                  checkboxKey: Key('shopping_item_checkbox_${item.id}'),
-                  onChanged: (value) async {
-                    await _handleToggle(
-                      context: context,
-                      ref: ref,
-                      item: item,
-                      value: value,
-                      isPurchasedSection: false,
-                    );
-                  },
-                  onDelete: () async {
-                    final repository = ref.read(shoppingListRepositoryProvider);
-                    await repository.deleteItem(item.id);
-                    _trackItemDeleted(ref, item.id);
-                    ref.invalidate(shoppingListItemsProvider);
-                  },
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              _SectionHeader(
-                key: const Key('shopping_purchased_section'),
-                title: 'Purchased',
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              ...purchased.map(
-                (item) => _ShoppingItemTile(
-                  key: Key('shopping_item_tile_${item.id}'),
-                  item: item,
-                  checkboxKey: Key('shopping_item_checkbox_${item.id}'),
-                  onChanged: (value) async {
-                    await _handleToggle(
-                      context: context,
-                      ref: ref,
-                      item: item,
-                      value: value,
-                      isPurchasedSection: true,
-                    );
-                  },
-                  onDelete: () async {
-                    final repository = ref.read(shoppingListRepositoryProvider);
-                    await repository.deleteItem(item.id);
-                    _trackItemDeleted(ref, item.id);
-                    ref.invalidate(shoppingListItemsProvider);
-                  },
-                ),
-              ),
-              if (purchased.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    key: const Key('shopping_convert_batch_button'),
-                    onPressed: () => _runBatchConvert(
-                      context: context,
-                      ref: ref,
-                      items: List<ShoppingListItem>.from(purchased),
-                    ),
-                    child: Text('Convert Purchased (${purchased.length})'),
-                  ),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  key: const Key('shopping_add_item_button'),
-                  onPressed: () => _showAddItemSheet(context, ref),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Item'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ),
+          elevation: 1,
+          bottom: const TabBar(
+            tabs: [
+              Tab(key: Key('shopping_list_tab'), text: 'List'),
+              Tab(key: Key('shopping_history_tab'), text: 'History 🧾'),
             ],
-          );
-        },
+          ),
+        ),
+        drawer: const AppDrawer(),
+        body: TabBarView(
+          children: [
+            // Tab 1: Shopping List
+            Builder(
+              builder: (context) => itemsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text(
+                    'Unable to load shopping list',
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                data: (items) {
+                  if (items.isEmpty) {
+                    return _EmptyState(
+                      onAdd: () => _showAddItemSheet(context, ref),
+                    );
+                  }
+
+                  final unpurchased = items
+                      .where((item) => !item.isPurchased)
+                      .toList();
+                  final purchased = items
+                      .where((item) => item.isPurchased)
+                      .toList();
+
+                  return ListView(
+                    padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                    children: [
+                      _SectionHeader(
+                        key: const Key('shopping_unpurchased_section'),
+                        title: 'Next Shop',
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ...unpurchased.map(
+                        (item) => _ShoppingItemTile(
+                          key: Key('shopping_item_tile_${item.id}'),
+                          item: item,
+                          checkboxKey: Key('shopping_item_checkbox_${item.id}'),
+                          onChanged: (value) async {
+                            await _handleToggle(
+                              context: context,
+                              ref: ref,
+                              item: item,
+                              value: value,
+                              isPurchasedSection: false,
+                            );
+                          },
+                          onDelete: () async {
+                            final repository = ref.read(
+                              shoppingListRepositoryProvider,
+                            );
+                            await repository.deleteItem(item.id);
+                            _trackItemDeleted(ref, item.id);
+                            ref.invalidate(shoppingListItemsProvider);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _SectionHeader(
+                        key: const Key('shopping_purchased_section'),
+                        title: 'Purchased',
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ...purchased.map(
+                        (item) => _ShoppingItemTile(
+                          key: Key('shopping_item_tile_${item.id}'),
+                          item: item,
+                          checkboxKey: Key('shopping_item_checkbox_${item.id}'),
+                          onChanged: (value) async {
+                            await _handleToggle(
+                              context: context,
+                              ref: ref,
+                              item: item,
+                              value: value,
+                              isPurchasedSection: true,
+                            );
+                          },
+                          onDelete: () async {
+                            final repository = ref.read(
+                              shoppingListRepositoryProvider,
+                            );
+                            await repository.deleteItem(item.id);
+                            _trackItemDeleted(ref, item.id);
+                            ref.invalidate(shoppingListItemsProvider);
+                          },
+                        ),
+                      ),
+                      if (purchased.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            key: const Key('shopping_convert_batch_button'),
+                            onPressed: () => _runBatchConvert(
+                              context: context,
+                              ref: ref,
+                              items: List<ShoppingListItem>.from(purchased),
+                            ),
+                            child: Text(
+                              'Convert Purchased (${purchased.length})',
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          key: const Key('shopping_add_item_button'),
+                          onPressed: () => _showAddItemSheet(context, ref),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Add Item'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            // Tab 2: Shopping History
+            const _ShoppingHistoryTab(),
+          ],
+        ),
       ),
     );
   }
@@ -630,6 +673,115 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ShoppingHistoryTab extends ConsumerWidget {
+  const _ShoppingHistoryTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final batchesAsync = ref.watch(_shoppingHistoryBatchesProvider);
+    final theme = Theme.of(context);
+
+    return batchesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text(
+          'Unable to load shopping history',
+          style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        ),
+      ),
+      data: (batches) {
+        if (batches.isEmpty) {
+          return Center(
+            key: const Key('shopping_history_empty'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.receipt_long_outlined,
+                  size: 64,
+                  color: theme.textTheme.bodySmall?.color,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'No shopping trips recorded yet',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Sort most recent first
+        final sorted = List<ReceiptBatch>.from(batches)
+          ..sort((a, b) {
+            final aDate = a.purchasedAt ?? a.createdAt;
+            final bDate = b.purchasedAt ?? b.createdAt;
+            return bDate.compareTo(aDate);
+          });
+
+        return ListView.builder(
+          key: const Key('shopping_history_list'),
+          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+          itemCount: sorted.length,
+          itemBuilder: (context, index) {
+            final batch = sorted[index];
+            final date = DateFormat.yMMMd().format(
+              batch.purchasedAt ?? batch.createdAt,
+            );
+            final title =
+                (batch.storeName != null && batch.storeName!.isNotEmpty)
+                ? '${batch.storeName} · $date'
+                : date;
+            final total = batch.totalAmount != null
+                ? NumberFormat.simpleCurrency().format(batch.totalAmount)
+                : '${batch.items.length} items';
+            final paymentSummary = batch.paymentMethod != null
+                ? ' · ${batch.paymentMethod!.label}'
+                : '';
+
+            return GestureDetector(
+              key: Key('shopping_history_card_${batch.id}'),
+              onTap: () => context.pushNamed(
+                'receipt-batch-detail',
+                pathParameters: {'id': batch.id},
+              ),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  border: Border.all(color: theme.dividerColor),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '$total$paymentSummary',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

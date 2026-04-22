@@ -28,6 +28,7 @@ class LearnedBarcodeMappingStore {
 
     final name = entry['name'];
     final categoryName = entry['category'];
+    final brand = entry['brand'];
     if (name is! String || categoryName is! String) {
       return null;
     }
@@ -36,6 +37,7 @@ class LearnedBarcodeMappingStore {
       name: name,
       category: ItemCategory.fromString(categoryName),
       source: 'learned_local',
+      brand: brand is String && brand.trim().isNotEmpty ? brand.trim() : null,
     );
   }
 
@@ -43,6 +45,7 @@ class LearnedBarcodeMappingStore {
     required String rawValue,
     required String name,
     required ItemCategory category,
+    String? brand,
   }) async {
     final normalized = normalizeBarcodeValue(rawValue);
     if (normalized == null) {
@@ -58,7 +61,13 @@ class LearnedBarcodeMappingStore {
     final jsonValue = prefs.getString(_storageKey);
     final decoded = _decodeMappings(jsonValue);
 
-    decoded[normalized] = {'name': trimmedName, 'category': category.name};
+    final normalizedBrand = brand?.trim();
+    decoded[normalized] = {
+      'name': trimmedName,
+      'category': category.name,
+      if (normalizedBrand != null && normalizedBrand.isNotEmpty)
+        'brand': normalizedBrand,
+    };
 
     await prefs.setString(_storageKey, jsonEncode(decoded));
   }

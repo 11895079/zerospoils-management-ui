@@ -6,7 +6,9 @@ import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
 import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/data/repositories/user_category_repository.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
+import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
+import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
@@ -59,9 +61,24 @@ class FakeUserCategoryRepository extends UserCategoryRepository {
       List<UserCategory>.from(categories);
 }
 
+class MockReceiptBatchRepository implements ReceiptBatchRepository {
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<List<ReceiptBatch>> getAllBatches() async => const [];
+
+  @override
+  Future<ReceiptBatch?> getBatch(String id) async => null;
+
+  @override
+  Future<void> saveBatch(ReceiptBatch batch) async {}
+}
+
 void main() {
   late MockItemRepository mockRepository;
   late FakeUserCategoryRepository fakeUserCategoryRepository;
+  late MockReceiptBatchRepository mockReceiptBatchRepository;
   Item buildTestItem() {
     final now = DateTime.now();
     return Item(
@@ -78,6 +95,7 @@ void main() {
   setUp(() {
     mockRepository = MockItemRepository();
     fakeUserCategoryRepository = FakeUserCategoryRepository();
+    mockReceiptBatchRepository = MockReceiptBatchRepository();
     SharedPreferences.setMockInitialValues({});
   });
 
@@ -97,6 +115,9 @@ void main() {
           }),
           userCategoryRepositoryProvider.overrideWithValue(
             fakeUserCategoryRepository,
+          ),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            mockReceiptBatchRepository,
           ),
           if (filterState != null)
             inventoryFilterProvider.overrideWith((ref) => filterState),
@@ -323,6 +344,9 @@ void main() {
           itemsFutureProvider.overrideWith((ref) async {
             return mockRepository.items;
           }),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            mockReceiptBatchRepository,
+          ),
           telemetryClientProvider.overrideWithValue(telemetry),
         ],
         child: const MaterialApp(home: InventoryScreen()),
@@ -596,6 +620,51 @@ void main() {
     expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
   });
 
+  testWidgets('batch-linked-only filter works', (tester) async {
+    final now = DateTime.now();
+    mockRepository.items = [
+      Item(
+        id: '1',
+        name: 'Linked item',
+        category: ItemCategory.produce,
+        location: StorageLocation.fridge,
+        status: ItemStatus.available,
+        receiptBatchId: 'batch-1',
+        createdAt: now,
+        updatedAt: now,
+      ),
+      Item(
+        id: '2',
+        name: 'Unlinked item',
+        category: ItemCategory.pantry,
+        location: StorageLocation.pantry,
+        status: ItemStatus.available,
+        createdAt: now,
+        updatedAt: now,
+      ),
+    ];
+
+    await pumpInventoryScreen(tester);
+
+    await tester.tap(find.byKey(const Key('inventory_filter_button')));
+    await tester.pumpAndSettle();
+
+    final batchLinkedToggle = find.byKey(
+      const Key('inventory_filter_batch_linked_only'),
+    );
+    await tester.ensureVisible(batchLinkedToggle);
+    await tester.tap(batchLinkedToggle);
+    await tester.pumpAndSettle();
+
+    final applyButton = find.byKey(const Key('inventory_filter_apply'));
+    await tester.ensureVisible(applyButton);
+    await tester.tap(applyButton);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('inventory_item_card_1')), findsOneWidget);
+    expect(find.byKey(const Key('inventory_item_card_2')), findsNothing);
+  });
+
   testWidgets('created date range filter works', (tester) async {
     final now = DateTime(2026, 2, 7);
     mockRepository.items = [
@@ -643,8 +712,8 @@ void main() {
 
     await pumpInventoryScreen(tester);
 
-    // Verify FAB exists (navigation requires GoRouter context, tested in integration tests)
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    // Verify add FAB exists (navigation requires GoRouter context, tested in integration tests)
+    expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
   });
 
   testWidgets('FAB opens item form directly', (tester) async {

@@ -9,11 +9,13 @@ class BarcodeProductSuggestion {
     required this.name,
     required this.category,
     required this.source,
+    this.brand,
   });
 
   final String name;
   final ItemCategory category;
   final String source;
+  final String? brand;
 }
 
 bool _passesGtinChecksum(String digits) {

@@ -5,6 +5,13 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/onboarding_screen.dart';
 
+Future<void> _goToPermissionsPage(WidgetTester tester) async {
+  for (var i = 0; i < 5; i++) {
+    await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+    await tester.pumpAndSettle();
+  }
+}
+
 void main() {
   group('OnboardingScreen', () {
     setUpAll(() {
@@ -45,9 +52,8 @@ void main() {
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
 
-      // Should now be on permissions page in short variant
-      expect(find.byIcon(Icons.notifications), findsWidgets);
-      expect(find.byIcon(Icons.camera_alt), findsWidgets);
+      // Should now be on a middle onboarding page (6-page flow)
+      expect(find.byIcon(Icons.notifications), findsNothing);
     });
 
     testWidgets('Shows permission prompts when permission buttons are tapped', (
@@ -59,9 +65,8 @@ void main() {
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
       );
 
-      // Navigate to permissions page
-      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-      await tester.pumpAndSettle();
+      // Navigate to permissions page (page 6 of 6)
+      await _goToPermissionsPage(tester);
 
       // Tap notification permission button
       await tester.tap(
@@ -104,9 +109,8 @@ void main() {
 
       await tester.pumpWidget(app);
 
-      // Navigate to permissions page
-      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-      await tester.pumpAndSettle();
+      // Navigate to permissions page (page 6 of 6)
+      await _goToPermissionsPage(tester);
 
       // Tap Continue to App button
       await tester.tap(find.byKey(const Key('onboarding_continue_button')));
@@ -141,8 +145,7 @@ void main() {
         ProviderScope(child: MaterialApp.router(routerConfig: testRouter)),
       );
 
-      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-      await tester.pumpAndSettle();
+      await _goToPermissionsPage(tester);
 
       await tester.tap(find.byKey(const Key('onboarding_continue_button')));
       await tester.pumpAndSettle();
@@ -162,7 +165,7 @@ void main() {
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
       );
 
-      // Should show "1 of 2" in short variant
+      // Should show "1 of 6"
       expect(
         find.byKey(const Key('onboarding_page_indicator')),
         findsOneWidget,
@@ -172,7 +175,7 @@ void main() {
       await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
       await tester.pumpAndSettle();
 
-      // Should show "2 of 2"
+      // Should still show page indicator after moving forward
       expect(
         find.byKey(const Key('onboarding_page_indicator')),
         findsOneWidget,
@@ -188,9 +191,8 @@ void main() {
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
       );
 
-      // Navigate to permissions page
-      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-      await tester.pumpAndSettle();
+      // Navigate to permissions page (page 6 of 6)
+      await _goToPermissionsPage(tester);
 
       // Tap camera permission button
       await tester.tap(find.byKey(const Key('onboarding_camera_button')));
@@ -216,8 +218,7 @@ void main() {
           ProviderScope(child: MaterialApp(home: OnboardingScreen())),
         );
 
-        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-        await tester.pumpAndSettle();
+        await _goToPermissionsPage(tester);
 
         await tester.tap(
           find.byKey(const Key('onboarding_notifications_button')),
@@ -245,8 +246,7 @@ void main() {
           ProviderScope(child: MaterialApp(home: OnboardingScreen())),
         );
 
-        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-        await tester.pumpAndSettle();
+        await _goToPermissionsPage(tester);
 
         await tester.tap(find.byKey(const Key('onboarding_camera_button')));
         await tester.pumpAndSettle();
@@ -306,9 +306,8 @@ void main() {
         ProviderScope(child: MaterialApp(home: OnboardingScreen())),
       );
 
-      // Navigate to permissions page
-      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
-      await tester.pumpAndSettle();
+      // Navigate to permissions page (page 6 of 6)
+      await _goToPermissionsPage(tester);
 
       // Verify both permission buttons are present
       expect(
@@ -316,6 +315,67 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('onboarding_camera_button')), findsOneWidget);
+    });
+
+    testWidgets('Preset chips can be selected and deselected', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+      );
+
+      await _goToPermissionsPage(tester);
+
+      final jollofChipFinder = find.byKey(
+        const Key('onboarding_preset_chip_jollof_rice'),
+      );
+      expect(jollofChipFinder, findsOneWidget);
+
+      FilterChip chip = tester.widget<FilterChip>(jollofChipFinder);
+      expect(chip.selected, isFalse);
+
+      await tester.tap(jollofChipFinder);
+      await tester.pumpAndSettle();
+
+      chip = tester.widget<FilterChip>(jollofChipFinder);
+      expect(chip.selected, isTrue);
+
+      await tester.tap(jollofChipFinder);
+      await tester.pumpAndSettle();
+
+      chip = tester.widget<FilterChip>(jollofChipFinder);
+      expect(chip.selected, isFalse);
+    });
+
+    testWidgets('Continue to app persists selected onboarding presets', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+      );
+
+      await _goToPermissionsPage(tester);
+
+      await tester.tap(
+        find.byKey(const Key('onboarding_preset_chip_jollof_rice')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('onboarding_preset_chip_curry')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      final selectedPresets =
+          prefs.getStringList('onboarding_preferred_food_presets') ?? const [];
+
+      expect(selectedPresets, contains('jollof_rice'));
+      expect(selectedPresets, contains('curry'));
     });
   });
 }

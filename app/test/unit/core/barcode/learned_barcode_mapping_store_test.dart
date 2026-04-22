@@ -31,6 +31,20 @@ void main() {
     expect(suggestion?.source, 'learned_local');
   });
 
+  test('saveMapping persists optional brand for learned suggestions', () async {
+    await store.saveMapping(
+      rawValue: '055000132152',
+      name: 'Instant Coffee',
+      category: ItemCategory.pantry,
+      brand: 'Nescafe',
+    );
+
+    final suggestion = await store.getSuggestion('055000132152');
+
+    expect(suggestion, isNotNull);
+    expect(suggestion?.brand, 'Nescafe');
+  });
+
   test('saveMapping ignores invalid barcode values', () async {
     await store.saveMapping(
       rawValue: 'abc',

@@ -32,59 +32,115 @@
       </div>
     </aside>
 
-    <!-- Shopping List Content -->
-    <div class="content shopping-content">
-      <h2 class="list-title">Next Shop</h2>
+    <!-- Tab Row: Shopping List | Shopping History (M3/198) -->
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabList" onclick="switchTab('list')">Shopping List</button>
+      <button class="tab-btn" id="tabHistory" onclick="switchTab('history')">History 🧾</button>
+    </div>
 
-      <!-- Unchecked Items -->
-      <div class="shopping-items">
-        <label class="shopping-item">
-          <input type="checkbox" onchange="handleCheck(this)" />
-          <span class="item-text">Milk</span>
-          <span class="item-emoji">🥛</span>
-        </label>
-        <label class="shopping-item">
-          <input type="checkbox" onchange="handleCheck(this)" />
-          <span class="item-text">Bread</span>
-          <span class="item-emoji">🍞</span>
-        </label>
-        <label class="shopping-item">
-          <input type="checkbox" onchange="handleCheck(this)" />
-          <span class="item-text">Apples</span>
-          <span class="item-emoji">🍎</span>
-        </label>
-        <label class="shopping-item">
-          <input type="checkbox" onchange="handleCheck(this)" />
-          <span class="item-text">Chicken breast</span>
-          <span class="item-emoji">🍗</span>
-        </label>
+    <!-- Tab: Shopping List -->
+    <div id="paneList" class="tab-pane active">
+      <div class="content shopping-content">
+        <h2 class="list-title">Next Shop</h2>
+
+        <!-- Unchecked Items -->
+        <div class="shopping-items">
+          <label class="shopping-item">
+            <input type="checkbox" onchange="handleCheck(this)" />
+            <span class="item-text">Milk</span>
+            <span class="item-emoji">🥛</span>
+          </label>
+          <label class="shopping-item">
+            <input type="checkbox" onchange="handleCheck(this)" />
+            <span class="item-text">Bread</span>
+            <span class="item-emoji">🍞</span>
+          </label>
+          <label class="shopping-item">
+            <input type="checkbox" onchange="handleCheck(this)" />
+            <span class="item-text">Apples</span>
+            <span class="item-emoji">🍎</span>
+          </label>
+          <label class="shopping-item">
+            <input type="checkbox" onchange="handleCheck(this)" />
+            <span class="item-text">Chicken breast</span>
+            <span class="item-emoji">🍗</span>
+          </label>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Purchased Section -->
+        <div class="purchased-section">
+          <h3 class="section-subtitle">Purchased</h3>
+          <label class="shopping-item checked">
+            <input type="checkbox" checked onchange="handleUncheck(this)" />
+            <span class="item-text">Eggs</span>
+            <span class="item-emoji">🥚</span>
+          </label>
+          <label class="shopping-item checked">
+            <input type="checkbox" checked onchange="handleUncheck(this)" />
+            <span class="item-text">Carrots</span>
+            <span class="item-emoji">🥕</span>
+          </label>
+        </div>
+
+        <!-- Actions -->
+        <button class="btn btn-secondary add-item-btn" onclick="window.location.href='add-item.html'">
+          + Add Item
+        </button>
+
+        <button class="btn btn-primary convert-btn" onclick="showConvertModal()">
+          Convert Purchased (2) → Inventory
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Shopping History (M3/198) -->
+    <div id="paneHistory" class="tab-pane" style="flex:1;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px 4px;">
+        <span style="font-size:13px;color:#888;">Recent shopping trips</span>
+        <a href="shopping-batch-form.html" class="fab-extended" style="position:static;box-shadow:none;">
+          <span class="fab-extended-icon">🛒</span> New batch
+        </a>
       </div>
 
-      <hr class="divider" />
+      <div class="section-label">This week</div>
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">Apr 19 · Costco</div>
+        <div class="batch-meta">14 items · $138.20 · 💳 Credit</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $40</span>
+          <span class="remaining">Remaining $98.20</span>
+        </div>
+      </a>
 
-      <!-- Purchased Section -->
-      <div class="purchased-section">
-        <h3 class="section-subtitle">Purchased</h3>
-        <label class="shopping-item checked">
-          <input type="checkbox" checked onchange="handleUncheck(this)" />
-          <span class="item-text">Eggs</span>
-          <span class="item-emoji">🥚</span>
-        </label>
-        <label class="shopping-item checked">
-          <input type="checkbox" checked onchange="handleUncheck(this)" />
-          <span class="item-text">Carrots</span>
-          <span class="item-emoji">🥕</span>
-        </label>
-      </div>
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">Apr 17 · Trader Joe's</div>
+        <div class="batch-meta">8 items · $62.50 · 📱 Mobile pay</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $28</span>
+          <span class="remaining">Remaining $34.50</span>
+        </div>
+      </a>
 
-      <!-- Actions -->
-      <button class="btn btn-secondary add-item-btn" onclick="window.location.href='add-item.html'">
-        + Add Item
-      </button>
+      <div class="section-label">Last week</div>
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">Apr 12 · Whole Foods</div>
+        <div class="batch-meta">11 items · $94.80 · 💵 Cash</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $72</span>
+          <span class="wasted">Wasted $8</span>
+          <span class="remaining">Remaining $14.80</span>
+        </div>
+      </a>
 
-      <button class="btn btn-primary convert-btn" onclick="showConvertModal()">
-        Convert Purchased (2)
-      </button>
+      <a href="receipt-batch-detail.html" class="batch-card">
+        <div class="batch-title">Apr 9 · Safeway</div>
+        <div class="batch-meta">6 items · $45.10 · 💳 Debit</div>
+        <div class="batch-stats">
+          <span class="consumed">Consumed $45.10</span>
+        </div>
+      </a>
     </div>
 
     <!-- Bottom Nav -->
@@ -189,6 +245,13 @@
         drawer.classList.remove('open');
         backdrop.classList.remove('show');
       }
+    }
+
+    function switchTab(tab) {
+      document.getElementById('tabList').classList.toggle('active', tab === 'list');
+      document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
+      document.getElementById('paneList').classList.toggle('active', tab === 'list');
+      document.getElementById('paneHistory').classList.toggle('active', tab === 'history');
     }
 
     function handleCheck(checkbox) {
