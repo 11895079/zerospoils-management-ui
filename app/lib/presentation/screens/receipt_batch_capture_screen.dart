@@ -124,7 +124,11 @@ class _ReceiptBatchCaptureScreenState
       return;
     }
     if (!_supportsLiveReceiptScan) {
-      _showSnack('Live receipt scanning is not available on web yet');
+      _showSnack(
+        kIsWeb
+            ? 'Live receipt scanning is not available on web yet'
+            : 'Live receipt scanning is not available on this platform yet',
+      );
       return;
     }
 

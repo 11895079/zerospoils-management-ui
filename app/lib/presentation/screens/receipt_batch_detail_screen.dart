@@ -14,6 +14,7 @@ import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
 import 'item_form_screen.dart';
 import 'receipt_batch_capture_screen.dart';
+import 'receipt_batches_screen.dart';
 
 class ReceiptBatchDetailScreen extends ConsumerStatefulWidget {
   final String batchId;
@@ -349,7 +350,12 @@ class _ReceiptBatchDetailScreenState
         .whereType<String>()
         .toSet();
     final candidates = allItems
-        .where((item) => line != null || !linkedIds.contains(item.id))
+        .where(
+          (item) =>
+              (item.receiptBatchId == null ||
+                  item.receiptBatchId == batch.id) &&
+              (line != null || !linkedIds.contains(item.id)),
+        )
         .toList();
 
     final selected = await _pickInventoryItem(candidates);
@@ -464,6 +470,7 @@ class _ReceiptBatchDetailScreenState
     final batch = await batchRepo.getBatch(widget.batchId);
     if (batch == null) return;
     await batchRepo.saveBatch(batch.copyWith(items: [...batch.items, newLine]));
+    ref.invalidate(receiptBatchesProvider);
   }
 
   Future<void> _updateLineLink(String lineId, Item item) async {
@@ -484,6 +491,7 @@ class _ReceiptBatchDetailScreenState
         )
         .toList();
     await batchRepo.saveBatch(batch.copyWith(items: updatedItems));
+    ref.invalidate(receiptBatchesProvider);
     await _attachItemToLine(item: item, lineId: lineId);
   }
 

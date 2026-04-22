@@ -35,10 +35,8 @@ class _LinkItemsToBatchDialogState
     await itemRepo.init();
     final allItems = await itemRepo.getAllItems();
 
-    // Filter items that are not already linked to this batch
-    return allItems
-        .where((item) => item.receiptBatchId != widget.batch.id)
-        .toList();
+    // Filter items that are not linked to any batch (truly unlinked)
+    return allItems.where((item) => item.receiptBatchId == null).toList();
   }
 
   Future<void> _linkSelectedItems() async {
@@ -53,6 +51,7 @@ class _LinkItemsToBatchDialogState
 
     try {
       final itemRepo = ref.read(itemRepositoryProvider);
+      await itemRepo.init();
 
       // Get all items to find the selected ones
       final allItems = await itemRepo.getAllItems();
@@ -116,7 +115,8 @@ class _LinkItemsToBatchDialogState
             ),
           ),
           const Divider(height: 0),
-          Expanded(
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 400),
             child: FutureBuilder<List<Item>>(
               future: _unlinkedItemsFuture,
               builder: (context, snapshot) {
