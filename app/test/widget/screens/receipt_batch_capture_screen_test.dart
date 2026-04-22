@@ -131,6 +131,7 @@ void main() {
     tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
 
     await pumpCaptureScreen(tester, batchPhotoEnabled: false);
 
