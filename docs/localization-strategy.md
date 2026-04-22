@@ -13,12 +13,13 @@ app/
 │   │   ├── app_en.arb           # English (base template)
 │   │   ├── app_fr.arb           # French (base/fallback)
 │   │   ├── app_fr_CA.arb        # French-Canadian (region-specific)
-│   │   └── ...                  # Future locales (es.arb, de.arb, etc.)
+│   │   ├── app_es.arb           # Spanish (complete translation)
+│   │   └── ...                  # Future locales (de.arb, pt_BR.arb, etc.)
 │   ├── generated_l10n/          # Auto-generated code (do not edit)
 │   │   ├── app_localizations.dart
 │   │   ├── app_localizations_en.dart
-│   │   ├── app_localizations_fr.dart
-│   │   └── ...
+│   │   ├── app_localizations_es.dart
+│   │   └── app_localizations_fr.dart
 │   └── main.dart                # Localization config in MaterialApp
 ├── l10n.yaml                    # Flutter gen-l10n configuration
 └── pubspec.yaml                 # flutter: generate: true
@@ -28,8 +29,9 @@ app/
 1. **app_en.arb** — Base English string templates + placeholders (source of truth)
 2. **app_fr.arb** — French fallback (supports `Locale('fr')`)
 3. **app_fr_CA.arb** — French-Canadian variant (supports `Locale('fr', 'CA')`)
-4. **l10n.yaml** — gen-l10n config (template file, supported locales, output settings)
-5. **generated_l10n/app_localizations.dart** — Main generated class (never edit)
+4. **app_es.arb** — Spanish complete translation (supports `Locale('es')`)
+5. **l10n.yaml** — gen-l10n config (template file, supported locales, output settings)
+6. **generated_l10n/app_localizations.dart** — Main generated class (never edit)
 
 ## Workflow
 
@@ -51,12 +53,30 @@ app/
    }
    ```
 
-2. **Add translations to app_fr.arb and app_fr_CA.arb**:
+2. **Add translations to all locale files** (app_fr.arb, app_fr_CA.arb, app_es.arb, etc.):
+   
+   **French (app_fr.arb):**
    ```json
    {
      "buttonAdd": "Ajouter",
      "dialogTitleDelete": "Supprimer l'article",
      "itemCountFormat": "Affichage de {count} articles",
+     "@itemCountFormat": {
+       "placeholders": {
+         "count": {
+           "type": "int"
+         }
+       }
+     }
+   }
+   ```
+   
+   **Spanish (app_es.arb):**
+   ```json
+   {
+     "buttonAdd": "Agregar",
+     "dialogTitleDelete": "Eliminar Artículo",
+     "itemCountFormat": "Mostrando {count} artículos",
      "@itemCountFormat": {
        "placeholders": {
          "count": {
@@ -91,13 +111,14 @@ app/
 
 ## Supported Locales
 
-| Locale | Language | Region | Priority | Status |
-|--------|----------|--------|----------|--------|
-| `en` | English | Any | P0 (Launch) | ✅ Complete |
-| `fr` | French | Any | P0 (Launch) | ✅ Complete |
-| `fr_CA` | French | Canada | P0 (Launch) | ✅ Complete |
-| `es` | Spanish | Any | Post-launch | 🔄 Planned |
-| `de` | German | Any | Post-launch | 🔄 Planned |
+| Locale | Language | Region | Priority | Status | Completeness |
+|--------|----------|--------|----------|--------|--------------|
+| `en` | English | Any | P0 (Launch) | ✅ Complete | 100% (140+ strings) |
+| `fr` | French | Any | P0 (Launch) | ✅ Complete | 100% (140+ strings) |
+| `fr_CA` | French | Canada | P0 (Launch) | ✅ Complete | 100% (140+ strings) |
+| `es` | Spanish | Any | P1 | ✅ Complete | 100% (140+ strings) |
+| `de` | German | Any | Post-launch | 🔄 Planned | 0% |
+| `pt_BR` | Portuguese | Brazil | Post-launch | 🔄 Planned | 0% |
 
 **Note:** Locale selection currently defaults to device language (`Locale('en')`). For user preference override, implement a settings page (see M3/195 feedback settings).
 
@@ -147,6 +168,7 @@ MaterialApp.router(
     Locale('en'),
     Locale('fr'),
     Locale('fr', 'CA'),
+    Locale('es'),
   ],
   // ...
 )
