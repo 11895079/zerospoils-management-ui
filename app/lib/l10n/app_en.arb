@@ -1,0 +1,221 @@
+{
+  "@@locale": "en",
+  "@@author": "ZeroSpoils",
+  "appTitle": "ZeroSpoils",
+  "appDescription": "Reduce household food waste",
+  
+  "navigationInventory": "Inventory",
+  "navigationShoppingList": "Shopping",
+  "navigationShoppingHistory": "History",
+  "navigationSettings": "Settings",
+  
+  "screenTitleInventory": "Inventory",
+  "screenTitleShoppingList": "Shopping List",
+  "screenTitleShoppingHistory": "Shopping History",
+  "screenTitleSettings": "Settings",
+  "screenTitleItemDetail": "Item Details",
+  "screenTitleAddItem": "Add Item",
+  "screenTitleEditItem": "Edit Item",
+  "screenTitleReceiptBatch": "Shopping Batch",
+  "screenTitleProgress": "Progress",
+  "screenTitleOnboarding": "Welcome to ZeroSpoils",
+  
+  "buttonAdd": "Add",
+  "buttonEdit": "Edit",
+  "buttonDelete": "Delete",
+  "buttonSave": "Save",
+  "buttonCancel": "Cancel",
+  "buttonClose": "Close",
+  "buttonConfirm": "Confirm",
+  "buttonNext": "Next",
+  "buttonBack": "Back",
+  "buttonYes": "Yes",
+  "buttonNo": "No",
+  "buttonMaybeLater": "Maybe Later",
+  "buttonEnable": "Enable",
+  "buttonDone": "Done",
+  "buttonContinue": "Continue",
+  "buttonRetry": "Retry",
+  "buttonSearch": "Search",
+  "buttonFilter": "Filter",
+  "buttonSort": "Sort",
+  "buttonClear": "Clear",
+  "buttonExport": "Export",
+  "buttonImport": "Import",
+  
+  "labelCategory": "Category",
+  "labelLocation": "Location",
+  "labelExpiry": "Expiry Date",
+  "labelQuantity": "Quantity",
+  "labelStatus": "Status",
+  "labelPrice": "Price",
+  "labelStore": "Store",
+  "labelDate": "Date",
+  "labelNotes": "Notes",
+  "labelPaymentMethod": "Payment Method",
+  "labelBarcode": "Barcode",
+  "labelSearch": "Search",
+  "labelFilter": "Filter",
+  "labelAll": "All",
+  
+  "statusAvailable": "Available",
+  "statusConsumed": "Consumed",
+  "statusWasted": "Wasted",
+  "statusPrepared": "Prepared",
+  "statusFresh": "Fresh",
+  "statusPackaged": "Packaged",
+  
+  "categoryProduce": "Produce",
+  "categoryDairy": "Dairy",
+  "categoryMeat": "Meat",
+  "categoryFrozen": "Frozen",
+  "categoryPantry": "Pantry",
+  "categoryBeverages": "Beverages",
+  "categoryOther": "Other",
+  
+  "locationFridge": "Fridge",
+  "locationFreezer": "Freezer",
+  "locationPantry": "Pantry",
+  "locationCounter": "Counter",
+  "locationOther": "Other",
+  
+  "paymentMethodCash": "Cash",
+  "paymentMethodDebit": "Debit",
+  "paymentMethodCredit": "Credit",
+  "paymentMethodMobile": "Mobile Payment",
+  
+  "errorUnableToLoadItems": "Unable to load items",
+  "errorNoItemsFound": "No items found",
+  "errorUnexpectedError": "An unexpected error occurred",
+  "errorPermissionDenied": "Permission denied",
+  "errorCameraPermissionRequired": "Camera permission is required",
+  "errorStoragePermissionRequired": "Storage permission is required",
+  "errorInvalidInput": "Invalid input",
+  "errorItemNotFound": "Item not found",
+  "errorDuplicateItem": "Item already exists",
+  
+  "messageEmptyInventory": "No items in your inventory yet. Add one to get started.",
+  "messageEmptyShoppingList": "Your shopping list is empty. Add items you need to buy.",
+  "messageNoResults": "No results found",
+  "messageConfirmDelete": "Are you sure you want to delete this item?",
+  "messageConfirmDeleteAll": "Are you sure you want to delete all items?",
+  "messageSaveSuccess": "Saved successfully",
+  "messageDeleteSuccess": "Deleted successfully",
+  "messageDuplicatePreventedMessage": "This item is already in your inventory",
+  
+  "dialogTitleCameraPermission": "Enable Camera",
+  "dialogMessageCameraPermission": "ZeroSpoils needs camera access to scan barcodes and capture receipts.",
+  "dialogTitleConfirmAction": "Confirm Action",
+  "dialogTitleDeleteConfirmation": "Delete Item",
+  
+  "toastItemAdded": "Item added",
+  "toastItemUpdated": "Item updated",
+  "toastItemDeleted": "Item deleted",
+  "toastCopiedToClipboard": "Copied to clipboard",
+  "toastErrorOccurred": "An error occurred",
+  
+  "hintSearchItems": "Search items...",
+  "hintItemName": "Item name",
+  "hintNotes": "Add notes...",
+  
+  "settingsReminders": "Reminders",
+  "settingsNotifications": "Notifications",
+  "settingsFeedback": "Feedback & Sounds",
+  "settingsAbout": "About",
+  "settingsPrivacy": "Privacy & Data",
+  "settingsDarkMode": "Dark Mode",
+  "settingsLanguage": "Language",
+  "settingsDateFormat": "Date Format",
+  "settingsVersion": "Version",
+  "settingsExportData": "Export Data",
+  "settingsImportData": "Import Data",
+  "settingsDeleteAllData": "Delete All Data",
+  
+  "feedbackHapticFeedback": "Haptic Feedback",
+  "feedbackHapticFeedbackDescription": "Enable vibration on user interactions",
+  "feedbackAudioFeedback": "Audio Feedback",
+  "feedbackAudioFeedbackDescription": "Enable sound effects on interactions",
+  "feedbackOcrBarcodeSuccess": "Barcode Scan Success",
+  "feedbackOcrBarcodeSuccessDescription": "Vibrate and beep when barcode is recognized",
+  "feedbackOcrExpirySuccess": "Expiry Date Recognition",
+  "feedbackOcrExpirySuccessDescription": "Vibrate and beep when expiry date is captured",
+  "feedbackOcrReceiptSuccess": "Receipt Recognition",
+  "feedbackOcrReceiptSuccessDescription": "Vibrate and beep when receipt items are extracted",
+  "feedbackOcrProduceSuccess": "Produce Label Recognition",
+  "feedbackOcrProduceSuccessDescription": "Vibrate and beep when produce sticker is read",
+  "feedbackBeepVolume": "Beep Volume",
+  "feedbackBeepVolumeDescription": "Adjust POS-style beep volume (0-100%)",
+  "feedbackHapticIntensity": "Haptic Intensity",
+  "feedbackHapticIntensityDescription": "Adjust vibration intensity (Light, Medium, Heavy)",
+  
+  "remindersTurnedOn": "Reminders turned on",
+  "remindersTurnedOff": "Reminders turned off",
+  "remindersLeadTime": "Lead Time",
+  "remindersSound": "Sound",
+  "remindersVibration": "Vibration",
+  
+  "shoppingBatchCapture": "Shopping Batch",
+  "shoppingBatchStore": "Store",
+  "shoppingBatchDate": "Date",
+  "shoppingBatchCost": "Total Cost",
+  "shoppingBatchReceipt": "Receipt Photo",
+  "shoppingBatchLinkedItems": "Linked Items",
+  "shoppingBatchTakePhoto": "Take Photo",
+  "shoppingBatchChoosePhoto": "Choose from Library",
+  "shoppingBatchLinkItems": "Link Items",
+  "shoppingBatchReview": "Review",
+  
+  "privacyExport": "Export your data as CSV or JSON",
+  "privacyDelete": "Delete all data permanently",
+  "privacyDeleteWarning": "This action cannot be undone",
+  
+  "aboutTitle": "About ZeroSpoils",
+  "aboutDescription": "A simple app to help you reduce food waste at home",
+  "aboutVersion": "Version",
+  "aboutDeveloper": "Developed with ❤️",
+  
+  "expiryTodayLabel": "Expires today",
+  "expiringSoonLabel": "Expiring soon",
+  "expiryThresholdDays": "within {days} days",
+  "@expiryThresholdDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "daysUntilExpiry": "{days} days left",
+  "@daysUntilExpiry": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "itemQuantityFormat": "Qty: {quantity}",
+  "@itemQuantityFormat": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "formattedPrice": "{currency}{amount}",
+  "@formattedPrice": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "double"
+      }
+    }
+  },
+  
+  "noData": "No data",
+  "loading": "Loading...",
+  "retry": "Retry"
+}

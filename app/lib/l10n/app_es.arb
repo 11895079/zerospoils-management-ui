@@ -1,0 +1,221 @@
+{
+  "@@locale": "es",
+  "@@author": "ZeroSpoils",
+  "appTitle": "ZeroSpoils",
+  "appDescription": "Reduce el desperdicio de alimentos en el hogar",
+  
+  "navigationInventory": "Inventario",
+  "navigationShoppingList": "Compras",
+  "navigationShoppingHistory": "Historial",
+  "navigationSettings": "Configuración",
+  
+  "screenTitleInventory": "Inventario",
+  "screenTitleShoppingList": "Lista de Compras",
+  "screenTitleShoppingHistory": "Historial de Compras",
+  "screenTitleSettings": "Configuración",
+  "screenTitleItemDetail": "Detalles del Artículo",
+  "screenTitleAddItem": "Agregar Artículo",
+  "screenTitleEditItem": "Editar Artículo",
+  "screenTitleReceiptBatch": "Lote de Compras",
+  "screenTitleProgress": "Progreso",
+  "screenTitleOnboarding": "Bienvenido a ZeroSpoils",
+  
+  "buttonAdd": "Agregar",
+  "buttonEdit": "Editar",
+  "buttonDelete": "Eliminar",
+  "buttonSave": "Guardar",
+  "buttonCancel": "Cancelar",
+  "buttonClose": "Cerrar",
+  "buttonConfirm": "Confirmar",
+  "buttonNext": "Siguiente",
+  "buttonBack": "Atrás",
+  "buttonYes": "Sí",
+  "buttonNo": "No",
+  "buttonMaybeLater": "Quizás Más Tarde",
+  "buttonEnable": "Habilitar",
+  "buttonDone": "Listo",
+  "buttonContinue": "Continuar",
+  "buttonRetry": "Reintentar",
+  "buttonSearch": "Buscar",
+  "buttonFilter": "Filtrar",
+  "buttonSort": "Ordenar",
+  "buttonClear": "Limpiar",
+  "buttonExport": "Exportar",
+  "buttonImport": "Importar",
+  
+  "labelCategory": "Categoría",
+  "labelLocation": "Ubicación",
+  "labelExpiry": "Fecha de Vencimiento",
+  "labelQuantity": "Cantidad",
+  "labelStatus": "Estado",
+  "labelPrice": "Precio",
+  "labelStore": "Tienda",
+  "labelDate": "Fecha",
+  "labelNotes": "Notas",
+  "labelPaymentMethod": "Método de Pago",
+  "labelBarcode": "Código de Barras",
+  "labelSearch": "Buscar",
+  "labelFilter": "Filtrar",
+  "labelAll": "Todo",
+  
+  "statusAvailable": "Disponible",
+  "statusConsumed": "Consumido",
+  "statusWasted": "Desperdiciado",
+  "statusPrepared": "Preparado",
+  "statusFresh": "Fresco",
+  "statusPackaged": "Empaquetado",
+  
+  "categoryProduce": "Productos Frescos",
+  "categoryDairy": "Lácteos",
+  "categoryMeat": "Carnes",
+  "categoryFrozen": "Congelados",
+  "categoryPantry": "Despensa",
+  "categoryBeverages": "Bebidas",
+  "categoryOther": "Otro",
+  
+  "locationFridge": "Refrigerador",
+  "locationFreezer": "Congelador",
+  "locationPantry": "Despensa",
+  "locationCounter": "Mostrador",
+  "locationOther": "Otro",
+  
+  "paymentMethodCash": "Efectivo",
+  "paymentMethodDebit": "Débito",
+  "paymentMethodCredit": "Crédito",
+  "paymentMethodMobile": "Pago Móvil",
+  
+  "errorUnableToLoadItems": "No se pudieron cargar los artículos",
+  "errorNoItemsFound": "No se encontraron artículos",
+  "errorUnexpectedError": "Ocurrió un error inesperado",
+  "errorPermissionDenied": "Permiso denegado",
+  "errorCameraPermissionRequired": "Se requiere permiso de cámara",
+  "errorStoragePermissionRequired": "Se requiere permiso de almacenamiento",
+  "errorInvalidInput": "Entrada inválida",
+  "errorItemNotFound": "Artículo no encontrado",
+  "errorDuplicateItem": "El artículo ya existe",
+  
+  "messageEmptyInventory": "No hay artículos en tu inventario todavía. Agrega uno para comenzar.",
+  "messageEmptyShoppingList": "Tu lista de compras está vacía. Agrega los artículos que necesitas comprar.",
+  "messageNoResults": "No se encontraron resultados",
+  "messageConfirmDelete": "¿Estás seguro de que deseas eliminar este artículo?",
+  "messageConfirmDeleteAll": "¿Estás seguro de que deseas eliminar todos los artículos?",
+  "messageSaveSuccess": "Guardado exitosamente",
+  "messageDeleteSuccess": "Eliminado exitosamente",
+  "messageDuplicatePreventedMessage": "Este artículo ya está en tu inventario",
+  
+  "dialogTitleCameraPermission": "Habilitar Cámara",
+  "dialogMessageCameraPermission": "ZeroSpoils necesita acceso a la cámara para escanear códigos de barras y capturar recibos.",
+  "dialogTitleConfirmAction": "Confirmar Acción",
+  "dialogTitleDeleteConfirmation": "Eliminar Artículo",
+  
+  "toastItemAdded": "Artículo agregado",
+  "toastItemUpdated": "Artículo actualizado",
+  "toastItemDeleted": "Artículo eliminado",
+  "toastCopiedToClipboard": "Copiado al portapapeles",
+  "toastErrorOccurred": "Ocurrió un error",
+  
+  "hintSearchItems": "Buscar artículos...",
+  "hintItemName": "Nombre del artículo",
+  "hintNotes": "Agregar notas...",
+  
+  "settingsReminders": "Recordatorios",
+  "settingsNotifications": "Notificaciones",
+  "settingsFeedback": "Retroalimentación y Sonidos",
+  "settingsAbout": "Acerca de",
+  "settingsPrivacy": "Privacidad y Datos",
+  "settingsDarkMode": "Modo Oscuro",
+  "settingsLanguage": "Idioma",
+  "settingsDateFormat": "Formato de Fecha",
+  "settingsVersion": "Versión",
+  "settingsExportData": "Exportar Datos",
+  "settingsImportData": "Importar Datos",
+  "settingsDeleteAllData": "Eliminar Todos los Datos",
+  
+  "feedbackHapticFeedback": "Retroalimentación Háptica",
+  "feedbackHapticFeedbackDescription": "Habilitar vibración en interacciones del usuario",
+  "feedbackAudioFeedback": "Retroalimentación de Audio",
+  "feedbackAudioFeedbackDescription": "Habilitar efectos de sonido en interacciones",
+  "feedbackOcrBarcodeSuccess": "Escaneo de Código de Barras Exitoso",
+  "feedbackOcrBarcodeSuccessDescription": "Vibrar y emitir sonido cuando se reconoce un código de barras",
+  "feedbackOcrExpirySuccess": "Reconocimiento de Fecha de Vencimiento",
+  "feedbackOcrExpirySuccessDescription": "Vibrar y emitir sonido cuando se captura la fecha de vencimiento",
+  "feedbackOcrReceiptSuccess": "Reconocimiento de Recibo",
+  "feedbackOcrReceiptSuccessDescription": "Vibrar y emitir sonido cuando se extraen artículos del recibo",
+  "feedbackOcrProduceSuccess": "Reconocimiento de Etiqueta de Producto",
+  "feedbackOcrProduceSuccessDescription": "Vibrar y emitir sonido cuando se lee la etiqueta del producto",
+  "feedbackBeepVolume": "Volumen del Sonido",
+  "feedbackBeepVolumeDescription": "Ajustar volumen del sonido de caja registradora (0-100%)",
+  "feedbackHapticIntensity": "Intensidad Háptica",
+  "feedbackHapticIntensityDescription": "Ajustar intensidad de vibración (Ligera, Media, Fuerte)",
+  
+  "remindersTurnedOn": "Recordatorios activados",
+  "remindersTurnedOff": "Recordatorios desactivados",
+  "remindersLeadTime": "Tiempo de Anticipación",
+  "remindersSound": "Sonido",
+  "remindersVibration": "Vibración",
+  
+  "shoppingBatchCapture": "Lote de Compras",
+  "shoppingBatchStore": "Tienda",
+  "shoppingBatchDate": "Fecha",
+  "shoppingBatchCost": "Costo Total",
+  "shoppingBatchReceipt": "Foto de Recibo",
+  "shoppingBatchLinkedItems": "Artículos Vinculados",
+  "shoppingBatchTakePhoto": "Tomar Foto",
+  "shoppingBatchChoosePhoto": "Elegir de la Galería",
+  "shoppingBatchLinkItems": "Vincular Artículos",
+  "shoppingBatchReview": "Revisar",
+  
+  "privacyExport": "Exporta tus datos como CSV o JSON",
+  "privacyDelete": "Elimina todos los datos permanentemente",
+  "privacyDeleteWarning": "Esta acción no se puede deshacer",
+  
+  "aboutTitle": "Acerca de ZeroSpoils",
+  "aboutDescription": "Una aplicación simple para ayudarte a reducir el desperdicio de alimentos en casa",
+  "aboutVersion": "Versión",
+  "aboutDeveloper": "Desarrollado con ❤️",
+  
+  "expiryTodayLabel": "Vence hoy",
+  "expiringSoonLabel": "Vence pronto",
+  "expiryThresholdDays": "dentro de {days} días",
+  "@expiryThresholdDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "daysUntilExpiry": "{days} días restantes",
+  "@daysUntilExpiry": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  
+  "itemQuantityFormat": "Cant.: {quantity}",
+  "@itemQuantityFormat": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+  
+  "formattedPrice": "{currency}{amount}",
+  "@formattedPrice": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "double"
+      }
+    }
+  },
+  
+  "noData": "Sin datos",
+  "loading": "Cargando...",
+  "retry": "Reintentar"
+}

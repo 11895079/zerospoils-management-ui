@@ -1,0 +1,221 @@
+{
+  "@@locale": "pt",
+  "@@author": "ZeroSpoils",
+  "appTitle": "ZeroSpoils",
+  "appDescription": "Reduza o desperdício de alimentos em casa",
+
+  "navigationInventory": "Inventário",
+  "navigationShoppingList": "Compras",
+  "navigationShoppingHistory": "Histórico",
+  "navigationSettings": "Definições",
+
+  "screenTitleInventory": "Inventário",
+  "screenTitleShoppingList": "Lista de Compras",
+  "screenTitleShoppingHistory": "Histórico de Compras",
+  "screenTitleSettings": "Definições",
+  "screenTitleItemDetail": "Detalhes do Item",
+  "screenTitleAddItem": "Adicionar Item",
+  "screenTitleEditItem": "Editar Item",
+  "screenTitleReceiptBatch": "Lote de Compras",
+  "screenTitleProgress": "Progresso",
+  "screenTitleOnboarding": "Bem-vindo ao ZeroSpoils",
+
+  "buttonAdd": "Adicionar",
+  "buttonEdit": "Editar",
+  "buttonDelete": "Eliminar",
+  "buttonSave": "Guardar",
+  "buttonCancel": "Cancelar",
+  "buttonClose": "Fechar",
+  "buttonConfirm": "Confirmar",
+  "buttonNext": "Seguinte",
+  "buttonBack": "Voltar",
+  "buttonYes": "Sim",
+  "buttonNo": "Não",
+  "buttonMaybeLater": "Talvez mais tarde",
+  "buttonEnable": "Ativar",
+  "buttonDone": "Concluído",
+  "buttonContinue": "Continuar",
+  "buttonRetry": "Tentar novamente",
+  "buttonSearch": "Pesquisar",
+  "buttonFilter": "Filtrar",
+  "buttonSort": "Ordenar",
+  "buttonClear": "Limpar",
+  "buttonExport": "Exportar",
+  "buttonImport": "Importar",
+
+  "labelCategory": "Categoria",
+  "labelLocation": "Local",
+  "labelExpiry": "Data de validade",
+  "labelQuantity": "Quantidade",
+  "labelStatus": "Estado",
+  "labelPrice": "Preço",
+  "labelStore": "Loja",
+  "labelDate": "Data",
+  "labelNotes": "Notas",
+  "labelPaymentMethod": "Método de pagamento",
+  "labelBarcode": "Código de barras",
+  "labelSearch": "Pesquisar",
+  "labelFilter": "Filtrar",
+  "labelAll": "Todos",
+
+  "statusAvailable": "Disponível",
+  "statusConsumed": "Consumido",
+  "statusWasted": "Desperdiçado",
+  "statusPrepared": "Preparado",
+  "statusFresh": "Fresco",
+  "statusPackaged": "Embalado",
+
+  "categoryProduce": "Frescos",
+  "categoryDairy": "Laticínios",
+  "categoryMeat": "Carne",
+  "categoryFrozen": "Congelados",
+  "categoryPantry": "Despensa",
+  "categoryBeverages": "Bebidas",
+  "categoryOther": "Outro",
+
+  "locationFridge": "Frigorífico",
+  "locationFreezer": "Congelador",
+  "locationPantry": "Despensa",
+  "locationCounter": "Bancada",
+  "locationOther": "Outro",
+
+  "paymentMethodCash": "Dinheiro",
+  "paymentMethodDebit": "Débito",
+  "paymentMethodCredit": "Crédito",
+  "paymentMethodMobile": "Pagamento móvel",
+
+  "errorUnableToLoadItems": "Não foi possível carregar os itens",
+  "errorNoItemsFound": "Nenhum item encontrado",
+  "errorUnexpectedError": "Ocorreu um erro inesperado",
+  "errorPermissionDenied": "Permissão negada",
+  "errorCameraPermissionRequired": "É necessária permissão da câmara",
+  "errorStoragePermissionRequired": "É necessária permissão de armazenamento",
+  "errorInvalidInput": "Entrada inválida",
+  "errorItemNotFound": "Item não encontrado",
+  "errorDuplicateItem": "O item já existe",
+
+  "messageEmptyInventory": "Ainda não há itens no seu inventário. Adicione um para começar.",
+  "messageEmptyShoppingList": "A sua lista de compras está vazia. Adicione os itens que precisa comprar.",
+  "messageNoResults": "Nenhum resultado encontrado",
+  "messageConfirmDelete": "Tem a certeza de que pretende eliminar este item?",
+  "messageConfirmDeleteAll": "Tem a certeza de que pretende eliminar todos os itens?",
+  "messageSaveSuccess": "Guardado com sucesso",
+  "messageDeleteSuccess": "Eliminado com sucesso",
+  "messageDuplicatePreventedMessage": "Este item já está no seu inventário",
+
+  "dialogTitleCameraPermission": "Ativar câmara",
+  "dialogMessageCameraPermission": "O ZeroSpoils precisa de acesso à câmara para digitalizar códigos de barras e capturar recibos.",
+  "dialogTitleConfirmAction": "Confirmar ação",
+  "dialogTitleDeleteConfirmation": "Eliminar item",
+
+  "toastItemAdded": "Item adicionado",
+  "toastItemUpdated": "Item atualizado",
+  "toastItemDeleted": "Item eliminado",
+  "toastCopiedToClipboard": "Copiado para a área de transferência",
+  "toastErrorOccurred": "Ocorreu um erro",
+
+  "hintSearchItems": "Pesquisar itens...",
+  "hintItemName": "Nome do item",
+  "hintNotes": "Adicionar notas...",
+
+  "settingsReminders": "Lembretes",
+  "settingsNotifications": "Notificações",
+  "settingsFeedback": "Feedback e sons",
+  "settingsAbout": "Sobre",
+  "settingsPrivacy": "Privacidade e dados",
+  "settingsDarkMode": "Modo escuro",
+  "settingsLanguage": "Idioma",
+  "settingsDateFormat": "Formato de data",
+  "settingsVersion": "Versão",
+  "settingsExportData": "Exportar dados",
+  "settingsImportData": "Importar dados",
+  "settingsDeleteAllData": "Eliminar todos os dados",
+
+  "feedbackHapticFeedback": "Feedback tátil",
+  "feedbackHapticFeedbackDescription": "Ativar vibração nas interações do utilizador",
+  "feedbackAudioFeedback": "Feedback de áudio",
+  "feedbackAudioFeedbackDescription": "Ativar efeitos sonoros nas interações",
+  "feedbackOcrBarcodeSuccess": "Leitura de código de barras com sucesso",
+  "feedbackOcrBarcodeSuccessDescription": "Vibrar e emitir som quando um código de barras for reconhecido",
+  "feedbackOcrExpirySuccess": "Reconhecimento da data de validade",
+  "feedbackOcrExpirySuccessDescription": "Vibrar e emitir som quando a data de validade for capturada",
+  "feedbackOcrReceiptSuccess": "Reconhecimento de recibo",
+  "feedbackOcrReceiptSuccessDescription": "Vibrar e emitir som quando os itens do recibo forem extraídos",
+  "feedbackOcrProduceSuccess": "Reconhecimento de etiqueta de produto",
+  "feedbackOcrProduceSuccessDescription": "Vibrar e emitir som quando a etiqueta do produto for lida",
+  "feedbackBeepVolume": "Volume do sinal sonoro",
+  "feedbackBeepVolumeDescription": "Ajustar volume do sinal sonoro tipo POS (0-100%)",
+  "feedbackHapticIntensity": "Intensidade tátil",
+  "feedbackHapticIntensityDescription": "Ajustar intensidade da vibração (Leve, Média, Forte)",
+
+  "remindersTurnedOn": "Lembretes ativados",
+  "remindersTurnedOff": "Lembretes desativados",
+  "remindersLeadTime": "Antecedência",
+  "remindersSound": "Som",
+  "remindersVibration": "Vibração",
+
+  "shoppingBatchCapture": "Lote de Compras",
+  "shoppingBatchStore": "Loja",
+  "shoppingBatchDate": "Data",
+  "shoppingBatchCost": "Custo total",
+  "shoppingBatchReceipt": "Foto do recibo",
+  "shoppingBatchLinkedItems": "Itens vinculados",
+  "shoppingBatchTakePhoto": "Tirar foto",
+  "shoppingBatchChoosePhoto": "Escolher da galeria",
+  "shoppingBatchLinkItems": "Vincular itens",
+  "shoppingBatchReview": "Rever",
+
+  "privacyExport": "Exporte os seus dados em CSV ou JSON",
+  "privacyDelete": "Eliminar permanentemente todos os dados",
+  "privacyDeleteWarning": "Esta ação não pode ser desfeita",
+
+  "aboutTitle": "Sobre o ZeroSpoils",
+  "aboutDescription": "Uma aplicação simples para ajudar a reduzir o desperdício de alimentos em casa",
+  "aboutVersion": "Versão",
+  "aboutDeveloper": "Desenvolvido com ❤️",
+
+  "expiryTodayLabel": "Expira hoje",
+  "expiringSoonLabel": "A expirar em breve",
+  "expiryThresholdDays": "dentro de {days} dias",
+  "@expiryThresholdDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "daysUntilExpiry": "faltam {days} dias",
+  "@daysUntilExpiry": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "itemQuantityFormat": "Qtd.: {quantity}",
+  "@itemQuantityFormat": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+
+  "formattedPrice": "{currency}{amount}",
+  "@formattedPrice": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "double"
+      }
+    }
+  },
+
+  "noData": "Sem dados",
+  "loading": "A carregar...",
+  "retry": "Tentar novamente"
+}

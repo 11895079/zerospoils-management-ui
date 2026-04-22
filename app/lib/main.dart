@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated_l10n/app_localizations.dart';
 import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
@@ -115,6 +117,40 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
 
     return MaterialApp.router(
       title: 'ZeroSpoils',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (deviceLocale == null) {
+          return const Locale('en');
+        }
+
+        for (final supportedLocale in supportedLocales) {
+          if (supportedLocale.languageCode == deviceLocale.languageCode &&
+              supportedLocale.countryCode == deviceLocale.countryCode) {
+            return supportedLocale;
+          }
+        }
+
+        for (final supportedLocale in supportedLocales) {
+          if (supportedLocale.languageCode == deviceLocale.languageCode) {
+            return supportedLocale;
+          }
+        }
+
+        return const Locale('en');
+      },
+      supportedLocales: const [
+        Locale('en'),
+        Locale('fr'),
+        Locale('fr', 'CA'),
+        Locale('es'),
+        Locale('de'),
+        Locale('pt'),
+      ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,

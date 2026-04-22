@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations:
+    sdk: flutter
+
   # Routing and deep linking
   go_router: ^17.0.1
 
@@ -131,6 +134,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  generate: true
 
   assets:
     - assets/reference-data/barcode_seed_ca.v2.json

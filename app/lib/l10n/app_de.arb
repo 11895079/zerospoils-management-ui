@@ -1,0 +1,221 @@
+{
+  "@@locale": "de",
+  "@@author": "ZeroSpoils",
+  "appTitle": "ZeroSpoils",
+  "appDescription": "Reduziere Lebensmittelverschwendung im Haushalt",
+
+  "navigationInventory": "Inventar",
+  "navigationShoppingList": "Einkauf",
+  "navigationShoppingHistory": "Verlauf",
+  "navigationSettings": "Einstellungen",
+
+  "screenTitleInventory": "Inventar",
+  "screenTitleShoppingList": "Einkaufsliste",
+  "screenTitleShoppingHistory": "Einkaufsverlauf",
+  "screenTitleSettings": "Einstellungen",
+  "screenTitleItemDetail": "Artikeldetails",
+  "screenTitleAddItem": "Artikel hinzufügen",
+  "screenTitleEditItem": "Artikel bearbeiten",
+  "screenTitleReceiptBatch": "Einkaufscharge",
+  "screenTitleProgress": "Fortschritt",
+  "screenTitleOnboarding": "Willkommen bei ZeroSpoils",
+
+  "buttonAdd": "Hinzufügen",
+  "buttonEdit": "Bearbeiten",
+  "buttonDelete": "Löschen",
+  "buttonSave": "Speichern",
+  "buttonCancel": "Abbrechen",
+  "buttonClose": "Schließen",
+  "buttonConfirm": "Bestätigen",
+  "buttonNext": "Weiter",
+  "buttonBack": "Zurück",
+  "buttonYes": "Ja",
+  "buttonNo": "Nein",
+  "buttonMaybeLater": "Vielleicht später",
+  "buttonEnable": "Aktivieren",
+  "buttonDone": "Fertig",
+  "buttonContinue": "Fortfahren",
+  "buttonRetry": "Erneut versuchen",
+  "buttonSearch": "Suchen",
+  "buttonFilter": "Filtern",
+  "buttonSort": "Sortieren",
+  "buttonClear": "Zurücksetzen",
+  "buttonExport": "Exportieren",
+  "buttonImport": "Importieren",
+
+  "labelCategory": "Kategorie",
+  "labelLocation": "Ort",
+  "labelExpiry": "Ablaufdatum",
+  "labelQuantity": "Menge",
+  "labelStatus": "Status",
+  "labelPrice": "Preis",
+  "labelStore": "Geschäft",
+  "labelDate": "Datum",
+  "labelNotes": "Notizen",
+  "labelPaymentMethod": "Zahlungsmethode",
+  "labelBarcode": "Barcode",
+  "labelSearch": "Suchen",
+  "labelFilter": "Filtern",
+  "labelAll": "Alle",
+
+  "statusAvailable": "Verfügbar",
+  "statusConsumed": "Verbraucht",
+  "statusWasted": "Verschwendet",
+  "statusPrepared": "Zubereitet",
+  "statusFresh": "Frisch",
+  "statusPackaged": "Verpackt",
+
+  "categoryProduce": "Frisches",
+  "categoryDairy": "Milchprodukte",
+  "categoryMeat": "Fleisch",
+  "categoryFrozen": "Tiefgekühlt",
+  "categoryPantry": "Vorrat",
+  "categoryBeverages": "Getränke",
+  "categoryOther": "Sonstiges",
+
+  "locationFridge": "Kühlschrank",
+  "locationFreezer": "Gefrierschrank",
+  "locationPantry": "Vorratsschrank",
+  "locationCounter": "Arbeitsfläche",
+  "locationOther": "Sonstiges",
+
+  "paymentMethodCash": "Bar",
+  "paymentMethodDebit": "Debitkarte",
+  "paymentMethodCredit": "Kreditkarte",
+  "paymentMethodMobile": "Mobiles Bezahlen",
+
+  "errorUnableToLoadItems": "Artikel konnten nicht geladen werden",
+  "errorNoItemsFound": "Keine Artikel gefunden",
+  "errorUnexpectedError": "Ein unerwarteter Fehler ist aufgetreten",
+  "errorPermissionDenied": "Zugriff verweigert",
+  "errorCameraPermissionRequired": "Kameraberechtigung ist erforderlich",
+  "errorStoragePermissionRequired": "Speicherberechtigung ist erforderlich",
+  "errorInvalidInput": "Ungültige Eingabe",
+  "errorItemNotFound": "Artikel nicht gefunden",
+  "errorDuplicateItem": "Artikel existiert bereits",
+
+  "messageEmptyInventory": "Noch keine Artikel im Inventar. Füge einen hinzu, um loszulegen.",
+  "messageEmptyShoppingList": "Deine Einkaufsliste ist leer. Füge Artikel hinzu, die du kaufen musst.",
+  "messageNoResults": "Keine Ergebnisse gefunden",
+  "messageConfirmDelete": "Möchtest du diesen Artikel wirklich löschen?",
+  "messageConfirmDeleteAll": "Möchtest du wirklich alle Artikel löschen?",
+  "messageSaveSuccess": "Erfolgreich gespeichert",
+  "messageDeleteSuccess": "Erfolgreich gelöscht",
+  "messageDuplicatePreventedMessage": "Dieser Artikel ist bereits in deinem Inventar",
+
+  "dialogTitleCameraPermission": "Kamera aktivieren",
+  "dialogMessageCameraPermission": "ZeroSpoils benötigt Kamerazugriff, um Barcodes zu scannen und Kassenbons zu erfassen.",
+  "dialogTitleConfirmAction": "Aktion bestätigen",
+  "dialogTitleDeleteConfirmation": "Artikel löschen",
+
+  "toastItemAdded": "Artikel hinzugefügt",
+  "toastItemUpdated": "Artikel aktualisiert",
+  "toastItemDeleted": "Artikel gelöscht",
+  "toastCopiedToClipboard": "In die Zwischenablage kopiert",
+  "toastErrorOccurred": "Ein Fehler ist aufgetreten",
+
+  "hintSearchItems": "Artikel suchen...",
+  "hintItemName": "Artikelname",
+  "hintNotes": "Notizen hinzufügen...",
+
+  "settingsReminders": "Erinnerungen",
+  "settingsNotifications": "Benachrichtigungen",
+  "settingsFeedback": "Feedback und Töne",
+  "settingsAbout": "Über",
+  "settingsPrivacy": "Datenschutz und Daten",
+  "settingsDarkMode": "Dunkelmodus",
+  "settingsLanguage": "Sprache",
+  "settingsDateFormat": "Datumsformat",
+  "settingsVersion": "Version",
+  "settingsExportData": "Daten exportieren",
+  "settingsImportData": "Daten importieren",
+  "settingsDeleteAllData": "Alle Daten löschen",
+
+  "feedbackHapticFeedback": "Haptisches Feedback",
+  "feedbackHapticFeedbackDescription": "Vibration bei Nutzerinteraktionen aktivieren",
+  "feedbackAudioFeedback": "Audio-Feedback",
+  "feedbackAudioFeedbackDescription": "Soundeffekte bei Interaktionen aktivieren",
+  "feedbackOcrBarcodeSuccess": "Barcode erfolgreich gescannt",
+  "feedbackOcrBarcodeSuccessDescription": "Vibrieren und Ton abspielen, wenn ein Barcode erkannt wurde",
+  "feedbackOcrExpirySuccess": "Ablaufdatum erkannt",
+  "feedbackOcrExpirySuccessDescription": "Vibrieren und Ton abspielen, wenn ein Ablaufdatum erfasst wurde",
+  "feedbackOcrReceiptSuccess": "Kassenbon erkannt",
+  "feedbackOcrReceiptSuccessDescription": "Vibrieren und Ton abspielen, wenn Kassenbon-Artikel extrahiert wurden",
+  "feedbackOcrProduceSuccess": "Produktetikett erkannt",
+  "feedbackOcrProduceSuccessDescription": "Vibrieren und Ton abspielen, wenn ein Produktetikett gelesen wurde",
+  "feedbackBeepVolume": "Signalton-Lautstärke",
+  "feedbackBeepVolumeDescription": "Lautstärke des Kassen-Signaltons anpassen (0-100%)",
+  "feedbackHapticIntensity": "Haptik-Intensität",
+  "feedbackHapticIntensityDescription": "Vibrationsintensität anpassen (Leicht, Mittel, Stark)",
+
+  "remindersTurnedOn": "Erinnerungen aktiviert",
+  "remindersTurnedOff": "Erinnerungen deaktiviert",
+  "remindersLeadTime": "Vorlaufzeit",
+  "remindersSound": "Ton",
+  "remindersVibration": "Vibration",
+
+  "shoppingBatchCapture": "Einkaufscharge",
+  "shoppingBatchStore": "Geschäft",
+  "shoppingBatchDate": "Datum",
+  "shoppingBatchCost": "Gesamtkosten",
+  "shoppingBatchReceipt": "Kassenbonfoto",
+  "shoppingBatchLinkedItems": "Verknüpfte Artikel",
+  "shoppingBatchTakePhoto": "Foto aufnehmen",
+  "shoppingBatchChoosePhoto": "Aus der Mediathek wählen",
+  "shoppingBatchLinkItems": "Artikel verknüpfen",
+  "shoppingBatchReview": "Prüfen",
+
+  "privacyExport": "Exportiere deine Daten als CSV oder JSON",
+  "privacyDelete": "Alle Daten dauerhaft löschen",
+  "privacyDeleteWarning": "Diese Aktion kann nicht rückgängig gemacht werden",
+
+  "aboutTitle": "Über ZeroSpoils",
+  "aboutDescription": "Eine einfache App, die dir hilft, Lebensmittelverschwendung zu Hause zu reduzieren",
+  "aboutVersion": "Version",
+  "aboutDeveloper": "Entwickelt mit ❤️",
+
+  "expiryTodayLabel": "Läuft heute ab",
+  "expiringSoonLabel": "Läuft bald ab",
+  "expiryThresholdDays": "innerhalb von {days} Tagen",
+  "@expiryThresholdDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "daysUntilExpiry": "noch {days} Tage",
+  "@daysUntilExpiry": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+
+  "itemQuantityFormat": "Menge: {quantity}",
+  "@itemQuantityFormat": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      }
+    }
+  },
+
+  "formattedPrice": "{currency}{amount}",
+  "@formattedPrice": {
+    "placeholders": {
+      "currency": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "double"
+      }
+    }
+  },
+
+  "noData": "Keine Daten",
+  "loading": "Wird geladen...",
+  "retry": "Erneut versuchen"
+}

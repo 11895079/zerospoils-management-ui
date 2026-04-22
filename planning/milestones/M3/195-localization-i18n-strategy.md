@@ -9,8 +9,8 @@ Define localization strategy (strings, date/number formats, RTL), tooling, and p
 - Strings are extracted, translation workflow defined, and formatting respects locale.
 
 ## Acceptance criteria (Definition of Done)
-- [ ] i18n tooling and string extraction process documented.
-- [ ] Dates/numbers formatted per device locale; sample translations included (en, fr-CA).
+- [x] i18n tooling and string extraction process documented.
+- [x] Dates/numbers formatted per device locale; sample translations included (en, fr-CA).
 - [ ] CI checks ensure no hardcoded strings in UI.
 
 ## Out of scope
