@@ -117,18 +117,39 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
 
     return MaterialApp.router(
       title: 'ZeroSpoils',
-      locale: const Locale('en'),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      localeResolutionCallback: (deviceLocale, supportedLocales) {
+        if (deviceLocale == null) {
+          return const Locale('en');
+        }
+
+        for (final supportedLocale in supportedLocales) {
+          if (supportedLocale.languageCode == deviceLocale.languageCode &&
+              supportedLocale.countryCode == deviceLocale.countryCode) {
+            return supportedLocale;
+          }
+        }
+
+        for (final supportedLocale in supportedLocales) {
+          if (supportedLocale.languageCode == deviceLocale.languageCode) {
+            return supportedLocale;
+          }
+        }
+
+        return const Locale('en');
+      },
       supportedLocales: const [
         Locale('en'),
         Locale('fr'),
         Locale('fr', 'CA'),
         Locale('es'),
+        Locale('de'),
+        Locale('pt'),
       ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

@@ -13,30 +13,108 @@ final feedbackServiceProvider = FutureProvider<FeedbackService>((ref) async {
   return service;
 });
 
-// Expose individual settings as StateNotifiers for reactive UI updates
-final hapticEnabledProvider = StateProvider<bool>((ref) {
-  return ref
-      .watch(feedbackServiceProvider)
-      .maybeWhen(data: (service) => service.hapticEnabled, orElse: () => true);
-});
+class FeedbackSettings {
+  const FeedbackSettings({
+    required this.hapticEnabled,
+    required this.audioEnabled,
+    required this.beepVolume,
+    required this.hapticIntensity,
+  });
 
-final audioEnabledProvider = StateProvider<bool>((ref) {
-  return ref
-      .watch(feedbackServiceProvider)
-      .maybeWhen(data: (service) => service.audioEnabled, orElse: () => true);
-});
+  final bool hapticEnabled;
+  final bool audioEnabled;
+  final double beepVolume;
+  final HapticIntensity hapticIntensity;
 
-final beepVolumeProvider = StateProvider<double>((ref) {
-  return ref
-      .watch(feedbackServiceProvider)
-      .maybeWhen(data: (service) => service.beepVolume, orElse: () => 0.8);
-});
+  FeedbackSettings copyWith({
+    bool? hapticEnabled,
+    bool? audioEnabled,
+    double? beepVolume,
+    HapticIntensity? hapticIntensity,
+  }) {
+    return FeedbackSettings(
+      hapticEnabled: hapticEnabled ?? this.hapticEnabled,
+      audioEnabled: audioEnabled ?? this.audioEnabled,
+      beepVolume: beepVolume ?? this.beepVolume,
+      hapticIntensity: hapticIntensity ?? this.hapticIntensity,
+    );
+  }
+}
 
-final hapticIntensityProvider = StateProvider<HapticIntensity>((ref) {
+class FeedbackSettingsNotifier extends AsyncNotifier<FeedbackSettings> {
+  late final FeedbackService _service;
+
+  @override
+  Future<FeedbackSettings> build() async {
+    _service = await ref.watch(feedbackServiceProvider.future);
+    return FeedbackSettings(
+      hapticEnabled: _service.hapticEnabled,
+      audioEnabled: _service.audioEnabled,
+      beepVolume: _service.beepVolume,
+      hapticIntensity: _service.hapticIntensity,
+    );
+  }
+
+  Future<void> setHapticEnabled(bool value) async {
+    await _service.setHapticEnabled(value);
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(hapticEnabled: value));
+  }
+
+  Future<void> setAudioEnabled(bool value) async {
+    await _service.setAudioEnabled(value);
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(audioEnabled: value));
+  }
+
+  Future<void> setBeepVolume(double value) async {
+    await _service.setBeepVolume(value);
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(beepVolume: value.clamp(0.0, 1.0)));
+  }
+
+  Future<void> setHapticIntensity(HapticIntensity value) async {
+    await _service.setHapticIntensity(value);
+    final current = state.valueOrNull;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(hapticIntensity: value));
+  }
+}
+
+final feedbackSettingsProvider =
+    AsyncNotifierProvider<FeedbackSettingsNotifier, FeedbackSettings>(
+      FeedbackSettingsNotifier.new,
+    );
+
+final hapticEnabledProvider = Provider<bool>((ref) {
   return ref
-      .watch(feedbackServiceProvider)
+      .watch(feedbackSettingsProvider)
       .maybeWhen(
-        data: (service) => service.hapticIntensity,
+        data: (settings) => settings.hapticEnabled,
+        orElse: () => true,
+      );
+});
+
+final audioEnabledProvider = Provider<bool>((ref) {
+  return ref
+      .watch(feedbackSettingsProvider)
+      .maybeWhen(data: (settings) => settings.audioEnabled, orElse: () => true);
+});
+
+final beepVolumeProvider = Provider<double>((ref) {
+  return ref
+      .watch(feedbackSettingsProvider)
+      .maybeWhen(data: (settings) => settings.beepVolume, orElse: () => 0.8);
+});
+
+final hapticIntensityProvider = Provider<HapticIntensity>((ref) {
+  return ref
+      .watch(feedbackSettingsProvider)
+      .maybeWhen(
+        data: (settings) => settings.hapticIntensity,
         orElse: () => HapticIntensity.medium,
       );
 });

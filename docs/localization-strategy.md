@@ -14,12 +14,16 @@ app/
 │   │   ├── app_fr.arb           # French (base/fallback)
 │   │   ├── app_fr_CA.arb        # French-Canadian (region-specific)
 │   │   ├── app_es.arb           # Spanish (complete translation)
-│   │   └── ...                  # Future locales (de.arb, pt_BR.arb, etc.)
+│   │   ├── app_de.arb           # German (complete translation)
+│   │   ├── app_pt.arb           # Portuguese (complete translation)
+│   │   └── ...                  # Future locales (it.arb, nl.arb, etc.)
 │   ├── generated_l10n/          # Auto-generated code (do not edit)
 │   │   ├── app_localizations.dart
+│   │   ├── app_localizations_de.dart
 │   │   ├── app_localizations_en.dart
 │   │   ├── app_localizations_es.dart
-│   │   └── app_localizations_fr.dart
+│   │   ├── app_localizations_fr.dart
+│   │   └── app_localizations_pt.dart
 │   └── main.dart                # Localization config in MaterialApp
 ├── l10n.yaml                    # Flutter gen-l10n configuration
 └── pubspec.yaml                 # flutter: generate: true
@@ -30,8 +34,10 @@ app/
 2. **app_fr.arb** — French fallback (supports `Locale('fr')`)
 3. **app_fr_CA.arb** — French-Canadian variant (supports `Locale('fr', 'CA')`)
 4. **app_es.arb** — Spanish complete translation (supports `Locale('es')`)
-5. **l10n.yaml** — gen-l10n config (template file, supported locales, output settings)
-6. **generated_l10n/app_localizations.dart** — Main generated class (never edit)
+5. **app_de.arb** — German complete translation (supports `Locale('de')`)
+6. **app_pt.arb** — Portuguese complete translation (supports `Locale('pt')`)
+7. **l10n.yaml** — gen-l10n config (template file, supported locales, output settings)
+8. **generated_l10n/app_localizations.dart** — Main generated class (never edit)
 
 ## Workflow
 
@@ -53,7 +59,7 @@ app/
    }
    ```
 
-2. **Add translations to all locale files** (app_fr.arb, app_fr_CA.arb, app_es.arb, etc.):
+2. **Add translations to all locale files** (app_fr.arb, app_fr_CA.arb, app_es.arb, app_de.arb, app_pt.arb, etc.):
    
    **French (app_fr.arb):**
    ```json
@@ -117,10 +123,10 @@ app/
 | `fr` | French | Any | P0 (Launch) | ✅ Complete | 100% (140+ strings) |
 | `fr_CA` | French | Canada | P0 (Launch) | ✅ Complete | 100% (140+ strings) |
 | `es` | Spanish | Any | P1 | ✅ Complete | 100% (140+ strings) |
-| `de` | German | Any | Post-launch | 🔄 Planned | 0% |
-| `pt_BR` | Portuguese | Brazil | Post-launch | 🔄 Planned | 0% |
+| `de` | German | Any | P1 | ✅ Complete | 100% (140+ strings) |
+| `pt` | Portuguese | Any | P1 | ✅ Complete | 100% (140+ strings) |
 
-**Note:** Locale selection currently defaults to device language (`Locale('en')`). For user preference override, implement a settings page (see M3/195 feedback settings).
+**Note:** Locale selection follows the device locale when supported, with fallback to English (`en`). For user preference override, implement a settings page (see M3/195 feedback settings).
 
 ## Date & Number Formatting
 
@@ -137,8 +143,8 @@ final dateString = dateFormatter.format(DateTime.now());
 final numberFormatter = NumberFormat.currency(locale: Locale('fr_CA').toString());
 final priceString = numberFormatter.format(9.99); // "9,99 $" (fr-CA) vs "$ 9.99" (en)
 
-// Already integrated in DateFormatter utility (see core/utils/date_formatter.dart)
-final expiryDate = DateFormatter.format(item.expiryDate); // Respects device locale
+// Preference-based formatting utility in the app (see core/utils/date_formatter.dart)
+final expiryDate = AppDateFormatter.formatDate(item.expiryDate, 'MM/DD/YYYY');
 ```
 
 ### Locale-Specific Handling
@@ -157,18 +163,22 @@ flutter:
 ### MaterialApp Configuration (main.dart)
 ```dart
 MaterialApp.router(
-  locale: const Locale('en'),
   localizationsDelegates: const [
     AppLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
   ],
+  localeResolutionCallback: (deviceLocale, supportedLocales) {
+    // Return exact or language-only match; fallback to English.
+  },
   supportedLocales: const [
     Locale('en'),
     Locale('fr'),
     Locale('fr', 'CA'),
     Locale('es'),
+    Locale('de'),
+    Locale('pt'),
   ],
   // ...
 )
@@ -184,6 +194,9 @@ output-dir: lib/generated_l10n
 preferred-supported-locales:
   - en
   - fr_CA
+  - es
+  - de
+  - pt
 ```
 
 ## Feedback & Sound Settings Localization
@@ -205,17 +218,17 @@ All strings are stored in ARB files and auto-generated into `AppLocalizations` (
 
 ### Pre-Commit Checks
 1. **ARB syntax validation**: `flutter gen-l10n` validates ARB JSON structure
-2. **Hardcoded string detection** (future): Lint rule to flag hardcoded UI strings in Dart code
+2. **Hardcoded string detection** (future): Lint/CI rule to flag direct string literals in UI widgets
 3. **Translation completeness**: Ensure all keys in `app_en.arb` are present in `app_fr.arb` and `app_fr_CA.arb`
 
 ### GitHub Actions Workflow
 ```yaml
-- name: Validate localization
+- name: Validate localization files
   run: |
     cd app
     flutter gen-l10n
-    # Compare keys across ARB files
-    python scripts/validate_arbs.py
+
+# Optional future step: hardcoded-string lint gate
 ```
 
 ### Manual QA
@@ -249,18 +262,23 @@ All strings are stored in ARB files and auto-generated into `AppLocalizations` (
 ### Unit Tests
 ```dart
 testWidgets('French locale renders without clipping', (tester) async {
-  addTearDown(tester.binding.window.physicalSizeTestValue = Size.zero);
-  addTearDown(tester.binding.window.devicePixelRatioTestValue = 1.0);
-
-  addTearDown(() => tester.binding.removeTestWidgetInspectorTransport());
-  tester.binding.window.physicalSizeTestValue = const Size(400, 800);
+  tester.view.physicalSize = const Size(400, 800);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+  });
 
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('fr', 'CA'),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
-        body: Text(AppLocalizations.of(context)!.feedbackHapticFeedback),
+        body: Builder(
+          builder: (context) => Text(
+            AppLocalizations.of(context)!.feedbackHapticFeedback,
+          ),
+        ),
       ),
     ),
   );

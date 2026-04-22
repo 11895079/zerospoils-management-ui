@@ -39,10 +39,18 @@ class FeedbackService {
     _audioEnabledValue = _prefs.getBool(_audioEnabledKey) ?? true;
     _beepVolumeValue = _prefs.getDouble(_beepVolumeKey) ?? 0.8;
     final intensityStr = _prefs.getString(_hapticIntensityKey);
-    if (intensityStr != null) {
-      _hapticIntensityValue = HapticIntensity.values.byName(intensityStr);
-    } else {
-      _hapticIntensityValue = HapticIntensity.medium;
+    _hapticIntensityValue = _parseHapticIntensity(intensityStr);
+  }
+
+  HapticIntensity _parseHapticIntensity(String? value) {
+    if (value == null) {
+      return HapticIntensity.medium;
+    }
+
+    try {
+      return HapticIntensity.values.byName(value);
+    } catch (_) {
+      return HapticIntensity.medium;
     }
   }
 
@@ -68,11 +76,30 @@ class FeedbackService {
 
   /// Trigger feedback for an OCR success event
   Future<void> triggerOcrSuccess(FeedbackType type) async {
+    final feedbackPattern = _feedbackPatternFor(type);
+
     if (_hapticEnabledValue) {
-      await _triggerHaptic();
+      for (var i = 0; i < feedbackPattern.hapticCount; i++) {
+        await _triggerHaptic();
+      }
     }
     if (_audioEnabledValue) {
-      await _triggerBeep();
+      for (var i = 0; i < feedbackPattern.beepCount; i++) {
+        await _triggerBeep();
+      }
+    }
+  }
+
+  _FeedbackPattern _feedbackPatternFor(FeedbackType type) {
+    switch (type) {
+      case FeedbackType.barcodeSuccess:
+        return const _FeedbackPattern(hapticCount: 1, beepCount: 1);
+      case FeedbackType.expirySuccess:
+        return const _FeedbackPattern(hapticCount: 1, beepCount: 1);
+      case FeedbackType.receiptSuccess:
+        return const _FeedbackPattern(hapticCount: 1, beepCount: 2);
+      case FeedbackType.produceSuccess:
+        return const _FeedbackPattern(hapticCount: 2, beepCount: 1);
     }
   }
 
@@ -82,29 +109,25 @@ class FeedbackService {
       switch (_hapticIntensityValue) {
         case HapticIntensity.light:
           await HapticFeedback.lightImpact();
+          return;
         case HapticIntensity.medium:
           await HapticFeedback.mediumImpact();
+          return;
         case HapticIntensity.heavy:
           await HapticFeedback.heavyImpact();
+          return;
       }
     } catch (_) {
       // Silently fail on devices without haptic support
     }
   }
 
-  /// Trigger POS-style beep sound
-  /// Note: Actual audio playback would require audio_players package
-  /// For now, we use SystemSounds as a placeholder
+  /// Trigger a lightweight system click sound.
   Future<void> _triggerBeep() async {
     try {
-      // Use system sounds (platform-specific implementation)
-      // On iOS: UISystemSoundType (kSystemSoundID_Vibrate)
-      // On Android: ToneGenerator (TONE_CDMA_PIP)
-      await SystemChannels.platform.invokeMethod('playBeepSound', {
-        'volume': _beepVolumeValue,
-      });
+      await SystemSound.play(SystemSoundType.click);
     } catch (_) {
-      // Silently fail if audio not available
+      // Silently fail if system audio feedback is not available
     }
   }
 
@@ -127,4 +150,11 @@ class FeedbackService {
       await HapticFeedback.heavyImpact();
     } catch (_) {}
   }
+}
+
+class _FeedbackPattern {
+  const _FeedbackPattern({required this.hapticCount, required this.beepCount});
+
+  final int hapticCount;
+  final int beepCount;
 }
