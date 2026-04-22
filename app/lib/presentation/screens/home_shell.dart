@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
+import '../widgets/beta_feedback_button.dart';
 import 'inventory_screen.dart';
 import 'expiring_today_screen.dart';
 import 'shopping_list_screen.dart';
@@ -27,6 +28,10 @@ class HomeShell extends ConsumerWidget {
     return Scaffold(
       body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
+      // The beta feedback FAB sits at bottom-left to avoid conflicting with
+      // screen-level FABs at bottom-right. Hidden in production builds.
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButton: const BetaFeedbackButton(),
       bottomNavigationBar: BottomNavigationBar(
         key: const Key('home_bottom_nav'),
         currentIndex: selectedIndex,

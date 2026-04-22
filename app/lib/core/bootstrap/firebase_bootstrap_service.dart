@@ -5,6 +5,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import '../auth/firebase_auth_service.dart';
 import '../auth/secure_token_service.dart';
+import '../distribution/app_distribution_service.dart';
 
 /// Handle FCM background messages. Must be a top-level function.
 @pragma('vm:entry-point')
@@ -92,6 +93,10 @@ class FirebaseBootstrapService {
 
       // Initialize Firebase Cloud Messaging (FCM) for push notifications.
       await _initializeFcm();
+
+      // Initialize App Distribution Tester SDK (beta/debug builds only).
+      // This is a no-op in production builds and never blocks startup.
+      await AppDistributionService.instance.initialize();
 
       debugPrint(
         '[Firebase] Bootstrap complete: Core + Auth (anonymous, token cached) '
