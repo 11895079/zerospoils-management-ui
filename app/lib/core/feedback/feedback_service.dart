@@ -100,8 +100,9 @@ class FeedbackService {
       // Use system sounds (platform-specific implementation)
       // On iOS: UISystemSoundType (kSystemSoundID_Vibrate)
       // On Android: ToneGenerator (TONE_CDMA_PIP)
-      await SystemChannels.platform
-          .invokeMethod('playBeepSound', {'volume': _beepVolumeValue});
+      await SystemChannels.platform.invokeMethod('playBeepSound', {
+        'volume': _beepVolumeValue,
+      });
     } catch (_) {
       // Silently fail if audio not available
     }
