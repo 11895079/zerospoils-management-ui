@@ -128,6 +128,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
         Locale('en'),
         Locale('fr'),
         Locale('fr', 'CA'),
+        Locale('es'),
       ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

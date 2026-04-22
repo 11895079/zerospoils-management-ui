@@ -9,4 +9,5 @@ no-synthetic-package: true
 preferred-supported-locales:
   - en
   - fr_CA
+  - es
 use-deferred-loading: false
