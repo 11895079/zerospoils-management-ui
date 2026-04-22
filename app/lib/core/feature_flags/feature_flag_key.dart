@@ -100,9 +100,9 @@ class _ReceiptOcr extends FeatureFlagKey {
     : super(
         key: 'receipt_ocr',
         description: 'Extract items from receipt photos',
-        defaultValue: false,
-        targetMilestone: 'M5+',
-        costNotes: 'ML API calls (Google Vision API)',
+        defaultValue: true,
+        targetMilestone: 'M3',
+        costNotes: 'On-device ML Kit OCR; no network cost',
       );
 }
 

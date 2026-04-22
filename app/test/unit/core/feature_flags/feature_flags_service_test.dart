@@ -97,7 +97,7 @@ void main() {
         expect(service.isEnabled(FeatureFlagKey.cloudSync), false);
         expect(service.isEnabled(FeatureFlagKey.cloudAnalyticsExport), false);
         expect(service.isEnabled(FeatureFlagKey.receiptBatchCapture), true);
-        expect(service.isEnabled(FeatureFlagKey.receiptOcr), false);
+        expect(service.isEnabled(FeatureFlagKey.receiptOcr), true);
         expect(service.isEnabled(FeatureFlagKey.batchPhotoCapture), false);
         expect(service.isEnabled(FeatureFlagKey.freshItemCv), true);
         expect(service.isEnabled(FeatureFlagKey.householdSync), false);
@@ -189,7 +189,7 @@ void main() {
         expect(flags.keys.length, 9);
         expect(flags[FeatureFlagKey.cloudSync], false);
         expect(flags[FeatureFlagKey.receiptBatchCapture], true);
-        expect(flags[FeatureFlagKey.receiptOcr], false);
+        expect(flags[FeatureFlagKey.receiptOcr], true);
         expect(flags[FeatureFlagKey.freshItemCv], true);
         expect(flags[FeatureFlagKey.expiryDateOcr], true);
       });
