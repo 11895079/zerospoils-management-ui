@@ -21,26 +21,31 @@ Deliver shopping batch capture with receipt photo attachment, batch metadata ent
 - Offline-first: all batch CRUD and photo storage local; no network dependency
 
 ## Acceptance criteria (Definition of Done)
-- [ ] Add `ShoppingBatch` entity to data model: id, store_name, purchase_date, total_cost, payment_method, receipt_photo_uri, created_at
-- [ ] Implement batch repository with local persistence (Hive/sqflite) for CRUD operations
-- [ ] Update "+" FAB: show bottom sheet with "Add Individual Item" and "Add Shopping Batch" options
-- [ ] "Add Shopping Batch" form: fields for store name, purchase date, total cost, payment method (cash/card/mobile), receipt photo picker
+- [x] Add `ShoppingBatch` entity to data model: id, store_name, purchase_date, total_cost, payment_method, receipt_photo_uri, created_at
+- [x] Implement batch repository with local persistence (Hive/sqflite) for CRUD operations
+- [x] Update "+" FAB: show bottom sheet with "Add Individual Item" and "Add Shopping Batch" options
+- [x] "Add Shopping Batch" form: fields for store name, purchase date, total cost, payment method (cash/card/mobile), receipt photo picker
 - [ ] Receipt photo stored locally; max 1 per batch; checksum for dedupe; display in batch detail view
-- [ ] Add optional `batch_id` field to Item entity (nullable UUID foreign key)
+- [x] Add optional `batch_id` field to Item entity (nullable UUID foreign key)
 - [ ] Add `purchase_date` field to Item entity (required; uses batch purchase date when linked)
-- [ ] Add-item form includes batch dropdown (show batches from last 30 days; searchable by store/date)
+- [x] Add-item form includes batch dropdown (show batches from last 30 days; searchable by store/date)
 - [ ] Add-item form sets purchase date: auto-populate from batch when selected; allow manual override when no batch
-- [ ] Retroactive linking: multi-select items in inventory -> "Link to Batch" action -> batch selector
-- [ ] Shopping tab redesign: tabs/sections for "Shopping List" and "Shopping History" (batches chronological, most recent first)
-- [ ] Batch detail view: receipt photo preview (tap to enlarge), metadata, linked items list, aggregate stats (cost, count, category pie chart)
-- [ ] Inventory item detail shows purchase date and batch info (with link to batch detail)
+- [x] Retroactive linking: multi-select items in inventory -> "Link to Batch" action -> batch selector
+- [x] Shopping tab redesign: tabs/sections for "Shopping List" and "Shopping History" (batches chronological, most recent first)
+- [x] Batch detail view: receipt photo preview (tap to enlarge), metadata, linked items list, aggregate stats (cost, count, category pie chart)
+- [x] Inventory item detail shows purchase date and batch info (with link to batch detail)
 - [ ] Inventory filter: add "Batch" filter showing all batches; selecting batch filters items to that batch only
 - [ ] Update M2/165 backup/restore: include `shopping_batches` in JSON; embed receipt photo as base64 data URI
 - [ ] Telemetry events: `batch_created {store, total_cost, items_count}`, `batch_item_linked {batch_id, item_count}`, `batch_viewed {batch_id}`
-- [ ] Unit/widget/integration tests added or updated (batch CRUD, item linking, photo storage, backup/restore)
+- [x] Unit/widget/integration tests added or updated (batch CRUD, item linking, photo storage, backup/restore)
 - [ ] Telemetry added/updated (event names + key properties documented)
 - [ ] Offline-first behavior verified (no network dependency)
 - [ ] Accessibility basics (form labels, photo preview alt text, batch list semantics)
+
+### Implementation status update (April 22, 2026)
+- Merged via PR [#105](https://github.com/11895079/zerospoils/pull/105) and PR [#106](https://github.com/11895079/zerospoils/pull/106).
+- Receipt batch flow currently supports multiple receipt photos during capture/review (not the original max-1 scope line above).
+- Receipt batch linking now supports add-time linking from item form and retroactive linking through batch detail actions/dialogs.
 
 ## Out of scope
 - Receipt OCR for line item extraction as a dependency for this flow; receipt OCR remains a separate, feature-flagged follow-up and batch capture must still work without it
