@@ -63,6 +63,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // firebase_app_distribution_android exposes staging/production flavors.
+        // Prefer staging so Android builds include the in-app Tester SDK.
+        // Keep production as fallback for compatibility.
+        missingDimensionStrategy("default", "staging", "production")
     }
 
     // Configure release signing only when key.properties is present and complete.
@@ -129,6 +133,7 @@ dependencies {
     // Keep Firebase Android SDK versions aligned when adding direct Firebase deps.
     implementation(platform("com.google.firebase:firebase-bom:34.10.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-common-ktx:20.4.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("com.google.mlkit:text-recognition-chinese:16.0.1")

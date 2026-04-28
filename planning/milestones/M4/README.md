@@ -13,12 +13,13 @@
 - Dark mode theme toggle (295)
 - Settings feedback entry (285)
 - Closed-testing backend and launch hardening (Firebase + Supabase + release security) (370)
+- Apple individual enrollment now + organization conversion readiness checklist (670)
 
 **Acceptance:** App distributed to 10-50 beta testers on iOS and Android; feedback mechanism working; crash reports visible; performance baseline established; launch hardening checklist completed for production-ready release security.
 
 **Out of Scope:** Public launch, store listing copy, brand assets (deferred to M5).
 
-**Issues:** 260, 265, 270, 275, 280, 285, 290, 295, 300, 370
+**Issues:** 260, 265, 270, 275, 280, 285, 290, 295, 300, 370, 670
 
 **Dependencies:** M3 complete (all MVP features functional, telemetry instrumented).
 
@@ -26,7 +27,7 @@
 
 ## M4 Implementation Status
 
-**Last Updated:** April 11, 2026 — **Progress:** 0/10 planned issues complete (0%)
+**Last Updated:** April 24, 2026 — **Progress:** 0/11 planned issues complete (0%)
 
 ### Issues & Completion
 
@@ -42,9 +43,10 @@
 | **295** | Dark mode theme toggle | ⚠️ In Progress | — | Toggle is present in Settings but currently disabled (`Soon`) and does not switch app theme live |
 | **300** | Basic metrics dashboard (optional) | ⏳ Not Started | — | No `docs/metrics.md` dashboard artifact found yet |
 | **370** | Closed-testing backend security hardening (Firebase + Supabase) | ⚠️ In Progress | — | Steps 1-6 are marked complete in the issue; server-side endpoint gating still open; no PR open yet |
+| **670** | Apple individual now + organization conversion readiness checklist | ⏳ Not Started | — | New cross-functional checklist for immediate iOS beta path and later Apple organization conversion before public launch |
 
 ### Commentary
 
 - M4 delivery is active, with the bulk of concrete implementation progress currently concentrated in issue 370.
-- No M4 issue is fully closed yet against all documented acceptance criteria, so milestone completion remains at 0/10.
+- No M4 issue is fully closed yet against all documented acceptance criteria, so milestone completion remains at 0/11.
 - After server-side endpoint gating is completed and a PR is opened and merged for issue 370, M4 completion should be re-baselined.

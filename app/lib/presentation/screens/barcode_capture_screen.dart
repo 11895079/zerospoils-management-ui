@@ -1,6 +1,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/theme/app_spacing.dart';
@@ -48,6 +49,7 @@ class _BarcodeCaptureScreenState extends State<BarcodeCaptureScreen> {
 
       _isCompleting = true;
       await _controller.stop();
+      HapticFeedback.selectionClick();
       if (!mounted) {
         return;
       }

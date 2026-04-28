@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -169,6 +170,7 @@ class _PackagedItemFastAddScreenState
 
       _barcodeIsCompleting = true;
       await _scannerController?.stop();
+      HapticFeedback.selectionClick();
       if (!mounted) {
         return;
       }
@@ -306,6 +308,7 @@ class _PackagedItemFastAddScreenState
     }
 
     if (result.isSuccess) {
+      HapticFeedback.mediumImpact();
       setState(() {
         _lockedExpiry = result.parsed;
         _stage = _FastAddStage.expiryLocked;
