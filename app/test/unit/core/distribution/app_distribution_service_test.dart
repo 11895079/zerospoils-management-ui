@@ -76,16 +76,18 @@ void main() {
       expect(client.updateIfNewReleaseCalls, 0);
     });
 
-    test('returns true and calls update prompt when update is available',
-        () async {
-      final client = _FakeClient(hasUpdate: true);
-      final service = _serviceWith(client);
+    test(
+      'returns true and calls update prompt when update is available',
+      () async {
+        final client = _FakeClient(hasUpdate: true);
+        final service = _serviceWith(client);
 
-      final result = await service.checkForUpdate();
+        final result = await service.checkForUpdate();
 
-      expect(result, isTrue);
-      expect(client.updateIfNewReleaseCalls, 1);
-    });
+        expect(result, isTrue);
+        expect(client.updateIfNewReleaseCalls, 1);
+      },
+    );
 
     test('swallows Exception and returns false when network fails', () async {
       final client = _FakeClient(
@@ -105,9 +107,9 @@ void main() {
 
       // The service applies a 10 s timeout internally; use a 12 s outer
       // timeout to avoid the test hanging indefinitely.
-      final result = await service
-          .checkForUpdate()
-          .timeout(const Duration(seconds: 12));
+      final result = await service.checkForUpdate().timeout(
+        const Duration(seconds: 12),
+      );
 
       expect(result, isFalse, reason: 'timeout should be handled gracefully');
     });
@@ -158,4 +160,3 @@ void main() {
     });
   });
 }
-

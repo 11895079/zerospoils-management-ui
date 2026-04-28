@@ -5,11 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:zerospoils/presentation/widgets/beta_feedback_button.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
-      home: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        floatingActionButton: child,
-      ),
-    );
+  home: Scaffold(
+    floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+    floatingActionButton: child,
+  ),
+);
 
 void main() {
   group('BetaFeedbackButton', () {
@@ -26,9 +26,7 @@ void main() {
     });
 
     testWidgets('renders nothing when isActive is false', (tester) async {
-      await tester.pumpWidget(
-        _wrap(const BetaFeedbackButton(isActive: false)),
-      );
+      await tester.pumpWidget(_wrap(const BetaFeedbackButton(isActive: false)));
       await tester.pump();
 
       expect(

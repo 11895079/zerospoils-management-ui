@@ -59,11 +59,13 @@ class AppDistributionService {
   Future<bool> checkForUpdate() async {
     if (!_isActive) return false;
     try {
-      final hasUpdate = await client
-          .isNewReleaseAvailable()
-          .timeout(const Duration(seconds: 10));
+      final hasUpdate = await client.isNewReleaseAvailable().timeout(
+        const Duration(seconds: 10),
+      );
       if (hasUpdate) {
-        debugPrint('[AppDistribution] New release available — prompting tester');
+        debugPrint(
+          '[AppDistribution] New release available — prompting tester',
+        );
         await client.updateIfNewReleaseAvailable();
       }
       return hasUpdate;
@@ -112,4 +114,3 @@ class _FirebaseAppDistributionClient implements AppDistributionClient {
   @override
   Future<bool> isTesterSignedIn() => fad.isTesterSignedIn();
 }
-

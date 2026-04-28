@@ -46,7 +46,9 @@ class BetaFeedbackButton extends StatelessWidget {
     try {
       await AppDistributionService.instance.checkForUpdate();
     } catch (e) {
-      debugPrint('[AppDistribution] Beta feedback action failed (non-fatal): $e');
+      debugPrint(
+        '[AppDistribution] Beta feedback action failed (non-fatal): $e',
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -58,4 +60,3 @@ class BetaFeedbackButton extends StatelessWidget {
     }
   }
 }
-
