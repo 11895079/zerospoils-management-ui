@@ -143,5 +143,5 @@ jobs:
         if: always()
         run: |
           if [ -f "$RUNNER_TEMP/app-signing.keychain-db" ]; then
-            security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+            security delete-keychain "$RUNNER_TEMP/app-signing.keychain-db"
           fi

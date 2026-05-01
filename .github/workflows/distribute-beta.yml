@@ -58,9 +58,11 @@ jobs:
           fi
           # Firebase App Distribution release notes max 16384 chars
           NOTES_TRIMMED=$(echo "$NOTES" | head -c 16000)
-          echo "RELEASE_NOTES<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$NOTES_TRIMMED" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          {
+            echo "RELEASE_NOTES<<EOF"
+            echo "$NOTES_TRIMMED"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Decode keystore
         env:
@@ -89,12 +91,12 @@ jobs:
           if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
             if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && \
                keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" >/dev/null 2>&1; then
-              cat > app/android/key.properties <<EOF
-storeFile=/tmp/release-keystore.jks
-storePassword=${KEYSTORE_PASSWORD}
-keyAlias=${KEY_ALIAS}
-keyPassword=${KEY_PASSWORD}
-EOF
+              printf '%s\n' \
+                "storeFile=/tmp/release-keystore.jks" \
+                "storePassword=${KEYSTORE_PASSWORD}" \
+                "keyAlias=${KEY_ALIAS}" \
+                "keyPassword=${KEY_PASSWORD}" \
+                > app/android/key.properties
               echo "SIGNING_READY=true" >> "$GITHUB_ENV"
             else
               echo "Warning: Android signing credentials/alias do not match keystore. APK will be debug-signed."
@@ -121,7 +123,7 @@ EOF
         run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta.apk
+             "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta.apk"
           echo "APK_PATH=app/build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta.apk" >> "$GITHUB_ENV"
 
       - name: Upload APK to Firebase App Distribution
@@ -176,9 +178,11 @@ EOF
             NOTES=$(git log --oneline -20)
           fi
           NOTES_TRIMMED=$(echo "$NOTES" | head -c 16000)
-          echo "RELEASE_NOTES<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$NOTES_TRIMMED" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          {
+            echo "RELEASE_NOTES<<EOF"
+            echo "$NOTES_TRIMMED"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Install provisioning profile
         env:

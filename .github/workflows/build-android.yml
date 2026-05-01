@@ -75,12 +75,12 @@ jobs:
           if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
             if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && \
                keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" >/dev/null 2>&1; then
-              cat > app/android/key.properties <<EOF
-storeFile=/tmp/release-keystore.jks
-storePassword=${KEYSTORE_PASSWORD}
-keyAlias=${KEY_ALIAS}
-keyPassword=${KEY_PASSWORD}
-EOF
+              printf '%s\n' \
+                "storeFile=/tmp/release-keystore.jks" \
+                "storePassword=${KEYSTORE_PASSWORD}" \
+                "keyAlias=${KEY_ALIAS}" \
+                "keyPassword=${KEY_PASSWORD}" \
+                > app/android/key.properties
               echo "SIGNING_READY=true" >> "$GITHUB_ENV"
             else
               echo "Warning: Android signing credentials/alias do not match keystore. Falling back to debug signing."
@@ -113,9 +113,9 @@ EOF
         run: |
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           mv build/app/outputs/flutter-apk/app-release.apk \
-             build/app/outputs/flutter-apk/zerospoils-$TAG_VERSION.apk
+           "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}.apk"
           mv build/app/outputs/bundle/release/app-release.aab \
-             build/app/outputs/bundle/release/zerospoils-$TAG_VERSION.aab
+           "build/app/outputs/bundle/release/zerospoils-${TAG_VERSION}.aab"
       
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
