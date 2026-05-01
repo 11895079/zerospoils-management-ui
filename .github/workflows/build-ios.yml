@@ -51,9 +51,17 @@ jobs:
           if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
             PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
             if printf '%s' "$PROVISIONING_PROFILE_BASE64" | tr -d '\r\n\t ' | base64 --decode > "$PP_PATH"; then
+              security cms -D -i "$PP_PATH" > "$RUNNER_TEMP/profile.plist"
+              PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+              PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")
+              TEAM_ID=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")
               mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-              cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
-              echo "PROFILE_AVAILABLE=true" >> "$GITHUB_ENV"
+              cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+              {
+                echo "PROFILE_NAME=$PROFILE_NAME"
+                echo "TEAM_ID=$TEAM_ID"
+                echo "PROFILE_AVAILABLE=true"
+              } >> "$GITHUB_ENV"
               echo "Provisioning profile installed"
             else
               echo "Warning: IOS_PROVISIONING_PROFILE_BASE64 is invalid base64."
@@ -120,7 +128,25 @@ jobs:
         working-directory: ./app
         run: |
           if [ "$CERT_AVAILABLE" = "true" ] && [ "$PROFILE_AVAILABLE" = "true" ]; then
-            if flutter build ipa --release; then
+            printf '%s\n' \
+              '<?xml version="1.0" encoding="UTF-8"?>' \
+              '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+              '<plist version="1.0">' \
+              '<dict>' \
+              '  <key>method</key>' \
+              '  <string>app-store</string>' \
+              '  <key>signingStyle</key>' \
+              '  <string>manual</string>' \
+              '  <key>teamID</key>' \
+              "  <string>${TEAM_ID}</string>" \
+              '  <key>provisioningProfiles</key>' \
+              '  <dict>' \
+              '    <key>com.zerospoils.zerospoils</key>' \
+              "    <string>${PROFILE_NAME}</string>" \
+              '  </dict>' \
+              '</dict>' \
+              '</plist>' > "$RUNNER_TEMP/ExportOptions.plist"
+            if flutter build ipa --release --export-options-plist="$RUNNER_TEMP/ExportOptions.plist"; then
               IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
               echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
               echo "ipa_available=true" >> "$GITHUB_OUTPUT"
