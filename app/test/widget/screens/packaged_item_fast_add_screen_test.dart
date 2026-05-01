@@ -237,7 +237,7 @@ void main() {
           'ATLANTIC SALMON FILLET\n'
           '0.742 KG @ 24.99/KG\n'
           'TOTAL 18.54\n'
-          'BEST BEFORE 04/24/2026',
+          'BEST BEFORE 03/31/2028',
         );
         await tester.tap(
           find.byKey(const Key('fast_add_package_extract_button')),
@@ -293,7 +293,7 @@ void main() {
           'ATLANTIC SALMON FILLET\n'
           '0.742 KG @ 24.99/KG\n'
           'TOTAL 18.54\n'
-          'BEST BEFORE 04/24/2026',
+          'BEST BEFORE 03/31/2028',
         );
 
         await tester.tap(
@@ -349,7 +349,7 @@ void main() {
           'ATLANTIC SALMON FILLET\n'
           '0.742 KG @ 24.99/KG\n'
           'TOTAL 18.54\n'
-          'BEST BEFORE 04/24/2026',
+          'BEST BEFORE 03/31/2028',
         );
         await tester.tap(
           find.byKey(const Key('fast_add_package_extract_button')),

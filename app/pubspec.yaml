@@ -85,6 +85,7 @@ dependencies:
   firebase_crashlytics: ^4.0.0
   firebase_remote_config: ^5.0.0
   firebase_messaging: ^15.0.0  # For push notifications (optional)
+  firebase_app_distribution: ^1.2.0  # Tester SDK for beta update checks + shake-to-feedback
 
   # Supabase (backend auth, entitlements, RLS)
   supabase_flutter: ^2.5.0

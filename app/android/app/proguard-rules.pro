@@ -59,6 +59,7 @@
 -dontwarn com.google.android.play.core.tasks.OnSuccessListener
 -dontwarn com.google.android.play.core.tasks.Task
 -dontwarn com.google.firebase.iid.FirebaseInstanceId
+-dontwarn com.google.firebase.ktx.Firebase
 
 # Verbose logging for debugging (comment out for production)
 # -verbose

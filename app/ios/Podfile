@@ -33,6 +33,13 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
+  # firebase_app_distribution_ios leaves FirebaseAppDistribution unconstrained,
+  # which defaults to the old 0.9.x series — incompatible with FirebaseCore 11.x
+  # used by FlutterFire. Pin to 11.15.0-beta, the earliest unified-SDK release
+  # that works with FirebaseCore 11.x. There is no stable 11.x release yet;
+  # this pin should be updated to a stable version once one is published.
+  pod 'FirebaseAppDistribution', '11.15.0-beta'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 
   target 'RunnerTests' do

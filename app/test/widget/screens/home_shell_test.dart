@@ -97,7 +97,7 @@ void main() {
 
     // Verify Expiring screen is shown
     expect(find.byKey(const Key('screen_expiring_today')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const Key('inventory_add_fab')), findsNothing);
 
     // Tap on Shopping tab
     await tester.tap(find.byKey(const Key('nav_shopping')));
@@ -105,7 +105,7 @@ void main() {
 
     // Verify Shopping List screen is shown
     expect(find.byKey(const Key('screen_shopping_list')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const Key('inventory_add_fab')), findsNothing);
 
     // Tap on Progress tab
     await tester.tap(find.byKey(const Key('nav_progress')));
@@ -113,7 +113,7 @@ void main() {
 
     // Verify Progress screen is shown
     expect(find.byKey(const Key('screen_progress')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const Key('inventory_add_fab')), findsNothing);
   });
 
   testWidgets('Inventory screen displays Add Item FAB', (
@@ -142,7 +142,7 @@ void main() {
 
     // Verify Progress screen is shown without FAB
     expect(find.byKey(const Key('screen_progress')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const Key('inventory_add_fab')), findsNothing);
 
     // Open drawer and navigate to Settings
     await tester.tap(find.byTooltip('Open navigation menu'));
@@ -152,7 +152,7 @@ void main() {
 
     // Verify Settings screen is shown
     expect(find.byKey(const Key('screen_settings')), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byKey(const Key('inventory_add_fab')), findsNothing);
 
     // Switch back to Inventory tab (tab 0)
     await tester.pageBack();

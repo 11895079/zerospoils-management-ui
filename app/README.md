@@ -15,6 +15,34 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+## iOS Simulator + MLKit Workaround
+
+Apple Silicon iOS 26+ simulators require arm64 simulator support from all
+native pods. Current MLKit pods in this project do not provide compatible
+simulator support, so simulator builds fail when real MLKit plugins are active.
+
+Use the stub toggle scripts when you need simulator runs:
+
+```bash
+cd app
+chmod +x scripts/use-ios-simulator-mlkit-stubs.sh scripts/use-real-mlkit-packages.sh
+./scripts/use-ios-simulator-mlkit-stubs.sh
+flutter run -d ios --debug
+```
+
+Restore real packages before device or release builds:
+
+```bash
+cd app
+./scripts/use-real-mlkit-packages.sh
+```
+
+Notes:
+- Stub mode only affects local development by creating `pubspec_overrides.yaml`.
+- Real iOS devices should use real MLKit packages (no stubs).
+- In stub mode, OCR/CV flows gracefully return no detections and the app falls
+  back to manual entry.
+
 ## Firebase Integration Tests
 
 The Firebase-backed integration tests under `integration_test/` are opt-in.
