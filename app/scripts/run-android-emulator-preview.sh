@@ -5,10 +5,12 @@
 
 set -euo pipefail
 
-ANDROID_SDK="$HOME/Library/Android/sdk"
+# Resolve Android SDK root: honour ANDROID_SDK_ROOT / ANDROID_HOME if set,
+# fall back to the default macOS location.
+ANDROID_SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Library/Android/sdk}}"
 EMULATOR="$ANDROID_SDK/emulator/emulator"
 ADB="$ANDROID_SDK/platform-tools/adb"
-AVD="Pixel_8_API_35"
+AVD="${ZS_AVD:-Pixel_8_API_35}"
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "==> Checking Android emulator ($AVD)..."

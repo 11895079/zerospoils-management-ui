@@ -41,7 +41,7 @@ Notes:
 - Stub mode only affects local development by creating `pubspec_overrides.yaml`.
 - Real iOS devices should use real MLKit packages (no stubs).
 - In stub mode, OCR/CV flows gracefully return no detections and the app falls
-	back to manual entry.
+  back to manual entry.
 
 ## Firebase Integration Tests
 

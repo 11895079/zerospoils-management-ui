@@ -7,8 +7,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-SIMULATOR_UDID="59D1C578-0ED7-4056-8258-634C27446C5E"
-SIMULATOR_NAME="ZS-iPhone-17"
+# Override via env vars for team members with different simulator setups:
+#   SIMULATOR_UDID=<udid> SIMULATOR_NAME=<name> ./scripts/run-ios-simulator-preview.sh
+SIMULATOR_UDID="${SIMULATOR_UDID:-59D1C578-0ED7-4056-8258-634C27446C5E}"
+SIMULATOR_NAME="${SIMULATOR_NAME:-ZS-iPhone-17}"
 
 echo "==> Checking MLKit stub mode..."
 if [[ ! -f "$APP_DIR/pubspec_overrides.yaml" ]]; then

@@ -3,8 +3,7 @@ import 'package:firebase_app_distribution/firebase_app_distribution.dart'
 import 'package:flutter/foundation.dart';
 
 /// Compile-time flag. Set with `--dart-define=BETA_BUILD=true` for beta/debug
-/// CI builds. Tree-shaking ensures Tester SDK code paths are absent in
-/// production binaries built without this flag.
+/// CI builds.
 const bool kBetaBuild = bool.fromEnvironment('BETA_BUILD');
 
 /// Whether the App Distribution Tester SDK should be active.
@@ -23,8 +22,14 @@ bool get _isActive => kBetaBuild || kDebugMode;
 /// - Offline-safe update checks on app launch via [checkForUpdate]
 /// - Tester sign-in state check via [isTesterSignedIn]
 ///
-/// All methods are no-ops in production builds and swallow non-fatal errors
-/// so that beta tooling never disrupts the user experience.
+/// All methods are **runtime no-ops** in production builds (when
+/// `kBetaBuild` is false and `kDebugMode` is false) and swallow non-fatal
+/// errors so that beta tooling never disrupts the user experience.
+///
+/// Note: The `firebase_app_distribution` plugin and its native
+/// Android/iOS platform components are included in every build as a
+/// direct dependency. The runtime guard prevents the Tester SDK from
+/// activating, but the native binary size impact is present in all builds.
 ///
 /// Note: In-app shake-to-feedback requires native platform integration beyond
 /// the Flutter plugin (v1.x). Use [BetaFeedbackButton] for an in-app
