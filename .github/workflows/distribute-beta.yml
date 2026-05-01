@@ -110,11 +110,11 @@ jobs:
         working-directory: ./app
         run: |
           if [ "$SIGNING_READY" = "true" ]; then
-            flutter build apk --release --no-daemon --dart-define=BETA_BUILD=true
+            flutter build apk --release --dart-define=BETA_BUILD=true
           else
             # No keystore — allow debug signing so the workflow can still distribute
             # to internal testers (Firebase App Distribution accepts debug APKs).
-            flutter build apk --release --no-daemon --dart-define=BETA_BUILD=true \
+            flutter build apk --release --dart-define=BETA_BUILD=true \
               -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
           fi
 
