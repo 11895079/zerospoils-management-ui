@@ -16,7 +16,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.7'
+          flutter-version: '3.41.8'
           channel: 'stable'
           cache: true
       
@@ -50,12 +50,18 @@ jobs:
         run: |
           if [ -n "$PROVISIONING_PROFILE_BASE64" ]; then
             PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
-            echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > $PP_PATH
-            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-            cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles/
-            echo "Provisioning profile installed"
+            if printf '%s' "$PROVISIONING_PROFILE_BASE64" | tr -d '\r\n\t ' | base64 --decode > "$PP_PATH"; then
+              mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+              cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+              echo "PROFILE_AVAILABLE=true" >> "$GITHUB_ENV"
+              echo "Provisioning profile installed"
+            else
+              echo "Warning: IOS_PROVISIONING_PROFILE_BASE64 is invalid base64."
+              echo "PROFILE_AVAILABLE=false" >> "$GITHUB_ENV"
+            fi
           else
             echo "Warning: IOS_PROVISIONING_PROFILE_BASE64 secret not set. Build may fail."
+            echo "PROFILE_AVAILABLE=false" >> "$GITHUB_ENV"
           fi
       
       - name: Install certificate
@@ -70,52 +76,56 @@ jobs:
             KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
             
             # Decode certificate
-            echo "$CERTIFICATE_BASE64" | base64 --decode > $CERTIFICATE_PATH
+            if ! printf '%s' "$CERTIFICATE_BASE64" | tr -d '\r\n\t ' | base64 --decode > "$CERTIFICATE_PATH"; then
+              echo "Warning: IOS_CERTIFICATE_BASE64 is invalid base64."
+              echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
+              exit 0
+            fi
             
             # Create temporary keychain
-            security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-            security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-            security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+            security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
             
             # Import certificate
-            security import $CERTIFICATE_PATH \
+            if security import "$CERTIFICATE_PATH" \
               -P "$CERTIFICATE_PASSWORD" \
               -A -t cert -f pkcs12 \
-              -k $KEYCHAIN_PATH
-            security list-keychain -d user -s $KEYCHAIN_PATH
+              -k "$KEYCHAIN_PATH"; then
+              security list-keychain -d user -s "$KEYCHAIN_PATH"
+              echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
+              echo "Certificate installed in keychain"
+            else
+              echo "Warning: Certificate import failed. Verify IOS_CERTIFICATE_PASSWORD matches the .p12 export password."
+              echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
+            fi
             
-            echo "Certificate installed in keychain"
           else
             echo "Warning: IOS_CERTIFICATE_BASE64 secret not set. Build may fail."
+            echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
           fi
       
       - name: Build iOS IPA
+        id: build_ipa
         working-directory: ./app
         run: |
-          # Always build for release (with or without signing)
-          if [ -n "${{ secrets.IOS_CERTIFICATE_BASE64 }}" ]; then
-            flutter build ios --release
-            BUILD_TYPE="signed"
+          if [ "$CERT_AVAILABLE" = "true" ] && [ "$PROFILE_AVAILABLE" = "true" ]; then
+            flutter build ipa --release
+            IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
+            echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
+            echo "ipa_available=true" >> "$GITHUB_OUTPUT"
           else
             flutter build ios --release --no-codesign
-            BUILD_TYPE="unsigned"
+            echo "Warning: iOS signing inputs unavailable/invalid; built unsigned app only."
+            echo "ipa_available=false" >> "$GITHUB_OUTPUT"
           fi
-          
-          # Create IPA from build artifacts
-          cd build/ios/iphoneos
-          mkdir -p Payload
-          cp -r Runner.app Payload/
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          zip -r zerospoils-$TAG_VERSION.ipa Payload
-          mv zerospoils-$TAG_VERSION.ipa ../../../
-          echo "IPA created ($BUILD_TYPE): zerospoils-$TAG_VERSION.ipa"
       
       - name: Upload IPA artifact
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: steps.build_ipa.outputs.ipa_available == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa-${{ github.ref_name }}
-          path: app/zerospoils-*.ipa
+          path: ${{ env.IPA_PATH }}
           retention-days: 90
           if-no-files-found: warn
       
