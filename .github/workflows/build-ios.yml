@@ -93,8 +93,13 @@ jobs:
               -A -t cert -f pkcs12 \
               -k "$KEYCHAIN_PATH"; then
               security list-keychain -d user -s "$KEYCHAIN_PATH"
-              echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
-              echo "Certificate installed in keychain"
+              if security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -Eq 'Apple Distribution|iPhone Distribution'; then
+                echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
+                echo "Certificate installed in keychain"
+              else
+                echo "Warning: Imported certificate has no usable code-signing identity/private key."
+                echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
+              fi
             else
               echo "Warning: Certificate import failed. Verify IOS_CERTIFICATE_PASSWORD matches the .p12 export password."
               echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
@@ -110,10 +115,15 @@ jobs:
         working-directory: ./app
         run: |
           if [ "$CERT_AVAILABLE" = "true" ] && [ "$PROFILE_AVAILABLE" = "true" ]; then
-            flutter build ipa --release
-            IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
-            echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
-            echo "ipa_available=true" >> "$GITHUB_OUTPUT"
+            if flutter build ipa --release; then
+              IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
+              echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
+              echo "ipa_available=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Warning: Signed IPA build failed; falling back to unsigned iOS build."
+              flutter build ios --release --no-codesign
+              echo "ipa_available=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             flutter build ios --release --no-codesign
             echo "Warning: iOS signing inputs unavailable/invalid; built unsigned app only."

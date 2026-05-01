@@ -73,30 +73,39 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            cat > app/android/key.properties <<EOF
-          storeFile=/tmp/release-keystore.jks
-          storePassword=${KEYSTORE_PASSWORD}
-          keyAlias=${KEY_ALIAS}
-          keyPassword=${KEY_PASSWORD}
-          EOF
+            if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && \
+               keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" >/dev/null 2>&1; then
+              cat > app/android/key.properties <<EOF
+storeFile=/tmp/release-keystore.jks
+storePassword=${KEYSTORE_PASSWORD}
+keyAlias=${KEY_ALIAS}
+keyPassword=${KEY_PASSWORD}
+EOF
+              echo "SIGNING_READY=true" >> "$GITHUB_ENV"
+            else
+              echo "Warning: Android signing credentials/alias do not match keystore. Falling back to debug signing."
+              echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
             fi
 
       - name: Build APK
         working-directory: ./app
         run: |
-          if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            flutter build apk --release
+          if [ "$SIGNING_READY" = "true" ]; then
+            flutter build apk --release --no-daemon
           else
-            flutter build apk --release -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
-            fi
+            flutter build apk --release --no-daemon -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
+          fi
 
       - name: Build App Bundle
         working-directory: ./app
         run: |
-          if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            flutter build appbundle --release
+          if [ "$SIGNING_READY" = "true" ]; then
+            flutter build appbundle --release --no-daemon
           else
-            flutter build appbundle --release -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
+            flutter build appbundle --release --no-daemon -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
           fi
       
       - name: Rename artifacts

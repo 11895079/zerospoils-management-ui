@@ -87,23 +87,32 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            cat > app/android/key.properties <<EOF
-          storeFile=/tmp/release-keystore.jks
-          storePassword=${KEYSTORE_PASSWORD}
-          keyAlias=${KEY_ALIAS}
-          keyPassword=${KEY_PASSWORD}
-          EOF
+            if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && \
+               keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" >/dev/null 2>&1; then
+              cat > app/android/key.properties <<EOF
+storeFile=/tmp/release-keystore.jks
+storePassword=${KEYSTORE_PASSWORD}
+keyAlias=${KEY_ALIAS}
+keyPassword=${KEY_PASSWORD}
+EOF
+              echo "SIGNING_READY=true" >> "$GITHUB_ENV"
+            else
+              echo "Warning: Android signing credentials/alias do not match keystore. APK will be debug-signed."
+              echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
           fi
 
       - name: Build APK (beta flavour)
         working-directory: ./app
         run: |
-          if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            flutter build apk --release --dart-define=BETA_BUILD=true
+          if [ "$SIGNING_READY" = "true" ]; then
+            flutter build apk --release --no-daemon --dart-define=BETA_BUILD=true
           else
             # No keystore — allow debug signing so the workflow can still distribute
             # to internal testers (Firebase App Distribution accepts debug APKs).
-            flutter build apk --release --dart-define=BETA_BUILD=true \
+            flutter build apk --release --no-daemon --dart-define=BETA_BUILD=true \
               -PALLOW_DEBUG_SIGNING_FOR_RELEASE=true
           fi
 
@@ -215,7 +224,12 @@ jobs:
               -A -t cert -f pkcs12 \
               -k "$KEYCHAIN_PATH"; then
               security list-keychain -d user -s "$KEYCHAIN_PATH"
-              echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
+              if security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -Eq 'Apple Distribution|iPhone Distribution'; then
+                echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
+              else
+                echo "Warning: Imported certificate has no usable code-signing identity/private key."
+                echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
+              fi
             else
               echo "Warning: Certificate import failed. Verify IOS_CERTIFICATE_PASSWORD matches the .p12 export password."
               echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
@@ -233,10 +247,14 @@ jobs:
             # flutter build ipa produces a properly packaged signed IPA using
             # the installed certificate + provisioning profile. Output path:
             # build/ios/ipa/<AppName>.ipa
-            flutter build ipa --release --dart-define=BETA_BUILD=true
-            IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
-            echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
-            echo "ipa_available=true" >> "$GITHUB_OUTPUT"
+            if flutter build ipa --release --dart-define=BETA_BUILD=true; then
+              IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)
+              echo "IPA_PATH=app/${IPA_FILE}" >> "$GITHUB_ENV"
+              echo "ipa_available=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Warning: Signed IPA build failed; skipping upload for this run."
+              echo "ipa_available=false" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "Warning: iOS signing inputs unavailable/invalid — skipping IPA build and upload."
             echo "Unsigned IPAs cannot be installed by testers; upload is intentionally skipped."
