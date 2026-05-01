@@ -43,3 +43,5 @@ app/lib/core/secure_storage/secrets.dart
 # Debug symbols (large obfuscation artifacts)
 debug-info/
 *.symbols
+
+distribution
