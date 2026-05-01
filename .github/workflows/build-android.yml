@@ -72,23 +72,42 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ "$KEYSTORE_AVAILABLE" = "true" ]; then
-            if [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ] && \
-               keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" -keypass "$KEY_PASSWORD" >/dev/null 2>&1; then
-              printf '%s\n' \
-                "storeFile=/tmp/release-keystore.jks" \
-                "storePassword=${KEYSTORE_PASSWORD}" \
-                "keyAlias=${KEY_ALIAS}" \
-                "keyPassword=${KEY_PASSWORD}" \
-                > app/android/key.properties
-              echo "SIGNING_READY=true" >> "$GITHUB_ENV"
-            else
-              echo "Warning: Android signing credentials/alias do not match keystore. Falling back to debug signing."
-              echo "SIGNING_READY=false" >> "$GITHUB_ENV"
-            fi
-          else
+          if [ "$KEYSTORE_AVAILABLE" != "true" ]; then
+            echo "Warning: Missing or invalid ANDROID_KEYSTORE_BASE64. Falling back to debug signing."
+            echo "SIGNING_STATUS=missing_keystore" >> "$GITHUB_ENV"
             echo "SIGNING_READY=false" >> "$GITHUB_ENV"
-            fi
+            exit 0
+          fi
+
+          if [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Warning: One or more Android signing secrets are empty. Falling back to debug signing."
+            echo "SIGNING_STATUS=missing_secret" >> "$GITHUB_ENV"
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          if ! keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+            echo "Warning: Keystore password is invalid. Falling back to debug signing."
+            echo "SIGNING_STATUS=bad_store_password" >> "$GITHUB_ENV"
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          if ! keytool -list -keystore /tmp/release-keystore.jks -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" >/dev/null 2>&1; then
+            echo "Warning: Keystore alias is invalid. Falling back to debug signing."
+            echo "SIGNING_STATUS=bad_alias" >> "$GITHUB_ENV"
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          printf '%s\n' \
+            "storeFile=/tmp/release-keystore.jks" \
+            "storePassword=${KEYSTORE_PASSWORD}" \
+            "keyAlias=${KEY_ALIAS}" \
+            "keyPassword=${KEY_PASSWORD}" \
+            > app/android/key.properties
+          echo "SIGNING_STATUS=ready" >> "$GITHUB_ENV"
+          echo "SIGNING_READY=true" >> "$GITHUB_ENV"
 
       - name: Build APK
         working-directory: ./app
