@@ -1,11 +1,12 @@
 name: Distribute Beta Build
 
-# Triggered by version tags in the form v<major>.<minor>.<patch>+<build>, e.g. v0.2.0+24
+# Triggered by version tags in the form v<major>.<minor>.<patch>-b<build>, e.g. v0.2.0-b26
+# pubspec uses 0.2.0+N which produces CFBundleShortVersionString=0.2.0, CFBundleVersion=N
 # Builds signed APK + IPA and distributes to beta testers.
 on:
   push:
     tags:
-      - 'v*+[0-9]*'
+      - 'v*-b[0-9]*'
 
 jobs:
   # ---------------------------------------------------------------------------
