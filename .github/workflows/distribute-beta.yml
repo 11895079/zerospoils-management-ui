@@ -1,11 +1,11 @@
 name: Distribute Beta Build
 
-# Triggered by beta version tags, e.g. v0.2.0-beta.1
-# Builds signed APK + IPA and uploads to Firebase App Distribution (beta-internal group).
+# Triggered by version tags in the form v<major>.<minor>.<patch>+<build>, e.g. v0.2.0+24
+# Builds signed APK + IPA and distributes to beta testers.
 on:
   push:
     tags:
-      - 'v*-beta.*'
+      - 'v[0-9]*.[0-9]*.[0-9]*+[0-9]*'
 
 jobs:
   # ---------------------------------------------------------------------------
