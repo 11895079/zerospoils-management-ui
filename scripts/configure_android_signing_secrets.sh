@@ -134,9 +134,9 @@ echo "Setting GitHub Actions secrets..."
 
 # Use stdin to avoid exposing secret values in process lists.
 gh secret set ANDROID_KEYSTORE_BASE64 --repo "$REPO" < "$OUT_B64"
-printf '%s' "$STORE_PASS" | gh secret set ANDROID_KEYSTORE_PASSWORD --repo "$REPO" -b-
-printf '%s' "$KEY_ALIAS" | gh secret set ANDROID_KEY_ALIAS --repo "$REPO" -b-
-printf '%s' "$KEY_PASS" | gh secret set ANDROID_KEY_PASSWORD --repo "$REPO" -b-
+printf '%s' "$STORE_PASS" | gh secret set ANDROID_KEYSTORE_PASSWORD --repo "$REPO"
+printf '%s' "$KEY_ALIAS" | gh secret set ANDROID_KEY_ALIAS --repo "$REPO"
+printf '%s' "$KEY_PASS" | gh secret set ANDROID_KEY_PASSWORD --repo "$REPO"
 
 echo "Done. Secrets updated:"
 echo "  - ANDROID_KEYSTORE_BASE64"
