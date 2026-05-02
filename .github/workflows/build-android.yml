@@ -7,6 +7,8 @@ on:
 
 jobs:
   build-android:
+    # Skip beta tags (v*-b*) — those are handled by distribute-beta.yml
+    if: ${{ !contains(github.ref_name, '-b') }}
     runs-on: ubuntu-latest
     
     steps:
