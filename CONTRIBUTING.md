@@ -2,6 +2,15 @@
 
 Thank you for your interest in contributing to ZeroSpoils! This guide outlines our development workflow and expectations.
 
+## Setup
+
+After cloning the repo, install the local Git hooks (prevents direct pushes to `main`):
+
+```bash
+cp scripts/hooks/pre-push .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+```
+
 ## Development Workflow
 
 ### 1. Pick an Issue
