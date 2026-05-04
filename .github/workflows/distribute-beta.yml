@@ -323,22 +323,29 @@ jobs:
             exit 1
           fi
 
-      - name: Upload IPA to Firebase App Distribution
+      - name: Upload IPA to TestFlight
         if: steps.build_ipa.outputs.ipa_available == 'true'
         env:
-          FIREBASE_APP_ID_IOS: ${{ secrets.FIREBASE_APP_ID_IOS }}
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          RELEASE_NOTES: ${{ steps.notes.outputs.RELEASE_NOTES }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
         run: |
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/firebase-service-account.json"
-          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/release-notes.txt"
-          npm install -g firebase-tools
-          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase-service-account.json" \
-            firebase appdistribution:distribute "$IPA_PATH" \
-            --app "$FIREBASE_APP_ID_IOS" \
-            --groups "beta-internal" \
-            --release-notes-file "$RUNNER_TEMP/release-notes.txt" \
-            --non-interactive
+          # altool discovers the .p8 key file automatically when placed in
+          # ~/.appstoreconnect/private_keys/ named AuthKey_<KEYID>.p8
+          mkdir -p ~/.appstoreconnect/private_keys
+          API_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${APPLE_API_KEY_ID}.p8"
+          printf '%s' "$APPLE_API_KEY_P8" > "$API_KEY_PATH"
+          chmod 600 "$API_KEY_PATH"
+
+          # Upload to App Store Connect / TestFlight using Xcode's built-in altool
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$APPLE_API_KEY_ID" \
+            --apiIssuer "$APPLE_API_ISSUER_ID" \
+            --verbose
+
+          rm -f "$API_KEY_PATH"
 
       - name: Cleanup keychain
         if: always()
