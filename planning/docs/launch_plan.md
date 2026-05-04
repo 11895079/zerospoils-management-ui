@@ -4,7 +4,7 @@
 
 Lock in a practical, low-risk path from the current build state to public launch in June 2026, while starting demand generation immediately through organic channels and a waitlist.
 
-Reference input: launch framework notes from [planning/app_launch_research/video1.md](planning/app_launch_research/video1.md).
+Reference input: launch framework notes synthesized from Chris Raroque's app-launch framework video.
 
 ---
 
@@ -226,4 +226,4 @@ Recommendation: add these as concrete planning issues in M4/M5 so progress is tr
 
 ## Source
 
-- [planning/app_launch_research/video1.md](planning/app_launch_research/video1.md)
+- https://www.youtube.com/watch?v=MnF-zJhyUtE
