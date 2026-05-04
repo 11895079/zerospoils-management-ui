@@ -28,6 +28,10 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is used to scan expiry dates from product labels.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is used to let you attach receipt and product photos for inventory and shopping batch workflows.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Photo library write access is used only when saving app-generated or edited images back to your library.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
