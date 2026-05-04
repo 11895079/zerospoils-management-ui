@@ -525,6 +525,35 @@ GitHub Actions workflows will be added for:
 
 See `planning/milestones/M1/020-set-up-flutter-ci-lint-format-tests-on-pr.md` for implementation details.
 
+### Lowest-Cost CI Paths (Beta Distribution)
+For beta tags (`v*-b[0-9]*`), minimize GitHub Actions minutes with this order of operations:
+
+1. Prefer platform-specific workflows:
+  - Android: `distribute-beta-android.yml`
+  - iOS: `distribute-beta-ios.yml`
+2. Retry only the failed platform workflow. Do not retrigger both platforms when one fails.
+3. Use `Rerun failed jobs` before creating a new tag.
+4. Cancel stale in-progress runs for the same tag before retrying.
+5. Recreate/push the same tag only as a last resort when GitHub control-plane state is stuck.
+6. Keep timeout policy strict to fail fast on hangs:
+  - Build step timeout: 40 minutes
+  - Job timeout: 60 minutes
+
+Quick commands:
+```bash
+# Android beta runs
+gh run list --workflow=distribute-beta-android.yml --limit 5
+
+# iOS beta runs
+gh run list --workflow=distribute-beta-ios.yml --limit 5
+
+# Cancel a stale run
+gh run cancel <RUN_ID>
+
+# Rerun a failed run
+gh run rerun <RUN_ID>
+```
+
 ### Key Validation Rules
 
 **For Planning Changes:**
