@@ -27,7 +27,7 @@
 
 ## M4 Implementation Status
 
-**Last Updated:** April 24, 2026 — **Progress:** 0/11 planned issues complete (0%)
+**Last Updated:** May 4, 2026 — **Progress:** 0/11 formally closed (0%); 295 is functionally complete pending contrast audit; 370 is ~90% complete; 285 and 280 are the active feature gap
 
 ### Issues & Completion
 
@@ -37,16 +37,17 @@
 | **265** | iOS device testing — compatibility and performance | ⏳ Not Started | — | iOS compat matrix (iOS 15+), CI Simulator matrix, manual runbook, performance baselines (cold start ≤ 3 s, scroll ≥ 55 fps) |
 | **270** | Google Play internal testing setup | ⚠️ In Progress | — | Closed-testing guidance exists in `docs/closed-testing-checklist.md`, but issue-specific deliverables (`docs/beta-android.md`, AAB release workflow) are not fully tracked as complete |
 | **275** | Firebase App Distribution tester feedback retrieval + triage workflow | ⏳ Not Started | — | New M4 follow-up to make Android beta feedback and screenshots operational instead of ad hoc |
-| **280** | In-app feedback entry point (email/web form + metadata) | ⏳ Not Started | — | Settings has "Send Feedback" entry, but action is still placeholder (`Feedback form coming soon`) |
-| **285** | Settings feedback entry | ⚠️ In Progress | — | UI entry exists in `app/lib/presentation/screens/settings_screen.dart`, pending integration to real feedback flow + telemetry per issue DoD |
+| **280** | In-app feedback entry point (email/web form + metadata) | ⏳ Not Started | — | No issue file in M4 folder; Settings has "Send Feedback" entry but taps show `Feedback form coming soon` snack — no form, no metadata, no telemetry |
+| **285** | Settings feedback entry | ⚠️ In Progress | — | UI row present (`Icons.feedback_outlined`, 'Send Feedback') in settings_screen.dart; `onTap` shows placeholder snack. Awaiting M4/280 feedback service to wire into |
 | **290** | Crash reporting + basic performance monitoring | ⚠️ In Progress | — | Firebase Crashlytics and release symbol flow were added under M4/370 scope; `docs/ops.md` triage workflow remains outstanding |
-| **295** | Dark mode theme toggle | ⚠️ In Progress | — | Toggle is present in Settings but currently disabled (`Soon`) and does not switch app theme live |
+| **295** | Dark mode theme toggle | ⚠️ Mostly Done | — | Toggle fully live: `ThemePreferencesStore` persists, `themeModeProvider` switches `MaterialApp.themeMode`, telemetry fires `theme_changed`. Widget tests cover persistence + live switching + dark surface colors. Remaining: manual accessibility contrast verification across all screens |
 | **300** | Basic metrics dashboard (optional) | ⏳ Not Started | — | No `docs/metrics.md` dashboard artifact found yet |
-| **370** | Closed-testing backend security hardening (Firebase + Supabase) | ⚠️ In Progress | — | Steps 1-6 are marked complete in the issue; server-side endpoint gating still open; no PR open yet |
+| **370** | Closed-testing backend security hardening (Firebase + Supabase) | ⚠️ In Progress | — | Steps 1-6 complete per issue DoD (Crashlytics, Remote Config, Firebase Auth + Custom Claims, R8/ProGuard, SecureTokenService, kill-switch). One item open: server-side endpoint gating (OCR/export endpoints check Firebase ID token + custom claims). Launch strategy review recommended before closing |
 | **670** | Apple individual now + organization conversion readiness checklist | ⏳ Not Started | — | New cross-functional checklist for immediate iOS beta path and later Apple organization conversion before public launch |
 
 ### Commentary
 
-- M4 delivery is active, with the bulk of concrete implementation progress currently concentrated in issue 370.
-- No M4 issue is fully closed yet against all documented acceptance criteria, so milestone completion remains at 0/11.
-- After server-side endpoint gating is completed and a PR is opened and merged for issue 370, M4 completion should be re-baselined.
+- **295 (Dark Mode)** is functionally complete; only manual contrast verification remains. Can be closed after a QA pass.
+- **370 (Security Hardening)** is ~90% done; server-side endpoint gating is the sole remaining DoD item. Recommend reviewing as part of launch strategy before closing.
+- **280/285 (In-App Feedback)** are the primary feature gap in M4. No feedback service or form exists yet; the Settings entry is a placeholder. Consider leveraging Apple Developer Connect, Play Store, or Firebase App Distribution feedback channels rather than building a custom form.
+- **275 (Firebase App Distribution tester feedback)** is blocked until the Firebase App Distribution Tester SDK is integrated (M3/361).

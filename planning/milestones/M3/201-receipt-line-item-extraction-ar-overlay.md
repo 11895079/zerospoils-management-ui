@@ -43,19 +43,32 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 ## Acceptance criteria (Definition of Done)
 
 - [ ] Live camera viewfinder renders AR bounding boxes on detected text regions with green (item), amber (review), and grey (excluded) colour coding
-- [ ] All instructional and status text in the receipt capture flow appears in a panel below the camera surface, not overlaid on the viewfinder
-- [ ] Classification pipeline excludes tax lines (HST, GST, PST, QST and label variants) from the review list
-- [ ] Classification pipeline excludes total/subtotal/balance lines from the review list
-- [ ] Classification pipeline excludes payment/card lines (card fragments, VISA/MASTERCARD/INTERAC/DEBIT/CREDIT labels, approval codes) from the review list
-- [ ] Classification pipeline excludes store header/footer noise (address, phone, cashier ID, terminal ID, loyalty headers, timestamps) from the review list
+  - **Partial**: `ReceiptLiveOcrOverlay` renders `lightGreenAccent` boxes for all detected regions; amber/grey distinction not implemented
+- [x] All instructional and status text in the receipt capture flow appears in a panel below the camera surface, not overlaid on the viewfinder
+  - `ReceiptLiveScanScreen` text panel is outside the camera viewport
+- [x] Classification pipeline excludes tax lines (HST, GST, PST, QST and label variants) from the review list
+  - `receipt_parser.dart` `_classifyRow()` handles tax classification via `ReceiptRowClassification.tax`
+- [x] Classification pipeline excludes total/subtotal/balance lines from the review list
+  - `ReceiptRowClassification.total` handled in `_classifyRow()`
+- [x] Classification pipeline excludes payment/card lines (card fragments, VISA/MASTERCARD/INTERAC/DEBIT/CREDIT labels, approval codes) from the review list
+  - `ReceiptRowClassification.payment` handled in `_classifyRow()`
+- [x] Classification pipeline excludes store header/footer noise (address, phone, cashier ID, terminal ID, loyalty headers, timestamps) from the review list
+  - `ReceiptRowClassification.storeInfo`, `.department`, `.loyalty` handled; exclusion patterns applied
 - [ ] Review screen shows only confirmed purchase items in receipt reading order; excluded lines visible in a collapsed "hidden lines" section with reason labels
+  - **Not done**: Review screen shows green overlay boxes on photos; no collapsed "hidden lines" section or reason labels
 - [ ] User can promote any excluded line to a purchase item and demote any purchase item to excluded in the review step
-- [ ] Classification pipeline is fully on-device; no network dependency
+  - **Not done**: `ReceiptParseResult` has `.rejectedRows` but no promote/demote UI built
+- [x] Classification pipeline is fully on-device; no network dependency
 - [ ] Web platform shows "not available on web yet" and skips the AR overlay
+  - **Not verified**
 - [ ] Telemetry events: `receipt_scan_lines_detected {total, kept, excluded, user_promoted, user_demoted}` emitted on review confirm
+  - **Not verified**
 - [ ] Unit/widget/integration tests added or updated (see test plan)
-- [ ] Offline-first behavior verified (no network dependency)
+  - **Partial**: parser unit tests exist; overlay widget tests use `debugOverlayItems`/`debugImageSize`; no promote/demote tests
+- [x] Offline-first behavior verified (no network dependency)
+  - `offline_first_verification_test.dart` covers receipt parser (pure Dart)
 - [ ] Accessibility basics: bounding-box colour coding supplemented with labelled semantics; text panel readable by screen reader; review list announces item count and excluded count
+  - **Partial**: text panel below viewport is accessible; tri-color semantic labels not implemented
 
 ---
 
@@ -71,6 +84,12 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 ---
 
 ## Implementation notes
+
+**Status as of May 2026 (code audit):**
+- `ReceiptLiveScanScreen` (`receipt_live_scan_screen.dart`): live AR overlay implemented with `ReceiptLiveOcrOverlay` widget. Single-color (`Colors.lightGreenAccent`) only; tri-color (amber/grey) not yet implemented.
+- `receipt_parser.dart` (`ReceiptParser`): full `parseDetailedOcrLines()` pipeline with `ReceiptRowClassification` enum (`saleItem, tax, total, loyalty, payment, savings, department, storeInfo, unknown`). `ReceiptParseResult` exposes `.acceptedRows` and `.rejectedRows` — domain layer is ready.
+- Review screen (`receipt_batch_review_screen.dart`): shows `_ReceiptOcrOverlayCard` with green boxes on static photos only. No collapsed "hidden lines" section; no promote/demote UI. `ReceiptParseResult.rejectedRows` is not surfaced to the user.
+- Remaining work: (1) tri-color AR boxes using classification from live scan, (2) hidden-lines section in review + promote/demote, (3) telemetry, (4) semantic labels on bounding boxes.
 
 - AR overlay: use the camera preview stream already established in M3/196 (live expiry OCR); throttle bounding-box refresh to ~10 fps — this rate is sufficient for smooth visual feedback (human perception threshold ~8–12 fps for positional updates) while avoiding GPU overdraw on mid-range Android devices; validate with a widget performance test that the overlay does not drop the camera preview below 30 fps on a reference device; draw rectangles using a `CustomPainter` layered on top of the camera preview widget; pair each coloured rectangle with an accessibility label (`Semantics` widget) so screen readers and colour-blind users receive status information through text, not only colour
 - Move all text overlays (guidance copy, capture count, auto-capture toggle, status messages) into a `Column` widget placed below the camera widget rather than using a `Stack` with overlaid children; this frees the camera surface for AR content only
