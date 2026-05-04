@@ -15,7 +15,7 @@ jobs:
   distribute-android:
     name: Distribute Android Beta
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
@@ -152,6 +152,7 @@ jobs:
         working-directory: ./app
         env:
           GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
+        timeout-minutes: 40
         run: |
           flutter build apk --release --dart-define=BETA_BUILD=true
 
@@ -178,7 +179,7 @@ jobs:
   distribute-ios:
     name: Distribute iOS Beta
     runs-on: macos-26  # Xcode 26 / iOS 26 SDK required by App Store Connect
-    timeout-minutes: 120
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
