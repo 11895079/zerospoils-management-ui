@@ -26,12 +26,12 @@ Enhance the onboarding flow with Zesto animations, interactive elements, and a s
 
 - **Zesto intro screen** (new screen 1 of 7): User meets Zesto with a simple animation (fade-in, bounce, wave). Copy is warm and introduces the "waste reduction buddy" concept. Zesto is persistent on this screen and responds to user taps (giggles, changes expression).
 - **Zesto on progress screens**: Zesto appears as a semi-transparent avatar in the corner of 2–3 subsequent onboarding screens (e.g., "Track Your Inventory" screen) with context-appropriate animations (nods, gives thumbs up). Tapping Zesto plays a short encouraging sound + haptic.
-- **Interactive badge preview** (new screen before final permissions): Shows 1–2 example badges from the 20-badge system with Zesto pointing at them. Copy: "Unlock badges like these as you use ZeroSpoils!" Tapping a badge shows its unlock condition. Zesto reacts with celebration when any badge is tapped.
+- **Interactive badge preview** (integrated into the final permissions/presets screen): Shows 1–2 example badges from the 20-badge system with Zesto pointing at them. Copy: "Unlock badges like these as you use ZeroSpoils!" Tapping a badge shows its unlock condition. Zesto reacts with celebration when any badge is tapped.
 - **Preset selection screen** (before final "Continue to App"): Zesto offers a warm send-off message: "Ready to reduce waste? Let's go!" with a thumbs-up or wave animation.
 - **Post-onboarding celebration**: After completing onboarding and adding the first item, Zesto appears with a celebratory message: "Welcome to the team! Your first item is tracked. Let's save that food!" with confetti or celebratory animation.
 - Tapping Zesto at any point during onboarding emits a telemetry event (`mascot_tapped_during_onboarding`) to measure engagement.
 - All Zesto animations use simple Dart code (Lottie optional, but custom animations via `Transform` + `AnimationController` are preferred for MVP).
-- Onboarding flow is extended from 6 to 7 screens to include the Zesto intro + badge preview.
+- Onboarding flow is extended from 6 to 7 screens by adding the Zesto intro screen and integrating badge preview content into the final screen.
 
 ---
 
@@ -41,7 +41,7 @@ Enhance the onboarding flow with Zesto animations, interactive elements, and a s
 - [ ] Onboarding flow extends from 6 to 7 screens
 - [ ] New screen 1: "Meet Zesto" with animation (fade-in + bounce) and Zesto responds to taps (giggles sound + expression change)
 - [ ] Screens 2–4: Zesto appears as semi-transparent corner avatar with context reactions (nod on "Track", thumbs-up on "Smart Reminders")
-- [ ] New screen before final permissions: "Badge Preview" showing 2–3 example badge icons with unlock conditions; Zesto celebrates when badge is tapped
+- [ ] Final permissions/presets screen includes a "Badge Preview" section showing 2–3 example badge icons with unlock conditions; Zesto celebrates when badge is tapped
 - [ ] Final preset screen: Zesto gives warm send-off ("Ready to reduce waste? Let's go!") with wave or thumbs-up animation
 - [ ] Post-onboarding: On home screen after first item added, Zesto shows celebratory popup ("Welcome to the team! Your first item is tracked. Let's save that food!")
 
@@ -93,8 +93,7 @@ Enhance the onboarding flow with Zesto animations, interactive elements, and a s
 4. Solution (unchanged, Zesto in corner)
 5. Workflow (unchanged, Zesto in corner)
 6. Waste (unchanged, Zesto in corner)
-7. **[MOVED] Badge Preview** — replaces one of the final screens OR added before permissions
-8. Permissions + Presets + Continue (final screen, Zesto send-off)
+7. Permissions + Presets + Badge Preview + Continue (final screen, Zesto send-off)
 
 **Sound & Haptics:**
 - Use `SystemSound.click` for Zesto giggle/tap feedback

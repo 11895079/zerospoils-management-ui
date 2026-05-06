@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/onboarding_screen.dart';
 
+const openOnboardingButtonKey = Key('open_onboarding_button');
+
 class _TestNavigatorObserver extends NavigatorObserver {
   int popCount = 0;
 
@@ -146,6 +148,7 @@ void main() {
               builder: (context) => Scaffold(
                 body: Center(
                   child: ElevatedButton(
+                    key: openOnboardingButtonKey,
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -162,14 +165,14 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Open onboarding'));
+      await tester.tap(find.byKey(openOnboardingButtonKey));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('onboarding_skip_button')));
       await tester.pumpAndSettle();
 
       expect(observer.popCount, greaterThanOrEqualTo(1));
-      expect(find.text('Open onboarding'), findsOneWidget);
+      expect(find.byKey(openOnboardingButtonKey), findsOneWidget);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
@@ -190,6 +193,7 @@ void main() {
               builder: (context) => Scaffold(
                 body: Center(
                   child: ElevatedButton(
+                    key: openOnboardingButtonKey,
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -206,7 +210,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Open onboarding'));
+      await tester.tap(find.byKey(openOnboardingButtonKey));
       await tester.pumpAndSettle();
 
       await _goToPermissionsPage(tester);
@@ -214,7 +218,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(observer.popCount, greaterThanOrEqualTo(1));
-      expect(find.text('Open onboarding'), findsOneWidget);
+      expect(find.byKey(openOnboardingButtonKey), findsOneWidget);
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
@@ -488,9 +492,18 @@ void main() {
 
         await _goToPermissionsPage(tester);
 
-        // Initially, button should show notifications icon (not granted yet)
-        expect(find.byIcon(Icons.notifications), findsWidgets);
-        expect(find.text('Enable Notifications'), findsOneWidget);
+        // Initially, notification button should show the notifications icon.
+        final notificationButton = find.byKey(
+          const Key('onboarding_notifications_button'),
+        );
+        expect(notificationButton, findsOneWidget);
+        expect(
+          find.descendant(
+            of: notificationButton,
+            matching: find.byIcon(Icons.notifications),
+          ),
+          findsOneWidget,
+        );
       },
     );
 
@@ -505,9 +518,16 @@ void main() {
 
       await _goToPermissionsPage(tester);
 
-      // Initially, button should show camera icon (not granted yet)
-      expect(find.byIcon(Icons.camera_alt), findsWidgets);
-      expect(find.text('Enable Camera'), findsOneWidget);
+      // Initially, camera button should show the camera icon.
+      final cameraButton = find.byKey(const Key('onboarding_camera_button'));
+      expect(cameraButton, findsOneWidget);
+      expect(
+        find.descendant(
+          of: cameraButton,
+          matching: find.byIcon(Icons.camera_alt),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

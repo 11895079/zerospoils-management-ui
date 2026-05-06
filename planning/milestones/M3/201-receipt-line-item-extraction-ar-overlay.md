@@ -86,7 +86,6 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 - Price and quantity extraction from line items (tracked separately in M3/195 package OCR)
 - Multi-currency or multi-language receipt support (English/CAD only for MVP)
 - Loyalty-card point extraction
-- Price and quantity extraction from individual purchase item lines (tracked in M3/195)
 - Receipt de-duplication across batches
 - Receipt sharing or export as PDF
 

@@ -10,6 +10,14 @@ class FeedbackRuntime {
   static FeedbackService? _service;
   static Future<FeedbackService>? _initializing;
 
+  static Future<FeedbackService> _initializeService() async {
+    final service = FeedbackService();
+    await service.initialize();
+    _service = service;
+    _initializing = null;
+    return service;
+  }
+
   static Future<FeedbackService> _getService() {
     if (_service != null) {
       return Future.value(_service);
@@ -20,12 +28,13 @@ class FeedbackRuntime {
       return inFlight;
     }
 
-    _initializing = () async {
-      final service = FeedbackService();
-      await service.initialize();
-      _service = service;
-      return service;
-    }();
+    _initializing = _initializeService();
+
+    // If initialization fails, clear the in-flight future so later calls can retry.
+    _initializing = _initializing!.catchError((Object error, StackTrace stack) {
+      _initializing = null;
+      throw error;
+    });
 
     return _initializing!;
   }
