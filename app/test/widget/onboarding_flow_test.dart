@@ -477,23 +477,26 @@ void main() {
       expect(selectedPresets, contains('curry'));
     });
 
-    testWidgets('Notification button shows enable icon before permission granted',
-        (WidgetTester tester) async {
-      addTearDown(() => tester.view.resetPhysicalSize());
+    testWidgets(
+      'Notification button shows enable icon before permission granted',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
 
-      await tester.pumpWidget(
-        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
-      );
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        );
 
-      await _goToPermissionsPage(tester);
+        await _goToPermissionsPage(tester);
 
-      // Initially, button should show notifications icon (not granted yet)
-      expect(find.byIcon(Icons.notifications), findsWidgets);
-      expect(find.text('Enable Notifications'), findsOneWidget);
-    });
+        // Initially, button should show notifications icon (not granted yet)
+        expect(find.byIcon(Icons.notifications), findsWidgets);
+        expect(find.text('Enable Notifications'), findsOneWidget);
+      },
+    );
 
-    testWidgets('Camera button shows enable icon before permission granted',
-        (WidgetTester tester) async {
+    testWidgets('Camera button shows enable icon before permission granted', (
+      WidgetTester tester,
+    ) async {
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
