@@ -1,0 +1,128 @@
+version: 1
+purpose: "Baseline manual test corpus for receipt OCR tuning (no parser changes in this artifact)."
+created_at: "2026-05-06"
+owner_note: "Some sets contain multiple captures of the same receipt. Keep all variants for robustness testing."
+
+sets:
+  - set_id: "S1_costco_large_basket_discount_heavy"
+    merchant: "Costco Wholesale (Gloucester BCTR #802)"
+    folder: "S1_costco_large_basket_discount_heavy"
+    files:
+      - "S1_costco_large_basket_discount_heavy/2026-05-06_064709.jpg"
+      - "S1_costco_large_basket_discount_heavy/2026-05-06_065087-1.jpg"
+      - "S1_costco_large_basket_discount_heavy/2026-05-06_065087-2.jpg"
+    duplicate_capture_notes:
+      - "065087-1 and 065087-2 are alternate captures of the same transaction region (header through payment start)."
+      - "064709 is the most complete full-length capture including payment footer and item count footer."
+    category: "warehouse_bulk_long_receipt"
+    complexity: "high"
+    essential_extraction_targets:
+      - "merchant_name, store_id, date_time"
+      - "line_items with sku-like prefixes + short item names + price"
+      - "discount lines with negative amounts (example: TPD/1708072 5.00-)"
+      - "summary amounts: subtotal, tax, total"
+      - "payment lines: masked account, auth/reference, approved status"
+      - "item count footer (Items Sold 20 / Total number of items sold)"
+    exclusion_or_demotion_targets:
+      - "member id and account fragments"
+      - "cashier/terminal/operator references"
+      - "barcode strings and long payment token lines"
+      - "repeated customer copy sections"
+    known_risks:
+      - "Long receipt causes section repetition and duplicate-payment noise"
+      - "Discount lines can be mistaken for items if parser keys only on amount"
+      - "Tax marker suffixes (H) and ECO fee lines can be misclassified"
+
+  - set_id: "S2_costco_split_tender_not_completed_then_approved"
+    merchant: "Costco Wholesale (Gloucester BCTR #802)"
+    folder: "S2_costco_split_tender_not_completed_then_approved"
+    files:
+      - "S2_costco_split_tender_not_completed_then_approved/2026-05-06_064900-1.jpg"
+      - "S2_costco_split_tender_not_completed_then_approved/2026-05-06_064900-2.jpg"
+    duplicate_capture_notes:
+      - "Both images are the same transaction with different crop emphasis."
+      - "-1 includes more of the item body and first payment block; -2 includes lower payment/footer details."
+    category: "split_tender_payment_edge_case"
+    complexity: "high"
+    essential_extraction_targets:
+      - "line_items and total item count (12)"
+      - "summary amounts: subtotal, tax, total"
+      - "payment status transitions: TRANSACTION NOT COMPLETED followed by APPROVED block"
+      - "multiple tender references (Visa and MasterCard blocks)"
+    exclusion_or_demotion_targets:
+      - "payment intermediate attempts and duplicate reference blocks"
+      - "barcode footer strings"
+    known_risks:
+      - "Parser may treat payment status text as product lines"
+      - "Duplicate amount lines in multiple payment blocks can overwrite total inference"
+
+  - set_id: "S3_real_canadian_superstore_dept_and_promo_math"
+    merchant: "Real Canadian Superstore (South Orleans)"
+    folder: "S3_real_canadian_superstore_dept_and_promo_math"
+    files:
+      - "S3_real_canadian_superstore_dept_and_promo_math/2026-05-06_065028-2.jpg"
+    category: "departmental_grocery_with_promotions"
+    complexity: "high"
+    essential_extraction_targets:
+      - "department headers (22-DAIRY, 25-NATURAL FOODS, etc.) as context but non-item"
+      - "item lines with abbreviated names and right-aligned prices"
+      - "promotion math lines (example: $3.49 ea or 2/$6.00; quantity expansion lines)"
+      - "summary amounts: subtotal, tax components, total"
+      - "tax breakdown lines with labels (H=HST 13%, PPD FD1)"
+    exclusion_or_demotion_targets:
+      - "phone/address/welcome header"
+      - "account and card metadata"
+      - "approval and customer copy footer"
+    known_risks:
+      - "Promo math lines may be mistaken for standalone items"
+      - "Tax component lines can be misread as products with amounts"
+
+  - set_id: "S4_costco_pack_label_weighted_meat"
+    merchant: "Costco packaged label"
+    folder: "S4_costco_pack_label_weighted_meat"
+    files:
+      - "S4_costco_pack_label_weighted_meat/2026-05-06_065257.jpg"
+    category: "package_label_ocr"
+    complexity: "medium"
+    essential_extraction_targets:
+      - "product name (CHICKEN DRUMSTICKS)"
+      - "item/article number (ITM/ART 55502)"
+      - "best-before date code (26MA10)"
+      - "net weight (2.602 kg)"
+      - "price per kg (6.99)"
+      - "line total (18.19)"
+      - "barcode digits where legible"
+    exclusion_or_demotion_targets:
+      - "logo and country badge graphics"
+      - "small-print supplier address text"
+    known_risks:
+      - "Date format is compact alpha month token (MA) and needs custom parsing"
+      - "Decimal separators and kg value may be split if crop quality degrades"
+
+  - set_id: "S5_africa_world_market_weight_and_bilingual_totals"
+    merchant: "Africa World Market"
+    folder: "S5_africa_world_market_weight_and_bilingual_totals"
+    files:
+      - "S5_africa_world_market_weight_and_bilingual_totals/2026-05-06_065271.jpg"
+    category: "independent_store_mixed_format"
+    complexity: "high"
+    essential_extraction_targets:
+      - "merchant and transaction metadata (date/time, transaction id)"
+      - "item lines with explicit price"
+      - "weighted item support: '1.290 kg @ $4.99/kg' associated to PLANTAIN KG"
+      - "bilingual/alt summary labels: Net Sales, TOTAL SALES, SOUS-TOTAL"
+      - "final paid amount and tender line"
+    exclusion_or_demotion_targets:
+      - "vendor/staff prefix lines (Vendeur: 444-JANET)"
+      - "transaction record and POS terminal identifiers"
+      - "masked account fragments"
+    known_risks:
+      - "Weight/price-per-kg line appears adjacent to item line and can detach during parsing"
+      - "Multiple total-like labels can create summary duplication"
+
+baseline_assertions:
+  - "System should extract item candidates from each set without requiring network calls."
+  - "System should detect and separate summary amounts (subtotal/tax/total) from item lines."
+  - "System should classify payment/account/footer lines as excluded-noise."
+  - "Duplicate captures of the same receipt should produce materially equivalent extracted item sets."
+  - "For weighted-label receipts, parser should preserve both product identity and quantitative fields (weight, unit price, total)."

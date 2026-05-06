@@ -1,0 +1,11 @@
+set_id: "S1_costco_large_basket_discount_heavy"
+summary: "Costco long basket receipt with discount negatives and full payment/footer blocks."
+essential_extraction:
+  - "line items (SKU-like prefix + short name + amount)"
+  - "discount negatives (e.g., TPD/... 5.00-)"
+  - "subtotal, tax, total"
+  - "payment approval block and item-count footer"
+noise_to_exclude:
+  - "member/account fragments"
+  - "cashier/operator/terminal references"
+  - "barcode strings and repeated customer-copy blocks"

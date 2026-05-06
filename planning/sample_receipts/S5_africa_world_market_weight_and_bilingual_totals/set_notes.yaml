@@ -1,0 +1,9 @@
+set_id: "S5_africa_world_market_weight_and_bilingual_totals"
+summary: "Independent-store receipt with weighted produce line and bilingual total labels."
+essential_extraction:
+  - "merchant/date/time/transaction metadata"
+  - "item lines and weighted line association (kg @ $/kg)"
+  - "Net Sales/TOTAL SALES/SOUS-TOTAL and paid amount"
+noise_to_exclude:
+  - "vendor/staff prefixes and POS identifiers"
+  - "masked account fragments"

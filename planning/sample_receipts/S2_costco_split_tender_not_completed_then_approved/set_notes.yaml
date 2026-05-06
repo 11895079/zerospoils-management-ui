@@ -1,0 +1,9 @@
+set_id: "S2_costco_split_tender_not_completed_then_approved"
+summary: "Costco split-tender flow showing not-completed then approved status blocks."
+essential_extraction:
+  - "item lines and summary totals"
+  - "payment status transition markers"
+  - "multiple tender blocks (Visa/MasterCard references)"
+noise_to_exclude:
+  - "intermediate declined/not-completed payment sections"
+  - "duplicate payment reference lines"
