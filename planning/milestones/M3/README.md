@@ -4,8 +4,10 @@
 
 **Scope:**
 - Reminder preferences and notification integration (180, 190, 200)
+- Onboarding polish with Zesto mascot intro and interactive progression (204)
 - Date format preference (205)
 - Expiry OCR reliability, packaged-item fast add, and barcode/reference-data follow-up (196, 197, 199, 206)
+- Haptic and sound scan feedback settings (203)
 - Shopping batch capture with receipt-photo attachment for free-tier add flows (198-shopping-batch-receipt-capture)
 - Shopping list UI and conversion workflow (210, 220)
 - Offline-first verification suite (230)
@@ -19,11 +21,13 @@
 
 **Out of Scope:** Pro tier features (household sync), IoT integrations, full recipe feature, and countertop/fridge goods-photo batch detection. Firebase Firestore/Cloud Functions (using local Hive/sqflite for M3; Supabase for Pro tier in M6).
 
-**Issues:** 130, 180, 190, 195, 196, 197, 198, 199, 200, 201, 202, 205, 206, 210, 220, 230, 240, 250, 300, 350, 360, 361
+**Issues:** 130, 180, 190, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 210, 220, 230, 240, 250, 300, 350, 360, 361
 
 **New M3 Features:**
 - **Issue 201:** Receipt line-item extraction with AR overlay — excludes HST/GST/totals/card lines; live AR bounding boxes on viewfinder; text panel moved below camera
 - **Issue 202:** Fresh produce packaged item recognition — identifies fish, meat, and deli sticker labels; extracts weight, price/kg, pack date, best-before without a separate scanner mode
+- **Issue 203:** Haptic and sound feedback settings — persistent per-scanner haptic + beep preferences; receipt scan currently silent; adds POS-style beep to all four scanners; l10n strings already exist
+- **Issue 204:** Onboarding polish with Zesto — mascot intro screen, interactive reactions, badge preview, post-onboarding celebration; 7-screen flow with animations and telemetry
 - **Issue 300:** Badge system (20 badges) — prerequisite for mascot unlocks
 - **Issue 350:** Zesto Phase 1 (10 triggers, anti-spam, storage tips) — interactive mascot companion with educational content
 - **Issue 360:** Firebase integration (Crashlytics, Remote Config, FCM) — mobile tooling for crash reporting, feature flags, push notifications (Spark Plan free tier only)
@@ -35,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** May 4, 2026 — **Progress:** 15/22 issues complete (68%); 3 issues reclassified from Not Started → Partial based on code audit
+**Last Updated:** May 6, 2026 — **Progress:** 15/24 issues complete (62%); added issues 203 (haptic/sound settings) and 204 (onboarding polish with Zesto); expanded issue 201 to include savings/tax/total amount extraction
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -54,6 +58,8 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **201** | Receipt line-item extraction with AR overlay | ⚠️ Partial | — | `ReceiptLiveScanScreen` with live AR overlay (green boxes only), `ReceiptRowClassification` pipeline (tax/total/payment/etc.), `ReceiptParseResult` with `.rows`/`.acceptedRows`/`.rejectedRows`. Missing: tri-color AR coding (amber/grey for excluded lines), hidden-lines section in review screen, promote/demote UI for excluded rows |
 | **202** | Fresh produce packaged item recognition | ⚠️ Partial | — | `FreshProduceOcrParser` fully implemented (fish/seafood/meat/deli, weight, price/kg, pack date, best-before), integrated in `PackagedItemFastAddScreen` (`packageLabelScan` stage). Missing: per-field confidence indicators on confirmation screen, fresh-produce-specific telemetry events |
+| **203** | Haptic and sound feedback settings | ⚠️ Partial | — | `FeedbackService` (prefs store + haptic/beep dispatch), `FeedbackRuntime` (static lazy-init accessor for non-Riverpod screens), and `FeedbackSettingsNotifier` Riverpod provider all implemented; all four scanner screens wired. Missing: "Feedback & Sounds" section in Settings UI, per-scanner individual toggles, and beep volume slider |
+| **204** | Onboarding polish with Zesto mascot intro | ⏳ Not Started | — | Enhance onboarding flow from 6 to 7 screens with Zesto animations, interactive reactions, badge preview, and post-onboarding celebration. Primes users for gamification; all animations use Dart AnimationController |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
 | **206** | Downloadable reference-data update packs | ⚠️ Stub Only | — | `LocalBarcodeCatalog` loads bundled `barcode_seed_ca.v2.json` from assets (design is update-pack compatible per docs). No remote manifest fetch, pack validation, atomic activation, or rollback implemented yet |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |

@@ -307,6 +307,9 @@ Examples:
 - **MANDATORY TDD:** For every new feature, bugfix, or refactor, always write or update a failing test (unit/widget/integration) before implementing code. Verify the test fails, then implement code until it passes. This applies to all future work items.
 - When addressing pull request review comments, gather all unresolved feedback first, implement the minimal verified fixes, and resolve a GitHub review thread/comment only after the fix is verified and pushed to the PR branch. If no code change is needed, leave a clear rationale before resolving.
 - Use this resolve gate for every thread: (1) addressed by code change or explicit rationale, (2) relevant checks completed for the touched scope, and (3) commit containing the fix is pushed to the PR branch.
+- After fixes are pushed, proactively resolve all addressed review threads/comments on the PR to keep review state accurate. Prefer API-based resolution for reliability:
+  - `gh api graphql -f query='mutation($id:ID!){ resolveReviewThread(input:{threadId:$id}) { thread { id isResolved } } }' -f id=<THREAD_ID>`
+  - Verify no unresolved addressed threads remain before handing back to the user.
 - Keep milestone READMEs concise (80-120 words: objective, scope, acceptance, issue reference)
 - Use 10-step numbering for easy reordering of planning issues
 - **When implementing features**: Create code in `app/` folder, link PRs to planning issues

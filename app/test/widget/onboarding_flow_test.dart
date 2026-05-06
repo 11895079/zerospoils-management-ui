@@ -5,6 +5,18 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/onboarding_screen.dart';
 
+const openOnboardingButtonKey = Key('open_onboarding_button');
+
+class _TestNavigatorObserver extends NavigatorObserver {
+  int popCount = 0;
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    popCount++;
+    super.didPop(route, previousRoute);
+  }
+}
+
 Future<void> _goToPermissionsPage(WidgetTester tester) async {
   for (var i = 0; i < 5; i++) {
     await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
@@ -117,6 +129,97 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences was updated
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('onboarding_complete'), true);
+    });
+
+    testWidgets('Skip pops onboarding in non-GoRouter flow', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final observer = _TestNavigatorObserver();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            navigatorObservers: [observer],
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    key: openOnboardingButtonKey,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Open onboarding'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(openOnboardingButtonKey));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('onboarding_skip_button')));
+      await tester.pumpAndSettle();
+
+      expect(observer.popCount, greaterThanOrEqualTo(1));
+      expect(find.byKey(openOnboardingButtonKey), findsOneWidget);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('onboarding_complete'), true);
+    });
+
+    testWidgets('Continue pops onboarding in non-GoRouter flow', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final observer = _TestNavigatorObserver();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            navigatorObservers: [observer],
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    key: openOnboardingButtonKey,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Open onboarding'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(openOnboardingButtonKey));
+      await tester.pumpAndSettle();
+
+      await _goToPermissionsPage(tester);
+      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await tester.pumpAndSettle();
+
+      expect(observer.popCount, greaterThanOrEqualTo(1));
+      expect(find.byKey(openOnboardingButtonKey), findsOneWidget);
+
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
     });
@@ -376,6 +479,55 @@ void main() {
 
       expect(selectedPresets, contains('jollof_rice'));
       expect(selectedPresets, contains('curry'));
+    });
+
+    testWidgets(
+      'Notification button shows enable icon before permission granted',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        );
+
+        await _goToPermissionsPage(tester);
+
+        // Initially, notification button should show the notifications icon.
+        final notificationButton = find.byKey(
+          const Key('onboarding_notifications_button'),
+        );
+        expect(notificationButton, findsOneWidget);
+        expect(
+          find.descendant(
+            of: notificationButton,
+            matching: find.byIcon(Icons.notifications),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgets('Camera button shows enable icon before permission granted', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+      );
+
+      await _goToPermissionsPage(tester);
+
+      // Initially, camera button should show the camera icon.
+      final cameraButton = find.byKey(const Key('onboarding_camera_button'));
+      expect(cameraButton, findsOneWidget);
+      expect(
+        find.descendant(
+          of: cameraButton,
+          matching: find.byIcon(Icons.camera_alt),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

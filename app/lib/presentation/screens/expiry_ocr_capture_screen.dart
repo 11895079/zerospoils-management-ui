@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/notifications/notification_preferences.dart';
+import '../../core/feedback/feedback_runtime.dart';
+import '../../core/feedback/feedback_service.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/ocr/expiry_ocr_capture_session.dart';
 import '../../core/theme/app_spacing.dart';
@@ -58,7 +59,6 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
   bool _processingFrame = false;
   bool _streaming = false;
   bool _autoCaptureEnabled = true;
-  bool _hapticsEnabled = true;
   bool _torchEnabled = false;
   String? _errorMessage;
   String? _liveText;
@@ -92,10 +92,8 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final notificationPrefs = await NotificationPreferencesStore().load();
 
     _autoCaptureEnabled = prefs.getBool(_expiryOcrAutoCaptureKey) ?? true;
-    _hapticsEnabled = notificationPrefs.vibrationEnabled;
     _captureSession.autoCaptureEnabled = _autoCaptureEnabled;
   }
 
@@ -231,8 +229,8 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
       }
 
       final feedback = _captureSession.registerDetection(parsed);
-      if (feedback.shouldTriggerHaptic && _hapticsEnabled) {
-        HapticFeedback.selectionClick();
+      if (feedback.shouldTriggerHaptic) {
+        unawaited(FeedbackRuntime.triggerSelection());
       }
 
       if (feedback.shouldAutoCapture) {
@@ -326,6 +324,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
       _bestDetection = _selectBestDetection(_capturedDetections);
 
       if (analysis.isSuccess) {
+        await FeedbackRuntime.triggerOcrSuccess(FeedbackType.expirySuccess);
         if (!mounted) {
           return;
         }

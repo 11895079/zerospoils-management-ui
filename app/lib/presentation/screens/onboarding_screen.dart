@@ -87,17 +87,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return;
     }
 
-    // In non-router contexts (e.g., some widget tests), just avoid throwing.
-    if (mounted) {
-      setState(() {
-        _isCompletingOnboarding = false;
-      });
+    // In non-router contexts (e.g., onboarding opened from Settings/Drawer),
+    // close the screen so users still return to the app after completion.
+    final navigator = Navigator.maybeOf(context);
+    if (navigator != null && navigator.canPop()) {
+      navigator.pop(true);
+      return;
     }
+
+    // Last-resort fallback for edge test scaffolds without routing or nav stack.
+    _resetCompletingState();
   }
 
   void _skipOnboarding() {
     _emitTelemetry('onboarding_skipped', {});
     _completeOnboarding();
+  }
+
+  void _resetCompletingState() {
+    if (!mounted) return;
+    setState(() {
+      _isCompletingOnboarding = false;
+    });
   }
 
   void _onPermissionDeferredOrDenied(String permissionType) {
