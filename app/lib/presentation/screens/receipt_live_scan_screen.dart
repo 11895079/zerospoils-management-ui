@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 
+import '../../core/feedback/feedback_runtime.dart';
+import '../../core/feedback/feedback_service.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/receipt_line_item.dart';
@@ -274,6 +276,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
     try {
       await _stopImageStream();
       final photo = await controller.takePicture();
+      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.receiptSuccess);
       if (!mounted) {
         return;
       }

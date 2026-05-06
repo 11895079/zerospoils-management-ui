@@ -1,9 +1,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../core/feedback/feedback_runtime.dart';
+import '../../core/feedback/feedback_service.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 
@@ -49,7 +50,7 @@ class _BarcodeCaptureScreenState extends State<BarcodeCaptureScreen> {
 
       _isCompleting = true;
       await _controller.stop();
-      HapticFeedback.selectionClick();
+      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess);
       if (!mounted) {
         return;
       }

@@ -4,11 +4,12 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../core/barcode/local_barcode_catalog.dart';
+import '../../core/feedback/feedback_runtime.dart';
+import '../../core/feedback/feedback_service.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -170,7 +171,7 @@ class _PackagedItemFastAddScreenState
 
       _barcodeIsCompleting = true;
       await _scannerController?.stop();
-      HapticFeedback.selectionClick();
+      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess);
       if (!mounted) {
         return;
       }
@@ -286,6 +287,15 @@ class _PackagedItemFastAddScreenState
     } else {
       _showSnack('Package label hints applied. Review and continue.');
     }
+
+    final recognizedProduce =
+        parsed.classification != FreshProduceClassification.other ||
+        parsed.productDescription != null ||
+        parsed.totalPrice != null ||
+        parsed.bestBeforeDate != null;
+    if (recognizedProduce) {
+      unawaited(FeedbackRuntime.triggerOcrSuccess(FeedbackType.produceSuccess));
+    }
   }
 
   void _retryBarcodeScanning() {
@@ -308,7 +318,7 @@ class _PackagedItemFastAddScreenState
     }
 
     if (result.isSuccess) {
-      HapticFeedback.mediumImpact();
+      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.expirySuccess);
       setState(() {
         _lockedExpiry = result.parsed;
         _stage = _FastAddStage.expiryLocked;
