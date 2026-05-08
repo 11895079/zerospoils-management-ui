@@ -30,6 +30,25 @@ class ReceiptParser {
     'promotional discounts',
     'total of your savings',
     'hst#',
+    'transaction not completed',
+    'approved - thank you',
+    'customer copy',
+    'transaction record',
+  ];
+
+  static const _ignoredChargePhrases = [
+    'donation',
+    'charity',
+    'eco fee',
+    'enviro fee',
+  ];
+
+  static const _paymentMarkers = [
+    'mastercard',
+    'visa',
+    'american express',
+    'tangerine card',
+    'scotiabank visa',
   ];
 
   static const _departmentHeadings = {
@@ -164,6 +183,13 @@ class ReceiptParser {
         name = _cleanDescription(pendingDescription.normalizedText);
         ocrBox = _mergeBoxes(pendingDescription.box, row.box);
         photoIndex = pendingDescription.photoIndex;
+      } else {
+        // Try extracting description when price appears first (split-column OCR)
+        final afterPrice = _descriptionAfterPrice(normalizedText);
+        if (afterPrice != null && _looksLikeProductDescription(afterPrice)) {
+          name = _cleanDescription(afterPrice);
+          ocrBox = row.box;
+        }
       }
 
       pendingDescription = null;
@@ -241,7 +267,33 @@ class ReceiptParser {
     final rowCenterY = (rowBox.top + rowBox.bottom) / 2;
     final lineCenterY = (lineBox.top + lineBox.bottom) / 2;
     final tolerance = _rowJoinTolerance(rowBox.height, lineBox.height);
-    return (rowCenterY - lineCenterY).abs() <= tolerance;
+    if ((rowCenterY - lineCenterY).abs() > tolerance) {
+      return false;
+    }
+
+    // Prevent merging a complete item (name+price) with a new name-with-code line
+    // (allows split-column price+name merging, but prevents name continuations from merging)
+    final rowPrices = _extractPrices(row.normalizedText);
+    final linePrices = _extractPrices(line.text);
+    
+    if (rowPrices.isNotEmpty && linePrices.isEmpty) {
+      // Row has price, line has no price
+      // Only merge if the line looks like part of a split-column (not a continuation)
+      // Check: does the row already have descriptive text (a complete item)?
+      final rowWithoutPrice = row.normalizedText
+          .replaceAll(RegExp(r'\d+[\.,]\d{2}'), ' ')
+          .replaceAll(RegExp(r'[$€£]'), ' ')
+          .replaceAll(RegExp(r'\s+'), ' ')
+          .trim();
+      
+      final hasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(rowWithoutPrice);
+      if (hasDescriptiveText) {
+        // Row is already a complete item, don't merge with continuation
+        return false;
+      }
+    }
+
+    return true;
   }
 
   double _rowJoinTolerance(double rowHeight, double lineHeight) {
@@ -271,11 +323,19 @@ class ReceiptParser {
       return ReceiptRowClassification.storeInfo;
     }
 
+    if (_ignoredChargePhrases.any(lower.contains)) {
+      return ReceiptRowClassification.storeInfo;
+    }
+
     if (_departmentHeadings.contains(normalized)) {
       return ReceiptRowClassification.department;
     }
 
     if (lower.startsWith('saving') || lower.startsWith('savings')) {
+      return ReceiptRowClassification.savings;
+    }
+
+    if (lower.startsWith('tpd/') || lower.contains(' tpd/')) {
       return ReceiptRowClassification.savings;
     }
 
@@ -301,7 +361,17 @@ class ReceiptParser {
 
     if (lower.startsWith('credit') ||
         lower.startsWith('debit') ||
-        lower.startsWith('cash')) {
+        lower.startsWith('cash') ||
+        lower.startsWith('change') ||
+        lower.startsWith('amount') ||
+        lower.startsWith('acct') ||
+        lower.startsWith('reference') ||
+        lower.startsWith('auth') ||
+        lower.startsWith('invoice') ||
+        lower.startsWith('date/time') ||
+        lower.startsWith('purchase -') ||
+        lower.contains('approved') ||
+        _paymentMarkers.any(lower.contains)) {
       return ReceiptRowClassification.payment;
     }
 
@@ -341,6 +411,53 @@ class ReceiptParser {
     return cleaned.isEmpty ? null : cleaned;
   }
 
+  /// Extract description that appears after a price (split-column OCR: price first, name after)
+  String? _descriptionAfterPrice(String line) {
+    final matches = _moneyPattern.allMatches(line).toList();
+    if (matches.isEmpty) {
+      return null;
+    }
+
+    final first = matches.first;
+    final afterPrice = line.substring(first.end);
+    final cleaned = afterPrice
+        .replaceAll(RegExp(r'[$€£]'), ' ')
+        .replaceAll(RegExp(r'\b[HFBTN]\b\s*$'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    return cleaned.isEmpty ? null : cleaned;
+  }
+
+  /// Check if text might be a continuation of a product name (e.g., "STEWING" to go with "BEEF")
+  bool _mightBeNameContinuation(String line) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty) {
+      return false;
+    }
+
+    // Must contain letters
+    if (!RegExp(r'[A-Za-z]').hasMatch(trimmed)) {
+      return false;
+    }
+
+    // Should not be a store info phrase
+    final lower = trimmed.toLowerCase();
+    if (_ignoredPhrases.any(lower.contains) || _ignoredKeywords.any((k) => lower.startsWith(k))) {
+      return false;
+    }
+
+    // Should be reasonably short (max 3 words, single word ideally)
+    final wordCount = trimmed.split(RegExp(r'\s+')).length;
+    if (wordCount > 3) {
+      return false;
+    }
+
+    // Minimum length check
+    final alphaCount = RegExp(r'[A-Za-z]').allMatches(trimmed).length;
+    return alphaCount >= 2;  // At least 2 letters (more permissive than product description)
+  }
+
   bool _looksLikeProductDescription(String line) {
     final trimmed = line.trim();
     if (trimmed.isEmpty) {
@@ -372,7 +489,9 @@ class ReceiptParser {
 
   String _cleanDescription(String value) {
     return value
+        .replaceAll('*', ' ')
         .replaceAll(RegExp(r'[$€£]'), ' ')
+        .replaceAll(RegExp(r'^\d{3,}\s+'), ' ')
         .replaceAll(RegExp(r'\b[HFBTN]\b\s*$'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();

@@ -29,8 +29,44 @@ let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
 try handler.perform([request])
 
 let observations = (request.results ?? []) as [VNRecognizedTextObservation]
-for observation in observations {
-    if let candidate = observation.topCandidates(1).first {
-        print(candidate.string)
+
+let imageWidth = Double(cgImage.width)
+let imageHeight = Double(cgImage.height)
+
+let lines: [[String: Any]] = observations.compactMap { observation in
+    guard let candidate = observation.topCandidates(1).first else {
+        return nil
     }
+
+    let box = observation.boundingBox
+    let left = Double(box.minX) * imageWidth
+    let right = Double(box.maxX) * imageWidth
+    let top = (1.0 - Double(box.maxY)) * imageHeight
+    let bottom = (1.0 - Double(box.minY)) * imageHeight
+
+    return [
+        "text": candidate.string,
+        "left": left,
+        "top": top,
+        "right": right,
+        "bottom": bottom,
+    ]
+}.sorted { lhs, rhs in
+    let lhsTop = lhs["top"] as? Double ?? 0
+    let rhsTop = rhs["top"] as? Double ?? 0
+    if lhsTop != rhsTop {
+        return lhsTop < rhsTop
+    }
+    let lhsLeft = lhs["left"] as? Double ?? 0
+    let rhsLeft = rhs["left"] as? Double ?? 0
+    return lhsLeft < rhsLeft
 }
+
+let payload: [String: Any] = [
+    "image_width": imageWidth,
+    "image_height": imageHeight,
+    "lines": lines,
+]
+
+let json = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted])
+FileHandle.standardOutput.write(json)

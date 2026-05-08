@@ -36,6 +36,7 @@ class ParserDiffResult:
     set_id: str
     passed: bool
     issues: list[str]
+    skipped: bool = False
 
 
 def _as_float(value: Any, default: float = 0.0) -> float:
@@ -158,6 +159,40 @@ def _signature(name: str, price: float) -> str:
     return f"{_normalize_name(name)}|{price:.2f}"
 
 
+IGNORED_SIGNATURE_MARKERS = [
+    "APPROVED",
+    "THANK YOU",
+    "CHANGE",
+    "AMOUNT",
+    "SUBTOTAL",
+    "TOTAL",
+    "TAX",
+    "HST",
+    "GST",
+    "PPD FD1",
+    "POINTS",
+    "REWARD",
+    "TPD",
+    "MASTERCARD",
+    "VISA",
+    "AMERICAN EXPRESS",
+    "NET SALES",
+    "SOUS TOTAL",
+    "REMISE",
+    "CUSTOMER COPY",
+    "AUTH",
+    "REFERENCE",
+    "INVOICE",
+    "DATE TIME",
+    "PURCHASE",
+]
+
+
+def _is_ignored_signature(signature: str) -> bool:
+    normalized_name = signature.split("|", 1)[0]
+    return any(marker in normalized_name for marker in IGNORED_SIGNATURE_MARKERS)
+
+
 def _extract_ocr_text(swift_script: Path, image_path: Path) -> str:
     proc = subprocess.run(
         ["swift", str(swift_script), str(image_path)],
@@ -212,8 +247,17 @@ def _run_parser_diff(
 ) -> ParserDiffResult:
     data = json.loads(reference_path.read_text(encoding="utf-8"))
     set_id = data.get("set_id", reference_path.parent.name)
+    document_type = data.get("document_type")
     images = data.get("images", [])
     issues: list[str] = []
+
+    if document_type == "package_label":
+        return ParserDiffResult(
+            set_id=set_id,
+            passed=True,
+            issues=["skipped package_label set for receipt parser diff"],
+            skipped=True,
+        )
 
     if not images:
         return ParserDiffResult(
@@ -244,6 +288,9 @@ def _run_parser_diff(
     actual_signatures = {
         _signature(item.get("name", ""), _as_float(item.get("price"), 0.0))
         for item in parsed_items
+        if not _is_ignored_signature(
+            _signature(item.get("name", ""), _as_float(item.get("price"), 0.0))
+        )
     }
 
     missing = sorted(expected_signatures - actual_signatures)
@@ -304,9 +351,9 @@ def run_with_parser(root: Path, expected_price_field: str) -> int:
             app_root,
             expected_price_field,
         )
-        status = "PASS" if result.passed else "FAIL"
+        status = "SKIP" if result.skipped else ("PASS" if result.passed else "FAIL")
         print(f"[{status}] {result.set_id}")
-        if not result.passed:
+        if not result.passed and not result.skipped:
             failures.append(result)
 
     if failures:

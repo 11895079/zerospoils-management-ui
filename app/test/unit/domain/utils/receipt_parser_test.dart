@@ -32,6 +32,80 @@ Total 9.33
       expect(items[0].price, 11.20);
     });
 
+    test('strips leading item codes and rejects payment/footer noise', () {
+      const raw = '''
+580517 **KS TOWEL** 24.99
+1417235 KS ORG JUICE 17.99
+CMN-DONATION 2.00
+01 APPROVED - THANK YOU 027
+AMOUNT: \$358.41
+CHANGE 0.00
+''';
+
+      final parser = ReceiptParser();
+      final items = parser.parse(raw);
+
+      expect(
+        items.map((item) => (item.name, item.price)).toList(),
+        [('KS TOWEL', 24.99), ('KS ORG JUICE', 17.99)],
+      );
+    });
+
+    test('ignores split-tender status blocks while keeping sale items', () {
+      final parser = ReceiptParser();
+
+      final items = parser.parseOcrLines(const [
+        ReceiptOcrLine(
+          text: '457 HOMO MILK',
+          box: ReceiptOcrBox(left: 24, top: 120, right: 180, bottom: 144),
+        ),
+        ReceiptOcrLine(
+          text: '7.09',
+          box: ReceiptOcrBox(left: 244, top: 120, right: 292, bottom: 144),
+        ),
+        ReceiptOcrLine(
+          text: 'TRANSACTION NOT COMPLETED',
+          box: ReceiptOcrBox(left: 24, top: 300, right: 240, bottom: 324),
+        ),
+        ReceiptOcrLine(
+          text: 'AMOUNT: \$160.32',
+          box: ReceiptOcrBox(left: 24, top: 328, right: 180, bottom: 352),
+        ),
+        ReceiptOcrLine(
+          text: '01 APPROVED - THANK YOU 027',
+          box: ReceiptOcrBox(left: 24, top: 356, right: 260, bottom: 380),
+        ),
+        ReceiptOcrLine(
+          text: 'CHANGE',
+          box: ReceiptOcrBox(left: 24, top: 384, right: 120, bottom: 408),
+        ),
+        ReceiptOcrLine(
+          text: '0.00',
+          box: ReceiptOcrBox(left: 244, top: 384, right: 292, bottom: 408),
+        ),
+      ]);
+
+      expect(items.map((item) => (item.name, item.price)).toList(), [
+        ('HOMO MILK', 7.09),
+      ]);
+    });
+
+    test('ignores separate TPD discount rows and masked tender rows', () {
+      const raw = '''
+55502 DRUMSTICKS 18.19
+2063709 TPD/55502 5.00-
+XXXXXXXXXXXX0727 ACCT: MASTERCARD 358.41
+''';
+
+      final parser = ReceiptParser();
+      final items = parser.parse(raw);
+
+      expect(
+        items.map((item) => (item.name, item.price)).toList(),
+        [('DRUMSTICKS', 18.19)],
+      );
+    });
+
     test('ignores savings and tax lines while keeping sale items', () {
       const raw = '''
 GROCERY
