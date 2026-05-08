@@ -1,0 +1,151 @@
+{
+    "schema_version": 1,
+    "set_id": "S3_real_canadian_superstore_dept_and_promo_math",
+    "document_type": "retail_receipt",
+    "currency": "CAD",
+    "images": [
+        "2026-05-06_065028-2.jpg"
+    ],
+    "merchant": {
+        "name": "Real Canadian Superstore",
+        "location": "South Orleans"
+    },
+    "transaction": {
+        "purchased_at": "2026-05-01T14:16:59",
+        "payment_method": "MasterCard",
+        "paid_amount": 73.00
+    },
+    "items": [
+        {
+            "line_id": "I01",
+            "code": "05680051051",
+            "description": "OIKS PR DR MXD",
+            "quantity": 2,
+            "listed_price": 7.00,
+            "discount": 0.0,
+            "discount_source": "2 @ $3.50",
+            "net_price": 7.00
+        },
+        {
+            "line_id": "I02",
+            "code": "05680096051",
+            "description": "DACT PR FB STR",
+            "quantity": 1,
+            "listed_price": 6.29,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 6.29
+        },
+        {
+            "line_id": "I03",
+            "code": "06038319249",
+            "description": "PC 2% GRK PCH/MA",
+            "quantity": 1,
+            "listed_price": 3.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 3.99
+        },
+        {
+            "line_id": "I04",
+            "code": "06680000004",
+            "description": "HOMO 4LI",
+            "quantity": 1,
+            "listed_price": 7.44,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 7.44
+        },
+        {
+            "line_id": "I05",
+            "code": "72243020047",
+            "description": "GT ORG LG GNGRD",
+            "quantity": 1,
+            "listed_price": 10.00,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 10.00
+        },
+        {
+            "line_id": "I06",
+            "code": "06148301570",
+            "description": "SQ SHRIMP 36-55",
+            "quantity": 1,
+            "listed_price": 8.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 8.99
+        },
+        {
+            "line_id": "I07",
+            "code": "06088500051",
+            "description": "CH PROTEIN BREAD",
+            "quantity": 2,
+            "listed_price": 6.98,
+            "discount": 0.98,
+            "discount_source": "2 @ 2/$6.00 promo",
+            "net_price": 6.00
+        },
+        {
+            "line_id": "I08",
+            "code": "06088500048",
+            "description": "CH EVERYTHING BR",
+            "quantity": 1,
+            "listed_price": 3.49,
+            "discount": 0.0,
+            "discount_source": "1 @ $3.49 ea",
+            "net_price": 3.49
+        },
+        {
+            "line_id": "I09",
+            "code": "06107777120",
+            "description": "POM WHT MOEL",
+            "quantity": 1,
+            "listed_price": 4.49,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 4.49
+        },
+        {
+            "line_id": "I10",
+            "code": "06038315245",
+            "description": "PC CHKN PRTGSE",
+            "quantity": 1,
+            "listed_price": 10.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 10.99
+        }
+    ],
+    "other_items": [
+        {
+            "line_id": "O01",
+            "type": "donation",
+            "description": "PC CHARITY",
+            "amount": 0.68,
+            "related_item_code": "25573"
+        }
+    ],
+    "summary": {
+        "subtotal": 69.36,
+        "tax": 3.64,
+        "total": 73.00,
+        "discount_total": 0.98
+    },
+    "tax_breakdown": [
+        {
+            "label": "H=HST 13%",
+            "amount": 2.21,
+            "taxable_base": 17.00
+        },
+        {
+            "label": "PPD FD1",
+            "amount": 1.43,
+            "taxable_base": 10.99
+        }
+    ],
+    "notes": [
+        "Department headers are intentionally excluded from structured line items.",
+        "Promo math is preserved as linkage context so tests can verify listed price minus discount behavior."
+    ]
+}

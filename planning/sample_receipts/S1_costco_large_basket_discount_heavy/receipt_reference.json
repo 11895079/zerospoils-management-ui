@@ -1,0 +1,257 @@
+{
+  "schema_version": 1,
+  "set_id": "S1_costco_large_basket_discount_heavy",
+  "document_type": "retail_receipt",
+  "currency": "CAD",
+  "images": [
+    "2026-05-06_064709.jpg",
+    "2026-05-06_065087-1.jpg",
+    "2026-05-06_065087-2.jpg"
+  ],
+  "merchant": {
+    "name": "Costco Wholesale",
+    "store_id": "802",
+    "location": "Gloucester, ON"
+  },
+  "transaction": {
+    "purchased_at": "2026-05-03T11:21:44",
+    "invoice_number": "003260",
+    "item_count": 20,
+    "payment_method": "MasterCard",
+    "paid_amount": 358.41
+  },
+  "items": [
+    {
+      "line_id": "I01",
+      "code": "580517",
+      "description": "KS TOWEL",
+      "quantity": 1,
+      "listed_price": 24.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 24.99
+    },
+    {
+      "line_id": "I02",
+      "code": "1417235",
+      "description": "KS ORG JUICE",
+      "quantity": 1,
+      "listed_price": 17.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 17.99
+    },
+    {
+      "line_id": "I03",
+      "code": "1424970",
+      "description": "CASHMERE TP",
+      "quantity": 1,
+      "listed_price": 26.99,
+      "discount": 5.5,
+      "discount_source": "2043837 TPD/TISSUE",
+      "net_price": 21.49
+    },
+    {
+      "line_id": "I04",
+      "code": "1708072",
+      "description": "LYSOL WIPES",
+      "quantity": 1,
+      "listed_price": 24.99,
+      "discount": 5.0,
+      "discount_source": "2046380 TPD/1708072",
+      "net_price": 19.99
+    },
+    {
+      "line_id": "I05",
+      "code": "1579298",
+      "description": "GROWERS ASST",
+      "quantity": 1,
+      "listed_price": 14.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 14.99
+    },
+    {
+      "line_id": "I06",
+      "code": "2154720",
+      "description": "MADEGOOD BIT",
+      "quantity": 1,
+      "listed_price": 13.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 13.99
+    },
+    {
+      "line_id": "I07",
+      "code": "60163",
+      "description": "BEEF RIBS",
+      "quantity": 1,
+      "listed_price": 27.18,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 27.18
+    },
+    {
+      "line_id": "I08",
+      "code": "33104",
+      "description": "TOP BLADE",
+      "quantity": 1,
+      "listed_price": 55.91,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 55.91
+    },
+    {
+      "line_id": "I09",
+      "code": "9696300",
+      "description": "CHEETOS VRTY",
+      "quantity": 1,
+      "listed_price": 16.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 16.99
+    },
+    {
+      "line_id": "I10",
+      "code": "21366",
+      "description": "CLEMENTINES",
+      "quantity": 1,
+      "listed_price": 10.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 10.99
+    },
+    {
+      "line_id": "I11",
+      "code": "21366",
+      "description": "CLEMENTINES",
+      "quantity": 1,
+      "listed_price": 10.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 10.99
+    },
+    {
+      "line_id": "I12",
+      "code": "55502",
+      "description": "DRUMSTICKS",
+      "quantity": 1,
+      "listed_price": 18.19,
+      "discount": 5.0,
+      "discount_source": "2063709 TPD/55502",
+      "net_price": 13.19
+    },
+    {
+      "line_id": "I13",
+      "code": "27003",
+      "description": "STRAWBERRIES",
+      "quantity": 1,
+      "listed_price": 7.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 7.99
+    },
+    {
+      "line_id": "I14",
+      "code": "1647794",
+      "description": "CRMYDILLPCKL",
+      "quantity": 1,
+      "listed_price": 8.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 8.99
+    },
+    {
+      "line_id": "I15",
+      "code": "647229",
+      "description": "WHITE BREAD",
+      "quantity": 1,
+      "listed_price": 6.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 6.99
+    },
+    {
+      "line_id": "I16",
+      "code": "1627198",
+      "description": "DURACELL AAA",
+      "quantity": 1,
+      "listed_price": 25.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 25.99
+    },
+    {
+      "line_id": "I17",
+      "code": "30669",
+      "description": "BANANAS",
+      "quantity": 1,
+      "listed_price": 1.69,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 1.69
+    },
+    {
+      "line_id": "I18",
+      "code": "259659",
+      "description": "FLAKED WHITE",
+      "quantity": 1,
+      "listed_price": 16.99,
+      "discount": 4.0,
+      "discount_source": "2043820 TPD/259659",
+      "net_price": 12.99
+    },
+    {
+      "line_id": "I19",
+      "code": "5558566",
+      "description": "ORG JUICE",
+      "quantity": 1,
+      "listed_price": 9.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 9.99
+    },
+    {
+      "line_id": "I20",
+      "code": "321724",
+      "description": "KS NATURALPB",
+      "quantity": 1,
+      "listed_price": 11.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 11.99
+    }
+  ],
+  "other_items": [
+    {
+      "line_id": "O01",
+      "type": "ecological_fee",
+      "description": "ECO FEE BAT",
+      "amount": 1.6,
+      "related_item_code": "1627198"
+    },
+    {
+      "line_id": "O02",
+      "type": "donation",
+      "description": "CMN-DONATION",
+      "amount": 2.0,
+      "related_item_code": null
+    }
+  ],
+  "summary": {
+    "subtotal": 338.91,
+    "tax": 19.5,
+    "total": 358.41,
+    "discount_total": 19.5
+  },
+  "tax_breakdown": [
+    {
+      "label": "HST 13%",
+      "amount": 19.5
+    }
+  ],
+  "notes": [
+    "Discount rows are printed as separate TPD lines and intentionally linked to the nearest eligible item for test expectations.",
+    "Repeated payment and customer-copy footer lines are excluded from structured extraction."
+  ]
+}

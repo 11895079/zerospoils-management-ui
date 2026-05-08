@@ -2,11 +2,13 @@ version: 1
 purpose: "Baseline manual test corpus for receipt OCR tuning (no parser changes in this artifact)."
 created_at: "2026-05-06"
 owner_note: "Some sets contain multiple captures of the same receipt. Keep all variants for robustness testing."
+machine_readable_schema_note: "Each set folder now includes receipt_reference.json for test fixtures and human review."
 
 sets:
   - set_id: "S1_costco_large_basket_discount_heavy"
     merchant: "Costco Wholesale (Gloucester BCTR #802)"
     folder: "S1_costco_large_basket_discount_heavy"
+    machine_readable_reference: "S1_costco_large_basket_discount_heavy/receipt_reference.json"
     files:
       - "S1_costco_large_basket_discount_heavy/2026-05-06_064709.jpg"
       - "S1_costco_large_basket_discount_heavy/2026-05-06_065087-1.jpg"
@@ -36,6 +38,7 @@ sets:
   - set_id: "S2_costco_split_tender_not_completed_then_approved"
     merchant: "Costco Wholesale (Gloucester BCTR #802)"
     folder: "S2_costco_split_tender_not_completed_then_approved"
+    machine_readable_reference: "S2_costco_split_tender_not_completed_then_approved/receipt_reference.json"
     files:
       - "S2_costco_split_tender_not_completed_then_approved/2026-05-06_064900-1.jpg"
       - "S2_costco_split_tender_not_completed_then_approved/2026-05-06_064900-2.jpg"
@@ -59,6 +62,7 @@ sets:
   - set_id: "S3_real_canadian_superstore_dept_and_promo_math"
     merchant: "Real Canadian Superstore (South Orleans)"
     folder: "S3_real_canadian_superstore_dept_and_promo_math"
+    machine_readable_reference: "S3_real_canadian_superstore_dept_and_promo_math/receipt_reference.json"
     files:
       - "S3_real_canadian_superstore_dept_and_promo_math/2026-05-06_065028-2.jpg"
     category: "departmental_grocery_with_promotions"
@@ -80,6 +84,7 @@ sets:
   - set_id: "S4_costco_pack_label_weighted_meat"
     merchant: "Costco packaged label"
     folder: "S4_costco_pack_label_weighted_meat"
+    machine_readable_reference: "S4_costco_pack_label_weighted_meat/receipt_reference.json"
     files:
       - "S4_costco_pack_label_weighted_meat/2026-05-06_065257.jpg"
     category: "package_label_ocr"
@@ -102,6 +107,7 @@ sets:
   - set_id: "S5_africa_world_market_weight_and_bilingual_totals"
     merchant: "Africa World Market"
     folder: "S5_africa_world_market_weight_and_bilingual_totals"
+    machine_readable_reference: "S5_africa_world_market_weight_and_bilingual_totals/receipt_reference.json"
     files:
       - "S5_africa_world_market_weight_and_bilingual_totals/2026-05-06_065271.jpg"
     category: "independent_store_mixed_format"

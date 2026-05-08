@@ -1,0 +1,157 @@
+{
+    "schema_version": 1,
+    "set_id": "S2_costco_split_tender_not_completed_then_approved",
+    "document_type": "retail_receipt",
+    "currency": "CAD",
+    "images": [
+        "2026-05-06_064900-1.jpg",
+        "2026-05-06_064900-2.jpg"
+    ],
+    "merchant": {
+        "name": "Costco Wholesale",
+        "store_id": "802",
+        "location": "Gloucester, ON"
+    },
+    "transaction": {
+        "purchased_at": "2026-02-08T15:54:49",
+        "invoice_number": "010130",
+        "item_count": 12,
+        "payment_method": "MasterCard",
+        "paid_amount": 160.32,
+        "intermediate_payment_status": "TRANSACTION NOT COMPLETED"
+    },
+    "items": [
+        {
+            "line_id": "I01",
+            "code": "457",
+            "description": "HOMO MILK",
+            "quantity": 1,
+            "listed_price": 7.09,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 7.09
+        },
+        {
+            "line_id": "I02",
+            "code": "71408",
+            "description": "P/BUTTER 2KG",
+            "quantity": 1,
+            "listed_price": 9.89,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 9.89
+        },
+        {
+            "line_id": "I03",
+            "code": "144480",
+            "description": "ACTIVIA",
+            "quantity": 1,
+            "listed_price": 10.79,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 10.79
+        },
+        {
+            "line_id": "I04",
+            "code": "12316",
+            "description": "STEWING BEEF",
+            "quantity": 1,
+            "listed_price": 54.93,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 54.93
+        },
+        {
+            "line_id": "I05",
+            "code": "30669",
+            "description": "BANANAS",
+            "quantity": 1,
+            "listed_price": 1.69,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 1.69
+        },
+        {
+            "line_id": "I06",
+            "code": "1060357",
+            "description": "MIX PEPPERS",
+            "quantity": 1,
+            "listed_price": 5.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 5.99
+        },
+        {
+            "line_id": "I07",
+            "code": "21366",
+            "description": "CLEMENTINES",
+            "quantity": 1,
+            "listed_price": 9.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 9.99
+        },
+        {
+            "line_id": "I08",
+            "code": "21366",
+            "description": "CLEMENTINES",
+            "quantity": 1,
+            "listed_price": 9.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 9.99
+        },
+        {
+            "line_id": "I09",
+            "code": "3139415",
+            "description": "GOLD KIWI",
+            "quantity": 1,
+            "listed_price": 17.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 17.99
+        },
+        {
+            "line_id": "I10",
+            "code": "2024705",
+            "description": "LIMES",
+            "quantity": 1,
+            "listed_price": 12.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 12.99
+        },
+        {
+            "line_id": "I11",
+            "code": "774939",
+            "description": "DEMPS.STAYSP",
+            "quantity": 1,
+            "listed_price": 6.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 6.99
+        },
+        {
+            "line_id": "I12",
+            "code": "1024706",
+            "description": "LEMONS",
+            "quantity": 1,
+            "listed_price": 11.99,
+            "discount": 0.0,
+            "discount_source": null,
+            "net_price": 11.99
+        }
+    ],
+    "other_items": [],
+    "summary": {
+        "subtotal": 160.32,
+        "tax": 0.00,
+        "total": 160.32,
+        "discount_total": 0.00
+    },
+    "tax_breakdown": [],
+    "notes": [
+        "The first tender attempt (Visa) is intentionally non-final and should not replace the final approved amount.",
+        "Both payment blocks reference the same invoice and amount; tests should prefer the approved MasterCard block as the final payment state."
+    ]
+}
