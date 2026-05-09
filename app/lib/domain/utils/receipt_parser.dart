@@ -1,5 +1,21 @@
 import '../models/receipt_line_item.dart';
 
+/// Deterministic OCR receipt parser tuned for noisy grocery receipts.
+///
+/// Parsing happens in two stages:
+/// 1. OCR lines are grouped into visual rows using geometry and ordering.
+/// 2. Rows are classified and sale-item candidates are reconstructed with
+///    targeted recovery heuristics.
+///
+/// Heuristics are intentionally conservative and primarily support the current
+/// corpus families:
+/// - Discount-heavy, code-driven layouts (for example Costco-style rows).
+/// - Promo-math fragments such as `2 @ $3.50` and `ea or 2/$6.00`.
+/// - Split-column OCR where price and description are separated.
+/// - Weighted produce/meat rows that include unit calculations.
+///
+/// Use [parseDetailed] or [parseDetailedOcrLines] when debugging to inspect
+/// per-row classifications and extracted item mappings.
 class ReceiptParser {
   static const _ignoredKeywords = [
     'total',
