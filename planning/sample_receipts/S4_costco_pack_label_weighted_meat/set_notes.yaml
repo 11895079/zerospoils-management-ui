@@ -1,0 +1,13 @@
+set_id: "S4_costco_pack_label_weighted_meat"
+summary: "Weighted package label with compact best-before date and kg pricing."
+machine_readable_reference: "receipt_reference.json"
+essential_extraction:
+  - "product name and item/article number"
+  - "best-before date token (e.g., 26MA10)"
+  - "net weight, price per kg, line total"
+noise_to_exclude:
+  - "logo graphics and small supplier/address text"
+structured_reference_contains:
+  - "single package item with code, listed_price, and net_price"
+  - "quantitative fields such as weight_kg and price_per_kg"
+  - "summary details for one-scan package-label assertions"

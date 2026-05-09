@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "set_id": "S5_africa_world_market_weight_and_bilingual_totals",
+  "document_type": "retail_receipt",
+  "currency": "CAD",
+  "images": [
+    "2026-05-06_065271.jpg"
+  ],
+  "merchant": {
+    "name": "Africa World Market",
+    "location": "Ottawa, ON"
+  },
+  "transaction": {
+    "purchased_at": "2026-05-01T13:34:09",
+    "transaction_id": "136885",
+    "cashier": "JANET",
+    "payment_method": "MasterCard",
+    "paid_amount": 101.68,
+    "item_count": 6
+  },
+  "items": [
+    {
+      "line_id": "I01",
+      "code": null,
+      "description": "FRESH BEEF KG",
+      "quantity": 1,
+      "listed_price": 60.20,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 60.20
+    },
+    {
+      "line_id": "I02",
+      "code": null,
+      "description": "SMALL SIZE CUT SMOKED TURKE",
+      "quantity": 1,
+      "listed_price": 12.92,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 12.92
+    },
+    {
+      "line_id": "I03",
+      "code": null,
+      "description": "SMALL SIZE CUT SMOKED TURKE",
+      "quantity": 1,
+      "listed_price": 11.84,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 11.84
+    },
+    {
+      "line_id": "I04",
+      "code": null,
+      "description": "PLANTAIN KG",
+      "quantity": 1,
+      "listed_price": 6.44,
+      "discount": 0.0,
+      "discount_source": "1.290 kg @ $4.99/kg",
+      "net_price": 6.44,
+      "weight_kg": 1.290,
+      "price_per_kg": 4.99
+    },
+    {
+      "line_id": "I05",
+      "code": null,
+      "description": "BURGER PEANUT SNACK 50GR",
+      "quantity": 1,
+      "listed_price": 1.29,
+      "discount": 0.0,
+      "discount_source": "1 @ $1.29 each (12/$13.99)",
+      "net_price": 1.29
+    },
+    {
+      "line_id": "I06",
+      "code": null,
+      "description": "CROCK SAVEUR ROASTED PEANUT",
+      "quantity": 1,
+      "listed_price": 8.99,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 8.99
+    }
+  ],
+  "other_items": [],
+  "summary": {
+    "subtotal": 101.68,
+    "tax": 0.00,
+    "total": 101.68,
+    "discount_total": 0.00
+  },
+  "tax_breakdown": [],
+  "notes": [
+    "Vendor/staff prefix lines are intentionally excluded from structured line items.",
+    "The weighted produce helper line is linked to PLANTAIN KG for machine-readable tests."
+  ]
+}

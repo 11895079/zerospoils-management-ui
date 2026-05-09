@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "set_id": "S4_costco_pack_label_weighted_meat",
+  "document_type": "package_label",
+  "currency": "CAD",
+  "images": [
+    "2026-05-06_065257.jpg"
+  ],
+  "merchant": {
+    "name": "Costco packaged label"
+  },
+  "transaction": {
+    "best_before": "26MA10",
+    "item_count": 1
+  },
+  "items": [
+    {
+      "line_id": "I01",
+      "code": "55502",
+      "description": "CHICKEN DRUMSTICKS",
+      "quantity": 1,
+      "listed_price": 18.19,
+      "discount": 0.0,
+      "discount_source": null,
+      "net_price": 18.19,
+      "weight_kg": 2.602,
+      "price_per_kg": 6.99,
+      "barcode_hint": "255502318195272"
+    }
+  ],
+  "other_items": [],
+  "summary": {
+    "subtotal": 18.19,
+    "tax": null,
+    "total": 18.19,
+    "discount_total": 0.00
+  },
+  "tax_breakdown": [],
+  "notes": [
+    "This set is intended for one-scan package-label extraction rather than full receipt parsing.",
+    "Barcode digits are treated as optional enrichment; the label text carries the core product fields."
+  ]
+}

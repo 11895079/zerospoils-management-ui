@@ -1,0 +1,14 @@
+set_id: "S3_real_canadian_superstore_dept_and_promo_math"
+summary: "Departmental grocery receipt with promo math and tax-component labels."
+machine_readable_reference: "receipt_reference.json"
+essential_extraction:
+  - "item lines with right-aligned prices"
+  - "promo math lines (ea, multi-buy, quantity expansion)"
+  - "subtotal/tax/total and tax component labels"
+noise_to_exclude:
+  - "department headers"
+  - "account/card metadata and customer-copy footer"
+structured_reference_contains:
+  - "items with code, listed_price, discount, and net_price"
+  - "other_items such as charity lines"
+  - "summary details including subtotal, tax breakdown, and total"
