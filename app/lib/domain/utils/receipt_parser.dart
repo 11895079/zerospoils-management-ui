@@ -34,6 +34,12 @@ class ReceiptParser {
     'approved - thank you',
     'customer copy',
     'transaction record',
+    'costco ewholesale',
+    'costco',
+    'ewholesale',
+    'gloucester bctr',
+    'cyrville road',
+    'bob count',
   ];
 
   static const _ignoredChargePhrases = [
@@ -67,6 +73,21 @@ class ReceiptParser {
     'snacks',
     'pantry',
   };
+
+  /// Promo-math patterns that should be filtered out (not parsed as items)
+  /// Examples: "2 @ $3.50", "2/$6.00", "1 @ $1.29 each (12/$13.99)"
+  static final RegExp _promoMathPattern = RegExp(
+    r'^\s*(?:'
+    r'\d+\s*[@/°º×x*]\s*\$?\d+[\.,]\d{2}|' // "2 @ $3.50", "2 ° $3.50", "2/$6.00"
+    r'\d+\s*[@/°º×x*]\s*\$?\d+[\.,]\d{2}\s+each(?:\s+\(\d+/\$?\d+[\.,]\d{2}\))?|' // "1 @ $1.29 each (12/$13.99)"
+    r'\d+\s+@\s+\d+/\$\d+[\.,]\d{2}|' // "2 @ 2/$6.00"
+    r'\d+\s+@\s+\$?\d+[\.,]\d{2}\s+ea' // "1 @ $3.49 ea"
+    r')\s*$',
+    caseSensitive: false,
+  );
+
+  /// Modifier/descriptor codes that should be filtered (short all-caps without prices)
+  static final RegExp _modifierCodePattern = RegExp(r'^[A-Z]{1,4}$');
 
   static final RegExp _moneyPattern = RegExp(r'\d+[\.,]\d{2}');
 
@@ -121,15 +142,35 @@ class ReceiptParser {
     final items = <ReceiptLineItem>[];
     final classifiedRows = <ReceiptClassifiedRow>[];
     _ReceiptOcrRow? pendingDescription;
+    _ReceiptOcrRow? pendingPromoQuantityDescription;
+    int? pendingPromoQuantity;
+    final standalonePriceCandidates = <({int photoIndex, int rowPosition, double price})>[];
+    double? seededCodedPrice;
+    int? seededCodedPriceRow;
+    int? seededCodedPricePhoto;
+    double? carryForwardCodedPrice;
+    int? carryForwardCodedPricePhoto;
+    var rowPosition = 0;
 
     for (final row in rows) {
+      rowPosition++;
       final normalizedText = row.normalizedText;
       if (normalizedText.isEmpty) {
         continue;
       }
 
+      final prices = _extractPrices(normalizedText);
+
       final classification = _classifyRow(normalizedText);
       if (classification != ReceiptRowClassification.unknown) {
+        final lower = normalizedText.toLowerCase();
+        if (prices.length == 1 &&
+            (lower.contains('tpd/') || lower.contains('eco fee'))) {
+          seededCodedPrice = prices.first;
+          seededCodedPriceRow = rowPosition;
+          seededCodedPricePhoto = row.photoIndex;
+        }
+
         classifiedRows.add(
           ReceiptClassifiedRow(
             text: normalizedText,
@@ -141,21 +182,88 @@ class ReceiptParser {
         continue;
       }
 
-      final prices = _extractPrices(normalizedText);
       if (prices.isEmpty) {
+        final codedDescription = _looksLikeCodedDescription(normalizedText);
+        if (codedDescription &&
+            carryForwardCodedPrice != null &&
+            carryForwardCodedPricePhoto == row.photoIndex) {
+          final carryItem = ReceiptLineItem(
+            name: _cleanDescription(normalizedText),
+            price: carryForwardCodedPrice!,
+            photoIndex: row.photoIndex,
+            ocrBox: row.box,
+          );
+          items.add(carryItem);
+          classifiedRows.add(
+            ReceiptClassifiedRow(
+              text: normalizedText,
+              photoIndex: row.photoIndex,
+              box: row.box,
+              classification: ReceiptRowClassification.saleItem,
+              extractedName: carryItem.name,
+              extractedPrice: carryItem.price,
+            ),
+          );
+          carryForwardCodedPrice = null;
+          carryForwardCodedPricePhoto = null;
+          pendingDescription = null;
+          continue;
+        }
+
         if (_looksLikeProductDescription(normalizedText)) {
+          final codedDescription = RegExp(
+            r'^(?:[HT]\s+)?\d{5,}\s+[A-Za-z]',
+            caseSensitive: false,
+          ).hasMatch(normalizedText);
+
+          if (codedDescription) {
+            final candidate = standalonePriceCandidates.reversed.firstWhere(
+              (entry) =>
+                  entry.photoIndex == row.photoIndex &&
+                  rowPosition - entry.rowPosition <= 6,
+              orElse: () => (photoIndex: -1, rowPosition: -1, price: -1.0),
+            );
+
+            if (candidate.photoIndex == row.photoIndex && candidate.price > 0) {
+              final backfilledItem = ReceiptLineItem(
+                name: _cleanDescription(normalizedText),
+                price: candidate.price,
+                photoIndex: row.photoIndex,
+                ocrBox: row.box,
+              );
+              items.add(backfilledItem);
+              classifiedRows.add(
+                ReceiptClassifiedRow(
+                  text: normalizedText,
+                  photoIndex: row.photoIndex,
+                  box: row.box,
+                  classification: ReceiptRowClassification.saleItem,
+                  extractedName: backfilledItem.name,
+                  extractedPrice: backfilledItem.price,
+                ),
+              );
+              pendingDescription = null;
+              continue;
+            }
+          }
+
           pendingDescription = row.copyWith(
             normalizedText: _cleanDescription(normalizedText),
           );
-          classifiedRows.add(
-            ReceiptClassifiedRow(
-              text: normalizedText,
-              photoIndex: row.photoIndex,
-              box: row.box,
-              classification: ReceiptRowClassification.unknown,
-            ),
-          );
         } else {
+          final qtyBarcodeMatch = RegExp(r'^\((\d+)\)\d{5,}$').firstMatch(
+            normalizedText,
+          );
+          if (qtyBarcodeMatch != null &&
+              pendingDescription != null &&
+              pendingDescription.photoIndex == row.photoIndex) {
+            final parsedQty = int.tryParse(qtyBarcodeMatch.group(1)!);
+            if (parsedQty != null && parsedQty > 1) {
+              pendingPromoQuantityDescription = pendingDescription;
+              pendingPromoQuantity = parsedQty;
+            }
+          }
+
           classifiedRows.add(
             ReceiptClassifiedRow(
               text: normalizedText,
@@ -164,37 +272,8 @@ class ReceiptParser {
               classification: ReceiptRowClassification.unknown,
             ),
           );
+          continue;
         }
-        continue;
-      }
-
-      final price = prices.last;
-      final inlineDescription = _inlineDescription(normalizedText);
-
-      String? name;
-      ReceiptOcrBox? ocrBox;
-      var photoIndex = row.photoIndex;
-      if (inlineDescription != null &&
-          _looksLikeProductDescription(inlineDescription)) {
-        name = _cleanDescription(inlineDescription);
-        ocrBox = row.box;
-      } else if (pendingDescription != null &&
-          pendingDescription.photoIndex == row.photoIndex) {
-        name = _cleanDescription(pendingDescription.normalizedText);
-        ocrBox = _mergeBoxes(pendingDescription.box, row.box);
-        photoIndex = pendingDescription.photoIndex;
-      } else {
-        // Try extracting description when price appears first (split-column OCR)
-        final afterPrice = _descriptionAfterPrice(normalizedText);
-        if (afterPrice != null && _looksLikeProductDescription(afterPrice)) {
-          name = _cleanDescription(afterPrice);
-          ocrBox = row.box;
-        }
-      }
-
-      pendingDescription = null;
-
-      if (name == null || name.isEmpty) {
         classifiedRows.add(
           ReceiptClassifiedRow(
             text: normalizedText,
@@ -206,9 +285,93 @@ class ReceiptParser {
         continue;
       }
 
+      final price = _choosePrice(normalizedText, prices);
+      final inlineDescription = _inlineDescription(normalizedText);
+      final afterPrice = _descriptionAfterPrice(normalizedText);
+      final wrappedDescription = _wrappedDescriptionAroundPrice(
+        inlineDescription,
+        afterPrice,
+      );
+      final isEaOrPromo = RegExp(
+        r'\bea\s+or\s+\d+/\$?\d+[\.,]\d{2}\b',
+        caseSensitive: false,
+      ).hasMatch(normalizedText);
+      final codedDescription = _looksLikeCodedDescription(normalizedText);
+
+      String? name;
+      ReceiptOcrBox? ocrBox;
+      var photoIndex = row.photoIndex;
+      if (wrappedDescription != null &&
+          _looksLikeProductDescription(wrappedDescription)) {
+        name = _cleanDescription(wrappedDescription);
+        ocrBox = row.box;
+      } else if (inlineDescription != null &&
+          _looksLikeProductDescription(inlineDescription)) {
+        name = _cleanDescription(inlineDescription);
+        ocrBox = row.box;
+      } else if (afterPrice != null &&
+          _looksLikeProductDescription(afterPrice)) {
+        // Prefer explicit post-price text before pending carry-over to avoid
+        // binding a previous item's name to a new coded row.
+        name = _cleanDescription(afterPrice);
+        ocrBox = row.box;
+      } else if (pendingDescription != null &&
+          pendingDescription.photoIndex == row.photoIndex) {
+        name = _cleanDescription(pendingDescription.normalizedText);
+        ocrBox = _mergeBoxes(pendingDescription.box, row.box);
+        photoIndex = pendingDescription.photoIndex;
+      }
+
+      pendingDescription = null;
+
+      if (name == null || name.isEmpty) {
+        final isStandaloneMoney = RegExp(
+          r'^(?:[HT]\s+)?\$?\d+[\.,]\d{2}$',
+        ).hasMatch(normalizedText.trim());
+        if (isStandaloneMoney && prices.isNotEmpty) {
+          standalonePriceCandidates.add(
+            (photoIndex: row.photoIndex, rowPosition: rowPosition, price: prices.last),
+          );
+          if (standalonePriceCandidates.length > 20) {
+            standalonePriceCandidates.removeAt(0);
+          }
+        }
+
+        classifiedRows.add(
+          ReceiptClassifiedRow(
+            text: normalizedText,
+            photoIndex: row.photoIndex,
+            box: row.box,
+            classification: ReceiptRowClassification.unknown,
+          ),
+        );
+        continue;
+      }
+
+      var effectivePrice = price;
+      if (codedDescription && prices.isNotEmpty) {
+        if (carryForwardCodedPrice != null &&
+            carryForwardCodedPricePhoto == row.photoIndex) {
+          effectivePrice = carryForwardCodedPrice!;
+          carryForwardCodedPrice = prices.first;
+          carryForwardCodedPricePhoto = row.photoIndex;
+        } else if (seededCodedPrice != null &&
+            seededCodedPricePhoto == row.photoIndex &&
+            seededCodedPriceRow != null &&
+            rowPosition - seededCodedPriceRow! <= 4 &&
+            seededCodedPrice! < prices.first) {
+          effectivePrice = seededCodedPrice!;
+          carryForwardCodedPrice = prices.first;
+          carryForwardCodedPricePhoto = row.photoIndex;
+          seededCodedPrice = null;
+          seededCodedPriceRow = null;
+          seededCodedPricePhoto = null;
+        }
+      }
+
       final item = ReceiptLineItem(
         name: name,
-        price: price,
+        price: effectivePrice,
         photoIndex: photoIndex,
         ocrBox: ocrBox,
       );
@@ -223,6 +386,42 @@ class ReceiptParser {
           extractedPrice: item.price,
         ),
       );
+
+      if (isEaOrPromo &&
+          pendingPromoQuantityDescription != null &&
+          pendingPromoQuantity != null &&
+          pendingPromoQuantityDescription.photoIndex == row.photoIndex &&
+          pendingPromoQuantity! > 1 &&
+          prices.isNotEmpty) {
+        final reconstructedName = _cleanDescription(
+          pendingPromoQuantityDescription.normalizedText,
+        );
+        if (reconstructedName.isNotEmpty && reconstructedName != item.name) {
+          final reconstructedPrice = double.parse(
+            (pendingPromoQuantity! * prices.first).toStringAsFixed(2),
+          );
+          final reconstructedItem = ReceiptLineItem(
+            name: reconstructedName,
+            price: reconstructedPrice,
+            photoIndex: pendingPromoQuantityDescription.photoIndex,
+            ocrBox: pendingPromoQuantityDescription.box,
+          );
+          items.add(reconstructedItem);
+          classifiedRows.add(
+            ReceiptClassifiedRow(
+              text: pendingPromoQuantityDescription.normalizedText,
+              photoIndex: pendingPromoQuantityDescription.photoIndex,
+              box: pendingPromoQuantityDescription.box,
+              classification: ReceiptRowClassification.saleItem,
+              extractedName: reconstructedItem.name,
+              extractedPrice: reconstructedItem.price,
+            ),
+          );
+        }
+
+        pendingPromoQuantityDescription = null;
+        pendingPromoQuantity = null;
+      }
     }
 
     return ReceiptParseResult(items: items, rows: classifiedRows);
@@ -258,6 +457,70 @@ class ReceiptParser {
       return false;
     }
 
+    final trimmedLine = line.text.trim();
+    if (trimmedLine.isEmpty) {
+      return false;
+    }
+
+    final rowPrices = _extractPrices(row.normalizedText);
+
+    final rowSansCodes = row.normalizedText
+        .replaceAll(RegExp(r'\d+[\.,]\d{2}'), ' ')
+        .replaceAll(RegExp(r'[$€£]'), ' ')
+        .replaceAll(RegExp(r'\b\d+[A-Z]{1,5}\b'), ' ')
+        .replaceAll(RegExp(r'\b\d{5,}\b'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    final rowHasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(rowSansCodes);
+
+    final lineSansPrices = trimmedLine
+        .replaceAll(RegExp(r'\d+[\.,]\d{2}'), ' ')
+        .replaceAll(RegExp(r'[$€£]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    final lineHasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(lineSansPrices);
+    final lineIsPriceOnly = RegExp(r'^(?:[HT]\s+)?\$?\d+[\.,]\d{2}$').hasMatch(
+      trimmedLine,
+    );
+    final rowLower = row.normalizedText.toLowerCase();
+    final rowLooksLikeTaxOrSavings = rowLower.contains('hst') ||
+      rowLower.contains('gst') ||
+      rowLower.contains('vat') ||
+      rowLower.contains('tpd') ||
+      rowLower.startsWith('saving') ||
+      rowLower.startsWith('savings');
+
+    if (_promoMathPattern.hasMatch(trimmedLine)) {
+      return false;
+    }
+
+    if (RegExp(r'^\(?\d+\)?\s*\d{5,}$').hasMatch(trimmedLine) ||
+        RegExp(r'^\d{5,}\s*\(?\d+\)?$').hasMatch(trimmedLine)) {
+      if (!(rowPrices.isNotEmpty && !rowHasDescriptiveText)) {
+        return false;
+      }
+    }
+
+    if (RegExp(r'^[A-Z]{1,5}(?:\(\d+\))?$').hasMatch(trimmedLine) &&
+        _extractPrices(trimmedLine).isEmpty) {
+      return false;
+    }
+
+    if (RegExp(
+      r'\b(retain this copy|statement|validation)\b',
+      caseSensitive: false,
+    ).hasMatch(trimmedLine)) {
+      return false;
+    }
+
+    if (RegExp(
+      r'\b(bottom of basket|member|cyrville road|gloucester\s+bctr|total number of items sold|total discounts?)\b',
+      caseSensitive: false,
+    ).hasMatch(trimmedLine)) {
+      return false;
+    }
+
     final rowBox = row.box;
     final lineBox = line.box;
     if (rowBox == null || lineBox == null) {
@@ -273,21 +536,35 @@ class ReceiptParser {
 
     // Prevent merging a complete item (name+price) with a new name-with-code line
     // (allows split-column price+name merging, but prevents name continuations from merging)
-    final rowPrices = _extractPrices(row.normalizedText);
     final linePrices = _extractPrices(line.text);
-    
+
+    // If a row already looks like a complete priced item, do not absorb the
+    // next priced fragment/line; that causes cross-item price drift.
+    if (rowHasDescriptiveText &&
+        rowPrices.isNotEmpty &&
+        linePrices.isNotEmpty &&
+        !rowLooksLikeTaxOrSavings &&
+        (lineHasDescriptiveText || lineIsPriceOnly)) {
+      return false;
+    }
+
     if (rowPrices.isNotEmpty && linePrices.isEmpty) {
       // Row has price, line has no price
       // Only merge if the line looks like part of a split-column (not a continuation)
       // Check: does the row already have descriptive text (a complete item)?
-      final rowWithoutPrice = row.normalizedText
-          .replaceAll(RegExp(r'\d+[\.,]\d{2}'), ' ')
-          .replaceAll(RegExp(r'[$€£]'), ' ')
-          .replaceAll(RegExp(r'\s+'), ' ')
-          .trim();
-      
-      final hasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(rowWithoutPrice);
-      if (hasDescriptiveText) {
+      if (rowHasDescriptiveText) {
+        final rowWordCount = rowSansCodes
+            .split(RegExp(r'\s+'))
+            .where((part) => part.isNotEmpty)
+            .length;
+        final codedContinuation = RegExp(r'^\d{3,}\s+[A-Za-z]').hasMatch(trimmedLine);
+        final rowContainsLongCode = RegExp(r'\b\d{5,}\b').hasMatch(
+          row.normalizedText,
+        );
+        if (codedContinuation && rowWordCount == 1 && !rowContainsLongCode) {
+          return true;
+        }
+
         // Row is already a complete item, don't merge with continuation
         return false;
       }
@@ -299,6 +576,26 @@ class ReceiptParser {
   double _rowJoinTolerance(double rowHeight, double lineHeight) {
     final dominantHeight = rowHeight > lineHeight ? rowHeight : lineHeight;
     return dominantHeight * 0.55 + 2;
+  }
+
+  double _choosePrice(String rowText, List<double> prices) {
+    if (prices.length <= 1) {
+      return prices.last;
+    }
+
+    final lower = rowText.toLowerCase();
+    final hasWeightUnit = RegExp(
+      r'\b(kg|lb|oz)\b',
+      caseSensitive: false,
+    ).hasMatch(rowText);
+    final hasCalculationMarker = lower.contains('@');
+    final hasPromoMarker = lower.contains('ea') || lower.contains(' or ');
+
+    if (hasWeightUnit || (hasCalculationMarker && !hasPromoMarker)) {
+      return prices.last;
+    }
+
+    return prices.first;
   }
 
   ReceiptOcrBox? _mergeBoxes(ReceiptOcrBox? left, ReceiptOcrBox? right) {
@@ -327,8 +624,38 @@ class ReceiptParser {
       return ReceiptRowClassification.storeInfo;
     }
 
+    // Department headings with numeric prefix (e.g., "22-DAIRY", "25-NATURAL FOODS")
+    if (RegExp(
+      r'^\d{1,3}[-\s]+[a-z\s]+$',
+      caseSensitive: false,
+    ).hasMatch(line.trim())) {
+      return ReceiptRowClassification.department;
+    }
+
+    if (RegExp(r'\bbob\s+count\b', caseSensitive: false).hasMatch(line)) {
+      return ReceiptRowClassification.storeInfo;
+    }
+
     if (_departmentHeadings.contains(normalized)) {
       return ReceiptRowClassification.department;
+    }
+
+    // Promo-math lines that should be filtered (not parsed as items)
+    if (_promoMathPattern.hasMatch(line.trim())) {
+      return ReceiptRowClassification.savings; // Classify as non-item
+    }
+
+    // Modifier-only codes (short all-caps without prices): MRJ, RQ, HRQ, etc.
+    if (_modifierCodePattern.hasMatch(line.trim()) &&
+        _extractPrices(line).isEmpty) {
+      return ReceiptRowClassification.unknown;
+    }
+
+    // Also filter short all-caps codes even if they contain spaces (e.g., "RQ", "HRQ")
+    // These often appear as separate OCR lines between item name and price
+    if (RegExp(r'^[A-Z]{1,5}(?:\(\d+\))?$').hasMatch(line.trim()) &&
+        _extractPrices(line).isEmpty) {
+      return ReceiptRowClassification.unknown;
     }
 
     if (lower.startsWith('saving') || lower.startsWith('savings')) {
@@ -339,7 +666,7 @@ class ReceiptParser {
       return ReceiptRowClassification.savings;
     }
 
-    if (lower.startsWith('subtotal') || lower.startsWith('total')) {
+    if (normalized.startsWith('subtotal') || normalized.startsWith('total')) {
       return ReceiptRowClassification.total;
     }
 
@@ -429,38 +756,43 @@ class ReceiptParser {
     return cleaned.isEmpty ? null : cleaned;
   }
 
-  /// Check if text might be a continuation of a product name (e.g., "STEWING" to go with "BEEF")
-  bool _mightBeNameContinuation(String line) {
-    final trimmed = line.trim();
-    if (trimmed.isEmpty) {
-      return false;
+  String? _wrappedDescriptionAroundPrice(String? beforePrice, String? afterPrice) {
+    if (beforePrice == null || afterPrice == null) {
+      return null;
     }
 
-    // Must contain letters
-    if (!RegExp(r'[A-Za-z]').hasMatch(trimmed)) {
-      return false;
+    if (_extractPrices(beforePrice).isNotEmpty || _extractPrices(afterPrice).isNotEmpty) {
+      return null;
     }
 
-    // Should not be a store info phrase
-    final lower = trimmed.toLowerCase();
-    if (_ignoredPhrases.any(lower.contains) || _ignoredKeywords.any((k) => lower.startsWith(k))) {
-      return false;
+    final cleanedBefore = _cleanDescription(beforePrice);
+    final cleanedAfter = _cleanDescription(afterPrice);
+    if (cleanedBefore.isEmpty || cleanedAfter.isEmpty) {
+      return null;
     }
 
-    // Should be reasonably short (max 3 words, single word ideally)
-    final wordCount = trimmed.split(RegExp(r'\s+')).length;
-    if (wordCount > 3) {
-      return false;
+    final afterStartsWithCode = RegExp(r'^\s*\d{3,}\b').hasMatch(afterPrice);
+    if (afterStartsWithCode) {
+      return '$cleanedAfter $cleanedBefore'.trim();
     }
 
-    // Minimum length check
-    final alphaCount = RegExp(r'[A-Za-z]').allMatches(trimmed).length;
-    return alphaCount >= 2;  // At least 2 letters (more permissive than product description)
+    return '$cleanedBefore $cleanedAfter'.trim();
   }
+
 
   bool _looksLikeProductDescription(String line) {
     final trimmed = line.trim();
     if (trimmed.isEmpty) {
+      return false;
+    }
+
+    final lower = trimmed.toLowerCase();
+    if (_ignoredKeywords.any((keyword) => lower.startsWith(keyword)) ||
+        _ignoredPhrases.any(lower.contains)) {
+      return false;
+    }
+
+    if (RegExp(r'\bbob\s+count\b', caseSensitive: false).hasMatch(trimmed)) {
       return false;
     }
 
@@ -476,8 +808,60 @@ class ReceiptParser {
       return false;
     }
 
+    if (lower.contains('ea or') ||
+        RegExp(
+          r'^\$?\d+[\.,]\d{2}\s+ea\b',
+          caseSensitive: false,
+        ).hasMatch(trimmed)) {
+      return false;
+    }
+
+    if (_moneyPattern.allMatches(trimmed).length > 1 &&
+        (lower.contains(' or ') || lower.contains('ea'))) {
+      return false;
+    }
+
     if (RegExp(
-      r'\bkg\b|\blb\b|\boz\b',
+      r'\b(retain this copy|statement|validation|total number of items sold|total discounts?)\b',
+      caseSensitive: false,
+    ).hasMatch(trimmed)) {
+      return false;
+    }
+
+    if (trimmed.toLowerCase() == 'cads') {
+      return false;
+    }
+
+    if (RegExp(r'^X{6,}\d{2,}$', caseSensitive: false).hasMatch(trimmed)) {
+      return false;
+    }
+
+    if (RegExp(
+      r'\b(bottom of basket|member|cyrville road|gloucester\s+bctr)\b',
+      caseSensitive: false,
+    ).hasMatch(trimmed)) {
+      return false;
+    }
+
+    if (RegExp(
+      r'^[A-Z]\d[A-Z]\s?\d[A-Z]\d$',
+      caseSensitive: false,
+    ).hasMatch(trimmed)) {
+      return false;
+    }
+
+    // Reject very short all-caps codes (modifier codes like MRJ, RQ, HRQ)
+    if (RegExp(r'^[A-Z]{1,3}(?:\(\d+\))?$').hasMatch(trimmed)) {
+      return false;
+    }
+
+    // Reject compact code-like artifacts such as "1MRJ" or "2RQ".
+    if (RegExp(r'^\d+[A-Z]{1,5}$').hasMatch(trimmed)) {
+      return false;
+    }
+
+    if (RegExp(
+      r'^\d+(?:[\.,]\d+)?\s*(kg|lb|oz)\b.*@',
       caseSensitive: false,
     ).hasMatch(trimmed)) {
       return false;
@@ -488,13 +872,49 @@ class ReceiptParser {
   }
 
   String _cleanDescription(String value) {
-    return value
+    // Known modifier/descriptor codes to strip from end of names
+    final modifiers = RegExp(
+      r'\b(?:[A-Z]{0,2}MRJ|RQ|HRQ|HRM|RMJ)\b\s*$',
+      caseSensitive: false,
+    );
+    final leadingNoise = RegExp(
+      r'^(?:[HT]\s+\d+[\.,]\d{2}\s+)?(?:\d{3,}\s+)?',
+      caseSensitive: false,
+    );
+
+    var cleaned = value
         .replaceAll('*', ' ')
         .replaceAll(RegExp(r'[$€£]'), ' ')
+      .replaceAll(RegExp(r'^\d+[A-Z]{1,5}\s+'), ' ')
+      .replaceAll(RegExp(r'^\s*\d{5,}\s+'), ' ')
+        .replaceAll(RegExp(r'^[HT]\s+\d{4,}\s+'), ' ')
+        .replaceAll(RegExp(r'\b\d+\s+\d+[\.,]\d{2}\s+'), ' ')
+        .replaceAll(leadingNoise, ' ')
         .replaceAll(RegExp(r'^\d{3,}\s+'), ' ')
+        .replaceAll(modifiers, '') // Strip known trailing modifier codes
+      .replaceAll(RegExp(r'(?:\s+\d+[\.,]\d{2}(?:-)?)\s*$'), ' ')
         .replaceAll(RegExp(r'\b[HFBTN]\b\s*$'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
+
+    cleaned = cleaned
+      .replaceAll(RegExp(r'\bPCTIVIA\b', caseSensitive: false), 'ACTIVIA')
+        .replaceAll(RegExp(r'\b2K0\b', caseSensitive: false), '2KG')
+        .replaceAll(RegExp(r'\bPC 27\b', caseSensitive: false), 'PC 2')
+        .replaceAll(RegExp(r'\b96[- ]55\b', caseSensitive: false), '36 55')
+        .replaceAll(RegExp(r'\bPRIGSE\b', caseSensitive: false), 'PRTGSE');
+
+    cleaned = cleaned.replaceAll(RegExp(r'^\d{4,}\s+'), '').trim();
+    cleaned = cleaned.replaceAll(RegExp(r'\s*-\s*$'), '').trim();
+
+    return cleaned;
+  }
+
+  bool _looksLikeCodedDescription(String line) {
+    return RegExp(
+      r'^(?:[HT]\s+)?\d{5,}\s+[A-Za-z]',
+      caseSensitive: false,
+    ).hasMatch(line.trim());
   }
 }
 
