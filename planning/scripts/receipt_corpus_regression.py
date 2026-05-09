@@ -334,6 +334,10 @@ def run_with_parser(root: Path, expected_price_field: str) -> int:
         print(f"No receipt_reference.json files found under {root}")
         return 1
 
+    if sys.platform != "darwin":
+        print("Skipping --with-parser: requires macOS (Swift Vision/AppKit helper).")
+        return 0
+
     scripts_dir = Path(__file__).resolve().parent
     swift_script = scripts_dir / "receipt_ocr_vision.swift"
     app_root = scripts_dir.parent.parent / "app"

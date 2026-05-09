@@ -160,7 +160,8 @@ class ReceiptParser {
     _ReceiptOcrRow? pendingDescription;
     _ReceiptOcrRow? pendingPromoQuantityDescription;
     int? pendingPromoQuantity;
-    final standalonePriceCandidates = <({int photoIndex, int rowPosition, double price})>[];
+    final standalonePriceCandidates =
+        <({int photoIndex, int rowPosition, double price})>[];
     double? seededCodedPrice;
     int? seededCodedPriceRow;
     int? seededCodedPricePhoto;
@@ -181,7 +182,8 @@ class ReceiptParser {
       if (classification != ReceiptRowClassification.unknown) {
         final lower = normalizedText.toLowerCase();
         if (prices.length == 1 &&
-            (lower.contains('tpd/') || lower.contains('eco fee'))) {
+            (lower.contains('tpd/') || lower.contains('eco fee')) &&
+            !_hasNegativeAdjustmentAmount(normalizedText)) {
           seededCodedPrice = prices.first;
           seededCodedPriceRow = rowPosition;
           seededCodedPricePhoto = row.photoIndex;
@@ -267,9 +269,9 @@ class ReceiptParser {
             normalizedText: _cleanDescription(normalizedText),
           );
         } else {
-          final qtyBarcodeMatch = RegExp(r'^\((\d+)\)\d{5,}$').firstMatch(
-            normalizedText,
-          );
+          final qtyBarcodeMatch = RegExp(
+            r'^\((\d+)\)\d{5,}$',
+          ).firstMatch(normalizedText);
           if (qtyBarcodeMatch != null &&
               pendingDescription != null &&
               pendingDescription.photoIndex == row.photoIndex) {
@@ -345,9 +347,11 @@ class ReceiptParser {
           r'^(?:[HT]\s+)?\$?\d+[\.,]\d{2}$',
         ).hasMatch(normalizedText.trim());
         if (isStandaloneMoney && prices.isNotEmpty) {
-          standalonePriceCandidates.add(
-            (photoIndex: row.photoIndex, rowPosition: rowPosition, price: prices.last),
-          );
+          standalonePriceCandidates.add((
+            photoIndex: row.photoIndex,
+            rowPosition: rowPosition,
+            price: prices.last,
+          ));
           if (standalonePriceCandidates.length > 20) {
             standalonePriceCandidates.removeAt(0);
           }
@@ -488,24 +492,29 @@ class ReceiptParser {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
-    final rowHasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(rowSansCodes);
+    final rowHasDescriptiveText = RegExp(
+      r'[A-Za-z]{3,}',
+    ).hasMatch(rowSansCodes);
 
     final lineSansPrices = trimmedLine
         .replaceAll(RegExp(r'\d+[\.,]\d{2}'), ' ')
         .replaceAll(RegExp(r'[$€£]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
-    final lineHasDescriptiveText = RegExp(r'[A-Za-z]{3,}').hasMatch(lineSansPrices);
-    final lineIsPriceOnly = RegExp(r'^(?:[HT]\s+)?\$?\d+[\.,]\d{2}$').hasMatch(
-      trimmedLine,
-    );
+    final lineHasDescriptiveText = RegExp(
+      r'[A-Za-z]{3,}',
+    ).hasMatch(lineSansPrices);
+    final lineIsPriceOnly = RegExp(
+      r'^(?:[HT]\s+)?\$?\d+[\.,]\d{2}$',
+    ).hasMatch(trimmedLine);
     final rowLower = row.normalizedText.toLowerCase();
-    final rowLooksLikeTaxOrSavings = rowLower.contains('hst') ||
-      rowLower.contains('gst') ||
-      rowLower.contains('vat') ||
-      rowLower.contains('tpd') ||
-      rowLower.startsWith('saving') ||
-      rowLower.startsWith('savings');
+    final rowLooksLikeTaxOrSavings =
+        rowLower.contains('hst') ||
+        rowLower.contains('gst') ||
+        rowLower.contains('vat') ||
+        rowLower.contains('tpd') ||
+        rowLower.startsWith('saving') ||
+        rowLower.startsWith('savings');
 
     if (_promoMathPattern.hasMatch(trimmedLine)) {
       return false;
@@ -573,10 +582,12 @@ class ReceiptParser {
             .split(RegExp(r'\s+'))
             .where((part) => part.isNotEmpty)
             .length;
-        final codedContinuation = RegExp(r'^\d{3,}\s+[A-Za-z]').hasMatch(trimmedLine);
-        final rowContainsLongCode = RegExp(r'\b\d{5,}\b').hasMatch(
-          row.normalizedText,
-        );
+        final codedContinuation = RegExp(
+          r'^\d{3,}\s+[A-Za-z]',
+        ).hasMatch(trimmedLine);
+        final rowContainsLongCode = RegExp(
+          r'\b\d{5,}\b',
+        ).hasMatch(row.normalizedText);
         if (codedContinuation && rowWordCount == 1 && !rowContainsLongCode) {
           return true;
         }
@@ -737,6 +748,12 @@ class ReceiptParser {
         .toList();
   }
 
+  bool _hasNegativeAdjustmentAmount(String line) {
+    final trimmed = line.trim();
+    return RegExp(r'\d+[\.,]\d{2}\s*-$').hasMatch(trimmed) ||
+        RegExp(r'-\s*\d+[\.,]\d{2}\b').hasMatch(trimmed);
+  }
+
   String? _inlineDescription(String line) {
     final matches = _moneyPattern.allMatches(line).toList();
     if (matches.isEmpty) {
@@ -772,12 +789,16 @@ class ReceiptParser {
     return cleaned.isEmpty ? null : cleaned;
   }
 
-  String? _wrappedDescriptionAroundPrice(String? beforePrice, String? afterPrice) {
+  String? _wrappedDescriptionAroundPrice(
+    String? beforePrice,
+    String? afterPrice,
+  ) {
     if (beforePrice == null || afterPrice == null) {
       return null;
     }
 
-    if (_extractPrices(beforePrice).isNotEmpty || _extractPrices(afterPrice).isNotEmpty) {
+    if (_extractPrices(beforePrice).isNotEmpty ||
+        _extractPrices(afterPrice).isNotEmpty) {
       return null;
     }
 
@@ -794,7 +815,6 @@ class ReceiptParser {
 
     return '$cleanedBefore $cleanedAfter'.trim();
   }
-
 
   bool _looksLikeProductDescription(String line) {
     final trimmed = line.trim();
@@ -901,20 +921,20 @@ class ReceiptParser {
     var cleaned = value
         .replaceAll('*', ' ')
         .replaceAll(RegExp(r'[$€£]'), ' ')
-      .replaceAll(RegExp(r'^\d+[A-Z]{1,5}\s+'), ' ')
-      .replaceAll(RegExp(r'^\s*\d{5,}\s+'), ' ')
+        .replaceAll(RegExp(r'^\d+[A-Z]{1,5}\s+'), ' ')
+        .replaceAll(RegExp(r'^\s*\d{5,}\s+'), ' ')
         .replaceAll(RegExp(r'^[HT]\s+\d{4,}\s+'), ' ')
         .replaceAll(RegExp(r'\b\d+\s+\d+[\.,]\d{2}\s+'), ' ')
         .replaceAll(leadingNoise, ' ')
         .replaceAll(RegExp(r'^\d{3,}\s+'), ' ')
         .replaceAll(modifiers, '') // Strip known trailing modifier codes
-      .replaceAll(RegExp(r'(?:\s+\d+[\.,]\d{2}(?:-)?)\s*$'), ' ')
+        .replaceAll(RegExp(r'(?:\s+\d+[\.,]\d{2}(?:-)?)\s*$'), ' ')
         .replaceAll(RegExp(r'\b[HFBTN]\b\s*$'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
 
     cleaned = cleaned
-      .replaceAll(RegExp(r'\bPCTIVIA\b', caseSensitive: false), 'ACTIVIA')
+        .replaceAll(RegExp(r'\bPCTIVIA\b', caseSensitive: false), 'ACTIVIA')
         .replaceAll(RegExp(r'\b2K0\b', caseSensitive: false), '2KG')
         .replaceAll(RegExp(r'\bPC 27\b', caseSensitive: false), 'PC 2')
         .replaceAll(RegExp(r'\b96[- ]55\b', caseSensitive: false), '36 55')

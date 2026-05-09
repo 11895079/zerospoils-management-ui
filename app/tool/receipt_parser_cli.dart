@@ -22,12 +22,7 @@ Future<void> main(List<String> args) async {
   final items = result.items;
 
   final payload = items
-      .map(
-        (item) => {
-          'name': item.name,
-          'price': item.price,
-        },
-      )
+      .map((item) => {'name': item.name, 'price': item.price})
       .toList(growable: false);
 
   final output = <String, Object?>{'items': payload};

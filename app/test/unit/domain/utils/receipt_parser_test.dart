@@ -411,6 +411,32 @@ PREMIUM BANANA
       ]);
     });
 
+    test('does not seed coded carry-forward from negative TPD rows', () {
+      final parser = ReceiptParser();
+
+      final items = parser.parseOcrLines(const [
+        ReceiptOcrLine(
+          text: '2063709 TPD/55502 5.00-',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 100, right: 240, bottom: 126),
+        ),
+        ReceiptOcrLine(
+          text: '27003 STRAWBERRIES 8.99',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 130, right: 260, bottom: 156),
+        ),
+        ReceiptOcrLine(
+          text: '647229 WHITE BREAD',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 160, right: 220, bottom: 186),
+        ),
+      ]);
+
+      expect(items.map((item) => (item.name, item.price)).toList(), [
+        ('STRAWBERRIES', 8.99),
+      ]);
+    });
+
     test('parses structured OCR lines with bounding boxes and photo index', () {
       final parser = ReceiptParser();
 
