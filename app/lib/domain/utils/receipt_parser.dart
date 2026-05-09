@@ -207,7 +207,7 @@ class ReceiptParser {
             carryForwardCodedPricePhoto == row.photoIndex) {
           final carryItem = ReceiptLineItem(
             name: _cleanDescription(normalizedText),
-            price: carryForwardCodedPrice!,
+            price: carryForwardCodedPrice,
             photoIndex: row.photoIndex,
             ocrBox: row.box,
           );
@@ -372,15 +372,15 @@ class ReceiptParser {
       if (codedDescription && prices.isNotEmpty) {
         if (carryForwardCodedPrice != null &&
             carryForwardCodedPricePhoto == row.photoIndex) {
-          effectivePrice = carryForwardCodedPrice!;
+          effectivePrice = carryForwardCodedPrice;
           carryForwardCodedPrice = prices.first;
           carryForwardCodedPricePhoto = row.photoIndex;
         } else if (seededCodedPrice != null &&
             seededCodedPricePhoto == row.photoIndex &&
             seededCodedPriceRow != null &&
-            rowPosition - seededCodedPriceRow! <= 4 &&
-            seededCodedPrice! < prices.first) {
-          effectivePrice = seededCodedPrice!;
+            rowPosition - seededCodedPriceRow <= 4 &&
+            seededCodedPrice < prices.first) {
+          effectivePrice = seededCodedPrice;
           carryForwardCodedPrice = prices.first;
           carryForwardCodedPricePhoto = row.photoIndex;
           seededCodedPrice = null;
@@ -411,14 +411,14 @@ class ReceiptParser {
           pendingPromoQuantityDescription != null &&
           pendingPromoQuantity != null &&
           pendingPromoQuantityDescription.photoIndex == row.photoIndex &&
-          pendingPromoQuantity! > 1 &&
+          pendingPromoQuantity > 1 &&
           prices.isNotEmpty) {
         final reconstructedName = _cleanDescription(
           pendingPromoQuantityDescription.normalizedText,
         );
         if (reconstructedName.isNotEmpty && reconstructedName != item.name) {
           final reconstructedPrice = double.parse(
-            (pendingPromoQuantity! * prices.first).toStringAsFixed(2),
+            (pendingPromoQuantity * prices.first).toStringAsFixed(2),
           );
           final reconstructedItem = ReceiptLineItem(
             name: reconstructedName,
