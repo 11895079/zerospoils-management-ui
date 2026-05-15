@@ -148,10 +148,6 @@ jobs:
         timeout-minutes: 40
         run: |
           if [ "$CERT_AVAILABLE" = "true" ] && [ "$PROFILE_AVAILABLE" = "true" ]; then
-            # Patch Release.xcconfig with manual signing for the archive phase
-            # (Xcode Automatic signing cannot resolve certificates on CI without Apple ID)
-            printf '\nCODE_SIGN_STYLE = Manual\nDEVELOPMENT_TEAM = %s\nPROVISIONING_PROFILE_SPECIFIER = %s\n' \
-              "${TEAM_ID}" "${PROFILE_NAME}" >> ios/Flutter/Release.xcconfig
             printf '%s\n' \
               '<?xml version="1.0" encoding="UTF-8"?>' \
               '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
@@ -160,14 +156,9 @@ jobs:
               '  <key>method</key>' \
               '  <string>app-store</string>' \
               '  <key>signingStyle</key>' \
-              '  <string>manual</string>' \
+              '  <string>automatic</string>' \
               '  <key>teamID</key>' \
               "  <string>${TEAM_ID}</string>" \
-              '  <key>provisioningProfiles</key>' \
-              '  <dict>' \
-              '    <key>com.zerospoils.zerospoils</key>' \
-              "    <string>${PROFILE_NAME}</string>" \
-              '  </dict>' \
               '</dict>' \
               '</plist>' > "$RUNNER_TEMP/ExportOptions.plist"
             if flutter build ipa --release --no-pub \
