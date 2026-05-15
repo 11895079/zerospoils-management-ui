@@ -156,8 +156,8 @@ jobs:
             exit 1
           fi
 
-          if ! echo "$IDS" | grep -Eq 'Apple Development|iPhone Developer'; then
-            echo "::error::No Apple Development certificate found. Automatic archive signing will fail. Upload a .p12 that includes an Apple Development private key, or switch project signing to fully manual distribution."
+          if ! echo "$IDS" | grep -Eq 'Apple Distribution|iPhone Distribution'; then
+            echo "::error::No Apple Distribution certificate found. TestFlight upload requires Apple Distribution certificate. Upload a .p12 that includes an Apple Distribution private key."
             exit 1
           fi
 
