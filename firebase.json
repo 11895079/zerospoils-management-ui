@@ -1,0 +1,10 @@
+{
+  "firestore": {
+    "rules": "app/firestore.rules"
+  },
+  "functions": [
+    {
+      "source": "firebase/functions"
+    }
+  ]
+}

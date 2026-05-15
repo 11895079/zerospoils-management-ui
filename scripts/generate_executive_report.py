@@ -630,11 +630,38 @@ The MVP roadmap spans **M1–M3**. Below is the current summary based on milesto
 
 ## Feature Delivery
 
-### Recently Implemented Features
-"""
+### Feature Outcomes (Last 30 Days)
 
-        for i, feature in enumerate(features, 1):
-            report += f"{i}. {feature}\n"
+1. **Inventory Capture and Fast Add**
+    - Delivered packaged-item fast-add flow with staged barcode-to-expiry entry.
+    - Promoted batch receipt action to a persistent FAB for faster inventory entry.
+    - Added fresh-produce fast-add extraction to reduce manual input.
+
+2. **Receipt OCR and Extraction Intelligence**
+    - Added fresh-produce OCR parsing.
+    - Added conflict-safe extraction and receipt OCR gating behavior.
+    - Extended scanner success haptic/audio feedback across barcode, expiry, produce, and receipt flows.
+
+3. **Barcode Data and Product Lookup**
+    - Expanded the Canada seed barcode catalog (v2) with top-scanned products.
+    - Added GTIN validation and runtime JSON loading.
+    - Integrated OpenFoodFacts live lookup with supporting catalog ingestion scripts.
+
+4. **Localization and User Preferences**
+    - Added localization strategy delivery with haptic/audio settings support.
+    - Expanded language coverage with Spanish, German, and Portuguese.
+
+5. **Beta Distribution and Release Enablement**
+    - Implemented Firebase App Distribution (Tester SDK + beta CI workflow).
+    - Added iOS beta upload path to TestFlight via App Store Connect API.
+
+6. **Engagement, Feedback, and Cloud Integration**
+    - Integrated issue-360 FCM workflow and issue-275 Firebase feedback workflow.
+    - Continued telemetry instrumentation hardening around OCR and onboarding paths.
+
+7. **Platform Stability and Readiness**
+    - Delivered baseline iOS/Android fixes and crash/onboarding permission follow-ups.
+"""
 
         report += f"""
 

@@ -32,6 +32,9 @@ app/android/app/google-services.json
 !app/android/app/google-services.json.placeholder
 app/ios/Runner/GoogleService-Info.plist
 !app/ios/Runner/GoogleService-Info.plist.placeholder
+firebase/functions/node_modules/
+.firebase/
+firebase-debug.log*
 .env
 .env.local
 .env.*.local
