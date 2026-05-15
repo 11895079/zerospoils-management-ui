@@ -30,6 +30,24 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods
+            app/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('app/ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Get dependencies
         working-directory: ./app
         run: flutter pub get
@@ -152,7 +170,7 @@ jobs:
               '  </dict>' \
               '</dict>' \
               '</plist>' > "$RUNNER_TEMP/ExportOptions.plist"
-            if flutter build ipa --release \
+            if flutter build ipa --release --no-pub \
               --export-options-plist="$RUNNER_TEMP/ExportOptions.plist" \
               --dart-define=BETA_BUILD=true; then
               IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -1)

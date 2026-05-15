@@ -46,6 +46,14 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('app/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
       - name: Get dependencies
         working-directory: ./app
         run: flutter pub get
@@ -151,7 +159,7 @@ jobs:
           GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
         timeout-minutes: 40
         run: |
-          flutter build apk --release --dart-define=BETA_BUILD=true
+          flutter build apk --release --no-pub --dart-define=BETA_BUILD=true
 
       - name: Rename APK
         working-directory: ./app
