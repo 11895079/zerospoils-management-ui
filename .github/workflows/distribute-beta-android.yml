@@ -159,7 +159,10 @@ jobs:
           GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
         timeout-minutes: 40
         run: |
-          flutter build apk --release --no-pub --dart-define=BETA_BUILD=true
+          # Prevent stale generated plugin registrant code from pulling in
+          # integration_test during release compilation.
+          rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+          flutter build apk --release --dart-define=BETA_BUILD=true
 
       - name: Rename APK
         working-directory: ./app

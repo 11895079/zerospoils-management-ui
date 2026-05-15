@@ -105,6 +105,7 @@ jobs:
             CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
             KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
             KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+            echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
 
             if ! printf '%s' "$CERTIFICATE_BASE64" | tr -d '\r\n\t ' | base64 --decode > "$CERTIFICATE_PATH"; then
               echo "Warning: IOS_CERTIFICATE_BASE64 is invalid base64."
@@ -140,6 +141,26 @@ jobs:
           else
             echo "Warning: IOS_CERTIFICATE_BASE64 not set."
             echo "CERT_AVAILABLE=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Validate iOS signing material (fail fast)
+        run: |
+          if [ "$CERT_AVAILABLE" != "true" ] || [ "$PROFILE_AVAILABLE" != "true" ]; then
+            echo "::error::iOS signing inputs unavailable/invalid. Verify IOS_PROVISIONING_PROFILE_BASE64, IOS_CERTIFICATE_BASE64, and IOS_CERTIFICATE_PASSWORD."
+            exit 1
+          fi
+
+          IDS=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>/dev/null || true)
+          echo "$IDS"
+
+          if ! echo "$IDS" | grep -Eq 'Apple Distribution|iPhone Distribution|Apple Development|iPhone Developer'; then
+            echo "::error::No usable code-signing identities found in imported keychain."
+            exit 1
+          fi
+
+          if ! echo "$IDS" | grep -Eq 'Apple Development|iPhone Developer'; then
+            echo "::error::No Apple Development certificate found. Automatic archive signing will fail. Upload a .p12 that includes an Apple Development private key, or switch project signing to fully manual distribution."
+            exit 1
           fi
 
       - name: Build iOS IPA (beta flavour)
