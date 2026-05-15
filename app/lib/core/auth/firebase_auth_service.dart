@@ -51,6 +51,88 @@ class FirebaseAuthService {
   /// Convenience getter for user UID.
   String? get currentUserId => _auth.currentUser?.uid;
 
+  /// Convenience getter for current user email.
+  String? get currentUserEmail => _auth.currentUser?.email;
+
+  /// Whether the current signed-in user is anonymous.
+  bool get isSignedInAnonymously => _auth.currentUser?.isAnonymous ?? false;
+
+  /// Sign in with email/password.
+  ///
+  /// If the current user is anonymous, this attempts to link credentials first
+  /// so existing local/user-linked data stays on the same UID.
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    final normalizedEmail = email.trim();
+    final credential = EmailAuthProvider.credential(
+      email: normalizedEmail,
+      password: password,
+    );
+
+    final user = _auth.currentUser;
+    if (user != null && user.isAnonymous) {
+      try {
+        await user.linkWithCredential(credential);
+        debugPrint('[FirebaseAuth] Linked anonymous user to email auth');
+        return;
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'credential-already-in-use') {
+          rethrow;
+        }
+        // Fall through to sign-in when account already exists.
+      }
+    }
+
+    await _auth.signInWithEmailAndPassword(
+      email: normalizedEmail,
+      password: password,
+    );
+    debugPrint('[FirebaseAuth] Signed in with email/password');
+  }
+
+  /// Create an email/password account.
+  ///
+  /// If the current user is anonymous, this links the anonymous user to avoid
+  /// creating a second account and losing linkage to existing UID-scoped data.
+  Future<void> createEmailPasswordAccount({
+    required String email,
+    required String password,
+  }) async {
+    final normalizedEmail = email.trim();
+    final credential = EmailAuthProvider.credential(
+      email: normalizedEmail,
+      password: password,
+    );
+
+    final user = _auth.currentUser;
+    if (user != null && user.isAnonymous) {
+      await user.linkWithCredential(credential);
+      debugPrint('[FirebaseAuth] Linked anonymous user to new email account');
+      return;
+    }
+
+    await _auth.createUserWithEmailAndPassword(
+      email: normalizedEmail,
+      password: password,
+    );
+    debugPrint('[FirebaseAuth] Created email/password account');
+  }
+
+  /// Signs out the current user.
+  Future<void> signOut() async {
+    await _auth.signOut();
+    debugPrint('[FirebaseAuth] Signed out');
+  }
+
+  /// Sends password reset email for an existing email/password account.
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    final normalizedEmail = email.trim();
+    await _auth.sendPasswordResetEmail(email: normalizedEmail);
+    debugPrint('[FirebaseAuth] Password reset email requested');
+  }
+
   /// Listen to auth state changes (for reactive UI updates).
   ///
   /// Returns a stream of [User?] that emits when user logs in/out.

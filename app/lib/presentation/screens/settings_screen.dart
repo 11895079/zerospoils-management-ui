@@ -1,6 +1,7 @@
 library;
 
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -19,7 +20,10 @@ import '../di/service_locator.dart'
 import '../di/repository_providers.dart';
 import '../di/theme_providers.dart';
 import '../../data/services/backup_restore_service.dart';
+import '../../core/auth/auth_providers.dart';
+import '../../core/auth/firebase_auth_service.dart';
 import 'onboarding_screen.dart';
+import '../widgets/feedback_drawer.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -29,6 +33,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  StreamSubscription<User?>? _authStateSubscription;
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
@@ -43,6 +48,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    try {
+      _authStateSubscription = ref
+          .read(firebaseAuthServiceProvider)
+          .authStateChanges
+          .listen((_) {
+            if (!mounted) return;
+            setState(() {});
+          });
+    } catch (e) {
+      debugPrint('[Settings] Auth listener unavailable: $e');
+    }
+  }
+
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadSettings() async {
@@ -307,8 +329,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildLinkTile(
               icon: Icons.person,
               label: 'Account',
-              subtitle: 'View profile or sign in',
-              onTap: () => _showSnack(context, 'Account coming soon'),
+              subtitle: _accountSubtitle(),
+              onTap: () => _showAccountDialog(context),
             ),
             _buildToggleTile(
               icon: Icons.cloud_sync,
@@ -499,7 +521,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildLinkTile(
               icon: Icons.feedback_outlined,
               label: 'Send Feedback',
-              onTap: () => _showSnack(context, 'Feedback form coming soon'),
+              onTap: () => showFeedbackDrawer(context, ref, source: 'settings'),
             ),
             _buildLinkTile(
               icon: Icons.star_rate,
@@ -865,6 +887,50 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  String _accountSubtitle() {
+    late final FirebaseAuthService authService;
+    try {
+      authService = ref.read(firebaseAuthServiceProvider);
+    } catch (_) {
+      return 'Not signed in';
+    }
+
+    final user = authService.currentUser;
+
+    if (user == null) {
+      return 'Not signed in';
+    }
+
+    if (user.isAnonymous) {
+      return 'Anonymous session';
+    }
+
+    final email = user.email;
+    if (email != null && email.isNotEmpty) {
+      return email;
+    }
+
+    return 'Signed in';
+  }
+
+  Future<void> _showAccountDialog(BuildContext context) async {
+    FirebaseAuthService authService;
+    try {
+      authService = ref.read(firebaseAuthServiceProvider);
+    } catch (_) {
+      _showSnack(context, 'Authentication service is unavailable.');
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (_) => _AccountDialog(authService: authService),
+    );
+
+    if (!mounted) return;
+    setState(() {});
+  }
+
   /// Reschedule all notifications when notification preferences change.
   /// Called after master toggle or lead time changes are persisted.
   Future<void> _rescheduleNotifications() async {
@@ -940,5 +1006,300 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       'name': 'theme_changed',
       'properties': {'theme': darkModeEnabled ? 'dark' : 'light'},
     });
+  }
+}
+
+class _AccountDialog extends StatefulWidget {
+  const _AccountDialog({required this.authService});
+
+  final FirebaseAuthService authService;
+
+  @override
+  State<_AccountDialog> createState() => _AccountDialogState();
+}
+
+class _AccountDialogState extends State<_AccountDialog> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authService = widget.authService;
+    final user = authService.currentUser;
+    final isAnonymous = user?.isAnonymous ?? false;
+    final isSignedIn = user != null && !isAnonymous;
+
+    return AlertDialog(
+      title: const Text('Account'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isSignedIn) ...[
+              Text('Signed in as ${user.email ?? 'unknown'}'),
+              const SizedBox(height: AppSpacing.md),
+              const Text(
+                'You can sign out to return to an anonymous session.',
+              ),
+            ] else ...[
+              Text(
+                isAnonymous
+                    ? 'Upgrade your anonymous session to an email account.'
+                    : 'Sign in with email to submit authenticated feedback.',
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextField(
+                key: const Key('account_email_field'),
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                key: const Key('account_password_field'),
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              const Text(
+                'Password must be at least 6 characters.',
+                style: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const Key('account_forgot_password_button'),
+                  onPressed: _isSubmitting
+                      ? null
+                      : () => _requestPasswordReset(authService),
+                  child: const Text('Forgot password?'),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _isSubmitting
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
+          child: const Text('Close'),
+        ),
+        if (isSignedIn)
+          FilledButton.tonal(
+            key: const Key('account_signout_button'),
+            onPressed: _isSubmitting
+                ? null
+                : () => _performAuthAction(
+                    action: () => authService.signOut(),
+                    successMessage: 'Signed out',
+                    closeDialogAfterSuccess: true,
+                  ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Sign Out'),
+          )
+        else ...[
+          FilledButton.tonal(
+            key: const Key('account_create_button'),
+            onPressed: _isSubmitting
+                ? null
+                : () => _performAuthAction(
+                    action: () => authService.createEmailPasswordAccount(
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                    ),
+                    successMessage: 'Account created',
+                    closeDialogAfterSuccess: true,
+                  ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Create Account'),
+          ),
+          FilledButton(
+            key: const Key('account_signin_button'),
+            onPressed: _isSubmitting
+                ? null
+                : () => _performAuthAction(
+                    action: () => authService.signInWithEmailPassword(
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                    ),
+                    successMessage: 'Signed in',
+                    closeDialogAfterSuccess: true,
+                  ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Sign In'),
+          ),
+          FilledButton.tonal(
+            key: const Key('account_apple_signin_button'),
+            onPressed: _isSubmitting
+                ? null
+                : () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Apple Sign-In will be enabled in the next auth rollout step.',
+                        ),
+                      ),
+                    );
+                  },
+            child: const Text('Continue with Apple (Soon)'),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _requestPasswordReset(FirebaseAuthService authService) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty || !email.contains('@')) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Enter your account email first.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await authService.sendPasswordResetEmail(email: email);
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text('Password reset email sent to $email.')),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(_messageForAuthError(e.code))),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Could not start password reset.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _performAuthAction({
+    required Future<void> Function() action,
+    required String successMessage,
+    required bool closeDialogAfterSuccess,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final requiresCredentials =
+        successMessage == 'Signed in' || successMessage == 'Account created';
+
+    if (requiresCredentials) {
+      if (email.isEmpty || !email.contains('@')) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Enter a valid email address.')),
+        );
+        return;
+      }
+      if (password.length < 6) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Password must be at least 6 characters.')),
+        );
+        return;
+      }
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await action();
+      if (!mounted) return;
+
+      messenger.showSnackBar(SnackBar(content: Text(successMessage)));
+
+      if (closeDialogAfterSuccess) {
+        Navigator.of(context).pop();
+      }
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(_messageForAuthError(e.code))),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Authentication failed. Try again.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  String _messageForAuthError(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return 'No account found for this email.';
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Incorrect email or password.';
+      case 'email-already-in-use':
+        return 'An account with this email already exists.';
+      case 'invalid-email':
+        return 'Email format is invalid.';
+      case 'operation-not-allowed':
+        return 'Enable Email/Password in Firebase Authentication settings.';
+      case 'weak-password':
+        return 'Choose a stronger password.';
+      default:
+        return 'Authentication failed ($code).';
+    }
   }
 }

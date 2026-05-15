@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../di/repository_providers.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/settings_screen.dart';
+import 'feedback_drawer.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
@@ -88,6 +89,18 @@ class AppDrawer extends ConsumerWidget {
               onTap: () => _switchTab(context, ref, 3),
             ),
             const Divider(height: 1),
+            _drawerItem(
+              context,
+              ref,
+              icon: Icons.feedback_outlined,
+              label: 'Send Feedback',
+              tileKey: const Key('drawer_feedback_item'),
+              onTap: () {
+                final rootContext = Navigator.of(context, rootNavigator: true).context;
+                Navigator.of(context).pop();
+                showFeedbackDrawer(rootContext, ref, source: 'drawer');
+              },
+            ),
             _drawerItem(
               context,
               ref,

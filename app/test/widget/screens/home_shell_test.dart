@@ -8,6 +8,7 @@ import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
 
 /// Lightweight in-memory mock to avoid Hive I/O during widget tests
 class MockItemRepository extends HiveItemRepository {
@@ -162,5 +163,29 @@ void main() {
 
     // Verify FAB is back
     expect(find.byKey(const Key('inventory_add_fab')), findsOneWidget);
+  });
+
+  testWidgets('Drawer feedback entry opens feedback drawer', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        ],
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('drawer_feedback_item')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(feedbackDrawerKey), findsOneWidget);
   });
 }

@@ -8,6 +8,7 @@ import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
+import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
 
 void main() {
   Widget buildTestHarness() {
@@ -368,5 +369,61 @@ void main() {
       expect(icon.color, theme.colorScheme.onSurface);
       expect(title.style?.color, theme.textTheme.bodyMedium?.color);
     });
+
+    testWidgets('Send Feedback opens feedback drawer', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.feedback_outlined);
+      await tester.tap(
+        find.ancestor(
+          of: find.byIcon(Icons.feedback_outlined),
+          matching: find.byType(ListTile),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(feedbackDrawerKey), findsOneWidget);
+      expect(
+        telemetry.events.any((event) => event['name'] == 'feedback_opened'),
+        isTrue,
+      );
+    });
+
+    testWidgets('Feedback submit requires message', (WidgetTester tester) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.feedback_outlined);
+      await tester.tap(
+        find.ancestor(
+          of: find.byIcon(Icons.feedback_outlined),
+          matching: find.byType(ListTile),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('feedback_submit_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(
+        find.text('Please enter feedback before submitting.'),
+        findsOneWidget,
+      );
+      expect(
+        telemetry.events.any((event) => event['name'] == 'feedback_submitted'),
+        isFalse,
+      );
+    });
+
   });
 }

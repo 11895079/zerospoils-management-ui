@@ -2,6 +2,7 @@
 platform :ios, '15.5'
 
 use_modular_headers!
+require 'fileutils'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -32,6 +33,41 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
+def ensure_grpc_modulemap_alias
+  modulemap_target = File.join(__dir__, 'Pods', 'Headers', 'Private', 'gRPC-Core', 'grpc', 'gRPC-Core.modulemap')
+  unless File.exist?(modulemap_target)
+    modulemap_target = File.join(__dir__, 'Pods', 'Target Support Files', 'gRPC-Core', 'gRPC-Core.modulemap')
+  end
+  modulemap_alias_dir = File.join(__dir__, 'Pods', 'Headers', 'Private', 'grpc')
+  modulemap_alias = File.join(modulemap_alias_dir, 'gRPC-Core.modulemap')
+
+  if File.exist?(modulemap_target)
+    FileUtils.mkdir_p(modulemap_alias_dir)
+    FileUtils.rm_f(modulemap_alias)
+    FileUtils.ln_sf(modulemap_target, modulemap_alias)
+  end
+end
+
+def sanitize_firestore_linker_flags
+  support_dir = File.join(__dir__, 'Pods', 'Target Support Files', 'Pods-Runner')
+  xcconfig_files = [
+    'Pods-Runner.debug.xcconfig',
+    'Pods-Runner.profile.xcconfig',
+    'Pods-Runner.release.xcconfig',
+  ]
+
+  xcconfig_files.each do |file_name|
+    path = File.join(support_dir, file_name)
+    next unless File.exist?(path)
+
+    content = File.read(path)
+    sanitized = content.gsub(' -weak_framework "FirebaseFirestoreInternal"', '')
+    next if sanitized == content
+
+    File.write(path, sanitized)
+  end
+end
+
 target 'Runner' do
   # firebase_app_distribution_ios leaves FirebaseAppDistribution unconstrained,
   # which defaults to the old 0.9.x series — incompatible with FirebaseCore 11.x
@@ -51,4 +87,10 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
   end
+end
+
+post_integrate do |_installer|
+  # Run after CocoaPods integrates the project so the alias is not removed.
+  ensure_grpc_modulemap_alias
+  sanitize_firestore_linker_flags
 end

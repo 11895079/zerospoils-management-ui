@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -38,6 +39,10 @@ class FirebaseBootstrapService {
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp();
       }
+
+      // Initialize App Check as early as possible so Firestore/Auth requests
+      // include attestation tokens.
+      await _initializeAppCheck();
 
       // Initialize Firebase Authentication (anonymous sign-in with token caching)
       final authService = FirebaseAuthService();
@@ -166,5 +171,29 @@ class FirebaseBootstrapService {
         '${message.messageId}',
       );
     });
+  }
+
+  static Future<void> _initializeAppCheck() async {
+    try {
+      if (kIsWeb) {
+        debugPrint(
+          '[Firebase] App Check on web requires reCAPTCHA config; skipping activation here.',
+        );
+        return;
+      }
+
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: kDebugMode
+            ? AndroidProvider.debug
+            : AndroidProvider.playIntegrity,
+        appleProvider: kDebugMode
+            ? AppleProvider.debug
+            : AppleProvider.appAttestWithDeviceCheckFallback,
+      );
+
+      debugPrint('[Firebase] App Check activated');
+    } catch (e) {
+      debugPrint('[Firebase] App Check activation failed: $e');
+    }
   }
 }

@@ -82,6 +82,8 @@ dependencies:
   # Firebase (closed testing, crash reporting, remote config, auth)
   firebase_core: ^3.1.0
   firebase_auth: ^5.0.0
+  cloud_firestore: ^5.0.0
+  firebase_app_check: ^0.3.0+4
   firebase_crashlytics: ^4.0.0
   firebase_remote_config: ^5.0.0
   firebase_messaging: ^15.0.0  # For push notifications (optional)
@@ -124,6 +126,12 @@ dev_dependencies:
   # App icon generator
   flutter_launcher_icons: ^0.14.1
   flutter_local_notifications_platform_interface: ^10.0.0
+
+dependency_overrides:
+  google_mlkit_image_labeling:
+    path: tooling_stubs/google_mlkit_image_labeling
+  google_mlkit_text_recognition:
+    path: tooling_stubs/google_mlkit_text_recognition
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
