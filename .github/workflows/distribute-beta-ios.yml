@@ -107,7 +107,7 @@ jobs:
               security import "$RUNNER_TEMP/AppleWWDRCAG3.cer" \
                 -k "$KEYCHAIN_PATH" 2>/dev/null || true
               security default-keychain -d user -s "$KEYCHAIN_PATH"
-              security list-keychain -d user -s "$KEYCHAIN_PATH"
+              security list-keychain -d user -s "$KEYCHAIN_PATH" "$HOME/Library/Keychains/login.keychain-db"
               security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" 2>/dev/null || true
               if security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -Eq 'Apple Distribution|iPhone Distribution'; then
                 echo "CERT_AVAILABLE=true" >> "$GITHUB_ENV"
@@ -130,6 +130,10 @@ jobs:
         timeout-minutes: 40
         run: |
           if [ "$CERT_AVAILABLE" = "true" ] && [ "$PROFILE_AVAILABLE" = "true" ]; then
+            # Patch Release.xcconfig with manual signing for the archive phase
+            # (Xcode Automatic signing cannot resolve certificates on CI without Apple ID)
+            printf '\nCODE_SIGN_STYLE = Manual\nDEVELOPMENT_TEAM = %s\nPROVISIONING_PROFILE_SPECIFIER = %s\n' \
+              "${TEAM_ID}" "${PROFILE_NAME}" >> ios/Flutter/Release.xcconfig
             printf '%s\n' \
               '<?xml version="1.0" encoding="UTF-8"?>' \
               '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
