@@ -394,7 +394,9 @@ void main() {
       );
     });
 
-    testWidgets('Feedback submit requires message', (WidgetTester tester) async {
+    testWidgets('Feedback submit requires message', (
+      WidgetTester tester,
+    ) async {
       final telemetry = TelemetryClient();
 
       await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
@@ -424,6 +426,5 @@ void main() {
         isFalse,
       );
     });
-
   });
 }

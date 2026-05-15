@@ -108,7 +108,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.descendant(of: find.byType(AlertDialog), matching: find.text('Account')),
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Account'),
+      ),
       findsOneWidget,
     );
 
@@ -129,7 +132,10 @@ void main() {
     expect(fakeAuthService.resetCalls, 1);
     expect(fakeAuthService.lastEmail, 'user@example.com');
 
-    expect(find.byKey(const Key('account_apple_signin_button')), findsOneWidget);
+    expect(
+      find.byKey(const Key('account_apple_signin_button')),
+      findsOneWidget,
+    );
 
     await tester.enterText(
       find.byKey(const Key('account_password_field')),

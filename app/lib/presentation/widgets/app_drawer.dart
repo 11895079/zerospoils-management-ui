@@ -96,7 +96,10 @@ class AppDrawer extends ConsumerWidget {
               label: 'Send Feedback',
               tileKey: const Key('drawer_feedback_item'),
               onTap: () {
-                final rootContext = Navigator.of(context, rootNavigator: true).context;
+                final rootContext = Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).context;
                 Navigator.of(context).pop();
                 showFeedbackDrawer(rootContext, ref, source: 'drawer');
               },

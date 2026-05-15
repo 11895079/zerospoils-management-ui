@@ -1047,9 +1047,7 @@ class _AccountDialogState extends State<_AccountDialog> {
             if (isSignedIn) ...[
               Text('Signed in as ${user.email ?? 'unknown'}'),
               const SizedBox(height: AppSpacing.md),
-              const Text(
-                'You can sign out to return to an anonymous session.',
-              ),
+              const Text('You can sign out to return to an anonymous session.'),
             ] else ...[
               Text(
                 isAnonymous
@@ -1245,7 +1243,9 @@ class _AccountDialogState extends State<_AccountDialog> {
       }
       if (password.length < 6) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Password must be at least 6 characters.')),
+          const SnackBar(
+            content: Text('Password must be at least 6 characters.'),
+          ),
         );
         return;
       }
