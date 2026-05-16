@@ -78,11 +78,22 @@ jobs:
               PROFILE_UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
               PROFILE_NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")
               TEAM_ID=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' "$RUNNER_TEMP/profile.plist")
+              APP_IDENTIFIER=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/profile.plist")
+              GET_TASK_ALLOW=$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:get-task-allow' "$RUNNER_TEMP/profile.plist" 2>/dev/null || echo "unknown")
+              BUNDLE_ID=${APP_IDENTIFIER#${TEAM_ID}.}
               mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
               cp "$PP_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+
+              if [ "$GET_TASK_ALLOW" = "true" ]; then
+                echo "::error::Provided provisioning profile is a Development profile (get-task-allow=true). Use an App Store Distribution profile."
+                echo "PROFILE_AVAILABLE=false" >> "$GITHUB_ENV"
+                exit 1
+              fi
+
               {
                 echo "PROFILE_NAME=$PROFILE_NAME"
                 echo "TEAM_ID=$TEAM_ID"
+                echo "BUNDLE_ID=$BUNDLE_ID"
                 echo "PROFILE_AVAILABLE=true"
               } >> "$GITHUB_ENV"
             else
@@ -148,10 +159,15 @@ jobs:
             exit 1
           fi
 
+          if [ -z "$BUNDLE_ID" ] || [ -z "$PROFILE_NAME" ] || [ -z "$TEAM_ID" ]; then
+            echo "::error::Provisioning profile metadata missing (BUNDLE_ID/PROFILE_NAME/TEAM_ID)."
+            exit 1
+          fi
+
           IDS=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>/dev/null || true)
           echo "$IDS"
 
-          if ! echo "$IDS" | grep -Eq 'Apple Distribution|iPhone Distribution|Apple Development|iPhone Developer'; then
+          if ! echo "$IDS" | grep -Eq 'Apple Distribution|iPhone Distribution'; then
             echo "::error::No usable code-signing identities found in imported keychain."
             exit 1
           fi
@@ -175,9 +191,14 @@ jobs:
               '  <key>method</key>' \
               '  <string>app-store</string>' \
               '  <key>signingStyle</key>' \
-              '  <string>automatic</string>' \
+              '  <string>manual</string>' \
               '  <key>teamID</key>' \
               "  <string>${TEAM_ID}</string>" \
+              '  <key>provisioningProfiles</key>' \
+              '  <dict>' \
+              "    <key>${BUNDLE_ID}</key>" \
+              "    <string>${PROFILE_NAME}</string>" \
+              '  </dict>' \
               '</dict>' \
               '</plist>' > "$RUNNER_TEMP/ExportOptions.plist"
             if flutter build ipa --release --no-pub \

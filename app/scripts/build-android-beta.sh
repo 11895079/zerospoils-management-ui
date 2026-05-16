@@ -4,7 +4,7 @@
 # Matches CI workflow: distribute-beta-android.yml
 #
 # Prerequisites:
-#   - Android keystore configured in android/app/key.properties
+#   - Android keystore configured in android/key.properties
 #   - Flutter installed and in PATH
 #   - Gradle cache available (~/.gradle/wrapper/dists)
 #
@@ -26,8 +26,8 @@ if ! command -v flutter &> /dev/null; then
   exit 1
 fi
 
-if [[ ! -f "$APP_DIR/android/app/key.properties" ]]; then
-  echo "❌ android/app/key.properties not found."
+if [[ ! -f "$APP_DIR/android/key.properties" ]]; then
+  echo "❌ android/key.properties not found."
   echo "   Configure your Android keystore and ensure key.properties exists."
   exit 1
 fi

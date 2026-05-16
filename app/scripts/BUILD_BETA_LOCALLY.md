@@ -30,7 +30,7 @@ GitHub Actions charges $0.008/minute on macOS runners. A failed iOS build can wa
 
 ### Android
 - Android SDK configured (via Android Studio or `flutter doctor`)
-- Keystore file at `android/app/key.properties` with signing credentials
+- Keystore file at `android/key.properties` with signing credentials
 - `flutter` and `gradle` in PATH
 
 ### iOS
@@ -131,7 +131,7 @@ Then re-run the script.
 ## Environment Variables
 
 None required, but you can override paths if needed (advanced):
-- Android: Keystore configured in `android/app/key.properties`
+- Android: Keystore configured in `android/key.properties`
 - iOS: Certificate/profile auto-discovered from system Keychain/Library
 
 ## See Also
