@@ -205,7 +205,11 @@ jobs:
 
             # Build Flutter assets without codesigning, then archive/export via xcodebuild
             # using explicit Distribution signing material to avoid Development-cert prechecks.
-            flutter build ios --release --no-codesign --no-pub --dart-define=BETA_BUILD=true
+            # Use GITHUB_RUN_NUMBER as the build number to auto-increment on each CI run.
+            BUILD_NUMBER=$GITHUB_RUN_NUMBER
+            flutter build ios --release --no-codesign --no-pub \
+              --build-number="$BUILD_NUMBER" \
+              --dart-define=BETA_BUILD=true
 
             # Write a temporary xcconfig to force Manual signing
             # (overrides project-level Automatic setting without editing project.pbxproj)
