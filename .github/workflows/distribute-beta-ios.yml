@@ -92,6 +92,7 @@ jobs:
 
               {
                 echo "PROFILE_NAME=$PROFILE_NAME"
+                echo "PROFILE_UUID=$PROFILE_UUID"
                 echo "TEAM_ID=$TEAM_ID"
                 echo "BUNDLE_ID=$BUNDLE_ID"
                 echo "PROFILE_AVAILABLE=true"
@@ -206,17 +207,24 @@ jobs:
             # using explicit Distribution signing material to avoid Development-cert prechecks.
             flutter build ios --release --no-codesign --no-pub --dart-define=BETA_BUILD=true
 
+            # Write a temporary xcconfig to force Manual signing
+            # (overrides project-level Automatic setting without editing project.pbxproj)
+            XCCONFIG_PATH="$RUNNER_TEMP/ci-signing.xcconfig"
+            printf '%s\n' \
+              'CODE_SIGN_STYLE = Manual' \
+              'CODE_SIGN_IDENTITY = Apple Distribution' \
+              "DEVELOPMENT_TEAM = $TEAM_ID" \
+              "PROVISIONING_PROFILE = $PROFILE_UUID" \
+              "PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID" > "$XCCONFIG_PATH"
+            cat "$XCCONFIG_PATH"
+
             xcodebuild \
               -workspace ios/Runner.xcworkspace \
               -scheme Runner \
               -configuration Release \
               -destination 'generic/platform=iOS' \
               -archivePath build/ios/archive/Runner.xcarchive \
-              CODE_SIGN_STYLE=Manual \
-              CODE_SIGN_IDENTITY='Apple Distribution' \
-              DEVELOPMENT_TEAM="$TEAM_ID" \
-              PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-              PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+              -xcconfig "$XCCONFIG_PATH" \
               archive
 
             xcodebuild \
