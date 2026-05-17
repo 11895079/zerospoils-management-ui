@@ -42,7 +42,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.zerospoils.zerospoils"
-    compileSdk = flutter.compileSdkVersion
+    // Ensure resource compatibility for dependencies using android:attr/lStar.
+    compileSdk = maxOf(flutter.compileSdkVersion, 34)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -60,7 +61,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = maxOf(flutter.targetSdkVersion, 34)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         // firebase_app_distribution_android exposes staging/production flavors.

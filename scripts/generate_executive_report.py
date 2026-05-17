@@ -630,11 +630,25 @@ The MVP roadmap spans **M1–M3**. Below is the current summary based on milesto
 
 ## Feature Delivery
 
-### Recently Implemented Features
+### Feature Outcomes (Last 30 Days)
 """
 
-        for i, feature in enumerate(features, 1):
-            report += f"{i}. {feature}\n"
+        if features:
+            for idx, feature in enumerate(features, start=1):
+                report += f"\n{idx}. {feature}\n"
+        else:
+            report += "\n- No feature-tagged commits detected in the selected reporting window.\n"
+
+        if recent_completions:
+            report += "\n### Recently Completed Milestone Items\n"
+            for idx, completion in enumerate(recent_completions[:10], start=1):
+                impact = completion['impact']
+                report += (
+                    f"\n{idx}. **{completion['milestone']}/{completion['issue']}** "
+                    f"{completion['title']}\n"
+                )
+                if impact and impact != 'Impact not specified':
+                    report += f"   - Impact: {impact}\n"
 
         report += f"""
 

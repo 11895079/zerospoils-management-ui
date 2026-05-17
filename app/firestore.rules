@@ -1,0 +1,91 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ZeroSpoils feedback submissions collected from in-app drawer.
+    match /feedback_submissions/{feedbackId} {
+      // Allow creates only from non-anonymous signed-in users.
+      allow create: if request.auth != null
+            && request.auth.token.firebase.sign_in_provider != 'anonymous'
+                    && _validFeedbackCreate()
+                    && _validFeedbackDocId(feedbackId);
+
+      // Client app does not need to read/update/delete feedback entries.
+      allow read, update, delete: if false;
+    }
+
+    // Deny all other access by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function _validFeedbackCreate() {
+      return request.resource.data.keys().hasOnly([
+               'message',
+               'category',
+               'source',
+               'email',
+               'device_fingerprint',
+               'platform',
+               'app_version',
+               'build_number',
+               'locale',
+               'user_id',
+               'created_at',
+               'created_at_client',
+               'status'
+             ])
+             && request.resource.data.message is string
+             && request.resource.data.message.size() > 0
+             && request.resource.data.message.size() <= 2000
+             && request.resource.data.category is string
+             && request.resource.data.category in [
+               'bug_report',
+               'feature_request',
+               'ux_feedback',
+               'other'
+             ]
+             && request.resource.data.source is string
+             && request.resource.data.source in ['settings', 'drawer']
+             && request.resource.data.device_fingerprint is string
+             && request.resource.data.device_fingerprint.size() >= 8
+             && request.resource.data.device_fingerprint.size() <= 64
+             && request.resource.data.platform is string
+             && request.resource.data.platform in [
+               'android',
+               'ios',
+               'web',
+               'macos',
+               'windows',
+               'linux',
+               'fuchsia'
+             ]
+             && request.resource.data.app_version is string
+             && request.resource.data.build_number is string
+             && request.resource.data.locale is string
+             && request.resource.data.status == 'new'
+             // Prevent spoofing another user id.
+             && request.resource.data.user_id == request.auth.uid
+             && request.resource.data.created_at is timestamp
+             && request.resource.data.created_at_client is string
+             && (
+               !('email' in request.resource.data)
+               || request.resource.data.email == null
+               || request.resource.data.email is string
+             );
+    }
+
+    // Enforce one submission per 10-minute window per account + device fingerprint.
+    function _validFeedbackDocId(feedbackId) {
+      return feedbackId == request.auth.uid
+                          + '_'
+                          + request.resource.data.device_fingerprint
+                          + '_'
+                          + string(_timeWindowId(request.time));
+    }
+
+    function _timeWindowId(ts) {
+      return (ts.toMillis() - (ts.toMillis() % (10 * 60 * 1000))) / (10 * 60 * 1000);
+    }
+  }
+}

@@ -92,4 +92,40 @@ Create checklist with verification steps for each security domain:
 - Issues: 245-encryption, 340-privacy-policy, 400-incident-response
 
 ## Status
-🚧 **PLACEHOLDER** - To be filled during M1 milestone completion. Review and validate during M2; formalize before M4 launch.
+🚧 **IN PROGRESS (M3/M4)** — Updated 2026-05-15 with current project state:
+
+### Implemented
+- [x] TLS 1.3 enforcement via Firebase
+- [x] App Check attestation on Cloud Functions (`submitFeedbackIngest`)
+- [x] Anonymous Firebase auth with secure token caching
+- [x] Rate limiting (feedback: 10-min window per device fingerprint)
+- [x] Input validation on Firestore rules (no plaintext PII in events)
+- [x] Telemetry PII filter (disallows email, phone, device_id, ip_address in events)
+- [x] Camera permission gating (only on OCR feature flag enabled)
+- [x] No hardcoded API keys (environment variables via `--dart-define`)
+- [x] Dependency management active (pubspec.lock)
+- [x] Unit/widget tests for feedback service
+- [x] Firestore rules enforce non-anonymous auth for feedback
+
+### In Progress / Planned
+- [ ] Local database encryption (Hive currently unencrypted; Pro tier blocker)
+- [ ] Certificate pinning for critical endpoints (M4, before launch)
+- [ ] JWT token rotation (M4, after auth refactor)
+- [ ] Biometric authentication option (M5, Pro tier)
+- [ ] Account lockout mechanism (M4, requires auth service enhancement)
+- [ ] Data export/import (GDPR Article 15; M5)
+- [ ] Data deletion workflow (GDPR Article 17; M4)
+- [ ] Dependency scanning in CI (Dependabot/Snyk; M2)
+- [ ] Code obfuscation (ProGuard/R8 for release Android builds; M4)
+- [ ] Security contact/vulnerability disclosure (M4)
+- [ ] Incident response runbook (issue 400, M4)
+- [ ] Penetration testing (M4, before public launch)
+- [ ] External security audit (M5, optional for Pro tier)
+- [ ] Anomaly detection & monitoring (M5)
+
+### Open Gaps
+- Receipt image lifecycle/retention policy (30-day max for Pro tier, currently undefined)
+- Webhook signature verification (deferred to M5 when IoT integrations planned)
+- CORS/API auth for Pro-tier backend (M5+)
+- Server-side receipt verification for IAP (M4, payment subsystem)
+- Static/dynamic security testing in CI (M4)
