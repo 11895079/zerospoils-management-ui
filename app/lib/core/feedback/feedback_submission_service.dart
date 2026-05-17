@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const String _pendingFeedbackKey = 'pending_feedback_submissions_v1';
 const String _deviceFingerprintKey = 'feedback_device_fingerprint_v1';
 const int _feedbackRateWindowMs = 10 * 60 * 1000;
+const int _maxPendingFeedbackQueue = 100;
 const String _feedbackIngestUrl = String.fromEnvironment(
   'FEEDBACK_INGEST_URL',
   defaultValue: '',
@@ -201,6 +202,10 @@ class FeedbackSubmissionService {
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getStringList(_pendingFeedbackKey) ?? <String>[];
     current.add(jsonEncode(payload));
+    if (current.length > _maxPendingFeedbackQueue) {
+      // Drop oldest entries to keep SharedPreferences queue bounded.
+      current.removeRange(0, current.length - _maxPendingFeedbackQueue);
+    }
     await prefs.setStringList(_pendingFeedbackKey, current);
   }
 

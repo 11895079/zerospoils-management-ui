@@ -16,7 +16,7 @@ Required fields:
 - `category` (`string`): `bug_report` | `feature_request` | `ux_feedback` | `other`
 - `source` (`string`): `settings` | `drawer`
 - `device_fingerprint` (`string`, 8-64 chars): locally generated stable device token used for write throttling
-- `platform` (`string`): `android` | `ios` | `web`
+- `platform` (`string`): `android` | `ios` | `web` | `macos` | `windows` | `linux` | `fuchsia`
 - `app_version` (`string`)
 - `build_number` (`string`)
 - `locale` (`string`)
@@ -38,7 +38,7 @@ Optional fields:
 - Write rate-limit is enforced via document id pattern: one submission per 10-minute window per `user_id + device_fingerprint`.
 - Firestore rules cannot reliably rate-limit by client IP address because IP is not exposed to rules.
 - App Check should be enabled for Firestore in Firebase Console to require valid app attestation tokens.
-- Rules live in [app/firestore.rules](app/firestore.rules).
+- Rules live in [app/firestore.rules](../app/firestore.rules).
 
 ## Operational notes
 
@@ -61,15 +61,18 @@ For protections Firestore rules cannot enforce directly (IP-based limits and bot
 
 ## Deployment
 
-This repo currently does not include a `firebase.json` deployment setup for rules.
+This repo includes `firebase.json` for Firebase CLI deployments.
 
-To apply rules manually in Firebase Console:
+To deploy Firestore rules from the repo root:
+
+1. Authenticate with Firebase CLI (`firebase login`) and select the project (`firebase use <project-id>`).
+2. Run `firebase deploy --only firestore:rules`.
+
+Manual fallback in Firebase Console:
 
 1. Open Firestore Database > Rules.
-2. Paste contents of [app/firestore.rules](app/firestore.rules).
+2. Paste contents of [app/firestore.rules](../app/firestore.rules).
 3. Publish rules.
-
-If/when Firebase CLI config is added later, move to automated deployment using `firebase deploy --only firestore:rules`.
 
 For backend ingestion deployment (after `cd firebase/functions && npm install`):
 

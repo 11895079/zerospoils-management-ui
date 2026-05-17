@@ -51,7 +51,15 @@ service cloud.firestore {
              && request.resource.data.device_fingerprint.size() >= 8
              && request.resource.data.device_fingerprint.size() <= 64
              && request.resource.data.platform is string
-             && request.resource.data.platform in ['android', 'ios', 'web']
+             && request.resource.data.platform in [
+               'android',
+               'ios',
+               'web',
+               'macos',
+               'windows',
+               'linux',
+               'fuchsia'
+             ]
              && request.resource.data.app_version is string
              && request.resource.data.build_number is string
              && request.resource.data.locale is string
