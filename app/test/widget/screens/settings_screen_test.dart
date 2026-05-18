@@ -450,9 +450,7 @@ void main() {
         ProviderScope(
           overrides: [
             telemetryClientProvider.overrideWithValue(telemetry),
-            demoModeProvider.overrideWith(
-              StateProvider<bool>((ref) => false),
-            ),
+            demoModeProvider.overrideWith((ref) => false),
           ],
           child: MaterialApp(home: Scaffold(body: SettingsScreen())),
         ),
@@ -487,9 +485,7 @@ void main() {
         ProviderScope(
           overrides: [
             telemetryClientProvider.overrideWithValue(telemetry),
-            demoModeProvider.overrideWith(
-              StateProvider<bool>((ref) => true),
-            ),
+            demoModeProvider.overrideWith((ref) => true),
           ],
           child: MaterialApp(home: Scaffold(body: SettingsScreen())),
         ),
@@ -520,11 +516,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            demoModeProvider.overrideWith(
-              StateProvider<bool>((ref) => false),
-            ),
-          ],
+          overrides: [demoModeProvider.overrideWith((ref) => false)],
           child: MaterialApp(home: Scaffold(body: SettingsScreen())),
         ),
       );
