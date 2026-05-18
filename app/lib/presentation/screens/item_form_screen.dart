@@ -1127,10 +1127,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         );
         ref.read(telemetryClientProvider).enqueue({
           'name': 'expiry_date_scanned',
-          'properties': {
-            'scan_success': true,
-            'date_format_detected': parsed.format,
-          },
+          'properties': {'success': true, 'format_detected': parsed.format},
         });
         return;
       }
@@ -1142,10 +1139,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           _showSnack('No expiry date detected');
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
-            'properties': {
-              'scan_success': false,
-              'date_format_detected': 'none',
-            },
+            'properties': {'success': false, 'format_detected': 'none'},
           });
           return;
         case ExpiryDateOcrFailure.permissionDenied:
@@ -1155,8 +1149,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
             'properties': {
-              'scan_success': false,
-              'date_format_detected': 'permission_denied',
+              'success': false,
+              'format_detected': 'permission_denied',
             },
           });
           return;
@@ -1168,10 +1162,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           _showSnack('Unable to scan expiry date');
           ref.read(telemetryClientProvider).enqueue({
             'name': 'expiry_date_scanned',
-            'properties': {
-              'scan_success': false,
-              'date_format_detected': 'error',
-            },
+            'properties': {'success': false, 'format_detected': 'error'},
           });
           return;
       }
