@@ -34,6 +34,21 @@ class AppColors {
   static const Color border = Color(0xFFE0E0E0);
   static const Color borderLight = Color(0xFFF0F0F0);
 
+  // Dark mode semantic palette (M4/296 baseline)
+  static const Color textPrimaryDark = Color(0xFFF2F6F2);
+  static const Color textSecondaryDark = Color(0xFFC8CED8);
+  static const Color textTertiaryDark = Color(0xFF98A2B3);
+  static const Color backgroundDark = Color(0xFF101513);
+  static const Color backgroundSecondaryDark = Color(0xFF151C19);
+  static const Color cardBackgroundDark = Color(0xFF1A201D);
+  static const Color surfaceDark = cardBackgroundDark;
+  static const Color borderDark = Color(0xFF2C3631);
+  static const Color borderLightDark = Color(0xFF3A4540);
+
+  // Dark mode state overlays
+  static const Color overlayDarkMode = Color(0x8F000000);
+  static const Color overlayLightDarkMode = Color(0x14FFFFFF);
+
   // Overlay colors
   static const Color overlayDark = Color(0x59000000); // rgba(0,0,0,0.35)
   static const Color overlayLight = Color(0x0FFFFFFF); // rgba(255,255,255,0.06)
