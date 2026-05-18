@@ -15,7 +15,7 @@ Audit and remediate dark-mode contrast/readability issues so all core screens me
 - [ ] Theme tokens updated where needed to remove hard-coded colors and improve dark-mode readability
 - [ ] Shared components updated to use semantic colors (not ad hoc overrides)
 - [ ] Widget tests added/updated for key dark-mode regressions (text/icon color resolution, surface contrast-safe pairings)
-- [ ] Manual QA checklist executed on iOS and Android (light and dark themes) with screenshots of remediated problem states
+- [ ] Manual QA checklist executed on iOS and Android (light and dark themes); screenshots are optional and not required for DoD closure
 - [ ] Telemetry event logged when users report a dark-mode readability issue from the feedback drawer: `ui_dark_mode_readability_reported`
 
 ## Out of scope
@@ -27,7 +27,7 @@ Audit and remediate dark-mode contrast/readability issues so all core screens me
 - Start from existing M4/295 token set and tighten semantic mappings (`onSurface`, `onSurfaceVariant`, `outline`, `error`, `inverse*`)
 - Prioritize remediation of small text and helper labels first (most frequent readability failures)
 - Avoid one-off inline color fixes in screen widgets; patch theme extensions and shared component styles first
-- Add screenshot-based review artifacts in PR discussion for each remediated screen group
+- If screenshots are captured during manual review, treat them as optional supporting evidence rather than a DoD requirement
 
 ## Test plan
 **Automated:**
@@ -41,7 +41,7 @@ Audit and remediate dark-mode contrast/readability issues so all core screens me
 2. Verify title/body/caption/helper/disabled text is readable without squinting on both iOS and Android devices
 3. Trigger validation and error states in forms and verify readability
 4. Open feedback drawer and verify all labels, placeholders, and buttons are legible
-5. Compare before/after screenshots for remediated states and attach to PR
+5. If you choose to capture screenshots, compare before/after states and attach them to the PR as optional evidence
 
 ## Dependencies
 - M4/295 dark mode theme toggle (implemented)

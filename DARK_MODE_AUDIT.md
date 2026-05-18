@@ -121,7 +121,7 @@ Updated: May 18, 2026
   - [x] Widget tests for color resolution in both themes
   - [x] Manual QA on iOS simulator launch/smoke verified
   - [ ] Manual QA on Android emulator (light + dark)
-  - [ ] Screenshot before/after for remediated areas (optional when manual QA sign-off is explicitly recorded)
+  - [ ] Screenshot before/after for remediated areas (optional supporting evidence only)
 
 ## Issues Found & Fixes (To Be Updated)
 
@@ -145,7 +145,7 @@ Updated: May 18, 2026
 **Manual QA:**
 - [x] iOS: App launch/smoke in simulator verified
 - [ ] Android: Navigate all 10 screens, light → dark toggle
-- [ ] Screenshot before/after for each remediated screen (optional if manual verification checklist is completed and acknowledged)
+- [ ] Screenshot before/after for each remediated screen (optional supporting evidence only)
 - [ ] Verify no regression in light mode
 
 ## Telemetry Addition
@@ -156,4 +156,4 @@ Updated: May 18, 2026
 
 ---
 
-**Next Step:** Complete Android manual QA and record manual verification checklist completion; screenshots can be added as supporting evidence but are not required for DoD closure
+**Next Step:** Complete Android manual QA and record manual verification checklist completion; screenshots are optional supporting evidence only
