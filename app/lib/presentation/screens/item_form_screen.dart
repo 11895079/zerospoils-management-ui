@@ -1846,9 +1846,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
+                              key: const Key('item_form_category_value'),
                               _selectedUserCategory?.name ??
                                   _selectedCategory.displayName,
-                              style: AppTextStyles.body,
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ),
                           Icon(
@@ -2531,7 +2532,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               children: [
                 Text(
                   displayName,
-                  style: AppTextStyles.h4,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2551,6 +2554,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   Widget _buildFormGroup({required String label, required Widget child}) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
@@ -2558,7 +2563,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         children: [
           Text(
             label,
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           child,

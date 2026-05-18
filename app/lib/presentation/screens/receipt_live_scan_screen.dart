@@ -361,7 +361,9 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                               ? 'No sale items locked yet'
                               : '${_liveItems.length} sale items highlighted live',
                           key: const Key('receipt_live_scan_summary'),
-                          style: AppTextStyles.h4,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       IconButton(
@@ -383,16 +385,12 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Green boxes mark sale lines the parser currently trusts. Savings, HST, totals, and rewards lines are excluded live.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Hold the full width of the receipt steady in frame. Multi-line items stay grouped when the description and price line remain visible together.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const Spacer(),
                   Row(
@@ -500,7 +498,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                   _liveItems.isEmpty
                       ? 'Point the camera at receipt line items'
                       : 'Live AR active — ${_liveItems.length} item${_liveItems.length == 1 ? '' : 's'} detected',
-                  style: AppTextStyles.body,
+                  style: theme.textTheme.bodyMedium,
                 ),
                 if (_liveText != null && _liveText!.isNotEmpty) ...[
                   const SizedBox(height: AppSpacing.xs),
@@ -509,9 +507,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                     key: const Key('receipt_live_scan_ocr_text'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
               ],

@@ -217,6 +217,29 @@ void main() {
       );
     });
 
+    testWidgets('uses dark theme color for THIS WEEK bucket heading', (
+      WidgetTester tester,
+    ) async {
+      final now = DateTime.now();
+      final items = [
+        buildItem(id: 'week', expiryDate: now.add(const Duration(days: 3))),
+      ];
+      final repository = MockItemRepository(items);
+      final telemetry = TestTelemetryClient();
+
+      await pumpExpiringScreen(
+        tester,
+        repository: repository,
+        telemetry: telemetry,
+        themeMode: ThemeMode.dark,
+      );
+
+      final heading = tester.widget<Text>(find.text('THIS WEEK').first);
+      final theme = Theme.of(tester.element(find.byType(ExpiringTodayScreen)));
+
+      expect(heading.style?.color, theme.textTheme.headlineMedium?.color);
+    });
+
     testWidgets('renders sections in expected order', (
       WidgetTester tester,
     ) async {

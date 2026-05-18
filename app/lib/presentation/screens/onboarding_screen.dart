@@ -81,17 +81,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _emitTelemetry('onboarding_completed', {'pages': _numPages});
 
     if (!mounted) return;
-    final goRouter = GoRouter.maybeOf(context);
-    if (goRouter != null) {
-      goRouter.go('/');
-      return;
-    }
-
-    // In non-router contexts (e.g., onboarding opened from Settings/Drawer),
-    // close the screen so users still return to the app after completion.
     final navigator = Navigator.maybeOf(context);
     if (navigator != null && navigator.canPop()) {
       navigator.pop(true);
+      return;
+    }
+
+    final goRouter = GoRouter.maybeOf(context);
+    if (goRouter != null) {
+      goRouter.go('/');
       return;
     }
 
@@ -161,6 +159,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final appBarForeground =
+        theme.appBarTheme.foregroundColor ?? theme.colorScheme.onPrimary;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Welcome', key: Key('onboarding_appbar_title')),
@@ -172,9 +174,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: appBarForeground),
             onPressed: _skipOnboarding,
             key: const Key('onboarding_skip_button'),
-            child: const Text('Skip', style: TextStyle(color: Colors.white)),
+            child: const Text('Skip'),
           ),
         ],
       ),
@@ -227,7 +230,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           const SizedBox(height: 32),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Icon(Icons.check_circle, size: 80, color: Colors.green),
+            child: Icon(Icons.check_circle, size: 80),
           ),
           Text(
             'Track inventory\nSmart reminders\nShopping flow + waste insights',
@@ -541,6 +544,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildBottomNav() {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -562,7 +567,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     shape: BoxShape.circle,
                     color: _currentPage == index
                         ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                        : theme.colorScheme.outline,
                   ),
                 ),
               ),

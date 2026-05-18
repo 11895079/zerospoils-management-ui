@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/screens/onboarding_screen.dart';
 
 const openOnboardingButtonKey = Key('open_onboarding_button');
@@ -46,6 +47,36 @@ void main() {
       // Verify welcome screen is shown
       expect(find.byKey(const Key('onboarding_title')), findsOneWidget);
       expect(find.byKey(const Key('onboarding_appbar_title')), findsOneWidget);
+    });
+
+    testWidgets('Uses dark theme colors in dark mode', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.dark,
+            home: const OnboardingScreen(),
+          ),
+        ),
+      );
+
+      final theme = Theme.of(tester.element(find.byType(OnboardingScreen)));
+      final title = tester.widget<Text>(find.byKey(const Key('onboarding_title')));
+      final skipButton = tester.widget<TextButton>(
+        find.byKey(const Key('onboarding_skip_button')),
+      );
+
+      expect(theme.brightness, Brightness.dark);
+      expect(title.style?.color, theme.textTheme.headlineLarge?.color);
+      expect(
+        skipButton.style?.foregroundColor?.resolve({}),
+        theme.appBarTheme.foregroundColor,
+      );
     });
 
     testWidgets('Navigates between pages with PageView', (
@@ -258,6 +289,101 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
     });
+
+    testWidgets(
+      'Skip dismisses onboarding when opened from nested navigator with GoRouter present',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        const openNestedOnboardingKey = Key('open_nested_onboarding_button');
+        final testRouter = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    key: openNestedOnboardingKey,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Open nested onboarding'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp.router(routerConfig: testRouter)),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(openNestedOnboardingKey));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('onboarding_skip_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(openNestedOnboardingKey), findsOneWidget);
+
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('onboarding_complete'), true);
+      },
+    );
+
+    testWidgets(
+      'Continue dismisses onboarding when opened from nested navigator with GoRouter present',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        const openNestedOnboardingKey = Key('open_nested_onboarding_button');
+        final testRouter = GoRouter(
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    key: openNestedOnboardingKey,
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text('Open nested onboarding'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(child: MaterialApp.router(routerConfig: testRouter)),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(openNestedOnboardingKey));
+        await tester.pumpAndSettle();
+
+        await _goToPermissionsPage(tester);
+        await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(openNestedOnboardingKey), findsOneWidget);
+
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getBool('onboarding_complete'), true);
+      },
+    );
 
     testWidgets('Bottom navigation shows correct page indicator', (
       WidgetTester tester,

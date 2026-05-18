@@ -561,6 +561,58 @@ void main() {
     expect(decoration.color, theme.colorScheme.surfaceContainerHigh);
   });
 
+  testWidgets('form group labels use dark theme text colors', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await pumpItemForm(tester, themeMode: ThemeMode.dark);
+
+    final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
+    final nameLabel = tester.widget<Text>(find.text('Name *').first);
+
+    expect(nameLabel.style?.color, theme.textTheme.titleMedium?.color);
+  });
+
+  testWidgets('icon preview title uses dark theme text color', (tester) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await pumpItemForm(tester, themeMode: ThemeMode.dark);
+
+    final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
+    final previewTitle = tester.widget<Text>(find.text('New item').first);
+
+    expect(previewTitle.style?.color, theme.textTheme.titleLarge?.color);
+  });
+
+  testWidgets('category selector value uses dark theme text color', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await pumpItemForm(tester, themeMode: ThemeMode.dark);
+
+    final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
+    final categoryValue = tester.widget<Text>(
+      find.byKey(const Key('item_form_category_value')),
+    );
+
+    expect(categoryValue.style?.color, theme.textTheme.bodyMedium?.color);
+  });
+
   testWidgets('brand field is persisted when saving a new item', (
     tester,
   ) async {

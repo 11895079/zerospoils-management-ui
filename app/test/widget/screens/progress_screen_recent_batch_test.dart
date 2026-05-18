@@ -207,4 +207,65 @@ void main() {
       theme.appBarTheme.backgroundColor,
     );
   });
+
+  testWidgets('Progress section headers use dark theme text colors', (
+    WidgetTester tester,
+  ) async {
+    final fakeStats = ProgressStats(
+      totalItems: 1,
+      availableItems: 1,
+      consumedItems: 0,
+      wastedItems: 0,
+      categoryCounts: {ItemCategory.dairy: 1},
+      locationCounts: {StorageLocation.fridge: 1},
+      typeCounts: {ItemType.raw: 1},
+      expiringTodayCount: 0,
+      expiringThisWeekCount: 0,
+      expiringSoonCount: 0,
+      expiredCount: 0,
+      noExpiryCount: 1,
+      totalValue: 4.99,
+      consumedValue: 0,
+      wastedValue: 0,
+      savedValue: 0,
+      addedLast7Days: 1,
+      addedLast30Days: 1,
+      updatedLast7Days: 0,
+      updatedLast30Days: 0,
+      noWasteStreak: StreakData(
+        badgeType: BadgeType.noWasteWeek,
+        streakDays: 1,
+        streakStartDate: DateTime(2026, 2, 8),
+        lastActivityDate: DateTime(2026, 2, 9),
+        isActive: false,
+      ),
+      badgeProgress: const {},
+      telemetry: TelemetryAggregates.empty(),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(MockItemRepository(const [])),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            MockReceiptBatchRepository(const []),
+          ),
+          progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const ProgressScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final heading = tester.widget<Text>(find.text('Summary').first);
+    final theme = Theme.of(tester.element(find.byType(ProgressScreen)));
+
+    expect(heading.style?.color, theme.textTheme.headlineMedium?.color);
+  });
 }

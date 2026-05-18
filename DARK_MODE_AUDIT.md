@@ -4,16 +4,25 @@
 Started: May 18, 2026
 Updated: May 18, 2026
 
+## Latest Manual QA Snapshot
+- Chrome device pass completed for core screens.
+- Resolved during this pass:
+  - Add/Edit Item title low contrast in dark mode.
+  - Add/Edit Item category value text low contrast in dark mode.
+- Follow-up pending:
+  - Android device manual verification.
+  - Additional iOS device verification.
+
 ## Audit Scope (10 Screens)
 
 ### Screen Audit Checklist
 
-- [ ] **1. Onboarding** (app/lib/presentation/screens/onboarding_screen.dart)
+- [x] **1. Onboarding** (app/lib/presentation/screens/onboarding_screen.dart)
   - Primary text contrast in dark
   - Button contrast
   - Background/surface pairing
-  - Issues found: Pending manual walkthrough
-  - Fixes needed: TBD
+  - Issues found: Automated dark-theme coverage added; manual walkthrough deferred
+  - Fixes needed: None in automated pass
 
 - [x] **2. Inventory** (app/lib/presentation/screens/inventory_screen.dart)
   - Item list text color
@@ -26,8 +35,8 @@ Updated: May 18, 2026
   - Form labels (primary)
   - Helper text/hints (secondary)
   - Validation error messages
-  - Issues found: No contrast regression in automated dark-mode test flow
-  - Fixes needed: None identified in current pass
+  - Issues found: Manual QA found low-contrast title and category value text in dark mode
+  - Fixes needed: Resolved by switching preview title and category value text to theme-driven dark-safe colors
 
 - [x] **4. Item Detail** (app/lib/presentation/screens/item_detail_screen.dart)
   - Title/body text contrast
@@ -100,7 +109,7 @@ Updated: May 18, 2026
 ## Remediation Strategy
 
 1. **Phase 1: Audit & Document**
-   - [ ] Manually toggle dark mode on all 10 screens
+  - [ ] Manually toggle dark mode on all 10 screens on Android + iOS devices (Chrome pass completed)
    - [ ] Screenshot problematic text areas
    - [ ] Identify hardcoded colors vs theme colors
    - [ ] Document contrast ratios (use online checker if needed)
@@ -112,15 +121,15 @@ Updated: May 18, 2026
   - [x] Test ColorScheme.fromSeed brightness impact
 
 3. **Phase 3: Widget Updates**
-   - [ ] Replace hardcoded colors with theme colors
+  - [x] Replace hardcoded colors with theme colors
    - [ ] Update shared components (_buildToggleTile, _buildItemCard, etc.)
    - [ ] Fix badge/chip foreground/background pairs
-   - [ ] Test all components in light + dark
+  - [ ] Test all components in light + dark on Android + iOS manual pass
 
 4. **Phase 4: Testing**
   - [x] Widget tests for color resolution in both themes
   - [x] Manual QA on iOS simulator launch/smoke verified
-  - [ ] Manual QA on Android emulator (light + dark)
+  - [ ] Manual QA on Android emulator (light + dark) - deferred
   - [ ] Screenshot before/after for remediated areas (optional supporting evidence only)
 
 ## Issues Found & Fixes (To Be Updated)
@@ -140,20 +149,21 @@ Updated: May 18, 2026
 - [x] Widget test: TextStyle resolution in dark mode (4+ test groups)
 - [x] Widget test: Card/chip background + text pair contrast
 - [x] Widget test: Error state visibility in dark
-- [ ] Unit test: Theme color brightness validation
+- [x] Unit test: Theme color brightness validation
 
 **Manual QA:**
 - [x] iOS: App launch/smoke in simulator verified
-- [ ] Android: Navigate all 10 screens, light → dark toggle
+- [x] Chrome device: manual dark-mode walkthrough completed for reported screens
+- [ ] Android: Navigate all 10 screens, light -> dark toggle - deferred to follow-up verification pass
 - [ ] Screenshot before/after for each remediated screen (optional supporting evidence only)
 - [ ] Verify no regression in light mode
 
 ## Telemetry Addition
 
-- [ ] Add `ui_dark_mode_readability_reported` event handler
-- [ ] Wire feedback drawer to enqueue event with { screen, issue_description }
-- [ ] Test telemetry in demo + live modes
+- [x] Add `ui_dark_mode_readability_reported` event handler
+- [x] Wire feedback drawer to enqueue event with { screen, issue_description }
+- [x] Test telemetry in demo + live modes
 
 ---
 
-**Next Step:** Complete Android manual QA and record manual verification checklist completion; screenshots are optional supporting evidence only
+**Next Step:** Automated verification is complete; manual Android QA is deferred to a follow-up verification pass

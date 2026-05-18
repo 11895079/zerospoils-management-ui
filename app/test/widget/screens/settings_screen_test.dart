@@ -426,5 +426,35 @@ void main() {
         isFalse,
       );
     });
+
+    testWidgets('Dark mode readability category emits telemetry event', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.feedback_outlined);
+      await tester.tap(
+        find.ancestor(
+          of: find.byIcon(Icons.feedback_outlined),
+          matching: find.byType(ListTile),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('feedback_category_field')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dark mode readability').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        telemetry.events.any(
+          (event) => event['name'] == 'ui_dark_mode_readability_reported',
+        ),
+        isTrue,
+      );
+    });
   });
 }
