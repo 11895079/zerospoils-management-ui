@@ -15,7 +15,7 @@ import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
-  show TelemetryClient, telemetryClientProvider;
+    show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/ocr/expiry_ocr_capture_launcher.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 
