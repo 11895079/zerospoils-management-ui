@@ -93,7 +93,9 @@ void main() {
     expect(find.byType(Scaffold), findsOneWidget);
   });
 
-  testWidgets('batch section headings use dark theme text colors', (tester) async {
+  testWidgets('batch section headings use dark theme text colors', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -119,7 +121,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final heading = tester.widget<Text>(find.text('Batch details').first);
-    final theme = Theme.of(tester.element(find.byType(ReceiptBatchCaptureScreen)));
+    final theme = Theme.of(
+      tester.element(find.byType(ReceiptBatchCaptureScreen)),
+    );
 
     expect(heading.style?.color, theme.textTheme.headlineMedium?.color);
   });

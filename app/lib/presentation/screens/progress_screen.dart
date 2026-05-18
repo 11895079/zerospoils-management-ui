@@ -649,10 +649,7 @@ class _BadgeProgressTile extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                '$percentage%',
-                style: theme.textTheme.bodyMedium,
-              ),
+              Text('$percentage%', style: theme.textTheme.bodyMedium),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),

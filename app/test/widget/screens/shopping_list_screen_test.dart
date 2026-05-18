@@ -275,7 +275,9 @@ void main() {
       themeMode: ThemeMode.dark,
     );
 
-    final heading = tester.widget<Text>(find.text('Your shopping list is empty'));
+    final heading = tester.widget<Text>(
+      find.text('Your shopping list is empty'),
+    );
     final theme = Theme.of(tester.element(find.byType(ShoppingListScreen)));
 
     expect(heading.style?.color, theme.textTheme.titleLarge?.color);

@@ -224,11 +224,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final theme = Theme.of(tester.element(find.byKey(const Key('dark_text_sample'))));
+      final theme = Theme.of(
+        tester.element(find.byKey(const Key('dark_text_sample'))),
+      );
 
-      expect(theme.textTheme.bodyMedium?.color, app_palette.AppColors.textPrimaryDark);
-      expect(theme.textTheme.bodySmall?.color, app_palette.AppColors.textSecondaryDark);
-      expect(theme.textTheme.labelSmall?.color, app_palette.AppColors.textTertiaryDark);
+      expect(
+        theme.textTheme.bodyMedium?.color,
+        app_palette.AppColors.textPrimaryDark,
+      );
+      expect(
+        theme.textTheme.bodySmall?.color,
+        app_palette.AppColors.textSecondaryDark,
+      );
+      expect(
+        theme.textTheme.labelSmall?.color,
+        app_palette.AppColors.textTertiaryDark,
+      );
     });
 
     testWidgets('dark input decoration uses dark surfaces and borders', (
@@ -246,14 +257,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final theme = Theme.of(tester.element(find.byKey(const Key('dark_text_field'))));
+      final theme = Theme.of(
+        tester.element(find.byKey(const Key('dark_text_field'))),
+      );
 
-      expect(theme.inputDecorationTheme.fillColor, app_palette.AppColors.backgroundSecondaryDark);
+      expect(
+        theme.inputDecorationTheme.fillColor,
+        app_palette.AppColors.backgroundSecondaryDark,
+      );
       expect(
         theme.inputDecorationTheme.enabledBorder?.borderSide.color,
         app_palette.AppColors.borderDark,
       );
-      expect(theme.inputDecorationTheme.labelStyle?.color, app_palette.AppColors.textSecondaryDark);
+      expect(
+        theme.inputDecorationTheme.labelStyle?.color,
+        app_palette.AppColors.textSecondaryDark,
+      );
     });
 
     testWidgets('dark scaffold, card, and divider use shared surface tokens', (
@@ -261,16 +280,17 @@ void main() {
     ) async {
       await tester.pumpWidget(
         buildDarkHarness(
-          const Scaffold(
-            body: Card(child: SizedBox(height: 20, width: 20)),
-          ),
+          const Scaffold(body: Card(child: SizedBox(height: 20, width: 20))),
         ),
       );
       await tester.pumpAndSettle();
 
       final theme = Theme.of(tester.element(find.byType(Card)));
 
-      expect(theme.scaffoldBackgroundColor, app_palette.AppColors.backgroundDark);
+      expect(
+        theme.scaffoldBackgroundColor,
+        app_palette.AppColors.backgroundDark,
+      );
       expect(theme.cardColor, app_palette.AppColors.cardBackgroundDark);
       expect(theme.dividerColor, app_palette.AppColors.borderDark);
     });
@@ -284,7 +304,10 @@ void main() {
             bottomNavigationBar: BottomNavigationBar(
               items: [
                 BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-                BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
+                ),
               ],
             ),
           ),

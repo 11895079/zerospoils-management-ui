@@ -66,7 +66,9 @@ void main() {
       );
 
       final theme = Theme.of(tester.element(find.byType(OnboardingScreen)));
-      final title = tester.widget<Text>(find.byKey(const Key('onboarding_title')));
+      final title = tester.widget<Text>(
+        find.byKey(const Key('onboarding_title')),
+      );
       final skipButton = tester.widget<TextButton>(
         find.byKey(const Key('onboarding_skip_button')),
       );

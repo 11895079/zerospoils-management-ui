@@ -82,10 +82,7 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
     if (value == _darkModeReadabilityCategory) {
       widget.telemetry.enqueue({
         'name': 'ui_dark_mode_readability_reported',
-        'properties': {
-          'source': widget.source,
-          'category': value,
-        },
+        'properties': {'source': widget.source, 'category': value},
       });
     }
   }

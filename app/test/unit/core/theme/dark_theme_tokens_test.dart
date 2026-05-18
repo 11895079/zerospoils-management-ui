@@ -27,7 +27,10 @@ void main() {
 
     test('dark semantic surfaces remain distinct from text tokens', () {
       expect(AppColors.cardBackgroundDark, isNot(AppColors.textPrimaryDark));
-      expect(AppColors.backgroundSecondaryDark, isNot(AppColors.textSecondaryDark));
+      expect(
+        AppColors.backgroundSecondaryDark,
+        isNot(AppColors.textSecondaryDark),
+      );
       expect(AppColors.borderDark, isNot(AppColors.textTertiaryDark));
     });
   });

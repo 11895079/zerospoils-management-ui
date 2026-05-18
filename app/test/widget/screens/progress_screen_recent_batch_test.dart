@@ -246,7 +246,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          itemRepositoryProvider.overrideWithValue(MockItemRepository(const [])),
+          itemRepositoryProvider.overrideWithValue(
+            MockItemRepository(const []),
+          ),
           receiptBatchRepositoryProvider.overrideWithValue(
             MockReceiptBatchRepository(const []),
           ),
