@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/core/theme/app_colors.dart';
 import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
+import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/settings_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
@@ -425,6 +426,126 @@ void main() {
         telemetry.events.any((event) => event['name'] == 'feedback_submitted'),
         isFalse,
       );
+    });
+  });
+
+  group('SettingsScreen - Demo Mode Telemetry & Accessibility', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+        'demo_mode_enabled': false,
+      });
+    });
+
+    testWidgets('Demo mode toggle emits telemetry event with enabled=true', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            telemetryClientProvider.overrideWithValue(telemetry),
+            demoModeProvider.overrideWithProvider(
+              StateProvider<bool>((ref) => false),
+            ),
+          ],
+          child: MaterialApp(home: Scaffold(body: SettingsScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Scroll to demo mode toggle
+      await scrollToIcon(tester, Icons.bug_report);
+
+      // Toggle demo mode on
+      await tester.tap(switchForIcon(Icons.bug_report));
+      await tester.pump();
+
+      // Verify telemetry event was emitted
+      expect(
+        telemetry.events.any(
+          (event) =>
+              event['name'] == 'demo_mode_toggled' &&
+              event['properties']['enabled'] == true &&
+              event['properties']['active_namespace'] == 'demo',
+        ),
+        isTrue,
+      );
+    });
+
+    testWidgets('Demo mode toggle emits telemetry event with enabled=false', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            telemetryClientProvider.overrideWithValue(telemetry),
+            demoModeProvider.overrideWithProvider(
+              StateProvider<bool>((ref) => true),
+            ),
+          ],
+          child: MaterialApp(home: Scaffold(body: SettingsScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Scroll to demo mode toggle
+      await scrollToIcon(tester, Icons.bug_report);
+
+      // Toggle demo mode off
+      await tester.tap(switchForIcon(Icons.bug_report));
+      await tester.pump();
+
+      // Verify telemetry event was emitted with correct properties
+      expect(
+        telemetry.events.any(
+          (event) =>
+              event['name'] == 'demo_mode_toggled' &&
+              event['properties']['enabled'] == false &&
+              event['properties']['active_namespace'] == 'live',
+        ),
+        isTrue,
+      );
+    });
+
+    testWidgets('Demo mode toggle has accessibility semantic labels', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            demoModeProvider.overrideWithProvider(
+              StateProvider<bool>((ref) => false),
+            ),
+          ],
+          child: MaterialApp(home: Scaffold(body: SettingsScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Scroll to demo mode toggle
+      await scrollToIcon(tester, Icons.bug_report);
+
+      // Verify switch exists for demo mode
+      expect(switchForIcon(Icons.bug_report), findsOneWidget);
+
+      // Check that demo mode ListTile and its semantics are present
+      final demoModeTile = tileForIcon(Icons.bug_report);
+      expect(demoModeTile, findsOneWidget);
+
+      // Verify Semantics widgets are present for accessibility
+      final semanticsWidgets = find.descendant(
+        of: demoModeTile,
+        matching: find.byType(Semantics),
+      );
+      expect(semanticsWidgets, findsWidgets);
     });
   });
 }
