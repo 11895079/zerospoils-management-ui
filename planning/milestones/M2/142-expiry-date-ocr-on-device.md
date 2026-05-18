@@ -25,7 +25,7 @@ Enable users to scan product labels with device camera and auto-extract expiry d
 - [x] Accessibility basics: camera button labeled; successful OCR result announced
 
 - [x] Google ML Kit Text Recognition integrated for supported mobile platforms
-- [ ] Unit/widget/integration tests added or updated
+- [x] Unit/widget/integration tests added or updated
 
 ## Out of scope
 - Full receipt OCR (deferred to M6 Pro tier)
@@ -49,7 +49,7 @@ Enable users to scan product labels with device camera and auto-extract expiry d
 - Unit test: Date parsing logic with various formats ("01/15/2026", "Best By Jan 15 2026", "EXP 15-01-26")
 - Unit test: False positive rejection (dates >2 years away, invalid dates)
 - [x] Widget test: Camera button appears, shows guidance, and can pre-fill the detected date via mocked OCR service
-- [ ] Integration test: Mock ML Kit response → verify date pre-filled
+- [x] Integration test: launcher flow (`integration_test/expiry_ocr_launcher_flow_test.dart`) verifies guidance flow, OCR result handoff, date pre-fill, and telemetry payload contract `{ success, format_detected }`
 
 **Manual:**
 1. Tap camera button in Add Item form (verify permission prompt on first use)

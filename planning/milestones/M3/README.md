@@ -4,7 +4,7 @@
 
 **Scope:**
 - Reminder preferences and notification integration (180, 190, 200)
-- Onboarding polish with Zesto mascot intro and interactive progression (204)
+- Onboarding polish with Zesto mascot intro and interactive progression (204) — **deferred to M4**
 - Date format preference (205)
 - Expiry OCR reliability, packaged-item fast add, and barcode/reference-data follow-up (196, 197, 199, 206)
 - Haptic and sound scan feedback settings (203)
@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** May 6, 2026 — **Progress:** 15/24 issues complete (62%); added issues 203 (haptic/sound settings) and 204 (onboarding polish with Zesto); expanded issue 201 to include savings/tax/total amount extraction
+**Last Updated:** May 17, 2026 — **Progress:** 16/24 issues complete (67%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203/206 remain partial
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -59,7 +59,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **201** | Receipt line-item extraction with AR overlay | ⚠️ Partial | — | `ReceiptLiveScanScreen` with live AR overlay (green boxes only), `ReceiptRowClassification` pipeline (tax/total/payment/etc.), `ReceiptParseResult` with `.rows`/`.acceptedRows`/`.rejectedRows`. Missing: tri-color AR coding (amber/grey for excluded lines), hidden-lines section in review screen, promote/demote UI for excluded rows |
 | **202** | Fresh produce packaged item recognition | ⚠️ Partial | — | `FreshProduceOcrParser` fully implemented (fish/seafood/meat/deli, weight, price/kg, pack date, best-before), integrated in `PackagedItemFastAddScreen` (`packageLabelScan` stage). Missing: per-field confidence indicators on confirmation screen, fresh-produce-specific telemetry events |
 | **203** | Haptic and sound feedback settings | ⚠️ Partial | — | `FeedbackService` (prefs store + haptic/beep dispatch), `FeedbackRuntime` (static lazy-init accessor for non-Riverpod screens), and `FeedbackSettingsNotifier` Riverpod provider all implemented; all four scanner screens wired. Missing: "Feedback & Sounds" section in Settings UI, per-scanner individual toggles, and beep volume slider |
-| **204** | Onboarding polish with Zesto mascot intro | ⏳ Not Started | — | Enhance onboarding flow from 6 to 7 screens with Zesto animations, interactive reactions, badge preview, and post-onboarding celebration. Primes users for gamification; all animations use Dart AnimationController |
+| **204** | Onboarding polish with Zesto mascot intro | ➡️ Moved → M4 | — | Issue file moved to `planning/milestones/M4/`; promoted as user-activation/beta-retention work |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
 | **206** | Downloadable reference-data update packs | ⚠️ Stub Only | — | `LocalBarcodeCatalog` loads bundled `barcode_seed_ca.v2.json` from assets (design is update-pack compatible per docs). No remote manifest fetch, pack validation, atomic activation, or rollback implemented yet |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |
@@ -68,6 +68,6 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **240** | Data export/delete (privacy baseline) | ✅ Complete | [#78](https://github.com/11895079/zerospoils/pull/78) | CSV/JSON export + delete-all with confirmation; BackupRestoreService; Settings → Privacy & Data section; telemetry events |
 | **250** | Telemetry instrumentation for core funnel | ✅ Complete | [#81](https://github.com/11895079/zerospoils/pull/81) | Analytics consent toggle + schema validation + screen view events (22 new tests, 262/262 passing); merged |
 | **300** | Accountability/achievement badges | ✅ Complete (Foundation) | — | Domain models (BadgeType, BadgeProgress) + BadgeService + tests; UI in progress_screen.dart |
-| **350** | Zesto Phase 1 core triggers | ⏳ Not Started | — | Depends on badge triggers and UI hooks |
+| **350** | Zesto Phase 1 core triggers | ➡️ Moved → M4 | — | Issue file moved to `planning/milestones/M4/`; deferred alongside 204 |
 | **360** | Firebase integration (mobile tooling) | ✅ Complete | [#96](https://github.com/11895079/zerospoils/pull/96) | Crashlytics + Remote Config + FCM foreground/background handlers + permission request + device token + onMessageOpenedApp; all integrated in `firebase_bootstrap_service.dart` |
-| **361** | Firebase App Distribution — Tester API | ⏳ Not Started | — | CI upload to App Distribution on beta tags; Tester SDK for in-app update checks and shake-to-feedback |
+| **361** | Firebase App Distribution — Tester API | ✅ Complete | — | `AppDistributionService` implemented with `firebase_app_distribution: ^1.2.0`; `AppDistributionClient` abstraction + `_FirebaseAppDistributionClient` prod impl; `BetaFeedbackButton` widget; `distribute-beta-android.yml` + `distribute-beta-ios.yml` CI workflows both operational |
