@@ -14,6 +14,8 @@ import 'package:zerospoils/core/ocr/expiry_date_ocr_service.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
 import 'package:zerospoils/domain/utils/expiry_date_parser.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
+import 'package:zerospoils/presentation/di/service_locator.dart'
+  show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/ocr/expiry_ocr_capture_launcher.dart';
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 
@@ -71,6 +73,7 @@ void main() {
         ),
       ),
     );
+    final telemetryClient = TelemetryClient(consentEnabled: true);
 
     try {
       await tester.pumpWidget(
@@ -82,6 +85,7 @@ void main() {
             dateFormatPreferenceProvider.overrideWith(
               (ref) async => 'DD/MM/YYYY',
             ),
+            telemetryClientProvider.overrideWithValue(telemetryClient),
             expiryOcrCaptureLauncherProvider.overrideWithValue(
               fakeLauncher.call,
             ),
@@ -109,6 +113,15 @@ void main() {
         find.byKey(const Key('item_form_expiry_date_value')),
       );
       expect(expiryText.data, 'Expires: 2026-04-21');
+
+      final scanEvents = telemetryClient.events
+          .where((event) => event['name'] == 'expiry_date_scanned')
+          .toList();
+      expect(scanEvents.length, 1);
+      final properties =
+          scanEvents.single['properties'] as Map<String, dynamic>;
+      expect(properties['success'], true);
+      expect(properties['format_detected'], 'DD/MM/YYYY');
     } finally {
       debugDefaultTargetPlatformOverride = null;
       tester.view.resetPhysicalSize();
