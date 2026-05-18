@@ -450,7 +450,7 @@ void main() {
         ProviderScope(
           overrides: [
             telemetryClientProvider.overrideWithValue(telemetry),
-            demoModeProvider.overrideWithProvider(
+            demoModeProvider.overrideWith(
               StateProvider<bool>((ref) => false),
             ),
           ],
@@ -464,7 +464,7 @@ void main() {
 
       // Toggle demo mode on
       await tester.tap(switchForIcon(Icons.bug_report));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Verify telemetry event was emitted
       expect(
@@ -487,7 +487,7 @@ void main() {
         ProviderScope(
           overrides: [
             telemetryClientProvider.overrideWithValue(telemetry),
-            demoModeProvider.overrideWithProvider(
+            demoModeProvider.overrideWith(
               StateProvider<bool>((ref) => true),
             ),
           ],
@@ -501,7 +501,7 @@ void main() {
 
       // Toggle demo mode off
       await tester.tap(switchForIcon(Icons.bug_report));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Verify telemetry event was emitted with correct properties
       expect(
@@ -521,7 +521,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            demoModeProvider.overrideWithProvider(
+            demoModeProvider.overrideWith(
               StateProvider<bool>((ref) => false),
             ),
           ],

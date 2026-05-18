@@ -29,7 +29,7 @@ Provide a Settings toggle that swaps between a demo database and the live databa
   - Include items with notes, photos (sample images), batch codes, costs for realistic demo experience
 - [x] Telemetry: `demo_mode_toggled` (properties: `enabled`, `active_namespace`)
   - Implemented: Event fires on toggle with properties { enabled: bool, active_namespace: 'demo'|'live' }
-  - Test coverage: Unit tests verify event emission with correct payload
+  - Test coverage: Widget tests verify event emission with correct payload
 - [x] Offline-first verified
 - [x] Accessibility basics (labels, contrast, tap targets)
   - Implemented: Semantics wrapper for toggle with labels

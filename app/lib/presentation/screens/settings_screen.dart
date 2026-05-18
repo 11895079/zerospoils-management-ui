@@ -671,7 +671,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             Semantics(
               label: '$label: ${value ? "on" : "off"}',
-              enabled: true,
+              enabled: onChanged != null,
               child: Switch(value: value, onChanged: onChanged),
             ),
           ],
