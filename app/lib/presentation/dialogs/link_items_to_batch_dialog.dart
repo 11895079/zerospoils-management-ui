@@ -168,24 +168,27 @@ class _LinkItemsToBatchDialogState
                           width: isSelected ? 2 : 1,
                         ),
                       ),
-                      child: CheckboxListTile(
-                        key: Key('link_item_checkbox_${item.id}'),
-                        value: isSelected,
-                        onChanged: (value) {
-                          setState(() {
-                            if (value ?? false) {
-                              _selectedItemIds.add(item.id);
-                            } else {
-                              _selectedItemIds.remove(item.id);
-                            }
-                          });
-                        },
-                        title: Text(item.name, style: AppTextStyles.body),
-                        subtitle: Text(
-                          '${item.category.toString().split('.').last} • ${item.status.toString().split('.').last}',
-                          style: AppTextStyles.caption,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: CheckboxListTile(
+                          key: Key('link_item_checkbox_${item.id}'),
+                          value: isSelected,
+                          onChanged: (value) {
+                            setState(() {
+                              if (value ?? false) {
+                                _selectedItemIds.add(item.id);
+                              } else {
+                                _selectedItemIds.remove(item.id);
+                              }
+                            });
+                          },
+                          title: Text(item.name, style: AppTextStyles.body),
+                          subtitle: Text(
+                            '${item.category.toString().split('.').last} • ${item.status.toString().split('.').last}',
+                            style: AppTextStyles.caption,
+                          ),
+                          controlAffinity: ListTileControlAffinity.leading,
                         ),
-                        controlAffinity: ListTileControlAffinity.leading,
                       ),
                     );
                   },

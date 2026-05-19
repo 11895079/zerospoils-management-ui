@@ -347,6 +347,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ref.read(demoModeProvider.notifier).state = value;
                 await _persistDemoMode(value);
                 ref.invalidate(itemsFutureProvider);
+                // Emit telemetry event for demo mode toggle
+                ref.read(telemetryClientProvider).enqueue({
+                  'name': 'demo_mode_toggled',
+                  'properties': {
+                    'enabled': value,
+                    'active_namespace': value ? 'demo' : 'live',
+                  },
+                });
                 if (!context.mounted) return;
                 _showSnack(
                   context,
@@ -598,7 +606,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ],
       ),
-      child: Column(children: _withDividers(children)),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(children: _withDividers(children)),
+      ),
     );
   }
 
@@ -643,23 +654,31 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }) {
     final theme = Theme.of(context);
 
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: theme.colorScheme.onSurface),
-      title: Text(label, style: theme.textTheme.bodyMedium),
-      subtitle: subtitle == null
-          ? null
-          : Text(subtitle, style: theme.textTheme.bodySmall),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (trailingLabel != null)
-            Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: Text(trailingLabel, style: theme.textTheme.bodySmall),
+    return Semantics(
+      enabled: onChanged != null,
+      onTap: onChanged != null ? () => onChanged(!value) : null,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: Icon(icon, color: theme.colorScheme.onSurface),
+        title: Text(label, style: theme.textTheme.bodyMedium),
+        subtitle: subtitle == null
+            ? null
+            : Text(subtitle, style: theme.textTheme.bodySmall),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (trailingLabel != null)
+              Padding(
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
+                child: Text(trailingLabel, style: theme.textTheme.bodySmall),
+              ),
+            Semantics(
+              label: '$label: ${value ? "on" : "off"}',
+              enabled: onChanged != null,
+              child: Switch(value: value, onChanged: onChanged),
             ),
-          Switch(value: value, onChanged: onChanged),
-        ],
+          ],
+        ),
       ),
     );
   }

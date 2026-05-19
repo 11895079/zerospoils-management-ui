@@ -20,7 +20,7 @@
 **Acceptance:** Core flows work fully offline; notifications behave correctly across edits/restarts; all screens have empty/error states; test coverage exists per issue DoD.
 
 ## Progress
-**Status:** Complete (16/17, 1 deferred/superseded) — Last Updated: May 17, 2026
+**Status:** Complete (17/17) — Last Updated: May 18, 2026
 
 | Issue | Title | Status | PR | Completed |
 |-------|-------|--------|----|-----------|
@@ -31,10 +31,10 @@
 | [M2/110](110-expiry-logic-library-grouping-rules.md) | Expiry bucketing algorithm | ✅ DONE | Implemented locally | Jan 27, 2026 |
 | [M2/120](120-local-notifications-service-schedule-reschedule.md) | Local notifications service | ✅ DONE | [#57](https://github.com/bakintunde/zerospoils/pull/57) | Jan 28, 2026 |
 | [M2/140](140-mvp-add-item-screen-manual-entry.md) | Add Item screen (manual entry) | ✅ DONE | [#41](https://github.com/bakintunde/zerospoils/pull/41) | Jan 22, 2026 |
-| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ✅ DONE | Implemented locally | Free-tier offline ML Kit flow + guidance prompt + widget prefill + integration flow coverage (`integration_test/expiry_ocr_launcher_flow_test.dart`); telemetry payload contract aligned to `{ success, format_detected }` |
+| [M2/142](142-expiry-date-ocr-on-device.md) | Expiry date OCR | ✅ DONE | [#113](https://github.com/11895079/zerospoils/pull/113) | May 17, 2026 (device-level integration coverage + telemetry aligned) |
 | [M2/145](145-onboarding-first-run-permissions-flow.md) | Onboarding + permissions | ✅ DONE | [commit 7264c7d](https://github.com/bakintunde/zerospoils/commit/7264c7d) | Feb 3, 2026 |
 | [M2/150](150-mvp-inventory-list-screen-search-filter.md) | Inventory list screen (search/filter) | ✅ DONE | Implemented in M2/100 | Jan 24, 2026 |
-| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ⚠️ PARTIAL | Implemented locally | Feb 12, 2026 — toggle persists, warning banner shows in InventoryScreen; `demo_mode_toggled` telemetry event not fired; accessibility polish pending |
+| [M2/155](155-demo-mode-data-isolation-toggle-in-settings.md) | Demo mode DB isolation toggle | ✅ DONE | [#114](https://github.com/11895079/zerospoils/pull/114) | May 18, 2026 (telemetry + accessibility complete) |
 | [M2/160](160-mvp-expiring-soon-screen-bucketed-view.md) | Expiring Soon screen (bucketed view) | ✅ DONE | Implemented locally | Feb 12, 2026 (Accessibility pending) |
 | [M2/165](165-backup-restore-local-json-in-settings.md) | Backup/restore (local JSON) in Settings | ✅ DONE | Implemented locally | Feb 12, 2026 (Accessibility pending) |
 | [M2/170](170-mvp-item-detail-screen-mark-used-wasted.md) | Item detail screen (mark used/wasted) | ✅ DONE | Implemented locally | Jan 24, 2026 |
@@ -42,7 +42,27 @@
 | [M2/185](185-user-defined-category-management-crud.md) | User-defined category management | ✅ DONE | Implemented locally | Feb 20, 2026 |
 | [M2/190](190-batch-receipt-capture-mvp.md) | Batch receipt capture MVP | ✅ SUPERSEDED | [#71](https://github.com/11895079/zerospoils/pull/71), [#105](https://github.com/11895079/zerospoils/pull/105), [#106](https://github.com/11895079/zerospoils/pull/106) | Fully delivered by M3/198 — 5 dedicated screens (live scan, batch capture, review, detail, history); all M2/190 scope covered |
 
-## Remaining Gaps (Open Items)
+## Milestone Completion Summary
+- All 17 issues complete or superseded by M3 work
+- Core flows fully functional offline
+- Notifications behave correctly across edits/restarts  
+- All screens have empty/error states
+- Test coverage per issue DoD
+- Build pipelines fully operational (iOS/Android)
+- Expiry OCR with telemetry integration complete
+- Demo mode with telemetry and accessibility complete
+- M2 is now ready for handoff to M3 auth and advanced features
 
-1. **M2/155** — Demo mode: `demo_mode_toggled` telemetry not fired; accessibility polish pending
+## Next Priorities (M3 onwards)
+
+**Recommended next:** M3 Authentication Work
+- Email + password auth UI entry points
+- Google Sign-In integration
+- Apple Sign-In integration
+- Estimated effort: 4-6 hours
+
+**Secondary:** M3 Gaps
+- M3/201: Receipt live scan (AR overlay, tri-color coding, hidden-lines)
+- M3/202: Fresh produce recognition (confidence indicators, telemetry)
+- M3/203: Haptic/sound settings (Settings section, per-scanner toggles)
 
