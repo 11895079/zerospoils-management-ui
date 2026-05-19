@@ -538,18 +538,21 @@ class _ShoppingItemTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           border: Border.all(color: theme.dividerColor),
         ),
-        child: CheckboxListTile(
-          key: checkboxKey,
-          value: isPurchased,
-          onChanged: onChanged,
-          title: Text(
-            item.name,
-            style: AppTextStyles.body.copyWith(
-              color: isPurchased ? secondaryTextColor : onSurfaceColor,
-              decoration: isPurchased ? TextDecoration.lineThrough : null,
+        child: Material(
+          color: Colors.transparent,
+          child: CheckboxListTile(
+            key: checkboxKey,
+            value: isPurchased,
+            onChanged: onChanged,
+            title: Text(
+              item.name,
+              style: AppTextStyles.body.copyWith(
+                color: isPurchased ? secondaryTextColor : onSurfaceColor,
+                decoration: isPurchased ? TextDecoration.lineThrough : null,
+              ),
             ),
+            controlAffinity: ListTileControlAffinity.leading,
           ),
-          controlAffinity: ListTileControlAffinity.leading,
         ),
       ),
     );
