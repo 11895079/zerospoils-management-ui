@@ -606,7 +606,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
         ],
       ),
-      child: Column(children: _withDividers(children)),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(children: _withDividers(children)),
+      ),
     );
   }
 
