@@ -219,6 +219,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
             child: Row(
               children: [
                 Text(
+                  key: Key('expiring_bucket_heading_${bucket.name}'),
                   bucket.displayName.toUpperCase(),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w600,

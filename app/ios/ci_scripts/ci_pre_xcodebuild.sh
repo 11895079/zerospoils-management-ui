@@ -15,6 +15,8 @@ set -e
 
 FLUTTER_VERSION="3.41.7"
 FLUTTER_HOME="$HOME/flutter"
+FLUTTER_ARCHIVE_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_${FLUTTER_VERSION}-stable.zip"
+FLUTTER_ARCHIVE_SHA256="2e3e6af44d1adccf695deff52e5e4c8beb10e5625066b27ad082b38b83ef805e"
 
 # ---------------------------------------------------------------------------
 # 1. Install Flutter
@@ -22,10 +24,11 @@ FLUTTER_HOME="$HOME/flutter"
 if ! command -v flutter > /dev/null 2>&1; then
   echo "Flutter not found — installing $FLUTTER_VERSION (stable, arm64)"
   curl --fail --silent --show-error --location \
-    "https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_${FLUTTER_VERSION}-stable.tar.xz" \
-    --output /tmp/flutter.tar.xz
-  tar -xf /tmp/flutter.tar.xz -C "$HOME"
-  rm /tmp/flutter.tar.xz
+    "$FLUTTER_ARCHIVE_URL" \
+    --output /tmp/flutter.zip
+  echo "$FLUTTER_ARCHIVE_SHA256  /tmp/flutter.zip" | shasum -a 256 -c -
+  unzip -q /tmp/flutter.zip -d "$HOME"
+  rm /tmp/flutter.zip
 fi
 
 export PATH="$PATH:$FLUTTER_HOME/bin"
@@ -46,6 +49,6 @@ cd ios
 # Disable analytics to avoid network delays.
 export COCOAPODS_DISABLE_STATS=true
 
-pod install --repo-update
+pod install --no-repo-update
 
 echo "ci_pre_xcodebuild: done"

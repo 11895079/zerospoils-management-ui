@@ -234,7 +234,9 @@ void main() {
         themeMode: ThemeMode.dark,
       );
 
-      final heading = tester.widget<Text>(find.text('THIS WEEK').first);
+      final heading = tester.widget<Text>(
+        find.byKey(const Key('expiring_bucket_heading_thisWeek')),
+      );
       final theme = Theme.of(tester.element(find.byType(ExpiringTodayScreen)));
 
       expect(heading.style?.color, theme.textTheme.headlineMedium?.color);

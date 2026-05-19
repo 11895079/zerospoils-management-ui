@@ -276,7 +276,7 @@ void main() {
     );
 
     final heading = tester.widget<Text>(
-      find.text('Your shopping list is empty'),
+      find.byKey(const Key('shopping_empty_heading')),
     );
     final theme = Theme.of(tester.element(find.byType(ShoppingListScreen)));
 

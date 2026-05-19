@@ -1720,6 +1720,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             // Name field (required)
             _buildFormGroup(
               label: 'Name *',
+              labelKey: const Key('item_form_name_label'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -2531,6 +2532,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  key: const Key('item_form_preview_title'),
                   displayName,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w600,
@@ -2553,7 +2555,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
   }
 
-  Widget _buildFormGroup({required String label, required Widget child}) {
+  Widget _buildFormGroup({
+    required String label,
+    required Widget child,
+    Key? labelKey,
+  }) {
     final theme = Theme.of(context);
 
     return Padding(
@@ -2562,6 +2568,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            key: labelKey,
             label,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,

@@ -78,13 +78,6 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
     setState(() {
       _category = value;
     });
-
-    if (value == _darkModeReadabilityCategory) {
-      widget.telemetry.enqueue({
-        'name': 'ui_dark_mode_readability_reported',
-        'properties': {'source': widget.source, 'category': value},
-      });
-    }
   }
 
   @override
@@ -160,7 +153,12 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                     ),
                     DropdownMenuItem(
                       value: _darkModeReadabilityCategory,
-                      child: Text('Dark mode readability'),
+                      child: Text(
+                        'Dark mode readability',
+                        key: Key(
+                          'feedback_category_option_dark_mode_readability',
+                        ),
+                      ),
                     ),
                     DropdownMenuItem(value: 'other', child: Text('Other')),
                   ],
@@ -238,18 +236,31 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
       return;
     }
 
+    final trimmedMessage = _messageController.text.trim();
+    final hasContactEmail = _emailController.text.trim().isNotEmpty;
+
+    if (_category == _darkModeReadabilityCategory) {
+      widget.telemetry.enqueue({
+        'name': 'ui_dark_mode_readability_reported',
+        'properties': {
+          'source': widget.source,
+          'category': _category,
+          'message_length': trimmedMessage.length,
+          'has_contact_email': hasContactEmail,
+        },
+      });
+    }
+
     setState(() {
       _isSubmitting = true;
     });
 
     final request = FeedbackSubmissionRequest(
-      message: _messageController.text,
+      message: trimmedMessage,
       category: _category,
       source: widget.source,
       locale: locale,
-      email: _emailController.text.trim().isEmpty
-          ? null
-          : _emailController.text.trim(),
+      email: hasContactEmail ? _emailController.text.trim() : null,
     );
 
     try {

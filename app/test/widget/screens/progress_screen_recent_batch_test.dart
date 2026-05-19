@@ -265,7 +265,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    final heading = tester.widget<Text>(find.text('Summary').first);
+    final heading = tester.widget<Text>(
+      find.byKey(const Key('progress_section_title_summary')),
+    );
     final theme = Theme.of(tester.element(find.byType(ProgressScreen)));
 
     expect(heading.style?.color, theme.textTheme.headlineMedium?.color);

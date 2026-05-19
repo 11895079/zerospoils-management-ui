@@ -572,7 +572,9 @@ void main() {
     await pumpItemForm(tester, themeMode: ThemeMode.dark);
 
     final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
-    final nameLabel = tester.widget<Text>(find.text('Name *').first);
+    final nameLabel = tester.widget<Text>(
+      find.byKey(const Key('item_form_name_label')),
+    );
 
     expect(nameLabel.style?.color, theme.textTheme.titleMedium?.color);
   });
@@ -588,7 +590,9 @@ void main() {
     await pumpItemForm(tester, themeMode: ThemeMode.dark);
 
     final theme = Theme.of(tester.element(find.byType(ItemFormScreen)));
-    final previewTitle = tester.widget<Text>(find.text('New item').first);
+    final previewTitle = tester.widget<Text>(
+      find.byKey(const Key('item_form_preview_title')),
+    );
 
     expect(previewTitle.style?.color, theme.textTheme.titleLarge?.color);
   });

@@ -468,7 +468,12 @@ class ProgressScreen extends ConsumerWidget {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     final theme = Theme.of(context);
+    final titleKeySuffix = title
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
     return Text(
+      key: Key('progress_section_title_$titleKeySuffix'),
       title,
       style: theme.textTheme.headlineMedium?.copyWith(
         fontWeight: FontWeight.w600,

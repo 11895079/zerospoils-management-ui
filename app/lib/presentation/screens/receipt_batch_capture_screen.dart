@@ -450,6 +450,7 @@ class _ReceiptBatchCaptureScreenState
           child: ListView(
             children: [
               Text(
+                key: const Key('receipt_batch_details_heading'),
                 'Batch details',
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,

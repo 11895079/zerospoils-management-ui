@@ -89,7 +89,10 @@ void main() {
       find.byKey(const Key('receipt_batch_receipt_section')),
       findsOneWidget,
     );
-    expect(find.text('Batch details'), findsOneWidget);
+    expect(
+      find.byKey(const Key('receipt_batch_details_heading')),
+      findsOneWidget,
+    );
     expect(find.byType(Scaffold), findsOneWidget);
   });
 
@@ -120,7 +123,9 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    final heading = tester.widget<Text>(find.text('Batch details').first);
+    final heading = tester.widget<Text>(
+      find.byKey(const Key('receipt_batch_details_heading')),
+    );
     final theme = Theme.of(
       tester.element(find.byType(ReceiptBatchCaptureScreen)),
     );

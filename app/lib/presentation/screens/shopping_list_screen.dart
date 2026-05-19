@@ -582,6 +582,7 @@ class _EmptyState extends StatelessWidget {
             const Icon(Icons.shopping_cart_outlined, size: 56),
             const SizedBox(height: AppSpacing.md),
             Text(
+              key: const Key('shopping_empty_heading'),
               'Your shopping list is empty',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
