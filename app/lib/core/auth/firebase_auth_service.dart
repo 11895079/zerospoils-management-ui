@@ -97,7 +97,9 @@ class FirebaseAuthService {
   /// If the current user is anonymous, this attempts to link credentials first
   /// so existing local/user-linked data stays on the same UID.
   Future<void> signInWithGoogle() async {
-    final provider = GoogleAuthProvider();
+    final provider = GoogleAuthProvider()
+      ..addScope('email')
+      ..addScope('profile');
     final user = _auth.currentUser;
 
     if (user != null && user.isAnonymous) {

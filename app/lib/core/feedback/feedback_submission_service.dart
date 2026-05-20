@@ -51,6 +51,9 @@ class FeedbackSubmissionService {
     final firestore = _resolveFirestore();
 
     if (firestore == null) {
+      debugPrint(
+        '[FeedbackSubmissionService] Firestore unavailable, queueing feedback',
+      );
       await _queuePayload(payload);
       return FeedbackSubmitOutcome.queued;
     }
