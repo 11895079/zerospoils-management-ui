@@ -17,6 +17,7 @@ class _FakeFirebaseAuthService implements FirebaseAuthService {
   int createCalls = 0;
   int signOutCalls = 0;
   int resetCalls = 0;
+  int googleCalls = 0;
   String? lastEmail;
   String? lastPassword;
 
@@ -75,6 +76,11 @@ class _FakeFirebaseAuthService implements FirebaseAuthService {
     resetCalls += 1;
     lastEmail = email;
   }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    googleCalls += 1;
+  }
 }
 
 void main() {
@@ -126,6 +132,9 @@ void main() {
       'user@example.com',
     );
 
+    await tester.ensureVisible(
+      find.byKey(const Key('account_forgot_password_button')),
+    );
     await tester.tap(find.byKey(const Key('account_forgot_password_button')));
     await tester.pumpAndSettle();
 
@@ -136,7 +145,6 @@ void main() {
       find.byKey(const Key('account_apple_signin_button')),
       findsOneWidget,
     );
-
     await tester.enterText(
       find.byKey(const Key('account_password_field')),
       'password123',
@@ -147,6 +155,42 @@ void main() {
     expect(fakeAuthService.signInCalls, 1);
     expect(fakeAuthService.lastEmail, 'user@example.com');
     expect(fakeAuthService.lastPassword, 'password123');
+
+    fakeAuthService.dispose();
+  });
+
+  testWidgets('Account tile triggers Google sign in', (tester) async {
+    final fakeAuthService = _FakeFirebaseAuthService();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ProviderScope(
+          overrides: [
+            firebaseAuthServiceProvider.overrideWithValue(fakeAuthService),
+          ],
+          child: const Scaffold(body: SettingsScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(
+      find.ancestor(
+        of: find.byIcon(Icons.person),
+        matching: find.byType(ListTile),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('account_google_signin_button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('account_google_signin_button')));
+    await tester.pumpAndSettle();
+
+    expect(fakeAuthService.googleCalls, 1);
 
     fakeAuthService.dispose();
   });
