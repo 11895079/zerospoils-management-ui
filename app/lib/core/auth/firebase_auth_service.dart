@@ -24,6 +24,15 @@ class FirebaseAuthService {
           '[FirebaseAuth] Already signed in as ${_auth.currentUser?.uid}',
         );
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'admin-restricted-operation') {
+        debugPrint(
+          '[FirebaseAuth] Anonymous sign-in unavailable for this environment; continuing without anon auth',
+        );
+        return;
+      }
+      debugPrint('[FirebaseAuth] Anonymous sign-in failed: $e');
+      // Continue app; auth is optional for offline-first operation
     } catch (e) {
       debugPrint('[FirebaseAuth] Anonymous sign-in failed: $e');
       // Continue app; auth is optional for offline-first operation

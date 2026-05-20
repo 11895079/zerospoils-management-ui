@@ -12,7 +12,20 @@
           "package_name": "com.zerospoils.zerospoils"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "737649709599-r5kbsgkcj5d8srbdrbijfcu636j8bma3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerospoils.zerospoils",
+            "certificate_hash": "973ebe4a3fafb1316396c8e5469a26c4c666a768"
+          }
+        },
+        {
+          "client_id": "737649709599-vjabprhev7f4rjvrhp7rj64m3la8m52j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB9gkFgnewTsv8w6yLrAsvoPwjRgJhcMqE"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737649709599-vjabprhev7f4rjvrhp7rj64m3la8m52j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "737649709599-ervqrvbm4fpfhc4qd9inktjo5nqfav41.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zerospoils.zerospoils"
+              }
+            }
+          ]
         }
       }
     }

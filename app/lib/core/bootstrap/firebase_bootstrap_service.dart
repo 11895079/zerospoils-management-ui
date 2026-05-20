@@ -130,14 +130,24 @@ class FirebaseBootstrapService {
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {
-      final token = await messaging.getToken();
-      if (kDebugMode) {
-        final redactedToken = token == null
-            ? 'null'
-            : token.length <= 12
-            ? '[redacted]'
-            : '${token.substring(0, 8)}...${token.substring(token.length - 4)}';
-        debugPrint('[FCM] Device token (redacted): $redactedToken');
+      try {
+        final token = await messaging.getToken();
+        if (kDebugMode) {
+          final redactedToken = token == null
+              ? 'null'
+              : token.length <= 12
+              ? '[redacted]'
+              : '${token.substring(0, 8)}...${token.substring(token.length - 4)}';
+          debugPrint('[FCM] Device token (redacted): $redactedToken');
+        }
+      } on FirebaseException catch (e) {
+        if (e.code == 'apns-token-not-set') {
+          debugPrint(
+            '[FCM] APNS token not available yet; skipping token fetch for now',
+          );
+        } else {
+          rethrow;
+        }
       }
     } else {
       debugPrint(
