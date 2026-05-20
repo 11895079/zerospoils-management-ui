@@ -97,7 +97,8 @@ class FirebaseAuthService {
   /// If the current user is anonymous, this attempts to link credentials first
   /// so existing local/user-linked data stays on the same UID.
   Future<void> signInWithGoogle() async {
-    // Request basic identity scopes used by app account UI and profile metadata.
+    // Request basic identity scopes for stable email identity, with profile
+    // metadata available for follow-up account UX improvements.
     final provider = GoogleAuthProvider()
       ..addScope('https://www.googleapis.com/auth/userinfo.email')
       ..addScope('https://www.googleapis.com/auth/userinfo.profile');

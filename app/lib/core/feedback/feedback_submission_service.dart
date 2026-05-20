@@ -54,6 +54,7 @@ class FeedbackSubmissionService {
     // Firebase initialization, or transient Firebase SDK init failures.
     // In those cases we keep feedback durable by queueing for a later retry.
     // Queued items are retried on the next feedback submission attempt.
+    // Queue storage is capped at _maxPendingFeedbackQueue entries.
     if (firestore == null) {
       debugPrint(
         '[FeedbackSubmissionService] Firestore unavailable, queueing feedback',
