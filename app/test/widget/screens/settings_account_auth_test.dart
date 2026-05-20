@@ -17,6 +17,7 @@ class _FakeFirebaseAuthService implements FirebaseAuthService {
   int createCalls = 0;
   int signOutCalls = 0;
   int resetCalls = 0;
+  int googleCalls = 0;
   String? lastEmail;
   String? lastPassword;
 
@@ -74,6 +75,11 @@ class _FakeFirebaseAuthService implements FirebaseAuthService {
   Future<void> sendPasswordResetEmail({required String email}) async {
     resetCalls += 1;
     lastEmail = email;
+  }
+
+  @override
+  Future<void> signInWithGoogle() async {
+    googleCalls += 1;
   }
 }
 
@@ -136,6 +142,14 @@ void main() {
       find.byKey(const Key('account_apple_signin_button')),
       findsOneWidget,
     );
+    expect(
+      find.byKey(const Key('account_google_signin_button')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('account_google_signin_button')));
+    await tester.pumpAndSettle();
+    expect(fakeAuthService.googleCalls, 1);
 
     await tester.enterText(
       find.byKey(const Key('account_password_field')),
