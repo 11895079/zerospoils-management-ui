@@ -82,6 +82,13 @@ This monorepo supports a workflow where planning drives implementation:
 6. **Submit PR** linking back to planning issue (e.g., "Closes planning/milestones/M1/090-*")
 7. **After PR merges, update this planning repo** ⚠️ **CRITICAL STEP**
 
+### Work Status Requests
+When asked for project/work status, do not respond with capability disclaimers. Inspect the repository directly and report concrete findings:
+- Local progress: `git status`, latest commits, changed files
+- Planning status: milestone README issue tables + root `README.md` status section
+- CI status (if requested): GitHub Actions workflow runs and failing job logs
+- Next actions: blockers, pending issues, and immediate follow-up tasks
+
 ### ⚠️ CRITICAL: Keep Planning & Code in Sync
 
 **After implementation is complete and merged to app repo main branch:**
