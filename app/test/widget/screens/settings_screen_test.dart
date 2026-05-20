@@ -427,6 +427,87 @@ void main() {
         isFalse,
       );
     });
+
+    testWidgets('Dark mode readability category emits telemetry event', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await scrollToIcon(tester, Icons.feedback_outlined);
+      await tester.tap(
+        find.ancestor(
+          of: find.byIcon(Icons.feedback_outlined),
+          matching: find.byType(ListTile),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('feedback_category_field')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('feedback_category_option_dark_mode_readability')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('feedback_message_field')),
+        'Dark mode text contrast is hard to read in settings tiles.',
+      );
+      await tester.tap(find.byKey(const Key('feedback_submit_button')));
+      await tester.pumpAndSettle();
+
+      final readabilityEvent = telemetry.events
+          .cast<Map<String, dynamic>?>()
+          .whereType<Map<String, dynamic>>()
+          .firstWhere(
+            (event) => event['name'] == 'ui_dark_mode_readability_reported',
+          );
+
+      expect(readabilityEvent['properties'], isA<Map<String, dynamic>>());
+      final properties = readabilityEvent['properties'] as Map<String, dynamic>;
+      expect(properties['source'], 'settings');
+      expect(properties['category'], 'dark_mode_readability');
+      expect(properties['message_length'], greaterThan(0));
+      expect(properties['has_contact_email'], isFalse);
+    });
+
+    testWidgets(
+      'Dark mode readability telemetry not emitted on category select only',
+      (WidgetTester tester) async {
+        final telemetry = TelemetryClient();
+
+        await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+        await tester.pumpAndSettle();
+
+        await scrollToIcon(tester, Icons.feedback_outlined);
+        await tester.tap(
+          find.ancestor(
+            of: find.byIcon(Icons.feedback_outlined),
+            matching: find.byType(ListTile),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('feedback_category_field')));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(
+            const Key('feedback_category_option_dark_mode_readability'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          telemetry.events.any(
+            (event) => event['name'] == 'ui_dark_mode_readability_reported',
+          ),
+          isFalse,
+        );
+      },
+    );
   });
 
   group('SettingsScreen - Demo Mode Telemetry & Accessibility', () {

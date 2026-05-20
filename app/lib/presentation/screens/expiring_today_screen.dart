@@ -177,7 +177,12 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
         children: [
           const Text('✨ 🎉 ✨', style: TextStyle(fontSize: 48)),
           const SizedBox(height: AppSpacing.lg),
-          Text('All clear!', style: AppTextStyles.h2),
+          Text(
+            'All clear!',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!',
@@ -213,7 +218,13 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: Row(
               children: [
-                Text(bucket.displayName.toUpperCase(), style: AppTextStyles.h3),
+                Text(
+                  key: Key('expiring_bucket_heading_${bucket.name}'),
+                  bucket.displayName.toUpperCase(),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(bucket.emoji, style: const TextStyle(fontSize: 20)),
                 const Spacer(),

@@ -449,7 +449,13 @@ class _ReceiptBatchCaptureScreenState
         Expanded(
           child: ListView(
             children: [
-              Text('Batch details', style: AppTextStyles.h3),
+              Text(
+                key: const Key('receipt_batch_details_heading'),
+                'Batch details',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 key: const Key('receipt_batch_store_name_field'),
@@ -515,7 +521,9 @@ class _ReceiptBatchCaptureScreenState
               Text(
                 'Receipt Photos (${_receiptPhotos.length}/5)',
                 key: const Key('receipt_batch_receipt_section'),
-                style: AppTextStyles.h3,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: AppSpacing.md),
               Wrap(
@@ -563,7 +571,9 @@ class _ReceiptBatchCaptureScreenState
                 Text(
                   'Goods Photos (${_goodsPhotos.length}/3)',
                   key: const Key('receipt_batch_goods_section'),
-                  style: AppTextStyles.h3,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Wrap(
@@ -650,7 +660,7 @@ class _ReceiptBatchCaptureScreenState
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(color: theme.dividerColor),
       ),
-      child: Center(child: Text(label, style: AppTextStyles.caption)),
+      child: Center(child: Text(label, style: theme.textTheme.labelSmall)),
     );
   }
 

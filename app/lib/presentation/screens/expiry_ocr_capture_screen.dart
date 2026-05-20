@@ -16,7 +16,6 @@ import '../../core/feedback/feedback_service.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
 import '../../core/ocr/expiry_ocr_capture_session.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../../domain/utils/expiry_date_parser.dart';
 import '../../domain/utils/live_ocr_product_insight_extractor.dart';
 
@@ -527,7 +526,9 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                       Expanded(
                         child: Text(
                           'Photos ${_photos.length}/$_maxPhotos',
-                          style: AppTextStyles.h4,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                       IconButton(
@@ -554,23 +555,17 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                     _autoCaptureEnabled
                         ? 'Move the product to up to five angles. The app will capture when it can read the expiry text.'
                         : 'Auto-capture is off. Use the shutter button to capture up to five angles manually.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Embossed or stamped dates: tilt the package and use side lighting or the torch so the numbers cast a small shadow.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Canadian labels may show BB/MA before the date. Aim so both the label and date stay inside the frame.',
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   SizedBox(
@@ -733,7 +728,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                   detected
                       ? 'Expiry detected: $dateLabel'
                       : 'Point the camera at the expiry date',
-                  style: AppTextStyles.body,
+                  style: theme.textTheme.bodyMedium,
                 ),
                 if (_liveInsights.productName != null) ...[
                   const SizedBox(height: AppSpacing.xs),
@@ -742,9 +737,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                     key: const Key('expiry_ocr_product_hint'),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
                 if (_liveInsights.brandName != null ||
@@ -759,9 +752,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                     ].join('  •  '),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: theme.textTheme.bodySmall?.color,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
                 if (_liveText != null && _liveText!.isNotEmpty) ...[
@@ -771,7 +762,7 @@ class _ExpiryOcrCaptureScreenState extends State<ExpiryOcrCaptureScreen> {
                     key: const Key('expiry_ocr_live_text'),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.caption.copyWith(
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.textTheme.bodySmall?.color,
                     ),
                   ),

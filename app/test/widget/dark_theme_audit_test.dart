@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:zerospoils/core/theme/app_colors.dart' as app_palette;
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
@@ -208,5 +209,122 @@ void main() {
     final theme = Theme.of(tester.element(find.byType(CategoryChip)));
 
     expect(label.style?.color, theme.textTheme.labelLarge?.color);
+  });
+
+  group('M4/296 dark token wiring', () {
+    testWidgets('dark text styles resolve to shared dark palette tokens', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildDarkHarness(
+          const Scaffold(
+            body: Text('Dark text sample', key: Key('dark_text_sample')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final theme = Theme.of(
+        tester.element(find.byKey(const Key('dark_text_sample'))),
+      );
+
+      expect(
+        theme.textTheme.bodyMedium?.color,
+        app_palette.AppColors.textPrimaryDark,
+      );
+      expect(
+        theme.textTheme.bodySmall?.color,
+        app_palette.AppColors.textSecondaryDark,
+      );
+      expect(
+        theme.textTheme.labelSmall?.color,
+        app_palette.AppColors.textTertiaryDark,
+      );
+    });
+
+    testWidgets('dark input decoration uses dark surfaces and borders', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildDarkHarness(
+          const Scaffold(
+            body: TextField(
+              key: Key('dark_text_field'),
+              decoration: InputDecoration(labelText: 'Name'),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final theme = Theme.of(
+        tester.element(find.byKey(const Key('dark_text_field'))),
+      );
+
+      expect(
+        theme.inputDecorationTheme.fillColor,
+        app_palette.AppColors.backgroundSecondaryDark,
+      );
+      expect(
+        theme.inputDecorationTheme.enabledBorder?.borderSide.color,
+        app_palette.AppColors.borderDark,
+      );
+      expect(
+        theme.inputDecorationTheme.labelStyle?.color,
+        app_palette.AppColors.textSecondaryDark,
+      );
+    });
+
+    testWidgets('dark scaffold, card, and divider use shared surface tokens', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildDarkHarness(
+          const Scaffold(body: Card(child: SizedBox(height: 20, width: 20))),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final theme = Theme.of(tester.element(find.byType(Card)));
+
+      expect(
+        theme.scaffoldBackgroundColor,
+        app_palette.AppColors.backgroundDark,
+      );
+      expect(theme.cardColor, app_palette.AppColors.cardBackgroundDark);
+      expect(theme.dividerColor, app_palette.AppColors.borderDark);
+    });
+
+    testWidgets('dark bottom navigation uses shared surface and text tokens', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        buildDarkHarness(
+          Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.settings),
+                  label: 'Settings',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final theme = Theme.of(tester.element(find.byType(BottomNavigationBar)));
+
+      expect(
+        theme.bottomNavigationBarTheme.backgroundColor,
+        app_palette.AppColors.backgroundSecondaryDark,
+      );
+      expect(
+        theme.bottomNavigationBarTheme.unselectedItemColor,
+        app_palette.AppColors.textTertiaryDark,
+      );
+    });
   });
 }

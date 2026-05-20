@@ -55,7 +55,7 @@ class ProgressScreen extends ConsumerWidget {
       children: [
         _buildStreakCard(stats),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Summary'),
+        _buildSectionTitle(context, 'Summary'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
@@ -80,7 +80,7 @@ class ProgressScreen extends ConsumerWidget {
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Expiry Health'),
+        _buildSectionTitle(context, 'Expiry Health'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
@@ -99,7 +99,7 @@ class ProgressScreen extends ConsumerWidget {
           _StatTile(label: 'No Expiry', value: '${stats.noExpiryCount}'),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Value Impact'),
+        _buildSectionTitle(context, 'Value Impact'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(label: 'Total Value', value: _currency(stats.totalValue)),
@@ -111,7 +111,7 @@ class ProgressScreen extends ConsumerWidget {
           _StatTile(label: 'Saved (est.)', value: _currency(stats.savedValue)),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Activity'),
+        _buildSectionTitle(context, 'Activity'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(label: 'Added (7d)', value: '${stats.addedLast7Days}'),
@@ -123,39 +123,42 @@ class ProgressScreen extends ConsumerWidget {
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Categories'),
+        _buildSectionTitle(context, 'Categories'),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
+          context,
           stats.categoryCounts.map(
             (key, value) => MapEntry(key.displayName, value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Locations'),
+        _buildSectionTitle(context, 'Locations'),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
+          context,
           stats.locationCounts.map(
             (key, value) => MapEntry(key.displayName, value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Types'),
+        _buildSectionTitle(context, 'Types'),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
+          context,
           stats.typeCounts.map(
             (key, value) => MapEntry(key.displayName, value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Badges & Achievements'),
+        _buildSectionTitle(context, 'Badges & Achievements'),
         const SizedBox(height: AppSpacing.sm),
         _buildBadgeProgressList(stats),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Telemetry (Local Aggregation)'),
+        _buildSectionTitle(context, 'Telemetry (Local Aggregation)'),
         const SizedBox(height: AppSpacing.sm),
-        _buildTelemetrySection(stats),
+        _buildTelemetrySection(context, stats),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle('Recent Receipt Batch'),
+        _buildSectionTitle(context, 'Recent Receipt Batch'),
         const SizedBox(height: AppSpacing.sm),
         _buildRecentBatchSection(ref),
         const SizedBox(height: AppSpacing.xl),
@@ -216,13 +219,15 @@ class ProgressScreen extends ConsumerWidget {
             children: [
               Text(
                 '${batch.items.length} items · ${_currency(total)} total',
-                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'Source: ${batch.source.name}',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodySmall?.color,
                 ),
               ),
             ],
@@ -355,7 +360,7 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTelemetrySection(ProgressStats stats) {
+  Widget _buildTelemetrySection(BuildContext context, ProgressStats stats) {
     final telemetry = stats.telemetry;
     final totalEvents = telemetry.eventCounts.values.fold<int>(
       0,
@@ -366,6 +371,7 @@ class ProgressScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildInsightCard(
+          context: context,
           title: 'Local Insights',
           subtitle: 'These insights are computed on-device from your activity.',
           icon: Icons.shield,
@@ -388,21 +394,25 @@ class ProgressScreen extends ConsumerWidget {
         ]),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
+          context: context,
           label: 'Top Add Sources',
           values: telemetry.itemAddedBySource,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
+          context: context,
           label: 'Top Waste Reasons',
           values: telemetry.itemWastedByReason,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
+          context: context,
           label: 'Most Viewed Screens',
           values: telemetry.screenViewedByScreen,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
+          context: context,
           label: 'Tab Switches',
           values: telemetry.tabSwitchedByTab,
         ),
@@ -411,10 +421,13 @@ class ProgressScreen extends ConsumerWidget {
   }
 
   Widget _buildInsightCard({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required IconData icon,
   }) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -439,12 +452,12 @@ class ProgressScreen extends ConsumerWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.body.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
-                Text(subtitle, style: AppTextStyles.bodySmall),
+                Text(subtitle, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -453,8 +466,19 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(title, style: AppTextStyles.h3);
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
+    final titleKeySuffix = title
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+    return Text(
+      key: Key('progress_section_title_$titleKeySuffix'),
+      title,
+      style: theme.textTheme.headlineMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+      ),
+    );
   }
 
   Widget _buildSummaryGrid(List<_StatTile> tiles) {
@@ -467,11 +491,15 @@ class ProgressScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChipWrap(Map<String, int> values) {
+  Widget _buildChipWrap(BuildContext context, Map<String, int> values) {
+    final theme = Theme.of(context);
+
     if (values.isEmpty) {
       return Text(
         'No data yet',
-        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.textTheme.bodySmall?.color,
+        ),
       );
     }
 
@@ -491,7 +519,7 @@ class ProgressScreen extends ConsumerWidget {
               ),
               child: Text(
                 '${entry.key}: ${entry.value}',
-                style: AppTextStyles.body.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
                   color: AppColors.primary,
                 ),
@@ -503,19 +531,23 @@ class ProgressScreen extends ConsumerWidget {
   }
 
   Widget _buildTopInsights({
+    required BuildContext context,
     required String label,
     required Map<String, int> values,
   }) {
+    final theme = Theme.of(context);
     final topEntries = _topEntries(values, 4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        _buildChipWrap(topEntries),
+        _buildChipWrap(context, topEntries),
       ],
     );
   }
@@ -567,9 +599,14 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tile.label, style: AppTextStyles.bodySmall),
+          Text(tile.label, style: theme.textTheme.bodySmall),
           const SizedBox(height: AppSpacing.xs),
-          Text(tile.value, style: AppTextStyles.h3),
+          Text(
+            tile.value,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -612,12 +649,12 @@ class _BadgeProgressTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   badgeType.displayName,
-                  style: AppTextStyles.body.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
-              Text('$percentage%'),
+              Text('$percentage%', style: theme.textTheme.bodyMedium),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),

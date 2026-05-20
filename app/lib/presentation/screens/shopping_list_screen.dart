@@ -552,6 +552,13 @@ class _ShoppingItemTile extends StatelessWidget {
               ),
             ),
             controlAffinity: ListTileControlAffinity.leading,
+            secondary: IconButton(
+              key: Key('shopping_item_delete_${item.id}'),
+              tooltip: 'Delete item',
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+              color: AppColors.danger,
+            ),
           ),
         ),
       ),
@@ -577,7 +584,13 @@ class _EmptyState extends StatelessWidget {
           children: [
             const Icon(Icons.shopping_cart_outlined, size: 56),
             const SizedBox(height: AppSpacing.md),
-            Text('Your shopping list is empty', style: AppTextStyles.h4),
+            Text(
+              key: const Key('shopping_empty_heading'),
+              'Your shopping list is empty',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               'Add items you need to buy on your next grocery trip.',

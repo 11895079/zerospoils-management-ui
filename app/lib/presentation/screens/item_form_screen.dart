@@ -1720,6 +1720,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             // Name field (required)
             _buildFormGroup(
               label: 'Name *',
+              labelKey: const Key('item_form_name_label'),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1846,9 +1847,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
+                              key: const Key('item_form_category_value'),
                               _selectedUserCategory?.name ??
                                   _selectedCategory.displayName,
-                              style: AppTextStyles.body,
+                              style: theme.textTheme.bodyMedium,
                             ),
                           ),
                           Icon(
@@ -2530,8 +2532,11 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
+                  key: const Key('item_form_preview_title'),
                   displayName,
-                  style: AppTextStyles.h4,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2550,15 +2555,24 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     );
   }
 
-  Widget _buildFormGroup({required String label, required Widget child}) {
+  Widget _buildFormGroup({
+    required String label,
+    required Widget child,
+    Key? labelKey,
+  }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
+            key: labelKey,
             label,
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w600),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           child,

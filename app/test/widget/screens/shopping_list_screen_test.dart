@@ -196,6 +196,28 @@ void main() {
     expect(find.byKey(const Key('shopping_item_checkbox_2')), findsOneWidget);
   });
 
+  testWidgets('Shopping list shows explicit delete button for each item', (
+    WidgetTester tester,
+  ) async {
+    final repository = MockShoppingListRepository();
+    final itemRepository = MockItemRepository();
+    await repository.init();
+    await itemRepository.init();
+    final now = DateTime.now();
+
+    await repository.saveShoppingListItem(
+      ShoppingListItem(id: '1', name: 'Milk', createdAt: now, updatedAt: now),
+    );
+
+    await pumpShoppingListScreen(
+      tester,
+      repository: repository,
+      itemRepository: itemRepository,
+    );
+
+    expect(find.byKey(const Key('shopping_item_delete_1')), findsOneWidget);
+  });
+
   testWidgets('uses dark theme surfaces in dark mode', (
     WidgetTester tester,
   ) async {
@@ -236,6 +258,29 @@ void main() {
       theme.appBarTheme.backgroundColor,
     );
     expect(decoration.color, theme.cardColor);
+  });
+
+  testWidgets('empty-state heading uses dark theme text color', (
+    WidgetTester tester,
+  ) async {
+    final repository = MockShoppingListRepository();
+    final itemRepository = MockItemRepository();
+    await repository.init();
+    await itemRepository.init();
+
+    await pumpShoppingListScreen(
+      tester,
+      repository: repository,
+      itemRepository: itemRepository,
+      themeMode: ThemeMode.dark,
+    );
+
+    final heading = tester.widget<Text>(
+      find.byKey(const Key('shopping_empty_heading')),
+    );
+    final theme = Theme.of(tester.element(find.byType(ShoppingListScreen)));
+
+    expect(heading.style?.color, theme.textTheme.titleLarge?.color);
   });
 
   testWidgets('Checking item opens convert dialog', (

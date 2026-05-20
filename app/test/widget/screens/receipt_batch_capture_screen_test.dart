@@ -89,8 +89,48 @@ void main() {
       find.byKey(const Key('receipt_batch_receipt_section')),
       findsOneWidget,
     );
-    expect(find.text('Batch details'), findsOneWidget);
+    expect(
+      find.byKey(const Key('receipt_batch_details_heading')),
+      findsOneWidget,
+    );
     expect(find.byType(Scaffold), findsOneWidget);
+  });
+
+  testWidgets('batch section headings use dark theme text colors', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          isFlagEnabledProvider(
+            FeatureFlagKey.receiptOcr,
+          ).overrideWith((ref) async => true),
+          isFlagEnabledProvider(
+            FeatureFlagKey.batchPhotoCapture,
+          ).overrideWith((ref) async => true),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.dark,
+          home: const ReceiptBatchCaptureScreen(
+            source: ReceiptBatchSource.inventory,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final heading = tester.widget<Text>(
+      find.byKey(const Key('receipt_batch_details_heading')),
+    );
+    final theme = Theme.of(
+      tester.element(find.byType(ReceiptBatchCaptureScreen)),
+    );
+
+    expect(heading.style?.color, theme.textTheme.headlineMedium?.color);
   });
 
   testWidgets('batch metadata fields are visible', (tester) async {

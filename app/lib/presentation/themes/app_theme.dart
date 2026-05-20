@@ -2,6 +2,7 @@
 // Applies design tokens to Flutter Material theme
 import 'package:flutter/material.dart';
 import '../../core/constants/design_tokens.dart';
+import '../../core/theme/app_colors.dart' as app_palette;
 
 class AppTheme {
   static ThemeData get lightTheme {
@@ -124,18 +125,18 @@ class AppTheme {
       appBarTheme: AppBarThemeData(
         elevation: AppElevation.sm,
         centerTitle: false,
-        backgroundColor: const Color(0xFF101513),
-        foregroundColor: const Color(0xFFF2F6F2),
+        backgroundColor: app_palette.AppColors.backgroundDark,
+        foregroundColor: app_palette.AppColors.textPrimaryDark,
         titleTextStyle: const TextStyle(
           fontSize: AppTypography.titleSize,
           fontWeight: FontWeight.w600,
-          color: Color(0xFFF2F6F2),
+          color: app_palette.AppColors.textPrimaryDark,
         ),
       ),
       iconTheme: IconThemeData(color: colorScheme.onSurface),
       primaryIconTheme: IconThemeData(color: colorScheme.onSurface),
-      cardColor: const Color(0xFF1A201D),
-      dividerColor: const Color(0xFF2C3631),
+      cardColor: app_palette.AppColors.cardBackgroundDark,
+      dividerColor: app_palette.AppColors.borderDark,
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryLight,
@@ -174,25 +175,25 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E2722),
+        fillColor: app_palette.AppColors.backgroundSecondaryDark,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.md,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          borderSide: const BorderSide(color: Color(0xFF2F3C35)),
+          borderSide: const BorderSide(color: app_palette.AppColors.borderDark),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
-          borderSide: const BorderSide(color: Color(0xFF2F3C35)),
+          borderSide: const BorderSide(color: app_palette.AppColors.borderDark),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppBorderRadius.md),
           borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
         ),
         labelStyle: const TextStyle(
-          color: Color(0xFFAAB6AE),
+          color: app_palette.AppColors.textSecondaryDark,
           fontSize: AppTypography.bodySize,
         ),
       ),
@@ -204,12 +205,12 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppBorderRadius.xl),
         ),
       ),
-      scaffoldBackgroundColor: const Color(0xFF121714),
+      scaffoldBackgroundColor: app_palette.AppColors.backgroundDark,
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         elevation: AppElevation.md,
-        backgroundColor: Color(0xFF171E1A),
+        backgroundColor: app_palette.AppColors.backgroundSecondaryDark,
         selectedItemColor: AppColors.primaryLight,
-        unselectedItemColor: Color(0xFF9DA8A1),
+        unselectedItemColor: app_palette.AppColors.textTertiaryDark,
         type: BottomNavigationBarType.fixed,
       ),
       listTileTheme: ListTileThemeData(iconColor: colorScheme.onSurface),
@@ -303,9 +304,9 @@ class AppTheme {
   }
 
   static TextTheme _buildDarkTextTheme() {
-    const textPrimary = Color(0xFFF2F6F2);
-    const textSecondary = Color(0xFFC2CEC6);
-    const textHint = Color(0xFF95A39B);
+    const textPrimary = app_palette.AppColors.textPrimaryDark;
+    const textSecondary = app_palette.AppColors.textSecondaryDark;
+    const textHint = app_palette.AppColors.textTertiaryDark;
 
     return TextTheme(
       displayLarge: const TextStyle(
