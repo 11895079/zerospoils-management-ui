@@ -98,8 +98,8 @@ class FirebaseAuthService {
   /// so existing local/user-linked data stays on the same UID.
   Future<void> signInWithGoogle() async {
     final provider = GoogleAuthProvider()
-      ..addScope('email')
-      ..addScope('profile');
+      ..addScope('https://www.googleapis.com/auth/userinfo.email')
+      ..addScope('https://www.googleapis.com/auth/userinfo.profile');
     final user = _auth.currentUser;
 
     if (user != null && user.isAnonymous) {

@@ -50,6 +50,9 @@ class FeedbackSubmissionService {
     final payload = await _buildSerializablePayload(request, userId);
     final firestore = _resolveFirestore();
 
+    // Firestore can be unavailable in early startup, test harnesses without
+    // Firebase initialization, or transient Firebase SDK init failures.
+    // In those cases we keep feedback durable by queueing for a later retry.
     if (firestore == null) {
       debugPrint(
         '[FeedbackSubmissionService] Firestore unavailable, queueing feedback',
