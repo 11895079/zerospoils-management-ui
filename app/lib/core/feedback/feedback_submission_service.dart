@@ -11,6 +11,7 @@ const String _pendingFeedbackKey = 'pending_feedback_submissions_v1';
 const String _deviceFingerprintKey = 'feedback_device_fingerprint_v1';
 const int _feedbackRateWindowMs = 10 * 60 * 1000;
 const int _maxPendingFeedbackQueue = 100;
+
 enum FeedbackSubmitOutcome { submitted, queued }
 
 class FeedbackSubmissionRequest {
