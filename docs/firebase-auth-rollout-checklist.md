@@ -6,14 +6,14 @@ Goal: move from anonymous-only usage to real user authentication with no downtim
 
 - Backend: Firebase Authentication
 - Client: Flutter app (Android + iOS)
-- Initial providers: Email/Password
-- Next providers: Sign in with Apple (iOS), Google (Android + iOS)
+- Initial providers: Email/Password, Google (Android + iOS)
+- Next provider: Sign in with Apple (iOS)
 
 ## Prerequisites
 
 - Firebase project selected and accessible
 - App Check already configured for Android/iOS apps
-- Current app supports anonymous auth and feedback ingestion
+- Current app supports anonymous auth and Firestore feedback submission
 - Firestore rules already require non-anonymous auth for feedback writes
 
 ## Phase 1: Firebase Console Setup (Email/Password)
@@ -35,7 +35,9 @@ Implemented in app code:
 - Settings account dialog supports:
   - Create account (email/password)
   - Sign in (email/password)
+  - Sign in (Google)
   - Sign out
+  - Forgot password (email reset)
 - Anonymous account upgrade behavior:
   - If user is anonymous, creating/signing in attempts credential linking first.
   - Preserves UID for existing user-linked data.
@@ -73,10 +75,10 @@ Success criteria:
 
 1. Sign in with a real account in-app.
 2. Submit feedback from drawer and from settings.
-3. Verify Cloud Function accepts request (no 401/403 due to auth/app check).
+3. Verify direct Firestore write succeeds (no 401/403 due to auth/app check).
 4. Confirm Firestore document appears in feedback_submissions with:
-   - app_check_enforced: true
-   - ingest_source: cloud_function
+   - user_id matches signed-in Firebase user
+   - source set to drawer or settings
 5. Confirm submissions by anonymous users are blocked by policy as expected.
 
 Success criteria:
@@ -85,7 +87,17 @@ Success criteria:
 
 ## Phase 5: Add Identity Providers
 
-### Apple Sign-In (recommended next)
+### Google Sign-In (current rollout)
+
+1. Firebase Console -> Authentication -> Sign-in method:
+   - Enable Google provider.
+2. Ensure Android SHA certificates and iOS config are correct.
+   - Use `gradle signingReport` (debug/release builds) or `keytool -list -v -keystore <path-to-keystore> -alias <alias>` to obtain your build's SHA-1 and SHA-256.
+   - Register both debug (for development) and release (for production) SHA values in Firebase Console.
+   - See [Android Signing Guide](/docs/ANDROID_SIGNING_GUIDE.md) for build-variant specific certificates.
+3. Validate on Android and iOS physical devices.
+
+### Apple Sign-In (deferred to next auth rollout step)
 
 1. Apple Developer portal:
    - Configure Sign in with Apple capability for iOS bundle ID.
@@ -94,14 +106,6 @@ Success criteria:
 3. App implementation:
    - Add Apple sign-in flow in account dialog and link to existing user.
 4. Verify on physical iOS device.
-
-### Google Sign-In
-
-1. Firebase Console -> Authentication -> Sign-in method:
-   - Enable Google provider.
-2. Ensure Android SHA certificates and iOS config are correct.
-3. Add Google sign-in in account dialog and link flow.
-4. Validate on Android and iOS.
 
 ## Security and Reliability Notes
 
@@ -131,7 +135,6 @@ Escalation triggers:
    - auth_sign_in_succeeded
    - auth_sign_in_failed
    - auth_sign_out
-2. Add "Forgot password" flow.
-3. Add account deletion flow (GDPR readiness).
-4. Add Apple and Google providers in UI.
-5. Add integration test for anonymous-to-email linking path.
+2. Add account deletion flow (GDPR readiness).
+3. Add Apple provider in UI after email + Google sign-in are validated on-device.
+4. Add integration test for anonymous-to-email linking path.

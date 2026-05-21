@@ -1152,6 +1152,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     ),
                     successMessage: 'Account created',
                     closeDialogAfterSuccess: true,
+                    requiresCredentials: true,
                   ),
             child: _isSubmitting
                 ? const SizedBox(
@@ -1172,6 +1173,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     ),
                     successMessage: 'Signed in',
                     closeDialogAfterSuccess: true,
+                    requiresCredentials: true,
                   ),
             child: _isSubmitting
                 ? const SizedBox(
@@ -1182,6 +1184,23 @@ class _AccountDialogState extends State<_AccountDialog> {
                 : const Text('Sign In'),
           ),
           FilledButton.tonal(
+            key: const Key('account_google_signin_button'),
+            onPressed: _isSubmitting
+                ? null
+                : () => _performAuthAction(
+                    action: () => authService.signInWithGoogle(),
+                    successMessage: 'Signed in with Google',
+                    closeDialogAfterSuccess: true,
+                  ),
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Continue with Google'),
+          ),
+          FilledButton.tonal(
             key: const Key('account_apple_signin_button'),
             onPressed: _isSubmitting
                 ? null
@@ -1189,7 +1208,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                          'Apple Sign-In will be enabled in the next auth rollout step.',
+                          'Apple Sign-In will be enabled after email and Google sign-in are fully verified on-device.',
                         ),
                       ),
                     );
@@ -1245,13 +1264,12 @@ class _AccountDialogState extends State<_AccountDialog> {
     required Future<void> Function() action,
     required String successMessage,
     required bool closeDialogAfterSuccess,
+    bool requiresCredentials = false,
   }) async {
     final messenger = ScaffoldMessenger.of(context);
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final requiresCredentials =
-        successMessage == 'Signed in' || successMessage == 'Account created';
 
     if (requiresCredentials) {
       if (email.isEmpty || !email.contains('@')) {

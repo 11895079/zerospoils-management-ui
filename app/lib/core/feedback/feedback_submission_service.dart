@@ -2,10 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,10 +11,6 @@ const String _pendingFeedbackKey = 'pending_feedback_submissions_v1';
 const String _deviceFingerprintKey = 'feedback_device_fingerprint_v1';
 const int _feedbackRateWindowMs = 10 * 60 * 1000;
 const int _maxPendingFeedbackQueue = 100;
-const String _feedbackIngestUrl = String.fromEnvironment(
-  'FEEDBACK_INGEST_URL',
-  defaultValue: '',
-);
 
 enum FeedbackSubmitOutcome { submitted, queued }
 
@@ -55,22 +49,25 @@ class FeedbackSubmissionService {
     }
 
     final payload = await _buildSerializablePayload(request, userId);
-    final ingestEnabled = _feedbackIngestUrl.isNotEmpty;
-    final firestore = ingestEnabled ? null : _resolveFirestore();
+    final firestore = _resolveFirestore();
 
-    if (!ingestEnabled && firestore == null) {
+    // Firestore can be unavailable in early startup, test harnesses without
+    // Firebase initialization, or transient Firebase SDK init failures.
+    // In those cases we keep feedback durable by queueing for a later retry.
+    // Queued items are retried on the next feedback submission attempt.
+    // Queue storage is capped at _maxPendingFeedbackQueue entries; oldest
+    // queued submissions are dropped first when the cap is exceeded.
+    if (firestore == null) {
+      debugPrint(
+        '[FeedbackSubmissionService] Firestore unavailable, queueing feedback',
+      );
       await _queuePayload(payload);
       return FeedbackSubmitOutcome.queued;
     }
 
     try {
-      if (ingestEnabled) {
-        await _flushPendingToIngestApi();
-        await _sendToIngestApi(payload, userId);
-      } else {
-        await _flushPending(firestore!);
-        await _sendToFirestore(firestore, payload);
-      }
+      await _flushPending(firestore);
+      await _sendToFirestore(firestore, payload);
       return FeedbackSubmitOutcome.submitted;
     } catch (_) {
       await _queuePayload(payload);
@@ -136,33 +133,6 @@ class FeedbackSubmissionService {
         .set(firestorePayload);
   }
 
-  Future<void> _sendToIngestApi(
-    Map<String, dynamic> payload,
-    String userId,
-  ) async {
-    final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
-    if (idToken == null || idToken.isEmpty) {
-      throw StateError('AUTH_REQUIRED');
-    }
-
-    final appCheckToken = await FirebaseAppCheck.instance.getToken();
-
-    final response = await http.post(
-      Uri.parse(_feedbackIngestUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $idToken',
-        if (appCheckToken != null && appCheckToken.isNotEmpty)
-          'X-Firebase-AppCheck': appCheckToken,
-      },
-      body: jsonEncode({...payload, 'user_id': userId}),
-    );
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw StateError('INGEST_REJECTED_${response.statusCode}');
-    }
-  }
-
   FirebaseFirestore? _resolveFirestore() {
     if (_firestore != null) {
       return _firestore;
@@ -226,40 +196,6 @@ class FeedbackSubmissionService {
           continue;
         }
         await _sendToFirestore(firestore, decoded);
-      } catch (_) {
-        remaining.add(entry);
-      }
-    }
-
-    if (remaining.isEmpty) {
-      await prefs.remove(_pendingFeedbackKey);
-    } else {
-      await prefs.setStringList(_pendingFeedbackKey, remaining);
-    }
-  }
-
-  Future<void> _flushPendingToIngestApi() async {
-    final userId = _userIdProvider();
-    if (userId == null || userId.isEmpty) {
-      throw StateError('AUTH_REQUIRED');
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final rawQueue = prefs.getStringList(_pendingFeedbackKey);
-
-    if (rawQueue == null || rawQueue.isEmpty) {
-      return;
-    }
-
-    final remaining = <String>[];
-
-    for (final entry in rawQueue) {
-      try {
-        final decoded = jsonDecode(entry);
-        if (decoded is! Map<String, dynamic>) {
-          continue;
-        }
-        await _sendToIngestApi(decoded, userId);
       } catch (_) {
         remaining.add(entry);
       }

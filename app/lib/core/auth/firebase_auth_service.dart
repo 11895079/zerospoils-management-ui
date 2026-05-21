@@ -24,6 +24,15 @@ class FirebaseAuthService {
           '[FirebaseAuth] Already signed in as ${_auth.currentUser?.uid}',
         );
       }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'admin-restricted-operation') {
+        debugPrint(
+          '[FirebaseAuth] Anonymous sign-in unavailable for this environment; continuing without anon auth',
+        );
+        return;
+      }
+      debugPrint('[FirebaseAuth] Anonymous sign-in failed: $e');
+      // Continue app; auth is optional for offline-first operation
     } catch (e) {
       debugPrint('[FirebaseAuth] Anonymous sign-in failed: $e');
       // Continue app; auth is optional for offline-first operation
@@ -90,6 +99,31 @@ class FirebaseAuthService {
       password: password,
     );
     debugPrint('[FirebaseAuth] Signed in with email/password');
+  }
+
+  /// Sign in with Google provider.
+  ///
+  /// If the current user is anonymous, this attempts to link credentials first
+  /// so existing local/user-linked data stays on the same UID.
+  Future<void> signInWithGoogle() async {
+    final provider = GoogleAuthProvider();
+    final user = _auth.currentUser;
+
+    if (user != null && user.isAnonymous) {
+      try {
+        await user.linkWithProvider(provider);
+        debugPrint('[FirebaseAuth] Linked anonymous user to Google auth');
+        return;
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'credential-already-in-use') {
+          rethrow;
+        }
+        // Fall through to sign-in when account already exists.
+      }
+    }
+
+    await _auth.signInWithProvider(provider);
+    debugPrint('[FirebaseAuth] Signed in with Google');
   }
 
   /// Create an email/password account.
