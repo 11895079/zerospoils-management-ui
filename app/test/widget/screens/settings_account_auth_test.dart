@@ -159,7 +159,7 @@ void main() {
     fakeAuthService.dispose();
   });
 
-  testWidgets('Account tile triggers Google sign in', (tester) async {
+  testWidgets('Account dialog Google sign-in button calls signInWithGoogle', (tester) async {
     final fakeAuthService = _FakeFirebaseAuthService();
 
     await tester.pumpWidget(

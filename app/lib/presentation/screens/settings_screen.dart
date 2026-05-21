@@ -1152,6 +1152,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     ),
                     successMessage: 'Account created',
                     closeDialogAfterSuccess: true,
+                    requiresCredentials: true,
                   ),
             child: _isSubmitting
                 ? const SizedBox(
@@ -1172,6 +1173,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     ),
                     successMessage: 'Signed in',
                     closeDialogAfterSuccess: true,
+                    requiresCredentials: true,
                   ),
             child: _isSubmitting
                 ? const SizedBox(
@@ -1262,13 +1264,12 @@ class _AccountDialogState extends State<_AccountDialog> {
     required Future<void> Function() action,
     required String successMessage,
     required bool closeDialogAfterSuccess,
+    bool requiresCredentials = false,
   }) async {
     final messenger = ScaffoldMessenger.of(context);
 
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final requiresCredentials =
-        successMessage == 'Signed in' || successMessage == 'Account created';
 
     if (requiresCredentials) {
       if (email.isEmpty || !email.contains('@')) {

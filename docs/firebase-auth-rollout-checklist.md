@@ -92,8 +92,9 @@ Success criteria:
 1. Firebase Console -> Authentication -> Sign-in method:
    - Enable Google provider.
 2. Ensure Android SHA certificates and iOS config are correct.
-   - SHA-1: `97:3E:BE:4A:3F:AF:B1:31:63:96:C8:E5:46:9A:26:C4:C6:66:A7:68`
-   - SHA-256: `DD:BA:D5:DA:19:E5:C2:73:58:27:9B:E5:88:80:41:0C:44:A4:CE:82:C1:B4:F9:72:51:80:20:FF:86:E0:6D:56`
+   - Use `gradle signingReport` (debug/release builds) or `keytool -list -v -keystore <path-to-keystore> -alias <alias>` to obtain your build's SHA-1 and SHA-256.
+   - Register both debug (for development) and release (for production) SHA values in Firebase Console.
+   - See [Android Signing Guide](/docs/ANDROID_SIGNING_GUIDE.md) for build-variant specific certificates.
 3. Validate on Android and iOS physical devices.
 
 ### Apple Sign-In (deferred to next auth rollout step)
