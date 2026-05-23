@@ -60,7 +60,9 @@ android {
         applicationId = "com.zerospoils.zerospoils"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Firebase app distribution + Material Design 3 require minSdk 31+
+        // for Material Design 3 color attributes (e.g., android:attr/lStar).
+        minSdk = maxOf(flutter.minSdkVersion, 31)
         targetSdk = maxOf(flutter.targetSdkVersion, 34)
         versionCode = flutter.versionCode
         versionName = flutter.versionName
