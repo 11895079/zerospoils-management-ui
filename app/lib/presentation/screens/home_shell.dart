@@ -51,10 +51,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
-        children: [
-          screens[selectedIndex],
-          const ZestoOverlay(),
-        ],
+        children: [screens[selectedIndex], const ZestoOverlay()],
       ),
       // FAB is now handled by individual screens (e.g., InventoryScreen)
       // The beta feedback FAB sits at bottom-left to avoid conflicting with

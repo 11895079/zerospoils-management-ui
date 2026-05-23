@@ -1555,7 +1555,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     try {
       final repository = ref.read(itemRepositoryProvider);
       await repository.init();
-      final existingItems = _isEditMode ? <Item>[] : await repository.getAllItems();
+      final existingItems = _isEditMode
+          ? <Item>[]
+          : await repository.getAllItems();
       final inventoryCountBeforeAdd = existingItems.length;
       final entryMethod = _entryMethodForSave();
       final cameraUsed = entryMethod != 'manual';
@@ -1605,10 +1607,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             ? MascotMessageType.firstItem
             : MascotMessageType.itemAdded;
         unawaited(
-          zestoService.showMascot(
-            addMessageType,
-            bypassAntiSpam: true,
-          ),
+          zestoService.showMascot(addMessageType, bypassAntiSpam: true),
         );
 
         final allItemsAfterAdd = [...existingItems, item];

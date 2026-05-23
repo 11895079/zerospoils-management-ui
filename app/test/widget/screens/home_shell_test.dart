@@ -227,9 +227,9 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await container.read(zestoServiceProvider).showMascot(
-      MascotMessageType.firstItem,
-    );
+    await container
+        .read(zestoServiceProvider)
+        .showMascot(MascotMessageType.firstItem);
     await tester.pump();
 
     expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);

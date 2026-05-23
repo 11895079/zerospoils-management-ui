@@ -79,24 +79,27 @@ void main() {
       expect(shownTypes, ['firstItem']);
     });
 
-    test('consumed trigger selects quickSave when expiry is under 24h', () async {
-      final service = buildService();
+    test(
+      'consumed trigger selects quickSave when expiry is under 24h',
+      () async {
+        final service = buildService();
 
-      await service.onItemConsumed(
-        expiryDate: now.add(const Duration(hours: 23)),
-      );
-      now = now.add(const Duration(seconds: 6));
-      await service.onItemConsumed(
-        expiryDate: now.add(const Duration(hours: 48)),
-      );
+        await service.onItemConsumed(
+          expiryDate: now.add(const Duration(hours: 23)),
+        );
+        now = now.add(const Duration(seconds: 6));
+        await service.onItemConsumed(
+          expiryDate: now.add(const Duration(hours: 48)),
+        );
 
-      final shownTypes = telemetry
-          .where((event) => event['name'] == 'mascot_shown')
-          .map((event) => event['messageType'] as String)
-          .toList();
+        final shownTypes = telemetry
+            .where((event) => event['name'] == 'mascot_shown')
+            .map((event) => event['messageType'] as String)
+            .toList();
 
-      expect(shownTypes, ['quickSave', 'consumed']);
-    });
+        expect(shownTypes, ['quickSave', 'consumed']);
+      },
+    );
 
     test('expiry alert trigger requires at least 3 expiring items', () async {
       final service = buildService();

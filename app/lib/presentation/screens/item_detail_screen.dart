@@ -419,9 +419,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
       );
       await repository.saveItem(updatedItem);
       final zestoService = ref.read(zestoServiceProvider);
-      unawaited(
-        zestoService.onItemWasted(itemCategory: _item!.category.name),
-      );
+      unawaited(zestoService.onItemWasted(itemCategory: _item!.category.name));
 
       // Track telemetry
       final attribution = ReminderAttributionStore().getContext();

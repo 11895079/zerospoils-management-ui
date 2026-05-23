@@ -10,10 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/zesto_model.dart';
 import '../../core/utils/app_logger.dart';
 
-typedef ZestoTelemetryLogger = void Function(
-  String eventName,
-  Map<String, Object?> properties,
-);
+typedef ZestoTelemetryLogger =
+    void Function(String eventName, Map<String, Object?> properties);
 
 class ZestoService {
   static const String _lastMessageTimeKey = 'zesto_last_message_time_ms';
@@ -343,7 +341,10 @@ class ZestoService {
     return streakMilestones.contains(streakDays);
   }
 
-  bool hasCrossedSavingsMilestone(double previousSavings, double currentSavings) {
+  bool hasCrossedSavingsMilestone(
+    double previousSavings,
+    double currentSavings,
+  ) {
     for (final milestone in savingsMilestones) {
       if (previousSavings < milestone && currentSavings >= milestone) {
         return true;
@@ -462,7 +463,8 @@ class ZestoService {
       duration = _minimumDisplayDuration;
     }
 
-    if (type == MascotMessageType.wasted || type == MascotMessageType.expiryAlert) {
+    if (type == MascotMessageType.wasted ||
+        type == MascotMessageType.expiryAlert) {
       if (duration < _tipDisplayDuration) {
         duration = _tipDisplayDuration;
       }
@@ -615,7 +617,10 @@ class ZestoService {
         );
       }
 
-      await prefs.setString(_unlockProgressKey, jsonEncode(_unlockProgress.toJson()));
+      await prefs.setString(
+        _unlockProgressKey,
+        jsonEncode(_unlockProgress.toJson()),
+      );
     } catch (e) {
       appLogger.w('Failed to persist Zesto state', error: e);
     }

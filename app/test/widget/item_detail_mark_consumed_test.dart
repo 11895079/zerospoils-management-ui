@@ -258,7 +258,8 @@ void main() {
         'item_marked_used',
         tester,
       );
-      final markedUsedProps = markedUsedEvent['properties'] as Map<String, dynamic>;
+      final markedUsedProps =
+          markedUsedEvent['properties'] as Map<String, dynamic>;
       expect(markedUsedEvent['name'], 'item_marked_used');
       expect(markedUsedProps['source'], 'reminder');
       final mascotEvent = await waitForTelemetryEvent(

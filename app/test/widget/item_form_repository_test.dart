@@ -310,7 +310,9 @@ void main() {
     expect(properties['camera_expiry_format'], 'none');
   });
 
-  testWidgets('first item save emits mascot_shown for firstItem', (tester) async {
+  testWidgets('first item save emits mascot_shown for firstItem', (
+    tester,
+  ) async {
     SharedPreferences.setMockInitialValues({});
     addTearDown(() => SharedPreferences.setMockInitialValues({}));
     tester.view.physicalSize = const Size(1200, 2000);

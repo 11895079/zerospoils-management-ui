@@ -38,9 +38,10 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-    _bobAnimation = Tween<double>(begin: 0, end: -4).animate(
-      CurvedAnimation(parent: _bobController, curve: Curves.easeInOut),
-    );
+    _bobAnimation = Tween<double>(
+      begin: 0,
+      end: -4,
+    ).animate(CurvedAnimation(parent: _bobController, curve: Curves.easeInOut));
 
     final service = ref.read(zestoServiceProvider);
     _state = service.currentState;
@@ -123,8 +124,8 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
       return const SizedBox.shrink();
     }
 
-    final disableAnimations = MediaQuery.maybeOf(context)?.disableAnimations ??
-        false;
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final accent = _accentForType(_state.currentMessageType);
     final avatar = _avatarForType(_state.currentMessageType);
 
@@ -160,7 +161,10 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                   decoration: BoxDecoration(
                     gradient: _bubbleGradient,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    border: Border.all(color: accent.withValues(alpha: 0.35), width: 1),
+                    border: Border.all(
+                      color: accent.withValues(alpha: 0.35),
+                      width: 1,
+                    ),
                   ),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Row(
@@ -170,7 +174,9 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                       AnimatedBuilder(
                         animation: _bobAnimation,
                         builder: (context, child) {
-                          final dy = disableAnimations ? 0.0 : _bobAnimation.value;
+                          final dy = disableAnimations
+                              ? 0.0
+                              : _bobAnimation.value;
                           return Transform.translate(
                             offset: Offset(0, dy),
                             child: child,
@@ -212,7 +218,9 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                         margin: const EdgeInsets.only(left: 4),
                         decoration: BoxDecoration(
                           color: accent.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
+                          ),
                         ),
                         child: IconButton(
                           key: const Key('zesto_dismiss_button'),
