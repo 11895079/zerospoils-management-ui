@@ -6,12 +6,20 @@ library;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
+import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/zesto_model.dart';
+
 import '../../core/utils/app_logger.dart';
 
 typedef ZestoTelemetryLogger =
     void Function(String eventName, Map<String, Object?> properties);
+
+/// Path to the bundled storage-tip pool. Loaded once during hydration; the
+/// JSON is the single source of truth — there is no compiled-in fallback,
+/// so divergence between asset and code is impossible.
+const _storageTipsAssetPath = 'assets/data/storage_tips.json';
 
 class ZestoService {
   static const String _lastMessageTimeKey = 'zesto_last_message_time_ms';
@@ -137,26 +145,38 @@ class ZestoService {
   ZestoState _currentState = const ZestoState();
   Future<void>? _hydrateFuture;
   SharedPreferences? _prefs;
+  // Pending auto-dismiss timer for the currently-visible mascot. Cancelled
+  // when (a) the user manually dismisses, (b) showMascot starts a new
+  // mascot before this one's auto-dismiss elapses, or (c) the service is
+  // disposed. Keeping a single field is safe because the mascot is a
+  // singleton overlay — only one can be visible at a time.
+  Timer? _autoDismissTimer;
 
   // Dependencies (injected)
   final MascotSettings Function() getSettings;
-  final Map<String, List<String>> Function() getStorageTips;
   final DateTime Function() _now;
   final Random _random;
   final ZestoTelemetryLogger? _telemetryLogger;
   final Duration _displayDuration;
+  final AssetBundle _assetBundle;
+
+  /// Storage tips loaded from `assets/data/storage_tips.json` during
+  /// hydration. Empty until the load completes; if the load fails the
+  /// service falls back to the generic message pool for wasted items.
+  Map<String, List<String>> _storageTips = const {};
 
   ZestoService({
     required this.getSettings,
-    required this.getStorageTips,
     DateTime Function()? now,
     Random? random,
     ZestoTelemetryLogger? telemetryLogger,
     Duration displayDuration = const Duration(seconds: 3),
+    AssetBundle? assetBundle,
   }) : _now = now ?? DateTime.now,
        _random = random ?? Random(),
        _telemetryLogger = telemetryLogger,
-       _displayDuration = displayDuration;
+       _displayDuration = displayDuration,
+       _assetBundle = assetBundle ?? rootBundle;
 
   /// Get state stream for UI
   Stream<ZestoState> get stateStream => _stateController.stream;
@@ -169,6 +189,8 @@ class ZestoService {
 
   /// Dispose resources
   void dispose() {
+    _autoDismissTimer?.cancel();
+    _autoDismissTimer = null;
     _stateController.close();
   }
 
@@ -218,6 +240,11 @@ class ZestoService {
     String? message = _selectMessage(messageType, context);
     if (message == null) return;
 
+    // A new mascot supersedes any in-flight auto-dismiss; cancel before
+    // updating state so a stale timer can't dismiss the new mascot.
+    _autoDismissTimer?.cancel();
+    _autoDismissTimer = null;
+
     // Update state
     _updateState(
       isVisible: true,
@@ -245,9 +272,13 @@ class ZestoService {
     }
 
     // Auto-dismiss after a readable duration. Tips/messages with more text
-    // stay longer so users can actually consume the content.
-    await Future.delayed(_displayDurationFor(messageType, message));
-    _dismissMascot('auto');
+    // stay longer so users can actually consume the content. Stored as a
+    // cancellable Timer so a manual dismiss (or a new showMascot) doesn't
+    // race the auto-dismiss into emitting a duplicate telemetry event.
+    _autoDismissTimer = Timer(_displayDurationFor(messageType, message), () {
+      _autoDismissTimer = null;
+      _dismissMascot('auto');
+    });
   }
 
   /// Manual dismiss from UI interactions.
@@ -402,12 +433,15 @@ class ZestoService {
   ) {
     List<String> messages = messagePool[messageType] ?? [];
 
-    // Handle wasted items with storage tips
+    // Handle wasted items with storage tips. Tips are loaded from the
+    // bundled JSON during hydration; if hydration hasn't completed yet (or
+    // the asset failed to load), _storageTips is empty and we fall through
+    // to the generic `wasted` message pool below.
     if (messageType == MascotMessageType.wasted &&
         context?['itemCategory'] != null) {
-      final tips = getStorageTips();
       final category = (context!['itemCategory'] as String).toLowerCase();
-      final categoryTips = tips[category] ?? tips['general'] ?? [];
+      final categoryTips =
+          _storageTips[category] ?? _storageTips['general'] ?? const [];
       if (categoryTips.isNotEmpty) {
         return categoryTips[_random.nextInt(categoryTips.length)];
       }
@@ -541,9 +575,18 @@ class ZestoService {
   }
 
   void _dismissMascot(String dismissType) {
-    final durationMs = _visibleSince == null
-        ? 0
-        : _now().difference(_visibleSince!).inMilliseconds;
+    // Idempotent: if no mascot is currently visible, do nothing. Prevents
+    // a duplicate mascot_dismissed event when both manual and auto paths
+    // race, and protects against repeat dismissMascot() taps from the UI.
+    if (_visibleSince == null) {
+      return;
+    }
+    // Cancel any pending auto-dismiss so it doesn't fire after this call
+    // (covers the manual-dismiss-before-timeout race).
+    _autoDismissTimer?.cancel();
+    _autoDismissTimer = null;
+
+    final durationMs = _now().difference(_visibleSince!).inMilliseconds;
     _updateState(isVisible: false, isAnimating: false);
     _logTelemetry('mascot_dismissed', {
       'dismissType': dismissType,
@@ -558,8 +601,33 @@ class ZestoService {
       return _hydrateFuture!;
     }
 
-    _hydrateFuture = _loadState();
+    // Hydrate persisted behavior state and bundled storage tips in
+    // parallel — neither depends on the other and both are read-only.
+    _hydrateFuture = Future.wait([_loadState(), _loadStorageTips()]).then(
+      (_) {},
+    );
     return _hydrateFuture!;
+  }
+
+  Future<void> _loadStorageTips() async {
+    try {
+      final raw = await _assetBundle.loadString(_storageTipsAssetPath);
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+      final result = <String, List<String>>{};
+      decoded.forEach((key, value) {
+        if (value is List) {
+          result[key] = value.whereType<String>().toList(growable: false);
+        }
+      });
+      _storageTips = result;
+    } catch (e) {
+      appLogger.w('Failed to load Zesto storage tips asset', error: e);
+      // Leave _storageTips at its default empty value; the service will
+      // fall back to generic wasted-item messages.
+    }
   }
 
   Future<void> _loadState() async {

@@ -328,7 +328,6 @@ void main() {
         enabled: true,
         frequency: MascotFrequency.always,
       ),
-      getStorageTips: () => const {'general': []},
       displayDuration: Duration.zero,
       telemetryLogger: (eventName, properties) {
         telemetry.enqueue({'name': eventName, 'properties': properties});

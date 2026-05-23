@@ -12,6 +12,7 @@ import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart'
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
+import 'package:zerospoils/presentation/widgets/zesto_overlay.dart';
 
 /// Lightweight in-memory mock to avoid Hive I/O during widget tests
 class MockItemRepository extends HiveItemRepository {
@@ -201,10 +202,6 @@ void main() {
         enabled: true,
         frequency: MascotFrequency.always,
       ),
-      getStorageTips: () => const {
-        'general': ['Tip A', 'Tip B'],
-        'produce': ['Produce tip'],
-      },
       displayDuration: Duration.zero,
     );
     addTearDown(zestoService.dispose);
@@ -221,7 +218,22 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: HomeShell()),
+        // Mirror main.dart: ZestoOverlay is mounted in the MaterialApp
+        // builder so it renders above all routes. Building HomeShell as
+        // the home means there's only one route here, but the structure
+        // matches production so the test exercises the real wiring.
+        child: MaterialApp(
+          builder: (context, child) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                if (child case != null) child,
+                const ZestoOverlay(),
+              ],
+            );
+          },
+          home: const HomeShell(),
+        ),
       ),
     );
 

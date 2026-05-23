@@ -100,51 +100,12 @@ final dateFormatPreferenceProvider = FutureProvider<String>((ref) async {
   return prefs.getString('date_format') ?? 'MM/DD/YYYY';
 });
 
-/// Bundled storage tips used by Zesto Phase 1 wasted-item messages.
-final zestoStorageTipsProvider = Provider<Map<String, List<String>>>((ref) {
-  return const {
-    'dairy': [
-      'Tip: Store milk on the back shelf where temperatures stay coldest.',
-      'Tip: Wrap cheese in wax paper, then a loose bag so it can breathe.',
-      'Tip: Keep eggs in their carton to reduce odor transfer.',
-    ],
-    'produce': [
-      'Tip: Keep berries dry and wash only right before eating.',
-      'Tip: Store leafy greens with a paper towel to absorb moisture.',
-      'Tip: Keep bananas away from other fruit to slow ripening.',
-    ],
-    'meat': [
-      'Tip: Freeze meat within two days if you will not cook it soon.',
-      'Tip: Defrost meat in the fridge, never on the counter.',
-      'Tip: Store raw meat on the lowest shelf to prevent drips.',
-    ],
-    'bread': [
-      'Tip: Slice and freeze bread so you can toast portions as needed.',
-      'Tip: Keep bread in a cool, dry cupboard away from heat.',
-      'Tip: Avoid refrigerating most bread; it can stale faster.',
-    ],
-    'leftovers': [
-      'Tip: Cool leftovers quickly and refrigerate within two hours.',
-      'Tip: Store leftovers in shallow containers for faster cooling.',
-      'Tip: Add a date label so you can eat older leftovers first.',
-    ],
-    'condiments': [
-      'Tip: Refrigerate opened sauces unless label says shelf-stable.',
-      'Tip: Use clean utensils in jars to avoid contamination.',
-      'Tip: Date homemade dressings so they are used in time.',
-    ],
-    'general': [
-      'Tip: Put soon-to-expire items at eye level in your fridge.',
-      'Tip: Date labels help you use food in the right order.',
-      'Tip: Freeze single portions to save food and prep time.',
-    ],
-  };
-});
-
 /// Zesto service provider for mascot triggers and telemetry events.
+///
+/// Storage tips are loaded from `assets/data/storage_tips.json` inside the
+/// service's hydration step — the JSON is the single source of truth.
 final zestoServiceProvider = Provider<ZestoService>((ref) {
   final telemetry = ref.watch(telemetryClientProvider);
-  final storageTips = ref.watch(zestoStorageTipsProvider);
   const isTest = bool.fromEnvironment('FLUTTER_TEST');
 
   return ZestoService(
@@ -155,7 +116,6 @@ final zestoServiceProvider = Provider<ZestoService>((ref) {
       showTips: true,
       showDailyWelcome: true,
     ),
-    getStorageTips: () => storageTips,
     displayDuration: isTest ? Duration.zero : const Duration(seconds: 5),
     telemetryLogger: (eventName, properties) {
       telemetry.enqueue({'name': eventName, 'properties': properties});

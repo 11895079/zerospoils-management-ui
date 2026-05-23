@@ -24,6 +24,20 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
   ZestoState _state = const ZestoState();
   late final AnimationController _bobController;
   late final Animation<double> _bobAnimation;
+  // While true, the overlay tree (including its Semantics live region)
+  // stays in the widget tree so the exit slide/opacity animation can run.
+  // Flipped to false by [_unmountTimer] after the animation finishes, at
+  // which point [build] returns `SizedBox.shrink()` and the Semantics node
+  // is fully removed from the tree (so screen readers don't keep an
+  // invisible mascot in focus).
+  bool _mountedForExit = false;
+  Timer? _unmountTimer;
+
+  // Animation durations — must match the values used in [build]'s
+  // AnimatedSlide / AnimatedOpacity so we don't unmount the tree mid-fade.
+  static const _slideDuration = Duration(milliseconds: 260);
+  static const _opacityDuration = Duration(milliseconds: 220);
+  static const _exitDuration = _slideDuration; // longer of the two
 
   static const _bubbleGradient = LinearGradient(
     colors: [Color(0xFFFFFAEC), Color(0xFFFFFFFF)],
@@ -45,21 +59,50 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
 
     final service = ref.read(zestoServiceProvider);
     _state = service.currentState;
+    _mountedForExit = _state.currentMessage != null;
     _syncAnimationState(_state);
-    _subscription = service.stateStream.listen((nextState) {
-      if (!mounted) return;
-      setState(() {
-        _state = nextState;
-      });
-      _syncAnimationState(nextState);
-    });
+    _subscription = service.stateStream.listen(_onState);
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _unmountTimer?.cancel();
     _bobController.dispose();
     super.dispose();
+  }
+
+  void _onState(ZestoState nextState) {
+    if (!mounted) return;
+    final wasVisible = _state.isVisible;
+    setState(() {
+      _state = nextState;
+      if (nextState.isVisible) {
+        // New mascot (or replacement): keep the tree mounted and cancel
+        // any in-flight unmount from a previous dismiss.
+        _mountedForExit = true;
+        _unmountTimer?.cancel();
+        _unmountTimer = null;
+      } else if (wasVisible) {
+        // Just dismissed: schedule unmount once the exit animation
+        // finishes so the Semantics live region disappears from the tree.
+        _unmountTimer?.cancel();
+        final disableAnimations =
+            MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+        _unmountTimer = Timer(
+          disableAnimations ? Duration.zero : _exitDuration,
+          _onExitComplete,
+        );
+      }
+    });
+    _syncAnimationState(nextState);
+  }
+
+  void _onExitComplete() {
+    if (!mounted) return;
+    setState(() {
+      _mountedForExit = false;
+    });
   }
 
   void _syncAnimationState(ZestoState state) {
@@ -120,7 +163,10 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
 
   @override
   Widget build(BuildContext context) {
-    if (_state.currentMessage == null) {
+    // Render nothing — and contribute no Semantics — when there's no
+    // current mascot AND any exit animation has finished. This keeps a
+    // dismissed mascot from lingering in the accessibility tree.
+    if (_state.currentMessage == null || !_mountedForExit) {
       return const SizedBox.shrink();
     }
 
@@ -141,16 +187,12 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
           ignoring: !_state.isVisible,
           child: AnimatedSlide(
             offset: _state.isVisible ? Offset.zero : const Offset(0.2, 0.25),
-            duration: disableAnimations
-                ? Duration.zero
-                : const Duration(milliseconds: 260),
+            duration: disableAnimations ? Duration.zero : _slideDuration,
             curve: Curves.easeOutCubic,
             child: AnimatedOpacity(
               key: const Key('zesto_overlay'),
               opacity: _state.isVisible ? 1 : 0,
-              duration: disableAnimations
-                  ? Duration.zero
-                  : const Duration(milliseconds: 220),
+              duration: disableAnimations ? Duration.zero : _opacityDuration,
               curve: Curves.easeOut,
               child: Material(
                 elevation: 8,

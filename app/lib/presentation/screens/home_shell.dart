@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/beta_feedback_button.dart';
-import '../widgets/zesto_overlay.dart';
 import 'inventory_screen.dart';
 import 'expiring_today_screen.dart';
 import 'shopping_list_screen.dart';
@@ -49,10 +48,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     const tabNames = ['inventory', 'expiring', 'shopping', 'progress'];
 
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [screens[selectedIndex], const ZestoOverlay()],
-      ),
+      // ZestoOverlay is mounted at the MaterialApp.router level (see
+      // main.dart `builder:`) so it renders above all pushed routes, not
+      // just HomeShell. Don't add it back here — that would double-mount
+      // it and the in-shell instance would be hidden behind any pushed
+      // page anyway (the original bug Copilot called out).
+      body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
       // The beta feedback FAB sits at bottom-left to avoid conflicting with
       // screen-level FABs at bottom-right. Hidden in production builds.

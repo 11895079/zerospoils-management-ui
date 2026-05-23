@@ -4,8 +4,9 @@ library;
 /// Item detail screen
 /// Shows full item details with mark used/wasted actions
 
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';

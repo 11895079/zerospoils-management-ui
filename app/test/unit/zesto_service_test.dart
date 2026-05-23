@@ -16,10 +16,10 @@ void main() {
           enabled: true,
           frequency: MascotFrequency.always,
         ),
-        getStorageTips: () => const {
-          'general': ['Tip A', 'Tip B'],
-          'produce': ['Produce tip'],
-        },
+        // Storage tips load from the bundled JSON during hydration. None
+        // of the tests in this group exercise the wasted-tip path, so we
+        // accept the default empty tip map (asset load fails silently in
+        // the test binding's empty rootBundle).
         now: () => now,
         random: Random(1),
         displayDuration: Duration.zero,
