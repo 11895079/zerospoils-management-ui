@@ -603,9 +603,10 @@ class ZestoService {
 
     // Hydrate persisted behavior state and bundled storage tips in
     // parallel — neither depends on the other and both are read-only.
-    _hydrateFuture = Future.wait([_loadState(), _loadStorageTips()]).then(
-      (_) {},
-    );
+    _hydrateFuture = Future.wait([
+      _loadState(),
+      _loadStorageTips(),
+    ]).then((_) {});
     return _hydrateFuture!;
   }
 

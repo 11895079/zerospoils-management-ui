@@ -226,10 +226,7 @@ void main() {
           builder: (context, child) {
             return Stack(
               fit: StackFit.expand,
-              children: [
-                if (child case != null) child,
-                const ZestoOverlay(),
-              ],
+              children: [if (child case != null) child, const ZestoOverlay()],
             );
           },
           home: const HomeShell(),

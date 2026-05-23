@@ -164,10 +164,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       builder: (context, child) {
         return Stack(
           fit: StackFit.expand,
-          children: [
-            if (child case != null) child,
-            const ZestoOverlay(),
-          ],
+          children: [if (child case != null) child, const ZestoOverlay()],
         );
       },
       debugShowCheckedModeBanner: false,
