@@ -16,6 +16,7 @@ import '../helpers/telemetry_test_helpers.dart';
 class MockTelemetryClient extends Mock implements sl.TelemetryClient {
   int enqueueCallCount = 0;
   Map<String, dynamic>? lastEvent;
+  @override
   final List<Map<String, dynamic>> events = [];
   @override
   void enqueue(Map<String, dynamic> event) {
