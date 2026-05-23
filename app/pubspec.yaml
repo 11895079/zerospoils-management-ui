@@ -148,6 +148,7 @@ flutter:
 
   assets:
     - assets/reference-data/barcode_seed_ca.v2.json
+    - assets/data/storage_tips.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

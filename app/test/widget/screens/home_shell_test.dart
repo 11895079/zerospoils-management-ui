@@ -2,8 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/home_shell.dart';
 import 'package:zerospoils/domain/models/item_model.dart' show Item;
+import 'package:zerospoils/domain/models/zesto_model.dart';
+import 'package:zerospoils/domain/repositories/zesto_service.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
@@ -70,6 +73,7 @@ void main() {
     mockRepo.init();
     mockShoppingRepo = MockShoppingListRepository();
     mockShoppingRepo.init();
+    SharedPreferences.setMockInitialValues({});
   });
 
   testWidgets('Tab navigation switches between screens', (
@@ -187,5 +191,52 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(feedbackDrawerKey), findsOneWidget);
+  });
+
+  testWidgets('shows visible Zesto overlay when mascot trigger fires', (
+    WidgetTester tester,
+  ) async {
+    final zestoService = ZestoService(
+      getSettings: () => const MascotSettings(
+        enabled: true,
+        frequency: MascotFrequency.always,
+      ),
+      getStorageTips: () => const {
+        'general': ['Tip A', 'Tip B'],
+        'produce': ['Produce tip'],
+      },
+      displayDuration: Duration.zero,
+    );
+    addTearDown(zestoService.dispose);
+
+    final container = ProviderContainer(
+      overrides: [
+        itemRepositoryProvider.overrideWithValue(mockRepo),
+        shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        zestoServiceProvider.overrideWithValue(zestoService),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(home: HomeShell()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await container.read(zestoServiceProvider).showMascot(
+      MascotMessageType.firstItem,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
+    expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
+
+    container.read(zestoServiceProvider).dismissMascot();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 4));
   });
 }

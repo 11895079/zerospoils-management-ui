@@ -4,6 +4,7 @@ library;
 /// Captures item name, category, location, quantity, expiry date
 
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -18,6 +19,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/receipt_batch.dart';
 import '../../core/vision/fresh_item_cv_service.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/models/zesto_model.dart';
 import '../../domain/models/user_category.dart';
 import '../../domain/utils/local_id_generator.dart';
 import '../widgets/app_button.dart';
@@ -1553,6 +1555,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     try {
       final repository = ref.read(itemRepositoryProvider);
       await repository.init();
+      final existingItems = _isEditMode ? <Item>[] : await repository.getAllItems();
+      final inventoryCountBeforeAdd = existingItems.length;
       final entryMethod = _entryMethodForSave();
       final cameraUsed = entryMethod != 'manual';
       final cameraBarcodeAccepted = _cameraBarcodeValue != null;
@@ -1594,6 +1598,34 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       );
 
       await repository.saveItem(item);
+
+      if (!_isEditMode) {
+        final zestoService = ref.read(zestoServiceProvider);
+        final addMessageType = inventoryCountBeforeAdd == 0
+            ? MascotMessageType.firstItem
+            : MascotMessageType.itemAdded;
+        unawaited(
+          zestoService.showMascot(
+            addMessageType,
+            bypassAntiSpam: true,
+          ),
+        );
+
+        final allItemsAfterAdd = [...existingItems, item];
+        final expiringWithin24hCount = allItemsAfterAdd
+            .where((it) => it.status == ItemStatus.available)
+            .where((it) => it.expiryDate != null)
+            .where((it) {
+              final hours = it.expiryDate!.difference(DateTime.now()).inHours;
+              return hours >= 0 && hours < 24;
+            })
+            .length;
+        unawaited(
+          zestoService.onInventoryScannedForExpiry(
+            expiringWithin24hCount: expiringWithin24hCount,
+          ),
+        );
+      }
 
       if (_cameraBarcodeValue != null) {
         await ref

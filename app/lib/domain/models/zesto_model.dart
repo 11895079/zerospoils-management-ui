@@ -268,6 +268,7 @@ enum MascotMessageType {
 
   // Special
   firstItem,
+  itemAdded,
   celebration,
 }
 
