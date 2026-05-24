@@ -78,7 +78,7 @@ class MockAssetBundle extends AssetBundle {
 
   @override
   Future<ByteData> load(String key) =>
-    throw FlutterError('Binary assets not supported in mock');
+      throw FlutterError('Binary assets not supported in mock');
 }
 
 void main() {
@@ -210,59 +210,57 @@ void main() {
     expect(find.byKey(feedbackDrawerKey), findsOneWidget);
   });
 
-  testWidgets('shows visible Zesto overlay when mascot trigger fires',
+  testWidgets(
+    'shows visible Zesto overlay when mascot trigger fires',
     skip: true, // TODO: Fix test context/Overlay issues
-    (
-    WidgetTester tester,
-  ) async {
-    // Mock AssetBundle to provide storage tips without loading from filesystem
-    final mockAssetBundle = MockAssetBundle();
+    (WidgetTester tester) async {
+      // Mock AssetBundle to provide storage tips without loading from filesystem
+      final mockAssetBundle = MockAssetBundle();
 
-    final zestoService = ZestoService(
-      getSettings: () => const MascotSettings(
-        enabled: true,
-        frequency: MascotFrequency.always,
-      ),
-      displayDuration: Duration.zero,
-      assetBundle: mockAssetBundle,
-    );
-    addTearDown(zestoService.dispose);
-
-    final container = ProviderContainer(
-      overrides: [
-        itemRepositoryProvider.overrideWithValue(mockRepo),
-        shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
-        zestoServiceProvider.overrideWithValue(zestoService),
-      ],
-    );
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const MaterialApp(
-          home: HomeShell(),
+      final zestoService = ZestoService(
+        getSettings: () => const MascotSettings(
+          enabled: true,
+          frequency: MascotFrequency.always,
         ),
-      ),
-    );
+        displayDuration: Duration.zero,
+        assetBundle: mockAssetBundle,
+      );
+      addTearDown(zestoService.dispose);
 
-    // Allow HomeShell to initialize
-    await tester.pumpAndSettle();
+      final container = ProviderContainer(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+          zestoServiceProvider.overrideWithValue(zestoService),
+        ],
+      );
+      addTearDown(container.dispose);
 
-    // Show the mascot
-    await container
-        .read(zestoServiceProvider)
-        .showMascot(MascotMessageType.firstItem);
-    // Pump to let the state change propagate
-    await tester.pump(const Duration(milliseconds: 50));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(home: HomeShell()),
+        ),
+      );
 
-    // The overlay should now be visible in the HomeShell's own Overlay
-    expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
-    expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
+      // Allow HomeShell to initialize
+      await tester.pumpAndSettle();
 
-    // Dismiss the mascot
-    container.read(zestoServiceProvider).dismissMascot();
-    // Final pump to process dismissal
-    await tester.pump(const Duration(milliseconds: 50));
-  });
+      // Show the mascot
+      await container
+          .read(zestoServiceProvider)
+          .showMascot(MascotMessageType.firstItem);
+      // Pump to let the state change propagate
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The overlay should now be visible in the HomeShell's own Overlay
+      expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
+      expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
+
+      // Dismiss the mascot
+      container.read(zestoServiceProvider).dismissMascot();
+      // Final pump to process dismissal
+      await tester.pump(const Duration(milliseconds: 50));
+    },
+  );
 }

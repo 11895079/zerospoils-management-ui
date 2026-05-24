@@ -159,6 +159,7 @@ class ZestoService {
   final ZestoTelemetryLogger? _telemetryLogger;
   final Duration _displayDuration;
   final AssetBundle _assetBundle;
+
   /// When true, skip reading from and writing to [SharedPreferences]. Set this
   /// in widget tests to prevent cross-test anti-spam state pollution.
   final bool _skipPersistence;
