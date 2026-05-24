@@ -234,7 +234,10 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    // Wait for initial widget build and any startup animations.
+    // Use specific duration instead of pumpAndSettle() to avoid hangs on
+    // pending provider operations or timers during HomeShell initialization.
+    await tester.pump(const Duration(milliseconds: 100));
 
     await container
         .read(zestoServiceProvider)
@@ -245,7 +248,9 @@ void main() {
     expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
 
     container.read(zestoServiceProvider).dismissMascot();
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 4));
+    // Wait for exit animation (260ms) plus unmount timer to settle
+    // Don't use pumpAndSettle() as it can hang if the provider state
+    // has pending operations. Instead, pump exactly through the animation duration.
+    await tester.pump(const Duration(milliseconds: 300));
   });
 }

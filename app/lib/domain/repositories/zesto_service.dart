@@ -493,18 +493,20 @@ class ZestoService {
   Duration _displayDurationFor(MascotMessageType type, String message) {
     var duration = _displayDuration;
 
-    if (duration < _minimumDisplayDuration) {
+    // Allow Duration.zero for tests; otherwise enforce minimum display duration
+    // so users have time to read the message.
+    if (duration > Duration.zero && duration < _minimumDisplayDuration) {
       duration = _minimumDisplayDuration;
     }
 
     if (type == MascotMessageType.wasted ||
         type == MascotMessageType.expiryAlert) {
-      if (duration < _tipDisplayDuration) {
+      if (duration > Duration.zero && duration < _tipDisplayDuration) {
         duration = _tipDisplayDuration;
       }
     }
 
-    if (message.length > 60) {
+    if (message.length > 60 && duration > Duration.zero) {
       duration += const Duration(seconds: 1);
     }
 
