@@ -159,6 +159,9 @@ class ZestoService {
   final ZestoTelemetryLogger? _telemetryLogger;
   final Duration _displayDuration;
   final AssetBundle _assetBundle;
+  /// When true, skip reading from and writing to [SharedPreferences]. Set this
+  /// in widget tests to prevent cross-test anti-spam state pollution.
+  final bool _skipPersistence;
 
   /// Storage tips loaded from `assets/data/storage_tips.json` during
   /// hydration. Empty until the load completes; if the load fails the
@@ -172,11 +175,13 @@ class ZestoService {
     ZestoTelemetryLogger? telemetryLogger,
     Duration displayDuration = const Duration(seconds: 3),
     AssetBundle? assetBundle,
+    bool skipPersistence = false,
   }) : _now = now ?? DateTime.now,
        _random = random ?? Random(),
        _telemetryLogger = telemetryLogger,
        _displayDuration = displayDuration,
-       _assetBundle = assetBundle ?? rootBundle;
+       _assetBundle = assetBundle ?? rootBundle,
+       _skipPersistence = skipPersistence;
 
   /// Get state stream for UI
   Stream<ZestoState> get stateStream => _stateController.stream;
@@ -613,6 +618,7 @@ class ZestoService {
   }
 
   Future<void> _loadStorageTips() async {
+    if (_skipPersistence) return;
     try {
       final raw = await _assetBundle.loadString(_storageTipsAssetPath);
       final decoded = jsonDecode(raw);
@@ -634,6 +640,7 @@ class ZestoService {
   }
 
   Future<void> _loadState() async {
+    if (_skipPersistence) return;
     try {
       _prefs ??= await SharedPreferences.getInstance();
       final prefs = _prefs!;
@@ -663,6 +670,7 @@ class ZestoService {
   }
 
   Future<void> _persistBehaviorState() async {
+    if (_skipPersistence) return;
     try {
       await _ensureHydrated();
       final prefs = _prefs;

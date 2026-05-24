@@ -65,6 +65,7 @@ void main() {
     setUp(() {
       mockRepo = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      SharedPreferences.resetStatic();
       SharedPreferences.setMockInitialValues({});
       ReminderAttributionStore().clear();
     });
@@ -88,6 +89,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -157,6 +159,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -230,6 +233,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(

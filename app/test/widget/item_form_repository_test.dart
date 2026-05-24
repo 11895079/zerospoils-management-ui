@@ -313,8 +313,12 @@ void main() {
   testWidgets('first item save emits mascot_shown for firstItem', (
     tester,
   ) async {
+    SharedPreferences.resetStatic();
     SharedPreferences.setMockInitialValues({});
-    addTearDown(() => SharedPreferences.setMockInitialValues({}));
+    addTearDown(() {
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
+    });
     tester.view.physicalSize = const Size(1200, 2000);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -329,6 +333,9 @@ void main() {
         frequency: MascotFrequency.always,
       ),
       displayDuration: Duration.zero,
+      // skipPersistence prevents anti-spam timestamps from a prior test (run
+      // concurrently in a different file) leaking in via SharedPreferences.
+      skipPersistence: true,
       telemetryLogger: (eventName, properties) {
         telemetry.enqueue({'name': eventName, 'properties': properties});
       },

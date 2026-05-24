@@ -1,6 +1,4 @@
 // Widget tests for HomeShell navigation
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,7 +13,6 @@ import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart'
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
-import 'package:zerospoils/presentation/widgets/zesto_overlay.dart';
 
 /// Lightweight in-memory mock to avoid Hive I/O during widget tests
 class MockItemRepository extends HiveItemRepository {
