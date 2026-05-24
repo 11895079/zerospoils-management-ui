@@ -15,7 +15,9 @@ import '../../data/repositories/demo_item_repository.dart';
 import '../../data/repositories/item_repository_base.dart';
 import '../../data/repositories/user_category_repository.dart';
 import '../../domain/models/item_model.dart';
+import '../../domain/models/zesto_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
+import '../../domain/repositories/zesto_service.dart';
 import 'service_locator.dart'
     show telemetryClientProvider, progressStatsServiceProvider;
 
@@ -96,4 +98,27 @@ final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {
 final dateFormatPreferenceProvider = FutureProvider<String>((ref) async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString('date_format') ?? 'MM/DD/YYYY';
+});
+
+/// Zesto service provider for mascot triggers and telemetry events.
+///
+/// Storage tips are loaded from `assets/data/storage_tips.json` inside the
+/// service's hydration step — the JSON is the single source of truth.
+final zestoServiceProvider = Provider<ZestoService>((ref) {
+  final telemetry = ref.watch(telemetryClientProvider);
+  const isTest = bool.fromEnvironment('FLUTTER_TEST');
+
+  return ZestoService(
+    getSettings: () => const MascotSettings(
+      enabled: true,
+      frequency: MascotFrequency.always,
+      showCelebrations: true,
+      showTips: true,
+      showDailyWelcome: true,
+    ),
+    displayDuration: isTest ? Duration.zero : const Duration(seconds: 5),
+    telemetryLogger: (eventName, properties) {
+      telemetry.enqueue({'name': eventName, 'properties': properties});
+    },
+  );
 });

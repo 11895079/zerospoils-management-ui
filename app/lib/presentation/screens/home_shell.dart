@@ -1,4 +1,6 @@
 // Home shell with 4-tab navigation
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../di/repository_providers.dart';
@@ -9,11 +11,31 @@ import 'expiring_today_screen.dart';
 import 'shopping_list_screen.dart';
 import 'progress_screen.dart';
 
-class HomeShell extends ConsumerWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell> {
+  bool _dailyWelcomeTriggered = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_dailyWelcomeTriggered) {
+      return;
+    }
+    _dailyWelcomeTriggered = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(zestoServiceProvider).onAppOpened());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final bottomNavigationTheme = Theme.of(context).bottomNavigationBarTheme;
     final selectedIndex = ref.watch(homeTabIndexProvider);
     final screens = [
@@ -26,6 +48,11 @@ class HomeShell extends ConsumerWidget {
     const tabNames = ['inventory', 'expiring', 'shopping', 'progress'];
 
     return Scaffold(
+      // ZestoOverlay is mounted at the MaterialApp.router level (see
+      // main.dart `builder:`) so it renders above all pushed routes, not
+      // just HomeShell. Don't add it back here — that would double-mount
+      // it and the in-shell instance would be hidden behind any pushed
+      // page anyway (the original bug Copilot called out).
       body: screens[selectedIndex],
       // FAB is now handled by individual screens (e.g., InventoryScreen)
       // The beta feedback FAB sits at bottom-left to avoid conflicting with

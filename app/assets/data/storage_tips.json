@@ -1,0 +1,51 @@
+{
+  "dairy": [
+    "Tip: Store milk on the back shelf where temperatures stay coldest.",
+    "Tip: Wrap cheese in wax paper, then a loose bag so it can breathe.",
+    "Tip: Freeze yogurt portions for quick smoothie cubes.",
+    "Tip: Keep eggs in their carton to reduce odor transfer.",
+    "Tip: Use older dairy first by keeping newest items at the back."
+  ],
+  "produce": [
+    "Tip: Keep berries dry and wash only right before eating.",
+    "Tip: Store leafy greens with a paper towel to absorb moisture.",
+    "Tip: Keep bananas away from other fruit to slow ripening.",
+    "Tip: Tomatoes keep best at room temperature until ripe.",
+    "Tip: Trim and refrigerate herbs in a glass with a little water."
+  ],
+  "meat": [
+    "Tip: Freeze meat within two days if you will not cook it soon.",
+    "Tip: Defrost meat in the fridge, never on the counter.",
+    "Tip: Store raw meat on the lowest shelf to prevent drips.",
+    "Tip: Portion meat before freezing so you thaw only what you need.",
+    "Tip: Label frozen meat with date and cut for easy rotation."
+  ],
+  "bread": [
+    "Tip: Slice and freeze bread so you can toast portions as needed.",
+    "Tip: Keep bread in a cool, dry cupboard away from heat.",
+    "Tip: Refresh stale bread in a warm oven for a few minutes.",
+    "Tip: Avoid refrigerating most bread; it can stale faster.",
+    "Tip: Freeze extra buns and thaw overnight to reduce waste."
+  ],
+  "leftovers": [
+    "Tip: Cool leftovers quickly and refrigerate within two hours.",
+    "Tip: Store leftovers in shallow containers for faster cooling.",
+    "Tip: Add a date label so you can eat older leftovers first.",
+    "Tip: Freeze extra portions if you will not eat them in 3 days.",
+    "Tip: Reheat leftovers to steaming hot all the way through."
+  ],
+  "condiments": [
+    "Tip: Refrigerate opened sauces unless label says shelf-stable.",
+    "Tip: Use clean utensils in jars to avoid contamination.",
+    "Tip: Wipe bottle rims to keep caps from getting sticky and moldy.",
+    "Tip: Date homemade dressings so they are used in time.",
+    "Tip: Keep condiments grouped by use-by date for easy rotation."
+  ],
+  "general": [
+    "Tip: Plan one leftovers meal each week to use what you already have.",
+    "Tip: Put soon-to-expire items at eye level in your fridge.",
+    "Tip: Date labels help you use food in the right order.",
+    "Tip: Freeze single portions to save food and prep time.",
+    "Tip: Store similar items together so nothing gets forgotten."
+  ]
+}

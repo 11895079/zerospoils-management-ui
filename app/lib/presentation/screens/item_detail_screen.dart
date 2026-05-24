@@ -4,6 +4,8 @@ library;
 /// Item detail screen
 /// Shows full item details with mark used/wasted actions
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -162,6 +164,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         updatedAt: DateTime.now(),
       );
       await repository.saveItem(updatedItem);
+      final zestoService = ref.read(zestoServiceProvider);
+      unawaited(zestoService.onItemConsumed(expiryDate: _item!.expiryDate));
 
       // Track telemetry
       final attribution = ReminderAttributionStore().getContext();
@@ -415,6 +419,8 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
         updatedAt: DateTime.now(),
       );
       await repository.saveItem(updatedItem);
+      final zestoService = ref.read(zestoServiceProvider);
+      unawaited(zestoService.onItemWasted(itemCategory: _item!.category.name));
 
       // Track telemetry
       final attribution = ReminderAttributionStore().getContext();

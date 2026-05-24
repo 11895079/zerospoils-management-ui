@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
@@ -10,13 +11,18 @@ import 'package:zerospoils/presentation/di/service_locator.dart' as sl;
 import 'package:zerospoils/data/repositories/item_repository_base.dart';
 import 'package:zerospoils/core/notifications/reminder_attribution_store.dart';
 
+import '../helpers/telemetry_test_helpers.dart';
+
 class MockTelemetryClient extends Mock implements sl.TelemetryClient {
   int enqueueCallCount = 0;
   Map<String, dynamic>? lastEvent;
   @override
+  final List<Map<String, dynamic>> events = [];
+  @override
   void enqueue(Map<String, dynamic> event) {
     enqueueCallCount++;
     lastEvent = event;
+    events.add(event);
   }
 }
 
@@ -51,6 +57,8 @@ void main() {
     setUp(() {
       mockRepo = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
       ReminderAttributionStore().clear();
       testItem = Item(
         id: 'item-1',
@@ -74,6 +82,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -112,7 +121,19 @@ void main() {
 
       // Verify telemetry event was emitted
       expect(mockTelemetry.enqueueCallCount, greaterThan(0));
-      expect(mockTelemetry.lastEvent?['name'], 'item_marked_wasted');
+      final wastedEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'item_marked_wasted',
+        tester,
+      );
+      expect(wastedEvent['name'], 'item_marked_wasted');
+      final mascotEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'mascot_shown',
+        tester,
+      );
+      final mascotProps = mascotEvent['properties'] as Map<String, dynamic>;
+      expect(mascotProps['messageType'], 'wasted');
     });
 
     testWidgets('adds reminder source when opened from reminder', (
@@ -133,6 +154,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -162,8 +184,21 @@ void main() {
       await tester.tap(confirmBtn);
       await tester.pumpAndSettle();
 
-      expect(mockTelemetry.lastEvent?['name'], 'item_marked_wasted');
-      expect(mockTelemetry.lastEvent?['properties']['source'], 'reminder');
+      final wastedEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'item_marked_wasted',
+        tester,
+      );
+      final wastedProps = wastedEvent['properties'] as Map<String, dynamic>;
+      expect(wastedEvent['name'], 'item_marked_wasted');
+      expect(wastedProps['source'], 'reminder');
+      final mascotEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'mascot_shown',
+        tester,
+      );
+      final mascotProps = mascotEvent['properties'] as Map<String, dynamic>;
+      expect(mascotProps['messageType'], 'wasted');
     });
 
     testWidgets('handles save failure gracefully', (tester) async {
@@ -175,6 +210,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -222,6 +258,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -265,6 +302,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(

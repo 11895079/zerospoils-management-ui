@@ -3,18 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:zerospoils/core/feature_flags/feature_flag_key.dart';
+import 'package:zerospoils/core/feature_flags/feature_flags_provider.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/receipt_batch_repository.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/receipt_batch.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
+import 'package:zerospoils/domain/models/zesto_model.dart';
+import 'package:zerospoils/domain/repositories/zesto_service.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart'
     show TelemetryClient, telemetryClientProvider;
 import 'package:zerospoils/presentation/screens/item_form_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/app_button.dart';
+
+import '../helpers/telemetry_test_helpers.dart';
 
 /// Mock repository for testing without Hive file I/O
 class MockItemRepository extends HiveItemRepository {
@@ -113,7 +120,15 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [itemRepositoryProvider.overrideWithValue(repository)],
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(repository),
+          isFlagEnabledProvider(
+            FeatureFlagKey.expiryDateOcr,
+          ).overrideWith((ref) async => false),
+          isFlagEnabledProvider(
+            FeatureFlagKey.freshItemCv,
+          ).overrideWith((ref) async => false),
+        ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
@@ -293,6 +308,67 @@ void main() {
     expect(properties['camera_expiry_accepted'], false);
     expect(properties['camera_barcode_source'], 'none');
     expect(properties['camera_expiry_format'], 'none');
+  });
+
+  testWidgets('first item save emits mascot_shown for firstItem', (
+    tester,
+  ) async {
+    SharedPreferences.resetStatic();
+    SharedPreferences.setMockInitialValues({});
+    addTearDown(() {
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
+    });
+    tester.view.physicalSize = const Size(1200, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final telemetry = TelemetryClient(consentEnabled: true);
+    final zestoService = ZestoService(
+      getSettings: () => const MascotSettings(
+        enabled: true,
+        frequency: MascotFrequency.always,
+      ),
+      displayDuration: Duration.zero,
+      // skipPersistence prevents anti-spam timestamps from a prior test (run
+      // concurrently in a different file) leaking in via SharedPreferences.
+      skipPersistence: true,
+      telemetryLogger: (eventName, properties) {
+        telemetry.enqueue({'name': eventName, 'properties': properties});
+      },
+    );
+    addTearDown(zestoService.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(repository),
+          telemetryClientProvider.overrideWithValue(telemetry),
+          zestoServiceProvider.overrideWithValue(zestoService),
+        ],
+        child: const MaterialApp(home: ItemFormScreen()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('item_form_name_field')),
+      'First Item Mascot Test',
+    );
+    await tester.tap(find.byKey(const Key('item_form_save_button')));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final mascotEvent = await waitForTelemetryEvent(
+      telemetry.events,
+      'mascot_shown',
+      tester,
+    );
+    final properties = mascotEvent['properties'] as Map<String, dynamic>;
+    expect(properties['messageType'], 'firstItem');
   });
 
   testWidgets('recent item suggestion reuses prior category and location', (

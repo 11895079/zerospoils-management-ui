@@ -9,6 +9,7 @@ import 'presentation/themes/app_theme.dart';
 import 'presentation/di/service_locator.dart' hide itemRepositoryProvider;
 import 'presentation/di/repository_providers.dart';
 import 'presentation/di/theme_providers.dart';
+import 'presentation/widgets/zesto_overlay.dart';
 import 'data/adapters/item_adapter.dart';
 import 'data/adapters/receipt_batch_adapter.dart';
 import 'domain/models/user_category.dart';
@@ -155,6 +156,17 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      // Mount ZestoOverlay above the Navigator so mascot bubbles render on
+      // top of every routed page (HomeShell, ItemFormScreen, ItemDetail,
+      // etc.). Mounting it inside a child screen would leave it behind
+      // pushed routes and the mascot would be invisible when triggered
+      // from item-add or item-detail flows.
+      builder: (context, child) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [if (child case != null) child, const ZestoOverlay()],
+        );
+      },
       debugShowCheckedModeBanner: false,
     );
   }

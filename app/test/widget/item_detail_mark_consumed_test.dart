@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart' as sl;
@@ -10,13 +11,18 @@ import 'package:zerospoils/presentation/screens/item_detail_screen.dart';
 import 'package:zerospoils/data/repositories/item_repository_base.dart';
 import 'package:zerospoils/core/notifications/reminder_attribution_store.dart';
 
+import '../helpers/telemetry_test_helpers.dart';
+
 class MockTelemetryClient extends Mock implements sl.TelemetryClient {
   int enqueueCallCount = 0;
   Map<String, dynamic>? lastEvent;
   @override
+  final List<Map<String, dynamic>> events = [];
+  @override
   void enqueue(Map<String, dynamic> event) {
     enqueueCallCount++;
     lastEvent = event;
+    events.add(event);
   }
 }
 
@@ -59,6 +65,8 @@ void main() {
     setUp(() {
       mockRepo = MockItemRepository();
       mockTelemetry = MockTelemetryClient();
+      SharedPreferences.resetStatic();
+      SharedPreferences.setMockInitialValues({});
       ReminderAttributionStore().clear();
     });
 
@@ -81,6 +89,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -116,7 +125,19 @@ void main() {
       expect(mockRepo.saveItemCallCount, 1);
       expect(mockRepo.lastSavedItem?.status, ItemStatus.available);
       expect(mockRepo.lastSavedItem?.quantity, 1);
-      expect(mockTelemetry.lastEvent?['name'], 'item_partially_consumed');
+      final consumedEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'item_partially_consumed',
+        tester,
+      );
+      expect(consumedEvent['name'], 'item_partially_consumed');
+      final mascotEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'mascot_shown',
+        tester,
+      );
+      final mascotProps = mascotEvent['properties'] as Map<String, dynamic>;
+      expect(mascotProps['messageType'], 'consumed');
     });
 
     testWidgets('marks consumed when all quantity is used', (tester) async {
@@ -138,6 +159,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -167,7 +189,19 @@ void main() {
       expect(mockRepo.saveItemCallCount, 1);
       expect(mockRepo.lastSavedItem?.status, ItemStatus.consumed);
       expect(mockRepo.lastSavedItem?.quantity, 0);
-      expect(mockTelemetry.lastEvent?['name'], 'item_marked_used');
+      final markedUsedEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'item_marked_used',
+        tester,
+      );
+      expect(markedUsedEvent['name'], 'item_marked_used');
+      final mascotEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'mascot_shown',
+        tester,
+      );
+      final mascotProps = mascotEvent['properties'] as Map<String, dynamic>;
+      expect(mascotProps['messageType'], anyOf('consumed', 'quickSave'));
     });
 
     testWidgets('adds reminder source when opened from reminder', (
@@ -199,6 +233,7 @@ void main() {
           overrides: [
             itemRepositoryProvider.overrideWithValue(mockRepo),
             sl.telemetryClientProvider.overrideWithValue(mockTelemetry),
+            zestoTestOverride(),
           ],
           child: MaterialApp.router(
             routerConfig: GoRouter(
@@ -223,8 +258,22 @@ void main() {
       await tester.tap(find.byKey(const Key('consume_confirm_button')));
       await tester.pumpAndSettle();
 
-      expect(mockTelemetry.lastEvent?['name'], 'item_marked_used');
-      expect(mockTelemetry.lastEvent?['properties']['source'], 'reminder');
+      final markedUsedEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'item_marked_used',
+        tester,
+      );
+      final markedUsedProps =
+          markedUsedEvent['properties'] as Map<String, dynamic>;
+      expect(markedUsedEvent['name'], 'item_marked_used');
+      expect(markedUsedProps['source'], 'reminder');
+      final mascotEvent = await waitForTelemetryEvent(
+        mockTelemetry.events,
+        'mascot_shown',
+        tester,
+      );
+      final mascotProps = mascotEvent['properties'] as Map<String, dynamic>;
+      expect(mascotProps['messageType'], anyOf('consumed', 'quickSave'));
     });
   });
 }
