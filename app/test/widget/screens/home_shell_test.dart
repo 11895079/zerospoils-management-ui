@@ -248,9 +248,11 @@ void main() {
     expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
 
     container.read(zestoServiceProvider).dismissMascot();
-    // Wait for exit animation (260ms) plus unmount timer to settle
-    // Don't use pumpAndSettle() as it can hang if the provider state
-    // has pending operations. Instead, pump exactly through the animation duration.
-    await tester.pump(const Duration(milliseconds: 300));
+    // Wait for exit animation to complete. The overlay animates out over 260ms
+    // then unmounts. Use multiple shorter pumps to avoid hanging on provider operations.
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
   });
 }
