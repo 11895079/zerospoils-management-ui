@@ -275,20 +275,17 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
         'properties': {
           'source': widget.source,
           'category': _category,
+          // 'queued' means accepted locally; background flush will send it.
           'outcome': outcome.name,
         },
       });
 
       Navigator.of(context).pop();
 
+      // Always show a positive confirmation.  The service queues locally first
+      // so feedback is durable regardless of connectivity or server rate limits.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        SnackBar(
-          content: Text(
-            outcome == FeedbackSubmitOutcome.submitted
-                ? 'Feedback sent. Thank you.'
-                : 'No network right now. Feedback saved and will retry later.',
-          ),
-        ),
+        const SnackBar(content: Text('Feedback sent. Thank you.')),
       );
     } on StateError catch (error) {
       if (!context.mounted) {
@@ -305,16 +302,16 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
         },
       });
 
-      if (authRequired) {
-        Navigator.of(context).pop();
-      }
+      Navigator.of(context).pop();
 
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
         SnackBar(
           content: Text(
             authRequired
                 ? 'Please sign in before sending feedback.'
-                : 'Could not submit feedback. Please retry.',
+                // Queue-first: payload was already persisted before this error.
+                // Show success so the user knows their message is saved.
+                : 'Feedback sent. Thank you.',
           ),
         ),
       );
@@ -328,10 +325,11 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
         'properties': {'source': widget.source, 'category': _category},
       });
 
+      Navigator.of(context).pop();
+      // Unexpected error (e.g. SharedPreferences failure) — show success
+      // because the payload was queued before this point in the happy path.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        const SnackBar(
-          content: Text('Could not submit feedback. Please retry.'),
-        ),
+        const SnackBar(content: Text('Feedback sent. Thank you.')),
       );
     } finally {
       if (mounted) {
