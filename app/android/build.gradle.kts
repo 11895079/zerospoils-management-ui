@@ -31,7 +31,7 @@ subprojects {
     afterEvaluate {
         if (plugins.hasPlugin("com.android.library")) {
             extensions.configure<com.android.build.gradle.LibraryExtension> {
-                compileSdk = maxOf(compileSdk ?: 0, 35)
+                compileSdk = maxOf(compileSdk, 35)
             }
         }
     }

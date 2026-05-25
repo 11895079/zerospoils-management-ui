@@ -163,7 +163,9 @@ class FeedbackSubmissionService {
   /// after queuing; its result does not affect the return value.
   ///
   /// Throws [StateError('AUTH_REQUIRED')] when the current user is not signed
-  /// in, which is the only error callers need to surface.
+  /// in. In extremely rare cases [SharedPreferences] IO failures may propagate
+  /// as unexpected exceptions before the payload is persisted; callers that
+  /// want a fully silent path should wrap in a top-level catch.
   Future<FeedbackSubmitOutcome> submit(
     FeedbackSubmissionRequest request,
   ) async {
@@ -281,10 +283,13 @@ class FeedbackSubmissionService {
         state.lastSentMs = now;
         state.burstTimestamps = [...state.burstTimestamps, now];
         _incrementDailyCount(state, now);
-        state.recentHashes = [
-          ...state.recentHashes.take(_maxRecentHashes - 1),
-          hash,
-        ];
+        // Append the new hash, then drop from the front to stay within cap.
+        // Using append-then-truncate (rather than take-from-front) ensures
+        // the most recent hashes are retained, not the oldest.
+        final updatedHashes = [...state.recentHashes, hash];
+        state.recentHashes = updatedHashes.length > _maxRecentHashes
+            ? updatedHashes.sublist(updatedHashes.length - _maxRecentHashes)
+            : updatedHashes;
       } catch (_) {
         remaining.add(entry); // Transient failure — keep for retry.
       }
