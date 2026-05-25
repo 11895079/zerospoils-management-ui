@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       runner_label:
-        description: 'Runner label for manual runs (larger labels require org support)'
+        description: 'Runner label for manual runs. Prefer ubuntu-latest; larger labels may queue if org capacity/entitlement is unavailable.'
         required: false
         default: ubuntu-latest
         type: choice
