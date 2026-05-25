@@ -29,10 +29,14 @@ subprojects {
 // can resolve those attributes regardless of what each plugin declares.
 // Uses plugins.withId() instead of afterEvaluate() to avoid
 // "project already evaluated" errors caused by evaluationDependsOn(":app").
+//
+// compileSdk is declared as Int? in AGP 8.x (nullable until the plugin sets
+// it); ?: 0 provides the null-safe default so maxOf resolves to Int on both
+// older (non-nullable) and newer (nullable) AGP versions.
 subprojects {
     plugins.withId("com.android.library") {
         extensions.configure<com.android.build.gradle.LibraryExtension> {
-            compileSdk = maxOf(compileSdk, 35)
+            compileSdk = maxOf(compileSdk ?: 0, 35)
         }
     }
 }
