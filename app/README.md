@@ -15,6 +15,31 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+## Android CI Parity (Local)
+
+To reproduce Android beta CI behavior locally, use the same core toolchain:
+
+- Java 17
+- Flutter 3.41.8 (stable)
+- Android SDK platform 35 and build-tools 35.0.0
+
+Quick parity check:
+
+```bash
+cd app
+java -version
+flutter --version | head -n 1
+sdkmanager --list_installed | grep -E 'platforms;android-35|build-tools;35\.0\.0'
+```
+
+Run the same release build path used by CI:
+
+```bash
+cd app
+rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+flutter build apk --release --no-pub --dart-define=BETA_BUILD=true
+```
+
 ## iOS Simulator + MLKit Workaround
 
 Apple Silicon iOS 26+ simulators require arm64 simulator support from all

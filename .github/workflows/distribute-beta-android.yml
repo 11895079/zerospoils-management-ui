@@ -29,6 +29,9 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -55,6 +58,26 @@ jobs:
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses > /dev/null 2>&1 || true
           # Install packages — positional args only, no --install
           "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" "platforms;android-35" "build-tools;35.0.0"
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed | grep -E 'platforms;android-35|build-tools;35\.0\.0'
+
+      - name: Android build preflight (parity diagnostics)
+        working-directory: ./app
+        run: |
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          java -version
+          flutter --version
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed | grep -E 'platforms;android-(30|31|32|33|34|35)|build-tools;35\.0\.0' || true
+          if ! "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed | grep -q 'platforms;android-35'; then
+            echo "::error::Android SDK platform 35 is required but not installed."
+            exit 1
+          fi
+          if ! "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed | grep -q 'build-tools;35.0.0'; then
+            echo "::error::Android build-tools 35.0.0 are required but not installed."
+            exit 1
+          fi
 
       - name: Cache pub packages
         uses: actions/cache@v4
