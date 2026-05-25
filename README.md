@@ -106,7 +106,7 @@ git checkout -b feature/item-inventory
 
 ## Project Status & Hours Tracking
 
-**Last Updated:** May 4, 2026
+**Last Updated:** May 24, 2026
 
 ### Cumulative Human Hours Invested
 | Phase | Hours | Status | Notes |
@@ -114,8 +114,8 @@ git checkout -b feature/item-inventory
 | Planning & Documentation | ~40h | ✅ Complete | Repo setup, design tokens, data model, telemetry schemas, UX docs |
 | M1 Flutter Skeleton | ~20h | ✅ Complete | App compiles, routing, DI, telemetry, CI; all M1 issues closed |
 | M2 Core Features | ~50h | ✅ Complete | Hive storage, add item, inventory list, item detail, shopping list, notifications, settings, dark mode, Android signing, backup/restore, export/delete |
-| M3 MVP Quality (in progress) | ~70h | 🔄 68% (15/22) | Telemetry, feature flags, reminder prefs, notification scheduling, OCR, packaged-item fast-add, Firebase (Crashlytics+Remote Config+FCM), offline suite, badges foundation, and merged receipt-batch capture/history/detail workflows from PRs #105/#106 |
-| **Total** | **~180h** | **M3 in progress** | Full MVP feature set taking shape; receipt-batch workflows advanced on `main`; beta distribution in progress |
+| M3 MVP Quality (in progress) | ~78h | 🔄 68% (15/22) | Telemetry, feature flags, reminder prefs, notification scheduling, OCR, packaged-item fast-add, Firebase (Crashlytics+Remote Config+FCM), offline suite, badges foundation, merged receipt-batch capture/history/detail workflows from PRs #105/#106, and merged Zesto Phase 1 service/trigger wiring baseline via PR #119 |
+| **Total** | **~188h** | **M3 in progress** | Full MVP feature set taking shape; receipt-batch workflows advanced on `main`; Zesto Phase 1 baseline merged; beta distribution in progress |
 
 **Next Milestones:** M3/198 follow-up (backup/export, specific batch filter, remaining telemetry polish), M3/201 (Receipt AR overlay), M3/202 (Fresh produce recognition), M3/350 (Zesto Phase 1), M3/361 (Firebase App Distribution)
 

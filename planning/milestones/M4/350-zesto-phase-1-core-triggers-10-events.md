@@ -58,57 +58,66 @@ Implement 10 core mascot triggers with 5-6 message variations each, anti-spam lo
 ## Acceptance criteria (Definition of Done)
 
 ### Code Implementation
-- [ ] Create `data/storage_tips.json` with 20-30 storage tips (category → tip mappings)
-- [ ] Expand `mascotMessages` object to include all 10 trigger types with 5-6 variations each
-- [ ] Implement anti-spam logic: check localStorage for last message timestamp, skip if <5s
-- [ ] Implement message history: track last 3 messages, re-roll if duplicate selected
-- [ ] Add trigger logic for first item added (check if inventory is empty before add)
-- [ ] Add trigger logic for item consumed (call `showMascot('consumed')` on consume action)
-- [ ] Add trigger logic for item wasted (call `showMascot('wasted')` with storage tip from JSON)
-- [ ] Add trigger logic for quick save (check if `daysUntilExpiry < 1` when consuming)
+- [x] Create `data/storage_tips.json` with 20-30 storage tips (category → tip mappings)
+- [x] Expand `mascotMessages` object to include all 10 trigger types with 5-6 variations each
+- [x] Implement anti-spam logic: check localStorage for last message timestamp, skip if <5s
+- [x] Implement message history: track last 3 messages, re-roll if duplicate selected
+- [x] Add trigger logic for first item added (check if inventory is empty before add)
+- [x] Add trigger logic for item consumed (call `showMascot('consumed')` on consume action)
+- [x] Add trigger logic for item wasted (call `showMascot('wasted')` with storage tip from JSON)
+- [x] Add trigger logic for quick save (check if `daysUntilExpiry < 1` when consuming)
 - [ ] Add trigger logic for badge unlocked (integrate with badge system, trigger on earn)
 - [ ] Add trigger logic for streak milestone (check if streak == 5/10/30/100)
 - [ ] Add trigger logic for savings milestone (check if totalSavings crosses $50/$100/$500)
 - [ ] Add trigger logic for zero waste (calculate weekly/monthly waste %, trigger if 0%)
-- [ ] Add trigger logic for daily welcome (check localStorage for lastOpenDate, once per day)
-- [ ] Add trigger logic for expiry alert (count items with `daysUntilExpiry < 1`, trigger if ≥3)
+- [x] Add trigger logic for daily welcome (check localStorage for lastOpenDate, once per day)
+- [x] Add trigger logic for expiry alert (count items with `daysUntilExpiry < 1`, trigger if ≥3)
 
 ### Data & Storage
-- [ ] Create `storage_tips.json` with structure: `{ "category": ["Tip 1", "Tip 2", ...], ... }`
-- [ ] Cover major categories: dairy, produce, meat, bread, leftovers, condiments
-- [ ] Store `mascot_last_timestamp` in localStorage (Unix timestamp)
-- [ ] Store `mascot_message_history` in localStorage (array of last 3 message strings)
-- [ ] Store `mascot_unlocked_characters` in localStorage (array: default = `["avocado"]`)
+- [x] Create `storage_tips.json` with structure: `{ "category": ["Tip 1", "Tip 2", ...], ... }`
+- [x] Cover major categories: dairy, produce, meat, bread, leftovers, condiments
+- [x] Store `mascot_last_timestamp` in localStorage (Unix timestamp)
+- [x] Store `mascot_message_history` in localStorage (array of last 3 message strings)
+- [x] Store `mascot_unlocked_characters` in localStorage (array: default = `["avocado"]`)
 
 ### UI/UX
 - [ ] Mascot appears correctly for all 10 triggers (visual test per trigger)
-- [ ] Messages vary across repeated triggers (no "stuck message" bug)
-- [ ] Anti-spam works: rapid events (5 items added in 2 seconds) only show 1 mascot
-- [ ] Wasted item messages show helpful tips, not judgment ("💡 Tip: Store milk in back of fridge!")
+- [x] Messages vary across repeated triggers (no "stuck message" bug)
+- [x] Anti-spam works: rapid events (5 items added in 2 seconds) only show 1 mascot
+- [x] Wasted item messages show helpful tips, not judgment ("💡 Tip: Store milk in back of fridge!")
 - [ ] Messages feel encouraging and educational (not annoying or repetitive)
 
 ### Telemetry
 - [ ] `mascot_shown` event fires with properties: `messageType`, `page`, `timestamp`
-- [ ] `mascot_dismissed` event fires with properties: `dismissType` (auto/manual), `durationMs`
-- [ ] Events logged to console (or telemetry service if implemented)
+- [x] `mascot_dismissed` event fires with properties: `dismissType` (auto/manual), `durationMs`
+- [x] Events logged to console (or telemetry service if implemented)
 
 ### Offline-First
-- [ ] All mascot logic works offline (localStorage, local JSON file)
-- [ ] No network dependencies for trigger detection or message display
+- [x] All mascot logic works offline (localStorage, local JSON file)
+- [x] No network dependencies for trigger detection or message display
 
 ### Accessibility
-- [ ] Mascot messages have 3s minimum display (users can read)
-- [ ] Speech bubbles have sufficient contrast (white bg, dark text)
-- [ ] Mascot animations don't trigger motion sickness (gentle bounce only)
+- [x] Mascot messages have 3s minimum display (users can read)
+- [x] Speech bubbles have sufficient contrast (white bg, dark text)
+- [x] Mascot animations don't trigger motion sickness (gentle bounce only)
 
 ### Tests
-- [ ] Unit test: Anti-spam logic prevents messages <5s apart
-- [ ] Unit test: Message history prevents last 3 messages from repeating
-- [ ] Unit test: First item trigger only fires on truly first item
-- [ ] Unit test: Quick save logic detects items <24h from expiry
-- [ ] Unit test: Expiry alert counts items correctly (≥3 items <24h)
+- [x] Unit test: Anti-spam logic prevents messages <5s apart
+- [x] Unit test: Message history prevents last 3 messages from repeating
+- [x] Unit test: First item trigger only fires on truly first item
+- [x] Unit test: Quick save logic detects items <24h from expiry
+- [x] Unit test: Expiry alert counts items correctly (≥3 items <24h)
 - [ ] Widget test: Mascot appears and dismisses correctly
 - [ ] Integration test: Trigger each of 10 events, verify mascot shown
+
+---
+
+## Post-merge status (PR #119)
+
+- Merged on May 24, 2026.
+- Implemented and wired end-to-end: first item, item added, consumed/quick-save, wasted (category tip), daily welcome, expiry alert.
+- Implemented in service but deferred for caller wiring: badge unlocked, streak milestone, savings milestone, zero waste.
+- `mascot_shown` currently emits `messageType`, `message`, `timestamp`; page context is not yet included.
 
 ---
 
