@@ -50,9 +50,10 @@ jobs:
         run: |
           ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
           SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-          yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --install \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+          # Accept all SDK licences (idempotent; --install is not a valid sdkmanager flag)
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          # Install packages — positional args only, no --install
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Cache pub packages
         uses: actions/cache@v4
