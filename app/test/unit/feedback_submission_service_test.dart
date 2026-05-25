@@ -277,27 +277,33 @@ void main() {
       expect(state['last_sent_ms'], _t0);
     });
 
-    test('document ID encodes userId, device fingerprint, and hour window', () async {
-      await queueRawItem(userId: 'u1', deviceFingerprint: 'fp1');
-      await makeFlushService().flushForTesting();
+    test(
+      'document ID encodes userId, device fingerprint, and hour window',
+      () async {
+        await queueRawItem(userId: 'u1', deviceFingerprint: 'fp1');
+        await makeFlushService().flushForTesting();
 
-      final docId = fakeFirestore.writes.first['id'] as String;
-      expect(docId, startsWith('u1_fp1_'));
-    });
+        final docId = fakeFirestore.writes.first['id'] as String;
+        expect(docId, startsWith('u1_fp1_'));
+      },
+    );
 
-    test('sends only the oldest item per flush when multiple are queued', () async {
-      await queueRawItem(message: 'first');
-      await queueRawItem(message: 'second');
-      await makeFlushService().flushForTesting();
+    test(
+      'sends only the oldest item per flush when multiple are queued',
+      () async {
+        await queueRawItem(message: 'first');
+        await queueRawItem(message: 'second');
+        await makeFlushService().flushForTesting();
 
-      expect(fakeFirestore.writes, hasLength(1));
-      expect(fakeFirestore.writes.first['data']['message'], 'first');
+        expect(fakeFirestore.writes, hasLength(1));
+        expect(fakeFirestore.writes.first['data']['message'], 'first');
 
-      // Second item remains queued.
-      final queue = await readQueue();
-      expect(queue, hasLength(1));
-      expect(queue.first['message'], 'second');
-    });
+        // Second item remains queued.
+        final queue = await readQueue();
+        expect(queue, hasLength(1));
+        expect(queue.first['message'], 'second');
+      },
+    );
 
     test('skips flush when queue is empty', () async {
       await makeFlushService().flushForTesting();
@@ -363,7 +369,10 @@ void main() {
       // 2 timestamps in the burst window — under the limit of 3.
       await setRateState(
         lastSentMs: _t0 - _hourMs - 1,
-        burstTimestamps: [_t0 - burstWindowMs + 10000, _t0 - burstWindowMs + 20000],
+        burstTimestamps: [
+          _t0 - burstWindowMs + 10000,
+          _t0 - burstWindowMs + 20000,
+        ],
       );
       await queueRawItem();
       await makeFlushService().flushForTesting();
@@ -371,23 +380,26 @@ void main() {
       expect(fakeFirestore.writes, hasLength(1));
     });
 
-    test('blocks send and sets blockedUntilMs when burst limit is reached', () async {
-      // 3 timestamps in the burst window — at the limit.
-      await setRateState(
-        lastSentMs: _t0 - _hourMs - 1,
-        burstTimestamps: [
-          _t0 - burstWindowMs + 1000,
-          _t0 - burstWindowMs + 2000,
-          _t0 - burstWindowMs + 3000,
-        ],
-      );
-      await queueRawItem();
-      await makeFlushService().flushForTesting();
+    test(
+      'blocks send and sets blockedUntilMs when burst limit is reached',
+      () async {
+        // 3 timestamps in the burst window — at the limit.
+        await setRateState(
+          lastSentMs: _t0 - _hourMs - 1,
+          burstTimestamps: [
+            _t0 - burstWindowMs + 1000,
+            _t0 - burstWindowMs + 2000,
+            _t0 - burstWindowMs + 3000,
+          ],
+        );
+        await queueRawItem();
+        await makeFlushService().flushForTesting();
 
-      expect(fakeFirestore.writes, isEmpty);
-      final state = await readRateState();
-      expect(state['blocked_until_ms'], greaterThan(_t0));
-    });
+        expect(fakeFirestore.writes, isEmpty);
+        final state = await readRateState();
+        expect(state['blocked_until_ms'], greaterThan(_t0));
+      },
+    );
 
     test('stale timestamps outside burst window do not count', () async {
       // 3 timestamps all older than the burst window.
@@ -429,29 +441,32 @@ void main() {
       expect(fakeFirestore.writes, hasLength(1));
     });
 
-    test('sets 24-h block and increments violationCount when daily cap is hit', () async {
-      // Pre-set count to 23 so this flush tips it to 24.
-      await setRateState(
-        lastSentMs: _t0 - _hourMs - 1,
-        dailyCount: 23,
-        dailyDate: todayStr(),
-        violationCount: 0,
-      );
-      await queueRawItem();
-      await makeFlushService().flushForTesting();
+    test(
+      'sets 24-h block and increments violationCount when daily cap is hit',
+      () async {
+        // Pre-set count to 23 so this flush tips it to 24.
+        await setRateState(
+          lastSentMs: _t0 - _hourMs - 1,
+          dailyCount: 23,
+          dailyDate: todayStr(),
+          violationCount: 0,
+        );
+        await queueRawItem();
+        await makeFlushService().flushForTesting();
 
-      // The send should have gone through.
-      expect(fakeFirestore.writes, hasLength(1));
+        // The send should have gone through.
+        expect(fakeFirestore.writes, hasLength(1));
 
-      final state = await readRateState();
-      expect(state['daily_count'], 24);
-      expect(state['violation_count'], 1);
-      expect(
-        state['blocked_until_ms'],
-        closeTo(_t0 + 24 * _hourMs, 1000),
-        reason: 'first violation should block for 24 h',
-      );
-    });
+        final state = await readRateState();
+        expect(state['daily_count'], 24);
+        expect(state['violation_count'], 1);
+        expect(
+          state['blocked_until_ms'],
+          closeTo(_t0 + 24 * _hourMs, 1000),
+          reason: 'first violation should block for 24 h',
+        );
+      },
+    );
 
     test('escalates to 72-h block on second violation', () async {
       await setRateState(
@@ -493,10 +508,7 @@ void main() {
   group('flush — content dedup', () {
     test('drops item whose hash is already in recentHashes', () async {
       final hash = stableHash('test feedback');
-      await setRateState(
-        lastSentMs: _t0 - _hourMs - 1,
-        recentHashes: [hash],
-      );
+      await setRateState(lastSentMs: _t0 - _hourMs - 1, recentHashes: [hash]);
       await queueRawItem(message: 'test feedback');
       await makeFlushService().flushForTesting();
 
@@ -508,10 +520,7 @@ void main() {
 
     test('sends item whose hash is not in recentHashes', () async {
       final hash = stableHash('old message');
-      await setRateState(
-        lastSentMs: _t0 - _hourMs - 1,
-        recentHashes: [hash],
-      );
+      await setRateState(lastSentMs: _t0 - _hourMs - 1, recentHashes: [hash]);
       await queueRawItem(message: 'new different message');
       await makeFlushService().flushForTesting();
 
@@ -530,10 +539,7 @@ void main() {
     test('dedup is case-insensitive and trims whitespace', () async {
       // Hash stored for lowercase trimmed form.
       final hash = stableHash('test feedback'); // same as '  Test Feedback  '
-      await setRateState(
-        lastSentMs: _t0 - _hourMs - 1,
-        recentHashes: [hash],
-      );
+      await setRateState(lastSentMs: _t0 - _hourMs - 1, recentHashes: [hash]);
       await queueRawItem(message: '  Test Feedback  ');
       await makeFlushService().flushForTesting();
 
@@ -571,32 +577,35 @@ void main() {
       expect(await readQueue(), isEmpty);
     });
 
-    test('processes valid entries even when preceded by malformed ones', () async {
-      final prefs = await SharedPreferences.getInstance();
-      // Corrupt first entry followed by a valid one.
-      await prefs.setStringList(_queueKey, [
-        'not-valid-json',
-        jsonEncode({
-          'message': 'valid entry',
-          'category': 'bug_report',
-          'source': 'test',
-          'email': null,
-          'device_fingerprint': 'test-fp',
-          'platform': 'android',
-          'app_version': '1.0',
-          'build_number': '1',
-          'locale': 'en',
-          'user_id': 'user-123',
-          'created_at_client': '2026-01-01T00:00:00.000',
-          'status': 'new',
-        }),
-      ]);
+    test(
+      'processes valid entries even when preceded by malformed ones',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        // Corrupt first entry followed by a valid one.
+        await prefs.setStringList(_queueKey, [
+          'not-valid-json',
+          jsonEncode({
+            'message': 'valid entry',
+            'category': 'bug_report',
+            'source': 'test',
+            'email': null,
+            'device_fingerprint': 'test-fp',
+            'platform': 'android',
+            'app_version': '1.0',
+            'build_number': '1',
+            'locale': 'en',
+            'user_id': 'user-123',
+            'created_at_client': '2026-01-01T00:00:00.000',
+            'status': 'new',
+          }),
+        ]);
 
-      await makeFlushService().flushForTesting();
+        await makeFlushService().flushForTesting();
 
-      expect(fakeFirestore.writes, hasLength(1));
-      expect(fakeFirestore.writes.first['data']['message'], 'valid entry');
-    });
+        expect(fakeFirestore.writes, hasLength(1));
+        expect(fakeFirestore.writes.first['data']['message'], 'valid entry');
+      },
+    );
   });
 
   // ─── rate state persistence ───────────────────────────────────────────────
@@ -617,15 +626,18 @@ void main() {
       expect(fakeFirestore.writes, hasLength(1));
     });
 
-    test('corrupt rate state is silently discarded and treated as fresh', () async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_rateLimitKey, '{not valid json}');
+    test(
+      'corrupt rate state is silently discarded and treated as fresh',
+      () async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_rateLimitKey, '{not valid json}');
 
-      await queueRawItem();
-      // Should not throw; corrupt state is treated as zero/default.
-      await expectLater(makeFlushService().flushForTesting(), completes);
-      // Flush proceeds as if fresh state (no prior send).
-      expect(fakeFirestore.writes, hasLength(1));
-    });
+        await queueRawItem();
+        // Should not throw; corrupt state is treated as zero/default.
+        await expectLater(makeFlushService().flushForTesting(), completes);
+        // Flush proceeds as if fresh state (no prior send).
+        expect(fakeFirestore.writes, hasLength(1));
+      },
+    );
   });
 }
