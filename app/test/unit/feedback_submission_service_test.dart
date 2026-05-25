@@ -6,7 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/core/feedback/feedback_submission_service.dart';
 
 // ─── Firestore fakes ──────────────────────────────────────────────────────────
+// DocumentReference, CollectionReference, and FirebaseFirestore are sealed in
+// newer cloud_firestore versions.  The ignore comments below are intentional —
+// these are lightweight test doubles that override only the methods exercised
+// by FeedbackSubmissionService._sendToFirestore.
 
+// ignore: subtype_of_sealed_class
 class FakeDocumentReference extends Fake
     implements DocumentReference<Map<String, dynamic>> {
   final FakeFirestore _parent;
@@ -24,6 +29,7 @@ class FakeDocumentReference extends Fake
   }
 }
 
+// ignore: subtype_of_sealed_class
 class FakeCollectionReference extends Fake
     implements CollectionReference<Map<String, dynamic>> {
   final FakeFirestore _parent;
@@ -35,6 +41,7 @@ class FakeCollectionReference extends Fake
       FakeDocumentReference(_parent, path ?? '');
 }
 
+// ignore: subtype_of_sealed_class
 class FakeFirestore extends Fake implements FirebaseFirestore {
   final List<Map<String, dynamic>> writes = [];
   bool shouldThrow = false;
@@ -135,7 +142,6 @@ String stableHash(String message) {
 // Fixed epoch for deterministic time control (arbitrary, but stable).
 const int _t0 = 1_748_000_000_000;
 const int _hourMs = 60 * 60 * 1000;
-const int _dayMs = 24 * _hourMs;
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
