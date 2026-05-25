@@ -46,6 +46,14 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Install Android SDK 35
+        run: |
+          ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --install \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
       - name: Cache pub packages
         uses: actions/cache@v4
         with:
