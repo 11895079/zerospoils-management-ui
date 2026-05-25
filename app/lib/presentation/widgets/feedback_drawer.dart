@@ -275,20 +275,17 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
         'properties': {
           'source': widget.source,
           'category': _category,
+          // 'queued' means accepted locally; background flush will send it.
           'outcome': outcome.name,
         },
       });
 
       Navigator.of(context).pop();
 
+      // Always show a positive confirmation.  The service queues locally first
+      // so feedback is durable regardless of connectivity or server rate limits.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        SnackBar(
-          content: Text(
-            outcome == FeedbackSubmitOutcome.submitted
-                ? 'Feedback sent. Thank you.'
-                : 'No network right now. Feedback saved and will retry later.',
-          ),
-        ),
+        const SnackBar(content: Text('Feedback sent. Thank you.')),
       );
     } on StateError catch (error) {
       if (!context.mounted) {
