@@ -187,6 +187,11 @@ class FeedbackSubmissionService {
 
   // ─── Background flush ────────────────────────────────────────────────────────
 
+  /// Exposes [_tryFlushBackground] for unit tests so callers can await the
+  /// background work that [submit] fires-and-forgets in production.
+  @visibleForTesting
+  Future<void> flushForTesting() => _tryFlushBackground();
+
   Future<void> _tryFlushBackground() async {
     try {
       final firestore = _resolveFirestore();
