@@ -197,6 +197,24 @@ jobs:
             exit 1
           fi
 
+      - name: Runner resource diagnostics
+        run: |
+          echo "Runner: ${RUNNER_NAME:-unknown} / ${RUNNER_OS:-unknown} ${RUNNER_ARCH:-unknown}"
+          echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "CPU: $(nproc) cores"
+          echo "=== Memory ==="
+          free -h || true
+          echo "=== Disk ==="
+          df -h || true
+          echo "=== Top memory processes ==="
+          ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head -n 20 || true
+          echo "=== Top CPU processes ==="
+          ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 20 || true
+          echo "=== Docker images footprint (best effort) ==="
+          docker system df || true
+          echo "=== ulimit ==="
+          ulimit -a || true
+
       - name: Build APK (beta flavour)
         working-directory: ./app
         env:
