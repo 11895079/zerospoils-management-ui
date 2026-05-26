@@ -19,8 +19,17 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
-      
+          java-version: '21'
+
+      - name: Install Android SDK 35
+        run: |
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          # build.gradle.kts enforces compileSdk >= 35 for all Android library
+          # subprojects; this step ensures the platform is present on the runner.
+          yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:

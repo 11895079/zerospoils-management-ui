@@ -37,7 +37,9 @@ Run the same release build path used by CI:
 ```bash
 cd app
 rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true
+# --max-workers 2 matches the CI cap (7 GB ubuntu-latest runner).
+# Omit on a local machine with ≥8 cores if you prefer a faster build.
+flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true -- --max-workers 2
 ```
 
 ## iOS Simulator + MLKit Workaround
