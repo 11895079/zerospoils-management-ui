@@ -6,15 +6,28 @@ on:
     tags:
       - 'v*-b[0-9]*'
   workflow_dispatch:
+    inputs:
+      runner_label:
+        description: 'Runner label for manual runs. Prefer ubuntu-latest; larger labels may queue if org capacity/entitlement is unavailable.'
+        required: false
+        default: ubuntu-latest
+        type: choice
+        options:
+          - ubuntu-latest
+          - ubuntu-latest-4-cores
+          - ubuntu-latest-8-cores
+          - ubuntu-latest-16-cores
 
 concurrency:
   group: beta-distribute-android-${{ github.ref }}
-  cancel-in-progress: true
+  # false: let an in-progress distribution upload finish rather than
+  # cancelling mid-upload if a second tag is pushed in quick succession.
+  cancel-in-progress: false
 
 jobs:
   distribute-android:
     name: Distribute Android Beta
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event_name == 'workflow_dispatch' && inputs.runner_label || 'ubuntu-latest' }}
     timeout-minutes: 60
 
     steps:
@@ -27,7 +40,10 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407  # v3
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -55,6 +71,30 @@ jobs:
           yes | "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --licenses > /dev/null 2>&1 || true
           # Install packages — positional args only, no --install
           "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" "platforms;android-35" "build-tools;35.0.0"
+          # Diagnostic only — || true so a clean runner with sparse output
+          # doesn't fail the install step before the preflight check runs.
+          "$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed | grep -E 'platforms;android-35|build-tools;35\.0\.0' || true
+
+      - name: Android build preflight (parity diagnostics)
+        working-directory: ./app
+        run: |
+          export ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          java -version
+          flutter --version
+          echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-unset}"
+          # Capture once — avoids spawning three separate sdkmanager JVMs.
+          INSTALLED=$("$SDKMANAGER" --sdk_root="$ANDROID_SDK_ROOT" --list_installed)
+          echo "$INSTALLED" | grep -E 'platforms;android-(30|31|32|33|34|35)|build-tools;35\.0\.0' || true
+          if ! echo "$INSTALLED" | grep -q 'platforms;android-35'; then
+            echo "::error::Android SDK platform 35 is required but not installed."
+            exit 1
+          fi
+          if ! echo "$INSTALLED" | grep -q 'build-tools;35.0.0'; then
+            echo "::error::Android build-tools 35.0.0 are required but not installed."
+            exit 1
+          fi
 
       - name: Cache pub packages
         uses: actions/cache@v4
@@ -163,6 +203,24 @@ jobs:
             exit 1
           fi
 
+      - name: Runner resource diagnostics
+        run: |
+          echo "Runner: ${RUNNER_NAME:-unknown} / ${RUNNER_OS:-unknown} ${RUNNER_ARCH:-unknown}"
+          echo "Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          echo "CPU: $(nproc) cores"
+          echo "=== Memory ==="
+          free -h || true
+          echo "=== Disk ==="
+          df -h || true
+          echo "=== Top memory processes ==="
+          ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head -n 20 || true
+          echo "=== Top CPU processes ==="
+          ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 20 || true
+          echo "=== Docker images footprint (best effort) ==="
+          docker system df || true
+          echo "=== ulimit ==="
+          ulimit -a || true
+
       - name: Build APK (beta flavour)
         working-directory: ./app
         env:
@@ -172,21 +230,54 @@ jobs:
           # Exclude integration_test from release builds (local testing only).
           # Delete registrant, then build with --no-pub to prevent regeneration.
           rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-          flutter build apk --release --no-pub --dart-define=BETA_BUILD=true
+          # --split-per-abi: R8 processes each ABI in isolation, keeping peak
+          # memory well under the runner's 7 GB limit.
+          # -- --max-workers 2: caps Gradle parallelism on CI without
+          # restricting local dev machines (not set in gradle.properties).
+          flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true -- --max-workers 2
 
-      - name: Rename APK
+      - name: Rename APKs
         working-directory: ./app
         run: |
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
-          mv build/app/outputs/flutter-apk/app-release.apk \
-             "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta.apk"
-          echo "APK_PATH=app/build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta.apk" >> "$GITHUB_ENV"
+          # Tag triggers: strip "refs/tags/v" → "0.2.0-b28"
+          # workflow_dispatch / branch triggers: fall back to short commit SHA
+          # so the filename never contains slashes from a branch ref.
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            TAG_VERSION=$(git rev-parse --short HEAD)
+          fi
+          # Rename all three ABI slices so every beta device/emulator is covered.
+          for ABI in arm64-v8a armeabi-v7a x86_64; do
+            mv "build/app/outputs/flutter-apk/app-${ABI}-release.apk" \
+               "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta-${ABI}.apk"
+          done
+          echo "APK_DIR=app/build/app/outputs/flutter-apk" >> "$GITHUB_ENV"
+          echo "APK_VERSION=${TAG_VERSION}" >> "$GITHUB_ENV"
 
-      - name: Upload APK to Firebase App Distribution
+      - name: Upload arm64-v8a APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: beta-internal
-          file: ${{ env.APK_PATH }}
+          file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-arm64-v8a.apk
+          releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
+
+      - name: Upload armeabi-v7a APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: beta-internal
+          file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-armeabi-v7a.apk
+          releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
+
+      - name: Upload x86_64 APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: beta-internal
+          file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-x86_64.apk
           releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
