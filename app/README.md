@@ -19,7 +19,7 @@ samples, guidance on mobile development, and a full API reference.
 
 To reproduce Android beta CI behavior locally, use the same core toolchain:
 
-- Java 17
+- Java 21
 - Flutter 3.41.8 (stable)
 - Android SDK platform 35 and build-tools 35.0.0
 
@@ -37,7 +37,7 @@ Run the same release build path used by CI:
 ```bash
 cd app
 rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-flutter build apk --release --no-pub --dart-define=BETA_BUILD=true
+flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true
 ```
 
 ## iOS Simulator + MLKit Workaround
