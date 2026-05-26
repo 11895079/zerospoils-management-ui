@@ -231,7 +231,14 @@ jobs:
       - name: Rename APK
         working-directory: ./app
         run: |
-          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          # Tag triggers: strip "refs/tags/v" → "0.2.0-b28"
+          # workflow_dispatch / branch triggers: fall back to short commit SHA
+          # so the filename never contains slashes from a branch ref.
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            TAG_VERSION=$(git rev-parse --short HEAD)
+          fi
           # arm64-v8a covers ~90 % of active Android devices; distribute that
           # slice for beta testing.  The other ABI APKs are discarded here.
           mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
