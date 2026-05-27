@@ -1,5 +1,8 @@
 library;
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -10,6 +13,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/badge_model.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/models/receipt_batch.dart';
+import '../../domain/models/zesto_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
 import '../widgets/app_drawer.dart';
@@ -157,6 +161,12 @@ class ProgressScreen extends ConsumerWidget {
         _buildSectionTitle(context, 'Telemetry (Local Aggregation)'),
         const SizedBox(height: AppSpacing.sm),
         _buildTelemetrySection(context, stats),
+        if (kDebugMode) ...[
+          const SizedBox(height: AppSpacing.lg),
+          _buildSectionTitle(context, 'Zesto Debug Triggers'),
+          const SizedBox(height: AppSpacing.sm),
+          _buildZestoDebugPanel(context, ref),
+        ],
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle(context, 'Recent Receipt Batch'),
         const SizedBox(height: AppSpacing.sm),
@@ -234,6 +244,78 @@ class ProgressScreen extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildZestoDebugPanel(BuildContext context, WidgetRef ref) {
+    final zesto = ref.read(zestoServiceProvider);
+    Future<void> trigger(MascotMessageType type) async {
+      await zesto.showMascot(type, bypassAntiSpam: true);
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: Theme.of(context).dividerColor),
+      ),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        children: [
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.dailyWelcome)),
+            child: const Text('Daily Welcome'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.firstItem)),
+            child: const Text('First Item'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.itemAdded)),
+            child: const Text('Item Added'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.consumed)),
+            child: const Text('Consumed'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.quickSave)),
+            child: const Text('Quick Save'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.wasted)),
+            child: const Text('Wasted'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.badgeUnlocked)),
+            child: const Text('Badge'),
+          ),
+          FilledButton.tonal(
+            onPressed: () =>
+                unawaited(trigger(MascotMessageType.streakMilestone)),
+            child: const Text('Streak'),
+          ),
+          FilledButton.tonal(
+            onPressed: () =>
+                unawaited(trigger(MascotMessageType.savingsMilestone)),
+            child: const Text('Savings'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.zeroWaste)),
+            child: const Text('Zero Waste'),
+          ),
+          FilledButton.tonal(
+            onPressed: () => unawaited(trigger(MascotMessageType.expiryAlert)),
+            child: const Text('Expiry Alert'),
+          ),
+          OutlinedButton(
+            onPressed: zesto.dismissMascot,
+            child: const Text('Dismiss'),
+          ),
+        ],
+      ),
     );
   }
 
