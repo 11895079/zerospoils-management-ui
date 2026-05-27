@@ -3,6 +3,11 @@
     <application
         android:label="zerospoils"
         android:icon="@mipmap/ic_launcher">
+        <!-- Disable Impeller on Android to avoid black-screen rendering
+             regressions seen on some physical devices/GPU drivers. -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

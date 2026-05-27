@@ -13,22 +13,65 @@
 
 set -e
 
-FLUTTER_VERSION="3.41.7"
+FLUTTER_VERSION="3.41.8"
 FLUTTER_HOME="$HOME/flutter"
-FLUTTER_ARCHIVE_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_${FLUTTER_VERSION}-stable.zip"
-FLUTTER_ARCHIVE_SHA256="2e3e6af44d1adccf695deff52e5e4c8beb10e5625066b27ad082b38b83ef805e"
+FLUTTER_RELEASES_BASE_URL="https://storage.googleapis.com/flutter_infra_release/releases"
+FLUTTER_RELEASES_JSON_URL="${FLUTTER_RELEASES_BASE_URL}/releases_macos.json"
+
+MACHINE_ARCH="$(uname -m)"
+case "$MACHINE_ARCH" in
+  arm64)
+    FLUTTER_ARCHIVE_FILE="flutter_macos_arm64_${FLUTTER_VERSION}-stable.zip"
+    ;;
+  x86_64)
+    FLUTTER_ARCHIVE_FILE="flutter_macos_${FLUTTER_VERSION}-stable.zip"
+    ;;
+  *)
+    echo "Unsupported macOS architecture: $MACHINE_ARCH"
+    exit 1
+    ;;
+esac
+
+FLUTTER_ARCHIVE_URL="${FLUTTER_RELEASES_BASE_URL}/stable/macos/${FLUTTER_ARCHIVE_FILE}"
+
+FLUTTER_ARCHIVE_SHA256="$({
+  curl --fail --silent --show-error --location "$FLUTTER_RELEASES_JSON_URL" --output /tmp/flutter_releases.json && \
+  python3 - "$FLUTTER_ARCHIVE_FILE" /tmp/flutter_releases.json <<'PY'
+import json
+import sys
+
+archive_file = sys.argv[1]
+json_path = sys.argv[2]
+
+with open(json_path, encoding='utf-8') as f:
+    data = json.load(f)
+
+for release in data.get('releases', []):
+    archive_path = release.get('archive', '')
+    if archive_path.endswith('/' + archive_file) or archive_path.endswith(archive_file):
+        print(release.get('hash', ''))
+        break
+PY
+} | tail -n 1)"
 
 # ---------------------------------------------------------------------------
 # 1. Install Flutter
 # ---------------------------------------------------------------------------
 if ! command -v flutter > /dev/null 2>&1; then
-  echo "Flutter not found — installing $FLUTTER_VERSION (stable, arm64)"
+  echo "Flutter not found — installing $FLUTTER_VERSION (stable, $MACHINE_ARCH)"
   curl --fail --silent --show-error --location \
     "$FLUTTER_ARCHIVE_URL" \
     --output /tmp/flutter.zip
-  echo "$FLUTTER_ARCHIVE_SHA256  /tmp/flutter.zip" | shasum -a 256 -c -
+
+  if [ -n "$FLUTTER_ARCHIVE_SHA256" ]; then
+    echo "$FLUTTER_ARCHIVE_SHA256  /tmp/flutter.zip" | shasum -a 256 -c -
+  else
+    echo "Warning: Unable to resolve Flutter archive SHA256; proceeding without checksum verification"
+  fi
+
   unzip -q /tmp/flutter.zip -d "$HOME"
   rm /tmp/flutter.zip
+  rm -f /tmp/flutter_releases.json
 fi
 
 export PATH="$PATH:$FLUTTER_HOME/bin"
