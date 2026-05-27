@@ -10,6 +10,7 @@ import 'package:zerospoils/domain/repositories/progress_stats_service.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
 import 'package:zerospoils/presentation/screens/progress_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
+import '../../helpers/telemetry_test_helpers.dart';
 
 class MockItemRepository implements ItemRepositoryBase {
   final List<Item> _items;
@@ -130,6 +131,7 @@ void main() {
             MockReceiptBatchRepository([batch]),
           ),
           progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          zestoTestOverride(),
         ],
         child: const MaterialApp(home: ProgressScreen()),
       ),
@@ -185,6 +187,7 @@ void main() {
             MockReceiptBatchRepository(const []),
           ),
           progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          zestoTestOverride(),
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,
@@ -253,6 +256,7 @@ void main() {
             MockReceiptBatchRepository(const []),
           ),
           progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          zestoTestOverride(),
         ],
         child: MaterialApp(
           theme: AppTheme.lightTheme,

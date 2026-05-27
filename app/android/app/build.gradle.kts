@@ -18,6 +18,10 @@ val allowDebugSigningForRelease = providers
     .gradleProperty("ALLOW_DEBUG_SIGNING_FOR_RELEASE")
     .orNull
     ?.toBooleanStrictOrNull() == true
+val enableImpellerForBuild = providers
+    .gradleProperty("ENABLE_IMPELLER")
+    .orElse("false")
+    .get()
 val isReleaseTaskRequested = gradle.startParameter.taskNames.any {
     it.contains("Release", ignoreCase = true)
 }
@@ -70,6 +74,10 @@ android {
         // Prefer staging so Android builds include the in-app Tester SDK.
         // Keep production as fallback for compatibility.
         missingDimensionStrategy("default", "staging", "production")
+        // Keep Impeller disabled by default for compatibility. A dedicated
+        // local debug install can override this by passing:
+        // -PENABLE_IMPELLER=true
+        manifestPlaceholders["enableImpeller"] = enableImpellerForBuild
     }
 
     // Configure release signing only when key.properties is present and complete.
