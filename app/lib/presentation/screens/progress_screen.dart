@@ -289,7 +289,8 @@ class ProgressScreen extends ConsumerWidget {
             child: const Text('Wasted'),
           ),
           FilledButton.tonal(
-            onPressed: () => unawaited(trigger(MascotMessageType.badgeUnlocked)),
+            onPressed: () =>
+                unawaited(trigger(MascotMessageType.badgeUnlocked)),
             child: const Text('Badge'),
           ),
           FilledButton.tonal(
