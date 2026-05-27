@@ -123,7 +123,6 @@ android {
             // Note: Obfuscation flag is passed via Flutter CLI, not here.
             // This is documented for the build team as a release pipeline step.
         }
-
     }
 
     // Enable R8/ProGuard minification for release builds

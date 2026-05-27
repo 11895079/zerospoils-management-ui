@@ -287,6 +287,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                           // stays compact at 18px.
                           child: IconButton(
                             key: const Key('zesto_dismiss_button'),
+                            tooltip: 'Dismiss Zesto',
                             iconSize: 18,
                             onPressed: () {
                               ref.read(zestoServiceProvider).dismissMascot();

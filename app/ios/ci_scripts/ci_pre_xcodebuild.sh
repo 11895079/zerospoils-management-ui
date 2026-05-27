@@ -34,9 +34,18 @@ esac
 
 FLUTTER_ARCHIVE_URL="${FLUTTER_RELEASES_BASE_URL}/stable/macos/${FLUTTER_ARCHIVE_FILE}"
 
-FLUTTER_ARCHIVE_SHA256="$({
-  curl --fail --silent --show-error --location "$FLUTTER_RELEASES_JSON_URL" --output /tmp/flutter_releases.json && \
-  python3 - "$FLUTTER_ARCHIVE_FILE" /tmp/flutter_releases.json <<'PY'
+# ---------------------------------------------------------------------------
+# 1. Install Flutter
+# ---------------------------------------------------------------------------
+if ! command -v flutter > /dev/null 2>&1; then
+  echo "Flutter not found — installing $FLUTTER_VERSION (stable, $MACHINE_ARCH)"
+
+  # Resolve SHA256 from the releases manifest. Filtered to channel==stable so
+  # the match is deterministic regardless of manifest ordering.
+  FLUTTER_ARCHIVE_SHA256="$({
+    curl --fail --silent --show-error --location "$FLUTTER_RELEASES_JSON_URL" \
+      --output /tmp/flutter_releases.json && \
+    python3 - "$FLUTTER_ARCHIVE_FILE" /tmp/flutter_releases.json <<'PY'
 import json
 import sys
 
@@ -47,28 +56,25 @@ with open(json_path, encoding='utf-8') as f:
     data = json.load(f)
 
 for release in data.get('releases', []):
+    if release.get('channel') != 'stable':
+        continue
     archive_path = release.get('archive', '')
     if archive_path.endswith('/' + archive_file) or archive_path.endswith(archive_file):
         print(release.get('hash', ''))
         break
 PY
-} | tail -n 1)"
+  } | tail -n 1)"
 
-# ---------------------------------------------------------------------------
-# 1. Install Flutter
-# ---------------------------------------------------------------------------
-if ! command -v flutter > /dev/null 2>&1; then
-  echo "Flutter not found — installing $FLUTTER_VERSION (stable, $MACHINE_ARCH)"
+  if [ -z "$FLUTTER_ARCHIVE_SHA256" ]; then
+    echo "Error: Unable to resolve Flutter archive SHA256 from releases manifest."
+    echo "Refusing to install an unverified archive."
+    exit 1
+  fi
+
   curl --fail --silent --show-error --location \
     "$FLUTTER_ARCHIVE_URL" \
     --output /tmp/flutter.zip
-
-  if [ -n "$FLUTTER_ARCHIVE_SHA256" ]; then
-    echo "$FLUTTER_ARCHIVE_SHA256  /tmp/flutter.zip" | shasum -a 256 -c -
-  else
-    echo "Warning: Unable to resolve Flutter archive SHA256; proceeding without checksum verification"
-  fi
-
+  echo "$FLUTTER_ARCHIVE_SHA256  /tmp/flutter.zip" | shasum -a 256 -c -
   unzip -q /tmp/flutter.zip -d "$HOME"
   rm /tmp/flutter.zip
   rm -f /tmp/flutter_releases.json
