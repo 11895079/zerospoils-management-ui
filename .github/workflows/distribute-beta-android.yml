@@ -224,7 +224,7 @@ jobs:
       - name: Build APK (beta flavour)
         working-directory: ./app
         env:
-          GRADLE_OPTS: -Dorg.gradle.vfs.watch=false
+          GRADLE_OPTS: -Dorg.gradle.vfs.watch=false -Dorg.gradle.workers.max=2
         timeout-minutes: 40
         run: |
           # Exclude integration_test from release builds (local testing only).
@@ -232,9 +232,8 @@ jobs:
           rm -f android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
           # --split-per-abi: R8 processes each ABI in isolation, keeping peak
           # memory well under the runner's 7 GB limit.
-          # -- --max-workers 2: caps Gradle parallelism on CI without
-          # restricting local dev machines (not set in gradle.properties).
-          flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true -- --max-workers 2
+          # org.gradle.workers.max=2 is passed via GRADLE_OPTS for CI only.
+          flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true
 
       - name: Rename APKs
         working-directory: ./app
