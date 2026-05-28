@@ -235,7 +235,7 @@ jobs:
           # org.gradle.workers.max=2 is passed via GRADLE_OPTS for CI only.
           flutter build apk --split-per-abi --release --no-pub --dart-define=BETA_BUILD=true
 
-      - name: Rename APKs
+      - name: Rename arm64-v8a APK
         working-directory: ./app
         run: |
           # Tag triggers: strip "refs/tags/v" → "0.2.0-b28"
@@ -246,11 +246,9 @@ jobs:
           else
             TAG_VERSION=$(git rev-parse --short HEAD)
           fi
-          # Rename all three ABI slices so every beta device/emulator is covered.
-          for ABI in arm64-v8a armeabi-v7a x86_64; do
-            mv "build/app/outputs/flutter-apk/app-${ABI}-release.apk" \
-               "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta-${ABI}.apk"
-          done
+          # Keep phone-tester distribution focused on arm64 only.
+          mv "build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" \
+             "build/app/outputs/flutter-apk/zerospoils-${TAG_VERSION}-beta-arm64-v8a.apk"
           echo "APK_DIR=app/build/app/outputs/flutter-apk" >> "$GITHUB_ENV"
           echo "APK_VERSION=${TAG_VERSION}" >> "$GITHUB_ENV"
 
@@ -261,22 +259,4 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: beta-internal
           file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-arm64-v8a.apk
-          releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
-
-      - name: Upload armeabi-v7a APK to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          groups: beta-internal
-          file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-armeabi-v7a.apk
-          releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
-
-      - name: Upload x86_64 APK to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          groups: beta-internal
-          file: ${{ env.APK_DIR }}/zerospoils-${{ env.APK_VERSION }}-beta-x86_64.apk
           releaseNotes: ${{ steps.notes.outputs.RELEASE_NOTES }}
