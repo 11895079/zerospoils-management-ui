@@ -97,7 +97,7 @@ PY
   # use a hardcoded known-good hash. This prevents false failures on manifest bugs
   # while still catching actual download corruption.
   FALLBACK_HASHES_x86_64="flutter_macos_3.41.8-stable.zip:2944ff00c9b190e8dcf1d7a9c64f49113558f8ca8c80a33c29a2a72d9efe333a"
-  FALLBACK_HASHES_arm64="flutter_macos_arm64_3.41.8-stable.zip:2944ff00c9b190e8dcf1d7a9c64f49113558f8ca8c80a33c29a2a72d9efe333a"
+  FALLBACK_HASHES_arm64="flutter_macos_arm64_3.41.8-stable.zip:225765cd6e3352e0e05dabc0a80418390aa08507dd03d6c2b9f5428f380575cb"
 
   # Check fallbacks if manifest provided a hash
   if [ -n "$FLUTTER_ARCHIVE_SHA256" ]; then
