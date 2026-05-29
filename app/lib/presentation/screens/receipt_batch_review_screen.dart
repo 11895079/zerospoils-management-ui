@@ -72,38 +72,36 @@ class _ReceiptBatchReviewScreenState
   void initState() {
     super.initState();
     _items = [
-      ...widget.parsedItems
-          .map(
-            (item) => _EditableReceiptItem(
-              name: item.name,
-              price: item.price,
-              quantity: 1,
-              selected: true,
-              sourceLabel: item.sourceLabel,
-              matchExplanation: item.matchExplanation,
-              receiptPhotoIndex: item.receiptPhotoIndex,
-              receiptBox: item.receiptBox,
-              classification: ReceiptRowClassification.saleItem,
-              hidden: false,
-            ),
-          ),
-      ...widget.excludedRows
-          .map(
-            (row) => _EditableReceiptItem(
-              name: _fallbackNameForRow(row),
-              price: row.extractedPrice ?? _extractPriceFromText(row.text),
-              quantity: 1,
-              selected: false,
-              sourceLabel: 'Receipt OCR (excluded)',
-              matchExplanation:
-                  'Excluded as ${_classificationLabel(row.classification)}',
-              receiptPhotoIndex: row.photoIndex,
-              receiptBox: row.box,
-              classification: row.classification,
-              hidden: true,
-              rawText: row.text,
-            ),
-          ),
+      ...widget.parsedItems.map(
+        (item) => _EditableReceiptItem(
+          name: item.name,
+          price: item.price,
+          quantity: 1,
+          selected: true,
+          sourceLabel: item.sourceLabel,
+          matchExplanation: item.matchExplanation,
+          receiptPhotoIndex: item.receiptPhotoIndex,
+          receiptBox: item.receiptBox,
+          classification: ReceiptRowClassification.saleItem,
+          hidden: false,
+        ),
+      ),
+      ...widget.excludedRows.map(
+        (row) => _EditableReceiptItem(
+          name: _fallbackNameForRow(row),
+          price: row.extractedPrice ?? _extractPriceFromText(row.text),
+          quantity: 1,
+          selected: false,
+          sourceLabel: 'Receipt OCR (excluded)',
+          matchExplanation:
+              'Excluded as ${_classificationLabel(row.classification)}',
+          receiptPhotoIndex: row.photoIndex,
+          receiptBox: row.box,
+          classification: row.classification,
+          hidden: true,
+          rawText: row.text,
+        ),
+      ),
     ];
   }
 
