@@ -86,8 +86,7 @@ class _ReceiptBatchReviewScreenState
               classification: ReceiptRowClassification.saleItem,
               hidden: false,
             ),
-          )
-          .toList(),
+          ),
       ...widget.excludedRows
           .map(
             (row) => _EditableReceiptItem(
@@ -104,8 +103,7 @@ class _ReceiptBatchReviewScreenState
               hidden: true,
               rawText: row.text,
             ),
-          )
-          .toList(),
+          ),
     ];
   }
 
