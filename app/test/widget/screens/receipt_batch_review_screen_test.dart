@@ -139,12 +139,7 @@ void main() {
           home: ReceiptBatchReviewScreen(
             source: ReceiptBatchSource.inventory,
             photoPaths: const ['receipt-1.jpg'],
-            parsedItems: [
-              ParsedReceiptItem(
-                name: 'MILK',
-                price: 5.49,
-              ),
-            ],
+            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 5.49)],
             batchId: 'batch-3',
           ),
         ),
