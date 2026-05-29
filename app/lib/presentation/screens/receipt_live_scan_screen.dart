@@ -21,11 +21,13 @@ class ReceiptLiveScanScreen extends StatefulWidget {
     super.key,
     this.skipCameraInitialization = false,
     this.debugOverlayItems = const [],
+    this.debugClassifiedRows = const [],
     this.debugImageSize,
   });
 
   final bool skipCameraInitialization;
   final List<ReceiptLineItem> debugOverlayItems;
+  final List<ReceiptClassifiedRow> debugClassifiedRows;
   final Size? debugImageSize;
 
   @override
@@ -52,6 +54,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
   String? _errorMessage;
   String? _liveText;
   List<ReceiptLineItem> _liveItems = const [];
+  List<ReceiptClassifiedRow> _liveRows = const [];
   Size? _imageSize;
   int _frameCounter = 0;
 
@@ -63,6 +66,20 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
     super.initState();
     if (widget.skipCameraInitialization) {
       _liveItems = widget.debugOverlayItems;
+      _liveRows = widget.debugClassifiedRows.isNotEmpty
+          ? widget.debugClassifiedRows
+          : widget.debugOverlayItems
+                .map(
+                  (item) => ReceiptClassifiedRow(
+                    text: item.name,
+                    photoIndex: item.photoIndex,
+                    box: item.ocrBox,
+                    classification: ReceiptRowClassification.saleItem,
+                    extractedName: item.name,
+                    extractedPrice: item.price,
+                  ),
+                )
+                .toList(growable: false);
       _imageSize = widget.debugImageSize;
       _initializing = false;
       return;
@@ -188,9 +205,9 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
           )
           .toList();
 
-      final items = ocrLines.isEmpty
-          ? _parser.parse(recognized.text)
-          : _parser.parseOcrLines(ocrLines);
+      final parseResult = ocrLines.isEmpty
+          ? _parser.parseDetailed(recognized.text)
+          : _parser.parseDetailedOcrLines(ocrLines);
 
       if (!mounted) {
         return;
@@ -201,7 +218,8 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
         _liveText = recognized.text.trim().isEmpty
             ? null
             : recognized.text.trim();
-        _liveItems = items;
+        _liveItems = parseResult.items;
+        _liveRows = parseResult.rows;
       });
     } catch (_) {
       // Keep the live preview active through transient OCR failures.
@@ -357,9 +375,9 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          _liveItems.isEmpty
-                              ? 'No sale items locked yet'
-                              : '${_liveItems.length} sale items highlighted live',
+                          _liveRows.isEmpty
+                              ? 'No OCR lines classified yet'
+                              : '${_liveItems.length} sale items · ${_liveRows.length - _liveItems.length} excluded lines highlighted',
                           key: const Key('receipt_live_scan_summary'),
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w600,
@@ -384,7 +402,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Green boxes mark sale lines the parser currently trusts. Savings, HST, totals, and rewards lines are excluded live.',
+                    'Green boxes are accepted sale lines. Amber boxes are uncertain/unknown rows. Grey boxes are excluded rows (tax, totals, loyalty, payment, store info).',
                     style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(height: AppSpacing.xs),
@@ -456,7 +474,7 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
             previewChild,
             ReceiptLiveOcrOverlay(
               key: const Key('receipt_live_scan_overlay'),
-              items: _liveItems,
+              rows: _liveRows,
               imageSize: _imageSize,
             ),
           ],
@@ -543,16 +561,16 @@ class _ReceiptLiveScanScreenState extends State<ReceiptLiveScanScreen> {
 class ReceiptLiveOcrOverlay extends StatelessWidget {
   const ReceiptLiveOcrOverlay({
     super.key,
-    required this.items,
+    required this.rows,
     required this.imageSize,
   });
 
-  final List<ReceiptLineItem> items;
+  final List<ReceiptClassifiedRow> rows;
   final Size? imageSize;
 
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty || imageSize == null) {
+    if (rows.isEmpty || imageSize == null) {
       return const SizedBox.shrink();
     }
 
@@ -562,13 +580,16 @@ class ReceiptLiveOcrOverlay extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return Stack(
-          children: items.asMap().entries.map((entry) {
+          children: rows.asMap().entries.map((entry) {
             final index = entry.key;
-            final item = entry.value;
-            final box = item.ocrBox;
+            final row = entry.value;
+            final box = row.box;
             if (box == null) {
               return const SizedBox.shrink();
             }
+
+            final tone = _toneForRow(row);
+            final label = row.extractedName ?? row.text;
 
             return Positioned(
               key: Key('receipt_live_overlay_box_$index'),
@@ -578,20 +599,20 @@ class ReceiptLiveOcrOverlay extends StatelessWidget {
               height: box.height / sourceHeight * constraints.maxHeight,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.lightGreenAccent, width: 2),
+                  border: Border.all(color: tone.border, width: 2),
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.lightGreenAccent.withValues(alpha: 0.16),
+                  color: tone.fill,
                 ),
                 alignment: Alignment.topLeft,
                 padding: const EdgeInsets.all(4),
                 child: Text(
-                  item.name,
+                  label,
                   key: Key('receipt_live_overlay_label_$index'),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.caption.copyWith(
-                    color: Colors.black,
-                    backgroundColor: Colors.lightGreenAccent,
+                    color: tone.text,
+                    backgroundColor: tone.labelBackground,
                   ),
                 ),
               ),
@@ -601,4 +622,50 @@ class ReceiptLiveOcrOverlay extends StatelessWidget {
       },
     );
   }
+
+  _OverlayTone _toneForRow(ReceiptClassifiedRow row) {
+    switch (row.classification) {
+      case ReceiptRowClassification.saleItem:
+        return const _OverlayTone(
+          border: Color(0xFF2E7D32),
+          fill: Color(0x2932CD32),
+          labelBackground: Color(0xCC8BC34A),
+          text: Colors.black,
+        );
+      case ReceiptRowClassification.unknown:
+        return const _OverlayTone(
+          border: Color(0xFFF9A825),
+          fill: Color(0x29F9A825),
+          labelBackground: Color(0xCCEEC643),
+          text: Colors.black,
+        );
+      case ReceiptRowClassification.tax:
+      case ReceiptRowClassification.total:
+      case ReceiptRowClassification.loyalty:
+      case ReceiptRowClassification.payment:
+      case ReceiptRowClassification.savings:
+      case ReceiptRowClassification.department:
+      case ReceiptRowClassification.storeInfo:
+        return const _OverlayTone(
+          border: Color(0xFF90A4AE),
+          fill: Color(0x3390A4AE),
+          labelBackground: Color(0xCCB0BEC5),
+          text: Colors.black,
+        );
+    }
+  }
+}
+
+class _OverlayTone {
+  const _OverlayTone({
+    required this.border,
+    required this.fill,
+    required this.labelBackground,
+    required this.text,
+  });
+
+  final Color border;
+  final Color fill;
+  final Color labelBackground;
+  final Color text;
 }
