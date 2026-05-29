@@ -10,6 +10,8 @@ enum FreshProduceClassification {
   other,
 }
 
+enum OcrFieldConfidence { low, medium, high }
+
 class FreshProduceOcrParseResult {
   const FreshProduceOcrParseResult({
     required this.isLikelyFreshProduce,
@@ -23,6 +25,13 @@ class FreshProduceOcrParseResult {
     required this.classification,
     required this.suggestedCategory,
     required this.extractedFieldCount,
+    required this.productDescriptionConfidence,
+    required this.netWeightConfidence,
+    required this.pricePerWeightConfidence,
+    required this.totalPriceConfidence,
+    required this.packDateConfidence,
+    required this.bestBeforeDateConfidence,
+    required this.classificationConfidence,
   });
 
   final bool isLikelyFreshProduce;
@@ -36,6 +45,13 @@ class FreshProduceOcrParseResult {
   final FreshProduceClassification classification;
   final ItemCategory suggestedCategory;
   final int extractedFieldCount;
+  final OcrFieldConfidence? productDescriptionConfidence;
+  final OcrFieldConfidence? netWeightConfidence;
+  final OcrFieldConfidence? pricePerWeightConfidence;
+  final OcrFieldConfidence? totalPriceConfidence;
+  final OcrFieldConfidence? packDateConfidence;
+  final OcrFieldConfidence? bestBeforeDateConfidence;
+  final OcrFieldConfidence classificationConfidence;
 
   bool get shouldFallbackToGenericOcr => extractedFieldCount < 2;
 }
@@ -157,6 +173,29 @@ class FreshProduceOcrParser {
     if (packDate != null) extractedFieldCount++;
     if (bestBeforeDate != null) extractedFieldCount++;
 
+    final productDescriptionConfidence = productDescription == null
+        ? null
+        : _confidenceForDescription(productDescription, classification);
+    final netWeightConfidence = (netWeight.$1 != null && netWeight.$2 != null)
+        ? OcrFieldConfidence.high
+        : (netWeight.$1 != null ? OcrFieldConfidence.medium : null);
+    final pricePerWeightConfidence = pricePerWeight != null
+        ? OcrFieldConfidence.high
+        : null;
+    final totalPriceConfidence = totalPrice != null
+        ? OcrFieldConfidence.high
+        : null;
+    final packDateConfidence = packDate != null
+        ? OcrFieldConfidence.high
+        : null;
+    final bestBeforeDateConfidence = bestBeforeDate != null
+        ? _bestBeforeConfidence(lines)
+        : null;
+    final classificationConfidence =
+        classification == FreshProduceClassification.other
+        ? OcrFieldConfidence.low
+        : OcrFieldConfidence.high;
+
     return FreshProduceOcrParseResult(
       isLikelyFreshProduce: shouldUseFreshProduceMode(
         text,
@@ -172,7 +211,48 @@ class FreshProduceOcrParser {
       classification: classification,
       suggestedCategory: suggestedCategory,
       extractedFieldCount: extractedFieldCount,
+      productDescriptionConfidence: productDescriptionConfidence,
+      netWeightConfidence: netWeightConfidence,
+      pricePerWeightConfidence: pricePerWeightConfidence,
+      totalPriceConfidence: totalPriceConfidence,
+      packDateConfidence: packDateConfidence,
+      bestBeforeDateConfidence: bestBeforeDateConfidence,
+      classificationConfidence: classificationConfidence,
     );
+  }
+
+  OcrFieldConfidence _confidenceForDescription(
+    String description,
+    FreshProduceClassification classification,
+  ) {
+    final hasMultipleWords =
+        description
+            .split(RegExp(r'\s+'))
+            .where((word) => word.isNotEmpty)
+            .length >=
+        2;
+    if (classification != FreshProduceClassification.other &&
+        hasMultipleWords) {
+      return OcrFieldConfidence.high;
+    }
+    return OcrFieldConfidence.medium;
+  }
+
+  OcrFieldConfidence _bestBeforeConfidence(List<String> lines) {
+    final directLabelHit = lines.any(
+      (line) => _containsAny(line.toLowerCase(), const [
+        'best before',
+        'best by',
+        'use by',
+        'expiry',
+        'exp',
+        'bb',
+      ]),
+    );
+    if (directLabelHit) {
+      return OcrFieldConfidence.high;
+    }
+    return OcrFieldConfidence.medium;
   }
 
   String? _extractProductDescription(List<String> lines) {
