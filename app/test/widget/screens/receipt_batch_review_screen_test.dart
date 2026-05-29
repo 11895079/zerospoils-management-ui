@@ -80,4 +80,92 @@ void main() {
       );
     },
   );
+
+  testWidgets('excluded rows appear in hidden section and can be promoted', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: ReceiptBatchReviewScreen(
+            source: ReceiptBatchSource.inventory,
+            photoPaths: const ['receipt-1.jpg'],
+            parsedItems: const [],
+            excludedRows: const [
+              ReceiptClassifiedRow(
+                text: 'HST 1.25',
+                photoIndex: 0,
+                box: ReceiptOcrBox(left: 24, top: 120, right: 200, bottom: 160),
+                classification: ReceiptRowClassification.tax,
+              ),
+            ],
+            batchId: 'batch-2',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Hidden receipt lines (1)'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.byKey(const Key('receipt_hidden_lines_section')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Hidden receipt lines (1)'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('receipt_hidden_item_0')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('receipt_hidden_promote_0')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('receipt_hidden_item_0')), findsNothing);
+    expect(find.textContaining('HST 1.25'), findsWidgets);
+  });
+
+  testWidgets('included rows can be demoted into hidden section', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: ReceiptBatchReviewScreen(
+            source: ReceiptBatchSource.inventory,
+            photoPaths: const ['receipt-1.jpg'],
+            parsedItems: [
+              ParsedReceiptItem(
+                name: 'MILK',
+                price: 5.49,
+              ),
+            ],
+            batchId: 'batch-3',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final demoteButton = find.byIcon(Icons.visibility_off_outlined).first;
+    await tester.ensureVisible(demoteButton);
+    await tester.pumpAndSettle();
+    await tester.tap(demoteButton);
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.textContaining('Hidden receipt lines'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.textContaining('Hidden receipt lines'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('receipt_hidden_item_0')), findsOneWidget);
+  });
 }

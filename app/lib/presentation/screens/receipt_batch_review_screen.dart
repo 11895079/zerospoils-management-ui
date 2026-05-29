@@ -2,6 +2,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/theme/app_spacing.dart';
 import '../../domain/models/item_model.dart' hide ShoppingListItem;
 import '../../domain/models/receipt_batch.dart';
@@ -35,6 +36,7 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final List<String> photoPaths;
   final List<String> goodsPhotoPaths;
   final List<ParsedReceiptItem> parsedItems;
+  final List<ReceiptClassifiedRow> excludedRows;
   final String batchId;
   final String? existingBatchId;
   final String? storeName;
@@ -48,6 +50,7 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
     required this.photoPaths,
     this.goodsPhotoPaths = const [],
     required this.parsedItems,
+    this.excludedRows = const [],
     required this.batchId,
     this.existingBatchId,
     this.storeName,
@@ -68,24 +71,48 @@ class _ReceiptBatchReviewScreenState
   @override
   void initState() {
     super.initState();
-    _items = widget.parsedItems
-        .map(
-          (item) => _EditableReceiptItem(
-            name: item.name,
-            price: item.price,
-            quantity: 1,
-            selected: true,
-            sourceLabel: item.sourceLabel,
-            matchExplanation: item.matchExplanation,
-            receiptPhotoIndex: item.receiptPhotoIndex,
-            receiptBox: item.receiptBox,
-          ),
-        )
-        .toList();
+    _items = [
+      ...widget.parsedItems
+          .map(
+            (item) => _EditableReceiptItem(
+              name: item.name,
+              price: item.price,
+              quantity: 1,
+              selected: true,
+              sourceLabel: item.sourceLabel,
+              matchExplanation: item.matchExplanation,
+              receiptPhotoIndex: item.receiptPhotoIndex,
+              receiptBox: item.receiptBox,
+              classification: ReceiptRowClassification.saleItem,
+              hidden: false,
+            ),
+          )
+          .toList(),
+      ...widget.excludedRows
+          .map(
+            (row) => _EditableReceiptItem(
+              name: _fallbackNameForRow(row),
+              price: row.extractedPrice ?? _extractPriceFromText(row.text),
+              quantity: 1,
+              selected: false,
+              sourceLabel: 'Receipt OCR (excluded)',
+              matchExplanation:
+                  'Excluded as ${_classificationLabel(row.classification)}',
+              receiptPhotoIndex: row.photoIndex,
+              receiptBox: row.box,
+              classification: row.classification,
+              hidden: true,
+              rawText: row.text,
+            ),
+          )
+          .toList(),
+    ];
   }
 
   Future<void> _saveBatch(ReceiptBatchDestination destination) async {
-    final selected = _items.where((item) => item.selected).toList();
+    final selected = _items
+        .where((item) => item.selected && !item.hidden)
+        .toList(growable: false);
     if (selected.isEmpty) {
       _showSnack('Select at least one item');
       return;
@@ -292,6 +319,28 @@ class _ReceiptBatchReviewScreenState
     });
   }
 
+  void _promoteExcluded(int index) {
+    final item = _items[index];
+    setState(() {
+      _items[index] = item.copyWith(
+        hidden: false,
+        selected: true,
+        sourceLabel: 'Receipt OCR (promoted)',
+      );
+    });
+  }
+
+  void _demoteIncluded(int index) {
+    final item = _items[index];
+    setState(() {
+      _items[index] = item.copyWith(
+        hidden: true,
+        selected: false,
+        sourceLabel: 'Receipt OCR (excluded)',
+      );
+    });
+  }
+
   void _showSnack(String message) {
     ScaffoldMessenger.of(
       context,
@@ -301,6 +350,12 @@ class _ReceiptBatchReviewScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final visibleEntries = _items
+        .asMap()
+        .entries
+        .where((entry) => !entry.value.hidden)
+        .toList(growable: false);
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(title: const Text('Review Items')),
@@ -318,7 +373,7 @@ class _ReceiptBatchReviewScreenState
                 subtitle: Text(_reviewMetadataSummary()),
               ),
             ),
-          ..._items.asMap().entries.map((entry) {
+          ...visibleEntries.map((entry) {
             final index = entry.key;
             final item = entry.value;
             return Card(
@@ -353,16 +408,31 @@ class _ReceiptBatchReviewScreenState
                     );
                   },
                 ),
-                trailing: IconButton(
-                  icon: Icon(
-                    Icons.edit,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () => _editItem(index),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      key: Key('receipt_review_demote_$index'),
+                      tooltip: 'Move to hidden lines',
+                      icon: Icon(
+                        Icons.visibility_off_outlined,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () => _demoteIncluded(index),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      onPressed: () => _editItem(index),
+                    ),
+                  ],
                 ),
               ),
             );
           }),
+          _buildHiddenLinesSection(),
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
             onPressed: () => _saveBatch(ReceiptBatchDestination.shoppingList),
@@ -378,6 +448,46 @@ class _ReceiptBatchReviewScreenState
             child: const Text('Save to Inventory'),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHiddenLinesSection() {
+    final hiddenEntries = _items
+        .asMap()
+        .entries
+        .where((entry) => entry.value.hidden)
+        .toList(growable: false);
+    if (hiddenEntries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      key: const Key('receipt_hidden_lines_section'),
+      child: ExpansionTile(
+        title: Text('Hidden receipt lines (${hiddenEntries.length})'),
+        subtitle: const Text(
+          'Promote excluded lines when OCR filtered a true sale item.',
+        ),
+        children: hiddenEntries
+            .map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return ListTile(
+                key: Key('receipt_hidden_item_$index'),
+                title: Text(item.name),
+                subtitle: Text(
+                  '${_classificationLabel(item.classification)} · ${item.rawText ?? item.name}',
+                ),
+                trailing: TextButton.icon(
+                  key: Key('receipt_hidden_promote_$index'),
+                  onPressed: () => _promoteExcluded(index),
+                  icon: const Icon(Icons.visibility_outlined),
+                  label: const Text('Promote'),
+                ),
+              );
+            })
+            .toList(growable: false),
       ),
     );
   }
@@ -398,6 +508,53 @@ class _ReceiptBatchReviewScreenState
       segments.add('${widget.goodsPhotoPaths.length} goods photos');
     }
     return segments.join(' · ');
+  }
+
+  String _classificationLabel(ReceiptRowClassification classification) {
+    switch (classification) {
+      case ReceiptRowClassification.saleItem:
+        return 'Sale item';
+      case ReceiptRowClassification.tax:
+        return 'Tax line';
+      case ReceiptRowClassification.total:
+        return 'Total line';
+      case ReceiptRowClassification.loyalty:
+        return 'Loyalty line';
+      case ReceiptRowClassification.payment:
+        return 'Payment line';
+      case ReceiptRowClassification.savings:
+        return 'Savings line';
+      case ReceiptRowClassification.department:
+        return 'Department header';
+      case ReceiptRowClassification.storeInfo:
+        return 'Store info';
+      case ReceiptRowClassification.unknown:
+        return 'Uncertain line';
+    }
+  }
+
+  String _fallbackNameForRow(ReceiptClassifiedRow row) {
+    final extracted = row.extractedName?.trim();
+    if (extracted != null && extracted.isNotEmpty) {
+      return extracted;
+    }
+    final raw = row.text.trim();
+    if (raw.isEmpty) {
+      return 'Unlabeled OCR line';
+    }
+    return raw.length > 48 ? '${raw.substring(0, 48)}...' : raw;
+  }
+
+  double _extractPriceFromText(String text) {
+    final matches = RegExp(r'\d+[\.,]\d{2}')
+        .allMatches(text)
+        .map((match) => double.tryParse(match.group(0)!.replaceAll(',', '.')))
+        .whereType<double>()
+        .toList(growable: false);
+    if (matches.isEmpty) {
+      return 0;
+    }
+    return matches.last;
   }
 
   List<Widget> _buildOverlayCards(ThemeData theme) {
@@ -447,6 +604,9 @@ class _EditableReceiptItem {
   final String? matchExplanation;
   final int? receiptPhotoIndex;
   final ReceiptOcrBox? receiptBox;
+  final ReceiptRowClassification classification;
+  final bool hidden;
+  final String? rawText;
 
   _EditableReceiptItem({
     required this.name,
@@ -457,6 +617,9 @@ class _EditableReceiptItem {
     this.matchExplanation,
     this.receiptPhotoIndex,
     this.receiptBox,
+    required this.classification,
+    required this.hidden,
+    this.rawText,
   });
 
   _EditableReceiptItem copyWith({
@@ -468,6 +631,9 @@ class _EditableReceiptItem {
     String? matchExplanation,
     int? receiptPhotoIndex,
     ReceiptOcrBox? receiptBox,
+    ReceiptRowClassification? classification,
+    bool? hidden,
+    String? rawText,
   }) {
     return _EditableReceiptItem(
       name: name ?? this.name,
@@ -478,6 +644,9 @@ class _EditableReceiptItem {
       matchExplanation: matchExplanation ?? this.matchExplanation,
       receiptPhotoIndex: receiptPhotoIndex ?? this.receiptPhotoIndex,
       receiptBox: receiptBox ?? this.receiptBox,
+      classification: classification ?? this.classification,
+      hidden: hidden ?? this.hidden,
+      rawText: rawText ?? this.rawText,
     );
   }
 }
@@ -517,7 +686,7 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Highlighted boxes show which OCR regions were treated as sale items.',
+              'Overlay colors: green = included sale item, amber = uncertain hidden line, grey = excluded hidden line.',
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.md),
@@ -545,6 +714,7 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
                         final index = entry.key;
                         final item = entry.value;
                         final box = item.receiptBox!;
+                        final tone = _toneFor(item, theme);
                         return Positioned(
                           key: Key(
                             'receipt_review_overlay_box_${photoIndex}_$index',
@@ -556,14 +726,9 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
                               box.height / sourceHeight * constraints.maxHeight,
                           child: Container(
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: theme.colorScheme.primary,
-                                width: 2,
-                              ),
+                              border: Border.all(color: tone.border, width: 2),
                               borderRadius: BorderRadius.circular(8),
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.14,
-                              ),
+                              color: tone.fill,
                             ),
                             alignment: Alignment.topLeft,
                             padding: const EdgeInsets.all(4),
@@ -572,9 +737,8 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: theme.colorScheme.onPrimaryContainer,
-                                backgroundColor:
-                                    theme.colorScheme.primaryContainer,
+                                color: tone.text,
+                                backgroundColor: tone.labelBackground,
                               ),
                             ),
                           ),
@@ -608,4 +772,45 @@ class _ReceiptOcrOverlayCard extends StatelessWidget {
     }
     return maxValue > 0 ? maxValue : fallback;
   }
+
+  _ReceiptOverlayTone _toneFor(_EditableReceiptItem item, ThemeData theme) {
+    if (!item.hidden && item.selected) {
+      return _ReceiptOverlayTone(
+        border: theme.colorScheme.primary,
+        fill: theme.colorScheme.primary.withValues(alpha: 0.14),
+        labelBackground: theme.colorScheme.primaryContainer,
+        text: theme.colorScheme.onPrimaryContainer,
+      );
+    }
+
+    if (item.classification == ReceiptRowClassification.unknown) {
+      return const _ReceiptOverlayTone(
+        border: Color(0xFFF9A825),
+        fill: Color(0x29F9A825),
+        labelBackground: Color(0xFFEEC643),
+        text: Colors.black,
+      );
+    }
+
+    return const _ReceiptOverlayTone(
+      border: Color(0xFF90A4AE),
+      fill: Color(0x3390A4AE),
+      labelBackground: Color(0xFFB0BEC5),
+      text: Colors.black,
+    );
+  }
+}
+
+class _ReceiptOverlayTone {
+  const _ReceiptOverlayTone({
+    required this.border,
+    required this.fill,
+    required this.labelBackground,
+    required this.text,
+  });
+
+  final Color border;
+  final Color fill;
+  final Color labelBackground;
+  final Color text;
 }

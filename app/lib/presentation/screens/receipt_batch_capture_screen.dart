@@ -200,6 +200,7 @@ class _ReceiptBatchCaptureScreenState
 
     try {
       final parsedItems = <ParsedReceiptItem>[];
+      final excludedRows = <ReceiptClassifiedRow>[];
       for (
         var photoIndex = 0;
         photoIndex < _receiptPhotos.length;
@@ -225,8 +226,8 @@ class _ReceiptBatchCaptureScreenState
             )
             .toList();
 
-        final items = ocrLines.isEmpty
-            ? parser.parseOcrLines(
+        final parseResult = ocrLines.isEmpty
+            ? parser.parseDetailedOcrLines(
                 result.text
                     .split(RegExp(r'\r?\n'))
                     .map((line) => line.trim())
@@ -237,9 +238,9 @@ class _ReceiptBatchCaptureScreenState
                     )
                     .toList(),
               )
-            : parser.parseOcrLines(ocrLines);
+            : parser.parseDetailedOcrLines(ocrLines);
 
-        for (final item in items) {
+        for (final item in parseResult.items) {
           parsedItems.add(
             ParsedReceiptItem(
               name: item.name,
@@ -250,6 +251,8 @@ class _ReceiptBatchCaptureScreenState
             ),
           );
         }
+
+        excludedRows.addAll(parseResult.rejectedRows);
       }
 
       final goodsPhotoSuggestions = _goodsPhotos.isEmpty
@@ -277,6 +280,7 @@ class _ReceiptBatchCaptureScreenState
           'batch_id': _batchId,
           'items_detected': mergedItems.length,
           'receipt_items_detected': parsedItems.length,
+          'receipt_rows_excluded': excludedRows.length,
           'goods_items_suggested': goodsPhotoSuggestions.length,
           'duration_ms': duration,
         },
@@ -290,6 +294,7 @@ class _ReceiptBatchCaptureScreenState
             photoPaths: _receiptPhotos.map((e) => e.path).toList(),
             goodsPhotoPaths: _goodsPhotos.map((e) => e.path).toList(),
             parsedItems: mergedItems,
+            excludedRows: excludedRows,
             batchId: _batchId,
             existingBatchId: widget.existingBatchId,
             storeName: _normalizedStoreName(),

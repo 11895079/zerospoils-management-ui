@@ -114,4 +114,71 @@ void main() {
     );
     expect(find.textContaining('2 item'), findsOneWidget);
   });
+
+  testWidgets('live AR overlay uses tri-color coding by row classification', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const ReceiptLiveScanScreen(
+          skipCameraInitialization: true,
+          debugImageSize: Size(320, 640),
+          debugClassifiedRows: [
+            ReceiptClassifiedRow(
+              text: 'BANANA 2.99',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 80, right: 300, bottom: 120),
+              classification: ReceiptRowClassification.saleItem,
+              extractedName: 'BANANA',
+              extractedPrice: 2.99,
+            ),
+            ReceiptClassifiedRow(
+              text: 'HST 0.52',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 160, right: 300, bottom: 200),
+              classification: ReceiptRowClassification.tax,
+            ),
+            ReceiptClassifiedRow(
+              text: 'RANDOM CODE',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 240, right: 300, bottom: 280),
+              classification: ReceiptRowClassification.unknown,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final salePositioned = tester.widget<Positioned>(
+      find.byKey(const Key('receipt_live_overlay_box_0')),
+    );
+    final taxPositioned = tester.widget<Positioned>(
+      find.byKey(const Key('receipt_live_overlay_box_1')),
+    );
+    final unknownPositioned = tester.widget<Positioned>(
+      find.byKey(const Key('receipt_live_overlay_box_2')),
+    );
+
+    final saleBox = salePositioned.child as Container;
+    final taxBox = taxPositioned.child as Container;
+    final unknownBox = unknownPositioned.child as Container;
+
+    final saleDecoration = saleBox.decoration! as BoxDecoration;
+    final taxDecoration = taxBox.decoration! as BoxDecoration;
+    final unknownDecoration = unknownBox.decoration! as BoxDecoration;
+
+    expect(
+      (saleDecoration.border as Border).top.color,
+      const Color(0xFF2E7D32),
+    );
+    expect((taxDecoration.border as Border).top.color, const Color(0xFF90A4AE));
+    expect(
+      (unknownDecoration.border as Border).top.color,
+      const Color(0xFFF9A825),
+    );
+  });
 }
