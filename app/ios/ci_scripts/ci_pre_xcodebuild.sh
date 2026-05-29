@@ -99,6 +99,24 @@ cd ios
 # Disable analytics to avoid network delays.
 export COCOAPODS_DISABLE_STATS=true
 
+# Some Xcode Cloud environments can inherit Git/proxy settings that rewrite
+# GitHub HTTPS URLs to HTTP (or route through an unavailable proxy), which
+# breaks CocoaPods git sources like BoringSSL-GRPC.
+echo "Normalizing GitHub git/proxy settings for CocoaPods..."
+unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+export NO_PROXY="${NO_PROXY:+$NO_PROXY,}github.com,api.github.com,codeload.github.com,raw.githubusercontent.com"
+
+# Remove any github.com URL rewrites that point to plain HTTP.
+git config --global --unset-all url.http://github.com/.insteadof 2>/dev/null || true
+git config --global --unset-all url.http://github.com/.insteadOf 2>/dev/null || true
+
+# Force github.com clones over HTTPS.
+git config --global url."https://github.com/".insteadOf "http://github.com/"
+
+# Ignore broken proxy entries specifically for GitHub remotes.
+git config --global http.https://github.com.proxy ""
+git config --global http.http://github.com.proxy ""
+
 pod install --no-repo-update
 
 echo "ci_pre_xcodebuild: done"
