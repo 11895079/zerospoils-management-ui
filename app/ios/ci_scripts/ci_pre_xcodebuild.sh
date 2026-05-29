@@ -40,8 +40,9 @@ FLUTTER_ARCHIVE_URL="${FLUTTER_RELEASES_BASE_URL}/stable/macos/${FLUTTER_ARCHIVE
 if ! command -v flutter > /dev/null 2>&1; then
   echo "Flutter not found — installing $FLUTTER_VERSION (stable, $MACHINE_ARCH)"
 
-  # Resolve SHA256 from the releases manifest. Filtered to channel==stable so
-  # the match is deterministic regardless of manifest ordering.
+  # Resolve SHA256 from the releases manifest. The manifest includes a 'sha256'
+  # field per entry (distinct from 'hash' which is the git commit hash).
+  # Filter to channel==stable for a deterministic match.
   FLUTTER_ARCHIVE_SHA256="$({
     curl --fail --silent --show-error --location "$FLUTTER_RELEASES_JSON_URL" \
       --output /tmp/flutter_releases.json && \
@@ -60,7 +61,7 @@ for release in data.get('releases', []):
         continue
     archive_path = release.get('archive', '')
     if archive_path.endswith('/' + archive_file) or archive_path.endswith(archive_file):
-        print(release.get('hash', ''))
+        print(release.get('sha256', ''))
         break
 PY
   } | tail -n 1)"
