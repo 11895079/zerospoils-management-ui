@@ -3,8 +3,33 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/core/reference/reference_pack_fetchers.dart';
 import 'package:zerospoils/core/reference/reference_pack_manifest.dart';
 import 'package:zerospoils/core/reference/reference_pack_service.dart';
+
+class _FakeManifestUrlProvider implements ReferencePackManifestUrlProvider {
+  _FakeManifestUrlProvider(this.url);
+
+  final Uri? url;
+
+  @override
+  Future<Uri?> getManifestUrl() async => url;
+}
+
+class _MapDownloader implements ReferencePackDownloader {
+  _MapDownloader(this.payloadsByUrl);
+
+  final Map<String, String> payloadsByUrl;
+
+  @override
+  Future<String> downloadJson(Uri url) async {
+    final payload = payloadsByUrl[url.toString()];
+    if (payload == null) {
+      throw Exception('missing payload for ${url.toString()}');
+    }
+    return payload;
+  }
+}
 
 void main() {
   group('ReferencePackService', () {
@@ -149,6 +174,104 @@ void main() {
       final status = await service.barcodeCatalogStatus();
       expect(status.version, 'v1');
       expect(status.recordCount, 1);
+    });
+
+    test('syncs barcode pack from manifest URL via downloader', () async {
+      const packUrl =
+          'https://firebase.storage.googleapis.com/packs/barcode-ca-v9.json';
+      const manifestUrl =
+          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+
+      const packJson =
+          '{"schema_version":1,"records":[{"barcode":"055000132152","product_name":"Firebase Pack Coffee","category_hint":"pantry"}]}';
+      final checksum = sha256.convert(utf8.encode(packJson)).toString();
+
+      final manifestJson =
+          '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "barcode_catalog",
+      "region": "ca",
+      "version": "v9",
+      "checksum": "$checksum",
+      "minimum_app_version": "1.0.0",
+      "download_url": "$packUrl"
+    }
+  ]
+}
+''';
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final result = await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
+        downloader: _MapDownloader({
+          manifestUrl: manifestJson,
+          packUrl: packJson,
+        }),
+        region: 'ca',
+      );
+
+      expect(result.success, isTrue);
+
+      final status = await service.barcodeCatalogStatus();
+      expect(status.version, 'v9');
+      expect(status.recordCount, 1);
+    });
+
+    test('fails sync when manifest URL is unset', () async {
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final result = await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: _FakeManifestUrlProvider(null),
+        downloader: _MapDownloader(const {}),
+      );
+
+      expect(result.success, isFalse);
+      expect(result.failureReason, 'manifest_url_unset');
+    });
+
+    test('fails sync when no matching pack exists for region', () async {
+      const manifestUrl =
+          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+
+      const manifestJson = '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "barcode_catalog",
+      "region": "us",
+      "version": "v1",
+      "checksum": "abc",
+      "minimum_app_version": "1.0.0",
+      "download_url": "https://example.com/us-pack.json"
+    }
+  ]
+}
+''';
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final result = await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
+        downloader: _MapDownloader({manifestUrl: manifestJson}),
+        region: 'ca',
+      );
+
+      expect(result.success, isFalse);
+      expect(result.failureReason, 'pack_not_found_for_region');
     });
   });
 }

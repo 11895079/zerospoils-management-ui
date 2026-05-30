@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'reference_pack_fetchers.dart';
 import 'reference_pack_keys.dart';
 import 'reference_pack_manifest.dart';
 
@@ -86,6 +87,116 @@ class ReferencePackService {
       updatedAt: updatedAt,
       recordCount: records.length,
     );
+  }
+
+  Future<ReferencePackActivationResult> syncBarcodeCatalogPack({
+    required ReferencePackManifestUrlProvider manifestUrlProvider,
+    required ReferencePackDownloader downloader,
+    String region = 'ca',
+  }) async {
+    _telemetry?.call('reference_pack_check_started', {
+      'pack_type': ReferencePackType.barcodeCatalog.wireName,
+      'region': region,
+    });
+
+    final manifestUrl = await manifestUrlProvider.getManifestUrl();
+    if (manifestUrl == null) {
+      _telemetry?.call('reference_pack_check_failed', {
+        'pack_type': ReferencePackType.barcodeCatalog.wireName,
+        'reason': 'manifest_url_unset',
+      });
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_url_unset',
+      );
+    }
+
+    final String manifestJson;
+    try {
+      manifestJson = await downloader.downloadJson(manifestUrl);
+    } catch (_) {
+      _telemetry?.call('reference_pack_check_failed', {
+        'pack_type': ReferencePackType.barcodeCatalog.wireName,
+        'reason': 'manifest_download_failed',
+      });
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_download_failed',
+      );
+    }
+
+    final ReferencePackManifest manifest;
+    try {
+      manifest = ReferencePackManifest.parse(manifestJson);
+    } catch (_) {
+      _telemetry?.call('reference_pack_check_failed', {
+        'pack_type': ReferencePackType.barcodeCatalog.wireName,
+        'reason': 'manifest_invalid',
+      });
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_invalid',
+      );
+    }
+
+    ReferencePackDescriptor? descriptor;
+    for (final pack in manifest.packs) {
+      if (pack.type == ReferencePackType.barcodeCatalog &&
+          pack.region == region) {
+        descriptor = pack;
+        break;
+      }
+    }
+
+    if (descriptor == null) {
+      _telemetry?.call('reference_pack_check_failed', {
+        'pack_type': ReferencePackType.barcodeCatalog.wireName,
+        'region': region,
+        'reason': 'pack_not_found_for_region',
+      });
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_not_found_for_region',
+      );
+    }
+
+    final String packJson;
+    try {
+      packJson = await downloader.downloadJson(descriptor.downloadUrl);
+    } catch (_) {
+      _telemetry?.call('reference_pack_download_failed', {
+        'pack_type': descriptor.type.wireName,
+        'region': descriptor.region,
+        'version': descriptor.version,
+      });
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_download_failed',
+      );
+    }
+
+    final activation = await activateBarcodeCatalogPack(
+      descriptor: descriptor,
+      packJson: packJson,
+    );
+
+    if (!activation.success) {
+      _telemetry?.call('reference_pack_sync_failed', {
+        'pack_type': descriptor.type.wireName,
+        'region': descriptor.region,
+        'version': descriptor.version,
+        'reason': activation.failureReason ?? 'activation_failed',
+      });
+      return activation;
+    }
+
+    _telemetry?.call('reference_pack_sync_succeeded', {
+      'pack_type': descriptor.type.wireName,
+      'region': descriptor.region,
+      'version': descriptor.version,
+    });
+
+    return activation;
   }
 
   Future<ReferencePackActivationResult> activateBarcodeCatalogPack({

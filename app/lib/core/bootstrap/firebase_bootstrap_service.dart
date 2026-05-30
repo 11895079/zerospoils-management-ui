@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../auth/firebase_auth_service.dart';
 import '../auth/secure_token_service.dart';
 import '../distribution/app_distribution_service.dart';
+import '../reference/reference_pack_fetchers.dart';
 
 /// Handle FCM background messages. Must be a top-level function.
 @pragma('vm:entry-point')
@@ -92,6 +93,9 @@ class FirebaseBootstrapService {
           minimumFetchInterval: const Duration(hours: 1),
         ),
       );
+      await remoteConfig.setDefaults({
+        ReferencePackRemoteConfigKeys.manifestUrl: '',
+      });
 
       // Fetch and activate remote config
       await remoteConfig.fetchAndActivate();
