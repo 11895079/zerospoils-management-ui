@@ -21,17 +21,37 @@ class FeedbackService {
   static const _audioEnabledKey = 'feedback_audio_enabled';
   static const _beepVolumeKey = 'feedback_beep_volume';
   static const _hapticIntensityKey = 'feedback_haptic_intensity';
+  static const _barcodeScannerEnabledKey = 'feedback_scanner_barcode_enabled';
+  static const _expiryScannerEnabledKey = 'feedback_scanner_expiry_enabled';
+  static const _receiptScannerEnabledKey = 'feedback_scanner_receipt_enabled';
+  static const _produceScannerEnabledKey = 'feedback_scanner_produce_enabled';
 
   late SharedPreferences _prefs;
   late bool _hapticEnabledValue;
   late bool _audioEnabledValue;
   late double _beepVolumeValue;
   late HapticIntensity _hapticIntensityValue;
+  late bool _barcodeScannerEnabledValue;
+  late bool _expiryScannerEnabledValue;
+  late bool _receiptScannerEnabledValue;
+  late bool _produceScannerEnabledValue;
 
   bool get hapticEnabled => _hapticEnabledValue;
   bool get audioEnabled => _audioEnabledValue;
   double get beepVolume => _beepVolumeValue;
   HapticIntensity get hapticIntensity => _hapticIntensityValue;
+  bool scannerEnabled(FeedbackType type) {
+    switch (type) {
+      case FeedbackType.barcodeSuccess:
+        return _barcodeScannerEnabledValue;
+      case FeedbackType.expirySuccess:
+        return _expiryScannerEnabledValue;
+      case FeedbackType.receiptSuccess:
+        return _receiptScannerEnabledValue;
+      case FeedbackType.produceSuccess:
+        return _produceScannerEnabledValue;
+    }
+  }
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
@@ -40,6 +60,14 @@ class FeedbackService {
     _beepVolumeValue = _prefs.getDouble(_beepVolumeKey) ?? 0.8;
     final intensityStr = _prefs.getString(_hapticIntensityKey);
     _hapticIntensityValue = _parseHapticIntensity(intensityStr);
+    _barcodeScannerEnabledValue =
+      _prefs.getBool(_barcodeScannerEnabledKey) ?? true;
+    _expiryScannerEnabledValue =
+      _prefs.getBool(_expiryScannerEnabledKey) ?? true;
+    _receiptScannerEnabledValue =
+      _prefs.getBool(_receiptScannerEnabledKey) ?? true;
+    _produceScannerEnabledValue =
+      _prefs.getBool(_produceScannerEnabledKey) ?? true;
   }
 
   HapticIntensity _parseHapticIntensity(String? value) {
@@ -74,8 +102,33 @@ class FeedbackService {
     await _prefs.setString(_hapticIntensityKey, intensity.name);
   }
 
+  Future<void> setScannerEnabled(FeedbackType type, bool enabled) async {
+    switch (type) {
+      case FeedbackType.barcodeSuccess:
+        _barcodeScannerEnabledValue = enabled;
+        await _prefs.setBool(_barcodeScannerEnabledKey, enabled);
+        return;
+      case FeedbackType.expirySuccess:
+        _expiryScannerEnabledValue = enabled;
+        await _prefs.setBool(_expiryScannerEnabledKey, enabled);
+        return;
+      case FeedbackType.receiptSuccess:
+        _receiptScannerEnabledValue = enabled;
+        await _prefs.setBool(_receiptScannerEnabledKey, enabled);
+        return;
+      case FeedbackType.produceSuccess:
+        _produceScannerEnabledValue = enabled;
+        await _prefs.setBool(_produceScannerEnabledKey, enabled);
+        return;
+    }
+  }
+
   /// Trigger feedback for an OCR success event
   Future<void> triggerOcrSuccess(FeedbackType type) async {
+    if (!scannerEnabled(type)) {
+      return;
+    }
+
     final feedbackPattern = _feedbackPatternFor(type);
 
     if (_hapticEnabledValue) {
