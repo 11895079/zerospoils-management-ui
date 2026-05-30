@@ -52,6 +52,11 @@ void main() {
         expect(result.classification, FreshProduceClassification.fishSeafood);
         expect(result.suggestedCategory, ItemCategory.meat);
         expect(result.extractedFieldCount, greaterThanOrEqualTo(5));
+        expect(result.productDescriptionConfidence, OcrFieldConfidence.high);
+        expect(result.netWeightConfidence, OcrFieldConfidence.high);
+        expect(result.totalPriceConfidence, OcrFieldConfidence.high);
+        expect(result.bestBeforeDateConfidence, OcrFieldConfidence.high);
+        expect(result.classificationConfidence, OcrFieldConfidence.high);
       },
     );
 
@@ -82,6 +87,7 @@ void main() {
 
         expect(result.extractedFieldCount, lessThan(2));
         expect(result.shouldFallbackToGenericOcr, isTrue);
+        expect(result.classificationConfidence, OcrFieldConfidence.low);
       },
     );
 

@@ -17,6 +17,7 @@ import '../../domain/models/item_model.dart';
 import '../../domain/utils/expiry_date_parser.dart';
 import '../../domain/utils/fresh_produce_ocr_parser.dart';
 import '../di/repository_providers.dart';
+import '../di/service_locator.dart' show telemetryClientProvider;
 
 /// Result returned when the fast-add flow completes or is cancelled.
 class PackagedItemFastAddResult {
@@ -117,6 +118,7 @@ class _PackagedItemFastAddScreenState
 
   // Expiry state
   ExpiryDateParseResult? _lockedExpiry;
+  FreshProduceOcrParseResult? _freshProduceParseResult;
 
   // Confirmation form state
   late TextEditingController _nameController;
@@ -262,6 +264,7 @@ class _PackagedItemFastAddScreenState
     }
 
     setState(() {
+      _freshProduceParseResult = parsed;
       _detectedPurchasePrice = parsed.totalPrice;
       _detectedWeightValue = parsed.netWeightValue;
       _detectedWeightUnit = parsed.netWeightUnit;
@@ -276,6 +279,25 @@ class _PackagedItemFastAddScreenState
           format: 'PACKAGE_LABEL',
         );
       }
+    });
+
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'fresh_produce_label_parsed',
+      'properties': {
+        'classification': parsed.classification.name,
+        'is_likely_fresh_produce': parsed.isLikelyFreshProduce,
+        'extracted_field_count': parsed.extractedFieldCount,
+        'has_product_description': parsed.productDescription != null,
+        'has_weight':
+            parsed.netWeightValue != null && parsed.netWeightUnit != null,
+        'has_price_per_weight': parsed.pricePerWeight != null,
+        'has_total_price': parsed.totalPrice != null,
+        'has_pack_date': parsed.packDate != null,
+        'has_best_before_date': parsed.bestBeforeDate != null,
+        'classification_confidence': _confidenceLabel(
+          parsed.classificationConfidence,
+        ),
+      },
     });
 
     if (parsed.shouldFallbackToGenericOcr) {
@@ -304,6 +326,7 @@ class _PackagedItemFastAddScreenState
     setState(() {
       _rawBarcode = null;
       _suggestion = null;
+      _freshProduceParseResult = null;
       _stage = _FastAddStage.barcodeScanning;
     });
   }
@@ -356,6 +379,30 @@ class _PackagedItemFastAddScreenState
         name: name,
         category: _selectedCategory,
       );
+    }
+
+    final freshProduceResult = _freshProduceParseResult;
+    if (freshProduceResult != null) {
+      ref.read(telemetryClientProvider).enqueue({
+        'name': 'fresh_produce_fast_add_saved',
+        'properties': {
+          'classification': freshProduceResult.classification.name,
+          'suggested_category': freshProduceResult.suggestedCategory.name,
+          'selected_category': _selectedCategory.name,
+          'name_overridden':
+              freshProduceResult.productDescription != null &&
+              freshProduceResult.productDescription!.toLowerCase() !=
+                  name.toLowerCase(),
+          'has_barcode': barcode != null,
+          'has_expiry': _lockedExpiry != null,
+          'detected_total_price': freshProduceResult.totalPrice,
+          'detected_weight_value': freshProduceResult.netWeightValue,
+          'detected_weight_unit': freshProduceResult.netWeightUnit?.name,
+          'classification_confidence': _confidenceLabel(
+            freshProduceResult.classificationConfidence,
+          ),
+        },
+      });
     }
 
     if (!mounted) {
@@ -954,6 +1001,10 @@ class _PackagedItemFastAddScreenState
             ),
             const SizedBox(height: AppSpacing.md),
             _buildCategoryDropdown(theme),
+            if (_freshProduceParseResult != null) ...[
+              const SizedBox(height: AppSpacing.md),
+              _buildFreshProduceConfidenceSection(theme),
+            ],
             const SizedBox(height: AppSpacing.md),
             if (expiry != null)
               Container(
@@ -1040,5 +1091,125 @@ class _PackagedItemFastAddScreenState
         }
       },
     );
+  }
+
+  Widget _buildFreshProduceConfidenceSection(ThemeData theme) {
+    final result = _freshProduceParseResult;
+    if (result == null) {
+      return const SizedBox.shrink();
+    }
+
+    final rows = <Widget>[
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_product_name'),
+        label: 'Product name',
+        confidence: result.productDescriptionConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_weight'),
+        label: 'Weight',
+        confidence: result.netWeightConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_total_price'),
+        label: 'Total price',
+        confidence: result.totalPriceConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_price_per_weight'),
+        label: 'Price per weight',
+        confidence: result.pricePerWeightConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_pack_date'),
+        label: 'Pack date',
+        confidence: result.packDateConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_best_before'),
+        label: 'Best-before date',
+        confidence: result.bestBeforeDateConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_classification'),
+        label: 'Classification',
+        confidence: result.classificationConfidence,
+      ),
+    ];
+
+    return Container(
+      key: const Key('fast_add_confirm_confidence_section'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Fresh Produce OCR Confidence',
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          ...rows,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConfidenceRow({
+    required Key key,
+    required String label,
+    required OcrFieldConfidence? confidence,
+  }) {
+    final text = confidence == null
+        ? 'Not detected'
+        : _confidenceLabel(confidence);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        key: key,
+        children: [
+          Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _confidenceColor(confidence),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Text(
+              text,
+              style: AppTextStyles.caption.copyWith(color: Colors.black),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _confidenceColor(OcrFieldConfidence? confidence) {
+    switch (confidence) {
+      case OcrFieldConfidence.high:
+        return const Color(0xFF9CCC65);
+      case OcrFieldConfidence.medium:
+        return const Color(0xFFFFD54F);
+      case OcrFieldConfidence.low:
+        return const Color(0xFFB0BEC5);
+      case null:
+        return const Color(0xFFE0E0E0);
+    }
+  }
+
+  String _confidenceLabel(OcrFieldConfidence confidence) {
+    switch (confidence) {
+      case OcrFieldConfidence.high:
+        return 'High';
+      case OcrFieldConfidence.medium:
+        return 'Medium';
+      case OcrFieldConfidence.low:
+        return 'Low';
+    }
   }
 }

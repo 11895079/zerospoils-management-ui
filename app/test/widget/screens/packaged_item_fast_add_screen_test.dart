@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/packaged_item_fast_add_screen.dart';
 import 'package:zerospoils/presentation/themes/app_theme.dart';
 
@@ -368,6 +369,9 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        await tester.ensureVisible(
+          find.byKey(const Key('fast_add_save_button')),
+        );
         await tester.tap(find.byKey(const Key('fast_add_save_button')));
         await tester.pumpAndSettle();
 
@@ -377,5 +381,138 @@ void main() {
         expect(savedResult!.packageWeightValue, closeTo(0.742, 0.0001));
       },
     );
+
+    testWidgets('confirm stage shows per-field confidence indicators', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('fast_add_package_label_button')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('fast_add_package_label_text_field')),
+        'ATLANTIC SALMON FILLET\n'
+        '0.742 KG @ 24.99/KG\n'
+        'TOTAL 18.54\n'
+        'BEST BEFORE 03/31/2028',
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_extract_button')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('fast_add_expiry_locked_continue')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('fast_add_confirm_confidence_section')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('fast_add_confidence_product_name')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('fast_add_confidence_weight')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('fast_add_confidence_total_price')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('fast_add_confidence_best_before')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('emits fresh produce telemetry on extract and save', (
+      tester,
+    ) async {
+      final telemetry = TelemetryClient(consentEnabled: true);
+
+      PackagedItemFastAddResult? savedResult;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [telemetryClientProvider.overrideWithValue(telemetry)],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  key: const Key('open_fast_add_for_telemetry_test'),
+                  onPressed: () async {
+                    savedResult = await Navigator.of(context)
+                        .push<PackagedItemFastAddResult>(
+                          MaterialPageRoute(
+                            builder: (_) => const PackagedItemFastAddScreen(),
+                          ),
+                        );
+                  },
+                  child: const Text('Open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(
+        find.byKey(const Key('open_fast_add_for_telemetry_test')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('fast_add_package_label_button')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('fast_add_package_label_text_field')),
+        'CHICKEN BREAST\n0.501 KG @ 17.99/KG\nTOTAL 9.01\nBEST BEFORE 03/31/2028',
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_extract_button')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('fast_add_expiry_locked_continue')),
+      );
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('fast_add_save_button')));
+      await tester.tap(find.byKey(const Key('fast_add_save_button')));
+      await tester.pumpAndSettle();
+
+      expect(savedResult, isNotNull);
+      expect(
+        telemetry.events.any(
+          (event) => event['name'] == 'fresh_produce_label_parsed',
+        ),
+        isTrue,
+      );
+      expect(
+        telemetry.events.any(
+          (event) => event['name'] == 'fresh_produce_fast_add_saved',
+        ),
+        isTrue,
+      );
+    });
   });
 }
