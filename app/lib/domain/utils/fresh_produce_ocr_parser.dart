@@ -238,17 +238,21 @@ class FreshProduceOcrParser {
     return OcrFieldConfidence.medium;
   }
 
+  // Matches 'bb' or 'exp' only as whole words/abbreviations so that strings
+  // like "BBQ" or "export" don't trigger a high-confidence best-before hit.
+  static final _bbWordRegex = RegExp(r'\bbb\b', caseSensitive: false);
+  static final _expWordRegex = RegExp(r'\bexp\b', caseSensitive: false);
+
   OcrFieldConfidence _bestBeforeConfidence(List<String> lines) {
-    final directLabelHit = lines.any(
-      (line) => _containsAny(line.toLowerCase(), const [
-        'best before',
-        'best by',
-        'use by',
-        'expiry',
-        'exp',
-        'bb',
-      ]),
-    );
+    final directLabelHit = lines.any((line) {
+      final lower = line.toLowerCase();
+      return lower.contains('best before') ||
+          lower.contains('best by') ||
+          lower.contains('use by') ||
+          lower.contains('expiry') ||
+          _bbWordRegex.hasMatch(line) ||
+          _expWordRegex.hasMatch(line);
+    });
     if (directLabelHit) {
       return OcrFieldConfidence.high;
     }

@@ -326,6 +326,7 @@ class _PackagedItemFastAddScreenState
     setState(() {
       _rawBarcode = null;
       _suggestion = null;
+      _freshProduceParseResult = null;
       _stage = _FastAddStage.barcodeScanning;
     });
   }
@@ -1113,6 +1114,16 @@ class _PackagedItemFastAddScreenState
         key: const Key('fast_add_confidence_total_price'),
         label: 'Total price',
         confidence: result.totalPriceConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_price_per_weight'),
+        label: 'Price per weight',
+        confidence: result.pricePerWeightConfidence,
+      ),
+      _buildConfidenceRow(
+        key: const Key('fast_add_confidence_pack_date'),
+        label: 'Pack date',
+        confidence: result.packDateConfidence,
       ),
       _buildConfidenceRow(
         key: const Key('fast_add_confidence_best_before'),
