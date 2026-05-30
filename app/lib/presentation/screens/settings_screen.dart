@@ -58,9 +58,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
-    // Eagerly start the FeedbackService FutureProvider so it is resolved by
-    // the time the user interacts with the Feedback & Sounds toggles.
-    ref.read(feedbackServiceProvider);
+    // Resolve FeedbackService eagerly and sync its in-memory state into the
+    // local UI fields.  This makes the service the single source of truth for
+    // feedback settings and avoids duplicating the prefs key strings that live
+    // inside FeedbackService as private constants.
+    ref.read(feedbackServiceProvider.future).then((svc) {
+      if (!mounted) return;
+      setState(() {
+        _feedbackHapticEnabled = svc.hapticEnabled;
+        _feedbackAudioEnabled = svc.audioEnabled;
+        _feedbackBeepVolume = svc.beepVolume;
+        _feedbackHapticIntensity = svc.hapticIntensity;
+        _feedbackBarcodeEnabled = svc.scannerEnabled(
+          FeedbackType.barcodeSuccess,
+        );
+        _feedbackExpiryEnabled = svc.scannerEnabled(FeedbackType.expirySuccess);
+        _feedbackReceiptEnabled = svc.scannerEnabled(
+          FeedbackType.receiptSuccess,
+        );
+        _feedbackProduceEnabled = svc.scannerEnabled(
+          FeedbackType.produceSuccess,
+        );
+      });
+    });
     try {
       _authStateSubscription = ref
           .read(firebaseAuthServiceProvider)
@@ -96,24 +116,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
       _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
-      _feedbackHapticEnabled = prefs.getBool('feedback_haptic_enabled') ?? true;
-      _feedbackAudioEnabled = prefs.getBool('feedback_audio_enabled') ?? true;
-      _feedbackBeepVolume = prefs.getDouble('feedback_beep_volume') ?? 0.8;
-      _feedbackHapticIntensity = switch (prefs.getString(
-        'feedback_haptic_intensity',
-      )) {
-        'light' => HapticIntensity.light,
-        'heavy' => HapticIntensity.heavy,
-        _ => HapticIntensity.medium,
-      };
-      _feedbackBarcodeEnabled =
-          prefs.getBool('feedback_scanner_barcode_enabled') ?? true;
-      _feedbackExpiryEnabled =
-          prefs.getBool('feedback_scanner_expiry_enabled') ?? true;
-      _feedbackReceiptEnabled =
-          prefs.getBool('feedback_scanner_receipt_enabled') ?? true;
-      _feedbackProduceEnabled =
-          prefs.getBool('feedback_scanner_produce_enabled') ?? true;
+      // Feedback & Sounds initial state is loaded from FeedbackService in
+      // initState (feedbackServiceProvider.future.then) to avoid duplicating
+      // the prefs key strings maintained inside FeedbackService.
       _leadTimeDays =
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
@@ -939,7 +944,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       trailing: SizedBox(
         width: 164,
         child: Slider(
-          value: value.clamp(0.0, 1.0).toDouble(),
+          value: value.clamp(0.0, 1.0),
           onChanged: onChanged,
           onChangeEnd: onChangeEnd,
         ),

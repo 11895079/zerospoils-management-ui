@@ -606,6 +606,89 @@ void main() {
         isTrue,
       );
     });
+
+    testWidgets('Scanner toggle persists and emits telemetry', (
+      WidgetTester tester,
+    ) async {
+      final telemetry = TelemetryClient();
+
+      await tester.pumpWidget(buildTestHarnessWithTelemetry(telemetry));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('feedback_scanner_barcode_toggle')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        switchForKey(const Key('feedback_scanner_barcode_toggle')),
+      );
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('feedback_scanner_barcode_enabled'), false);
+
+      expect(
+        telemetry.events.any(
+          (event) =>
+              event['name'] == 'feedback_scanner_toggle_changed' &&
+              event['properties']['scanner'] == 'barcodeSuccess' &&
+              event['properties']['enabled'] == false,
+        ),
+        isTrue,
+      );
+    });
+
+    testWidgets('Feedback settings are loaded from SharedPreferences on init', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'feedback_haptic_enabled': false,
+        'feedback_audio_enabled': false,
+        'feedback_scanner_barcode_enabled': false,
+      });
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('feedback_haptic_toggle')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Switch>(switchForKey(const Key('feedback_haptic_toggle')))
+            .value,
+        false,
+      );
+      expect(
+        tester
+            .widget<Switch>(switchForKey(const Key('feedback_audio_toggle')))
+            .value,
+        false,
+      );
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('feedback_scanner_barcode_toggle')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<Switch>(
+              switchForKey(const Key('feedback_scanner_barcode_toggle')),
+            )
+            .value,
+        false,
+      );
+    });
   });
 
   group('SettingsScreen - Demo Mode Telemetry & Accessibility', () {
