@@ -536,13 +536,34 @@ void main() {
 
       expect(tileForKey(const Key('feedback_haptic_toggle')), findsOneWidget);
       expect(tileForKey(const Key('feedback_audio_toggle')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_beep_volume_slider')), findsOneWidget);
-      expect(sliderForKey(const Key('feedback_beep_volume_slider')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_haptic_intensity_dropdown')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_scanner_barcode_toggle')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_scanner_expiry_toggle')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_scanner_receipt_toggle')), findsOneWidget);
-      expect(tileForKey(const Key('feedback_scanner_produce_toggle')), findsOneWidget);
+      expect(
+        tileForKey(const Key('feedback_beep_volume_slider')),
+        findsOneWidget,
+      );
+      expect(
+        sliderForKey(const Key('feedback_beep_volume_slider')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('feedback_haptic_intensity_dropdown')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('feedback_scanner_barcode_toggle')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('feedback_scanner_expiry_toggle')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('feedback_scanner_receipt_toggle')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('feedback_scanner_produce_toggle')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('Feedback settings persist and emit telemetry', (

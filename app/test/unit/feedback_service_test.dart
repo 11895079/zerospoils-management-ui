@@ -20,10 +20,22 @@ void main() {
       expect(feedbackService.audioEnabled, isTrue);
       expect(feedbackService.beepVolume, closeTo(0.8, 0.01));
       expect(feedbackService.hapticIntensity, HapticIntensity.medium);
-      expect(feedbackService.scannerEnabled(FeedbackType.barcodeSuccess), isTrue);
-      expect(feedbackService.scannerEnabled(FeedbackType.expirySuccess), isTrue);
-      expect(feedbackService.scannerEnabled(FeedbackType.receiptSuccess), isTrue);
-      expect(feedbackService.scannerEnabled(FeedbackType.produceSuccess), isTrue);
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.barcodeSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.expirySuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.receiptSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.produceSuccess),
+        isTrue,
+      );
     });
 
     test('toggles haptic feedback', () async {
@@ -74,10 +86,22 @@ void main() {
       await feedbackService.setAudioEnabled(false);
       await feedbackService.setBeepVolume(0.3);
       await feedbackService.setHapticIntensity(HapticIntensity.light);
-      await feedbackService.setScannerEnabled(FeedbackType.barcodeSuccess, false);
-      await feedbackService.setScannerEnabled(FeedbackType.expirySuccess, false);
-      await feedbackService.setScannerEnabled(FeedbackType.receiptSuccess, false);
-      await feedbackService.setScannerEnabled(FeedbackType.produceSuccess, false);
+      await feedbackService.setScannerEnabled(
+        FeedbackType.barcodeSuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.expirySuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.receiptSuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.produceSuccess,
+        false,
+      );
 
       // Create new instance and verify persistence
       final newService = FeedbackService();
@@ -93,12 +117,18 @@ void main() {
       expect(newService.scannerEnabled(FeedbackType.produceSuccess), isFalse);
     });
 
-    test('scanner toggle suppresses success feedback for that scanner', () async {
-      await feedbackService.setScannerEnabled(FeedbackType.produceSuccess, false);
+    test(
+      'scanner toggle suppresses success feedback for that scanner',
+      () async {
+        await feedbackService.setScannerEnabled(
+          FeedbackType.produceSuccess,
+          false,
+        );
 
-      await feedbackService.triggerOcrSuccess(FeedbackType.produceSuccess);
-      await feedbackService.triggerOcrSuccess(FeedbackType.receiptSuccess);
-    });
+        await feedbackService.triggerOcrSuccess(FeedbackType.produceSuccess);
+        await feedbackService.triggerOcrSuccess(FeedbackType.receiptSuccess);
+      },
+    );
 
     test('triggers OCR success feedback without errors', () async {
       // Should not throw, even on devices without haptic support

@@ -61,13 +61,13 @@ class FeedbackService {
     final intensityStr = _prefs.getString(_hapticIntensityKey);
     _hapticIntensityValue = _parseHapticIntensity(intensityStr);
     _barcodeScannerEnabledValue =
-      _prefs.getBool(_barcodeScannerEnabledKey) ?? true;
+        _prefs.getBool(_barcodeScannerEnabledKey) ?? true;
     _expiryScannerEnabledValue =
-      _prefs.getBool(_expiryScannerEnabledKey) ?? true;
+        _prefs.getBool(_expiryScannerEnabledKey) ?? true;
     _receiptScannerEnabledValue =
-      _prefs.getBool(_receiptScannerEnabledKey) ?? true;
+        _prefs.getBool(_receiptScannerEnabledKey) ?? true;
     _produceScannerEnabledValue =
-      _prefs.getBool(_produceScannerEnabledKey) ?? true;
+        _prefs.getBool(_produceScannerEnabledKey) ?? true;
   }
 
   HapticIntensity _parseHapticIntensity(String? value) {

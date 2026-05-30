@@ -92,13 +92,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
       _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
-      _feedbackHapticEnabled =
-          prefs.getBool('feedback_haptic_enabled') ?? true;
+      _feedbackHapticEnabled = prefs.getBool('feedback_haptic_enabled') ?? true;
       _feedbackAudioEnabled = prefs.getBool('feedback_audio_enabled') ?? true;
       _feedbackBeepVolume = prefs.getDouble('feedback_beep_volume') ?? 0.8;
-      _feedbackHapticIntensity = switch (
-        prefs.getString('feedback_haptic_intensity')
-      ) {
+      _feedbackHapticIntensity = switch (prefs.getString(
+        'feedback_haptic_intensity',
+      )) {
         'light' => HapticIntensity.light,
         'heavy' => HapticIntensity.heavy,
         _ => HapticIntensity.medium,
@@ -538,10 +537,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
-                  properties: {
-                    'scanner': 'barcodeSuccess',
-                    'enabled': value,
-                  },
+                  properties: {'scanner': 'barcodeSuccess', 'enabled': value},
                 ),
               ),
             ),
@@ -558,10 +554,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
-                  properties: {
-                    'scanner': 'expirySuccess',
-                    'enabled': value,
-                  },
+                  properties: {'scanner': 'expirySuccess', 'enabled': value},
                 ),
               ),
             ),
@@ -578,10 +571,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
-                  properties: {
-                    'scanner': 'receiptSuccess',
-                    'enabled': value,
-                  },
+                  properties: {'scanner': 'receiptSuccess', 'enabled': value},
                 ),
               ),
             ),
@@ -598,10 +588,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
-                  properties: {
-                    'scanner': 'produceSuccess',
-                    'enabled': value,
-                  },
+                  properties: {'scanner': 'produceSuccess', 'enabled': value},
                 ),
               ),
             ),
