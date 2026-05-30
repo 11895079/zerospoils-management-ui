@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../domain/models/item_model.dart';
+import '../reference/reference_pack_service.dart';
 
 class BarcodeProductSuggestion {
   const BarcodeProductSuggestion({
@@ -80,8 +82,12 @@ ItemCategory _categoryFromHint(String hint) {
 /// the compiled-in map, so a fresh JSON asset alone can update suggestions OTA.
 class LocalBarcodeCatalog {
   LocalBarcodeCatalog._({
+    required Map<String, BarcodeProductSuggestion> downloaded,
     required Map<String, BarcodeProductSuggestion> overlay,
-  }) : _overlay = overlay;
+  }) : _downloaded = downloaded,
+       _overlay = overlay;
+
+  final Map<String, BarcodeProductSuggestion> _downloaded;
 
   final Map<String, BarcodeProductSuggestion> _overlay;
 
@@ -89,37 +95,32 @@ class LocalBarcodeCatalog {
 
   static Future<LocalBarcodeCatalog> fromAsset([AssetBundle? bundle]) async {
     final b = bundle ?? rootBundle;
+    Map<String, BarcodeProductSuggestion> downloaded = const {};
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final records = ReferencePackService.activeBarcodeCatalogRecords(prefs);
+      downloaded = _recordsToSuggestions(records);
+    } catch (_) {
+      downloaded = const {};
+    }
+
     try {
       final jsonStr = await b.loadString(_assetPath);
       final decoded = jsonDecode(jsonStr);
       if (decoded is! Map<String, dynamic>) {
-        return LocalBarcodeCatalog._(overlay: const {});
+        return LocalBarcodeCatalog._(downloaded: downloaded, overlay: const {});
       }
 
       final records = decoded['records'];
       if (records is! List) {
-        return LocalBarcodeCatalog._(overlay: const {});
+        return LocalBarcodeCatalog._(downloaded: downloaded, overlay: const {});
       }
 
-      final overlay = <String, BarcodeProductSuggestion>{};
-      for (final r in records) {
-        if (r is! Map<String, dynamic>) continue;
-        final barcode = r['barcode'] as String?;
-        final name = r['product_name'] as String?;
-        final normalizedBarcode = barcode == null
-            ? null
-            : normalizeBarcodeValue(barcode);
-        if (normalizedBarcode == null || name == null) continue;
-        final catHint = r['category_hint'] as String? ?? '';
-        overlay[normalizedBarcode] = BarcodeProductSuggestion(
-          name: name,
-          category: _categoryFromHint(catHint),
-          source: r['source'] as String? ?? 'seed_catalog',
-        );
-      }
-      return LocalBarcodeCatalog._(overlay: overlay);
+      final overlay = _recordsToSuggestions(records);
+      return LocalBarcodeCatalog._(downloaded: downloaded, overlay: overlay);
     } catch (_) {
-      return LocalBarcodeCatalog._(overlay: const {});
+      return LocalBarcodeCatalog._(downloaded: downloaded, overlay: const {});
     }
   }
 
@@ -127,8 +128,40 @@ class LocalBarcodeCatalog {
   BarcodeProductSuggestion? lookup(String rawValue) {
     final normalized = normalizeBarcodeValue(rawValue);
     if (normalized == null) return null;
-    // Asset-loaded overlay takes priority; compiled-in map is the fallback.
-    return _overlay[normalized] ?? _seedCatalog[normalized];
+    // Precedence for M3/206:
+    // learned/user-defined (handled by caller) -> downloaded pack -> asset -> seed
+    return _downloaded[normalized] ??
+        _overlay[normalized] ??
+        _seedCatalog[normalized];
+  }
+
+  static Map<String, BarcodeProductSuggestion> _recordsToSuggestions(
+    List<dynamic> records,
+  ) {
+    final result = <String, BarcodeProductSuggestion>{};
+
+    for (final row in records) {
+      if (row is! Map<String, dynamic>) continue;
+
+      final barcode = row['barcode'] as String?;
+      final name = row['product_name'] as String?;
+      final normalizedBarcode = barcode == null
+          ? null
+          : normalizeBarcodeValue(barcode);
+
+      if (normalizedBarcode == null || name == null || name.isEmpty) {
+        continue;
+      }
+
+      final catHint = row['category_hint'] as String? ?? '';
+      result[normalizedBarcode] = BarcodeProductSuggestion(
+        name: name,
+        category: _categoryFromHint(catHint),
+        source: row['source'] as String? ?? 'reference_pack',
+      );
+    }
+
+    return result;
   }
 }
 
