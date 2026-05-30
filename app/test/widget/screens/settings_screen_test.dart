@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/core/reference/reference_pack_fetchers.dart';
 import 'package:zerospoils/core/theme/app_colors.dart';
 import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
@@ -508,6 +509,45 @@ void main() {
         );
       },
     );
+
+    testWidgets('Reference pack diagnostics render version, update, and source', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+        'refpack_barcode_active_version': 'v9',
+        'refpack_barcode_updated_at': '2026-05-30T14:30:00Z',
+        'refpack_barcode_records_json':
+            '{"schema_version":1,"records":[{"barcode":"055000132152","product_name":"Coffee"}]}',
+      });
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byIcon(Icons.dataset_linked),
+        500,
+        scrollable: find.byType(Scrollable),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reference Data Packs'), findsOneWidget);
+      expect(
+        find.textContaining('Active barcode pack: v9 (1 records)'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Last update: 2026-05-30'), findsOneWidget);
+      expect(
+        find.textContaining(
+          'Manifest source: Firebase Remote Config (${ReferencePackRemoteConfigKeys.manifestUrl})',
+        ),
+        findsOneWidget,
+      );
+    });
   });
 
   group('SettingsScreen - Demo Mode Telemetry & Accessibility', () {
