@@ -12,6 +12,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/feedback/feedback_service.dart';
+import '../../core/feedback/feedback_providers.dart';
 import '../../core/notifications/notification_preferences.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
@@ -57,6 +58,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    // Eagerly start the FeedbackService FutureProvider so it is resolved by
+    // the time the user interacts with the Feedback & Sounds toggles.
+    ref.read(feedbackServiceProvider);
     try {
       _authStateSubscription = ref
           .read(firebaseAuthServiceProvider)
@@ -457,16 +461,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Haptic Feedback',
               subtitle: 'Enable vibration on user interactions',
               value: _feedbackHapticEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_haptic_enabled',
-                value: value,
-                onUpdate: () => _feedbackHapticEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setHapticEnabled(value));
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_haptic_toggle_changed',
                   properties: {'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackHapticEnabled = value);
+              },
             ),
             _buildToggleTile(
               key: const Key('feedback_audio_toggle'),
@@ -474,16 +478,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Audio Feedback',
               subtitle: 'Enable sound effects on interactions',
               value: _feedbackAudioEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_audio_enabled',
-                value: value,
-                onUpdate: () => _feedbackAudioEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setAudioEnabled(value));
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_audio_toggle_changed',
                   properties: {'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackAudioEnabled = value);
+              },
             ),
             _buildSliderTile(
               key: const Key('feedback_beep_volume_slider'),
@@ -491,16 +495,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Beep Volume',
               subtitle: 'Adjust POS-style beep volume (0-100%)',
               value: _feedbackBeepVolume,
-              onChanged: (value) => _setDouble(
-                key: 'feedback_beep_volume',
-                value: value,
-                onUpdate: () => _feedbackBeepVolume = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              // Update local state on every tick for smooth UI; persist only
+              // when the drag ends to avoid dozens of disk writes per second.
+              onChanged: (value) {
+                if (mounted) setState(() => _feedbackBeepVolume = value);
+              },
+              onChangeEnd: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setBeepVolume(value));
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_beep_volume_changed',
                   properties: {'volume': value},
-                ),
-              ),
+                );
+              },
             ),
             _buildDropdownTile<HapticIntensity>(
               key: const Key('feedback_haptic_intensity_dropdown'),
@@ -513,16 +521,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 HapticIntensity.medium => 'Medium',
                 HapticIntensity.heavy => 'Heavy',
               },
-              onChanged: (value) => _setString(
-                key: 'feedback_haptic_intensity',
-                value: value.name,
-                onUpdate: () => _feedbackHapticIntensity = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setHapticIntensity(value));
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_haptic_intensity_changed',
                   properties: {'intensity': value.name},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackHapticIntensity = value);
+              },
             ),
             _buildToggleTile(
               key: const Key('feedback_scanner_barcode_toggle'),
@@ -530,16 +538,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Barcode Scan Success',
               subtitle: 'Vibrate and beep when barcode is recognized',
               value: _feedbackBarcodeEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_scanner_barcode_enabled',
-                value: value,
-                onUpdate: () => _feedbackBarcodeEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.barcodeSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
                   properties: {'scanner': 'barcodeSuccess', 'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackBarcodeEnabled = value);
+              },
             ),
             _buildToggleTile(
               key: const Key('feedback_scanner_expiry_toggle'),
@@ -547,16 +559,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Expiry Date Recognition',
               subtitle: 'Vibrate and beep when expiry date is captured',
               value: _feedbackExpiryEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_scanner_expiry_enabled',
-                value: value,
-                onUpdate: () => _feedbackExpiryEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.expirySuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
                   properties: {'scanner': 'expirySuccess', 'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackExpiryEnabled = value);
+              },
             ),
             _buildToggleTile(
               key: const Key('feedback_scanner_receipt_toggle'),
@@ -564,16 +580,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Receipt Recognition',
               subtitle: 'Vibrate and beep when receipt items are extracted',
               value: _feedbackReceiptEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_scanner_receipt_enabled',
-                value: value,
-                onUpdate: () => _feedbackReceiptEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.receiptSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
                   properties: {'scanner': 'receiptSuccess', 'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackReceiptEnabled = value);
+              },
             ),
             _buildToggleTile(
               key: const Key('feedback_scanner_produce_toggle'),
@@ -581,16 +601,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Produce Label Recognition',
               subtitle: 'Vibrate and beep when produce sticker is read',
               value: _feedbackProduceEnabled,
-              onChanged: (value) => _setBool(
-                key: 'feedback_scanner_produce_enabled',
-                value: value,
-                onUpdate: () => _feedbackProduceEnabled = value,
-                onChange: () => _trackFeedbackPreferenceChange(
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.produceSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
                   ref,
                   name: 'feedback_scanner_toggle_changed',
                   properties: {'scanner': 'produceSuccess', 'enabled': value},
-                ),
-              ),
+                );
+                if (mounted) setState(() => _feedbackProduceEnabled = value);
+              },
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
@@ -900,6 +924,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     String? subtitle,
     required double value,
     required ValueChanged<double> onChanged,
+    ValueChanged<double>? onChangeEnd,
   }) {
     final theme = Theme.of(context);
 
@@ -916,6 +941,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Slider(
           value: value.clamp(0.0, 1.0).toDouble(),
           onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
         ),
       ),
     );
@@ -966,19 +992,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(key, value);
-    onChange?.call();
-    if (!mounted) return;
-    setState(onUpdate);
-  }
-
-  Future<void> _setDouble({
-    required String key,
-    required double value,
-    required VoidCallback onUpdate,
-    VoidCallback? onChange,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(key, value);
     onChange?.call();
     if (!mounted) return;
     setState(onUpdate);

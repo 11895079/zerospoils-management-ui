@@ -117,18 +117,37 @@ void main() {
       expect(newService.scannerEnabled(FeedbackType.produceSuccess), isFalse);
     });
 
-    test(
-      'scanner toggle suppresses success feedback for that scanner',
-      () async {
-        await feedbackService.setScannerEnabled(
-          FeedbackType.produceSuccess,
-          false,
-        );
+    test('scanner toggle disables feedback for that scanner only', () async {
+      await feedbackService.setScannerEnabled(
+        FeedbackType.produceSuccess,
+        false,
+      );
 
-        await feedbackService.triggerOcrSuccess(FeedbackType.produceSuccess);
-        await feedbackService.triggerOcrSuccess(FeedbackType.receiptSuccess);
-      },
-    );
+      // Disabled scanner is reported as such.
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.produceSuccess),
+        isFalse,
+      );
+      // Other scanner types remain unaffected.
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.receiptSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.barcodeSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.expirySuccess),
+        isTrue,
+      );
+
+      // Triggering still completes without error (dispatch is skipped
+      // internally; verifying the absence of platform calls would require
+      // injecting a platform-channel mock, which is out of scope here).
+      await feedbackService.triggerOcrSuccess(FeedbackType.produceSuccess);
+      await feedbackService.triggerOcrSuccess(FeedbackType.receiptSuccess);
+    });
 
     test('triggers OCR success feedback without errors', () async {
       // Should not throw, even on devices without haptic support
