@@ -100,7 +100,10 @@ class LocalBarcodeCatalog {
     try {
       final prefs = await SharedPreferences.getInstance();
       final records = ReferencePackService.activeBarcodeCatalogRecords(prefs);
-      downloaded = _recordsToSuggestions(records);
+      downloaded = _recordsToSuggestions(
+        records,
+        defaultSource: 'reference_pack',
+      );
     } catch (_) {
       downloaded = const {};
     }
@@ -117,7 +120,10 @@ class LocalBarcodeCatalog {
         return LocalBarcodeCatalog._(downloaded: downloaded, overlay: const {});
       }
 
-      final overlay = _recordsToSuggestions(records);
+      final overlay = _recordsToSuggestions(
+        records,
+        defaultSource: 'seed_catalog',
+      );
       return LocalBarcodeCatalog._(downloaded: downloaded, overlay: overlay);
     } catch (_) {
       return LocalBarcodeCatalog._(downloaded: downloaded, overlay: const {});
@@ -136,8 +142,9 @@ class LocalBarcodeCatalog {
   }
 
   static Map<String, BarcodeProductSuggestion> _recordsToSuggestions(
-    List<dynamic> records,
-  ) {
+    List<dynamic> records, {
+    required String defaultSource,
+  }) {
     final result = <String, BarcodeProductSuggestion>{};
 
     for (final row in records) {
@@ -157,7 +164,7 @@ class LocalBarcodeCatalog {
       result[normalizedBarcode] = BarcodeProductSuggestion(
         name: name,
         category: _categoryFromHint(catHint),
-        source: row['source'] as String? ?? 'reference_pack',
+        source: row['source'] as String? ?? defaultSource,
       );
     }
 

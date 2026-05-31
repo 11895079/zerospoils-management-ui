@@ -91,5 +91,32 @@ void main() {
       expect(suggestion, isNotNull);
       expect(suggestion!.name, 'Asset Coffee');
     });
+
+    test(
+      'uses seed_catalog source when asset record omits source field',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+
+        final bundle = _StringAssetBundle('''
+  {
+    "schema_version": 1,
+    "generated_at": "2026-05-30T00:00:00Z",
+    "records": [
+      {
+        "barcode": "055000132152",
+        "product_name": "Asset Coffee",
+        "category_hint": "pantry"
+      }
+    ]
+  }
+  ''');
+
+        final catalog = await LocalBarcodeCatalog.fromAsset(bundle);
+        final suggestion = catalog.lookup('055000132152');
+
+        expect(suggestion, isNotNull);
+        expect(suggestion?.source, 'seed_catalog');
+      },
+    );
   });
 }
