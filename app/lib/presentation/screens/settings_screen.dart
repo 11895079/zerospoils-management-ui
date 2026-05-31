@@ -11,6 +11,8 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/feedback/feedback_service.dart';
+import '../../core/feedback/feedback_providers.dart';
 import '../../core/notifications/notification_preferences.dart';
 import '../../core/notifications/notification_service.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
@@ -41,6 +43,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _mealPlanningEnabled = false;
   bool _dataSyncEnabled = false;
   bool _analyticsConsent = true;
+  bool _feedbackHapticEnabled = true;
+  bool _feedbackAudioEnabled = true;
+  double _feedbackBeepVolume = 0.8;
+  HapticIntensity _feedbackHapticIntensity = HapticIntensity.medium;
+  bool _feedbackBarcodeEnabled = true;
+  bool _feedbackExpiryEnabled = true;
+  bool _feedbackReceiptEnabled = true;
+  bool _feedbackProduceEnabled = true;
   int _leadTimeDays = 3;
   String _dateFormat = 'MM/DD/YYYY';
 
@@ -48,6 +58,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    // Resolve FeedbackService eagerly and sync its in-memory state into the
+    // local UI fields.  This makes the service the single source of truth for
+    // feedback settings and avoids duplicating the prefs key strings that live
+    // inside FeedbackService as private constants.
+    ref.read(feedbackServiceProvider.future).then((svc) {
+      if (!mounted) return;
+      setState(() {
+        _feedbackHapticEnabled = svc.hapticEnabled;
+        _feedbackAudioEnabled = svc.audioEnabled;
+        _feedbackBeepVolume = svc.beepVolume;
+        _feedbackHapticIntensity = svc.hapticIntensity;
+        _feedbackBarcodeEnabled = svc.scannerEnabled(
+          FeedbackType.barcodeSuccess,
+        );
+        _feedbackExpiryEnabled = svc.scannerEnabled(FeedbackType.expirySuccess);
+        _feedbackReceiptEnabled = svc.scannerEnabled(
+          FeedbackType.receiptSuccess,
+        );
+        _feedbackProduceEnabled = svc.scannerEnabled(
+          FeedbackType.produceSuccess,
+        );
+      });
+    });
     try {
       _authStateSubscription = ref
           .read(firebaseAuthServiceProvider)
@@ -83,6 +116,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
       _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
+      // Feedback & Sounds initial state is loaded from FeedbackService in
+      // initState (feedbackServiceProvider.future.then) to avoid duplicating
+      // the prefs key strings maintained inside FeedbackService.
       _leadTimeDays =
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
@@ -422,6 +458,171 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
+          _buildSectionHeader('FEEDBACK & SOUNDS'),
+          _buildCard([
+            _buildToggleTile(
+              key: const Key('feedback_haptic_toggle'),
+              icon: Icons.vibration,
+              label: 'Haptic Feedback',
+              subtitle: 'Enable vibration on user interactions',
+              value: _feedbackHapticEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setHapticEnabled(value));
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_haptic_toggle_changed',
+                  properties: {'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackHapticEnabled = value);
+              },
+            ),
+            _buildToggleTile(
+              key: const Key('feedback_audio_toggle'),
+              icon: Icons.volume_up,
+              label: 'Audio Feedback',
+              subtitle: 'Enable sound effects on interactions',
+              value: _feedbackAudioEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setAudioEnabled(value));
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_audio_toggle_changed',
+                  properties: {'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackAudioEnabled = value);
+              },
+            ),
+            _buildSliderTile(
+              key: const Key('feedback_beep_volume_slider'),
+              icon: Icons.graphic_eq,
+              label: 'Beep Volume',
+              subtitle: 'Adjust POS-style beep volume (0-100%)',
+              value: _feedbackBeepVolume,
+              // Update local state on every tick for smooth UI; persist only
+              // when the drag ends to avoid dozens of disk writes per second.
+              onChanged: (value) {
+                if (mounted) setState(() => _feedbackBeepVolume = value);
+              },
+              onChangeEnd: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setBeepVolume(value));
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_beep_volume_changed',
+                  properties: {'volume': value},
+                );
+              },
+            ),
+            _buildDropdownTile<HapticIntensity>(
+              key: const Key('feedback_haptic_intensity_dropdown'),
+              icon: Icons.flash_on,
+              label: 'Haptic Intensity',
+              value: _feedbackHapticIntensity,
+              items: HapticIntensity.values,
+              itemLabel: (value) => switch (value) {
+                HapticIntensity.light => 'Light',
+                HapticIntensity.medium => 'Medium',
+                HapticIntensity.heavy => 'Heavy',
+              },
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) unawaited(svc.setHapticIntensity(value));
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_haptic_intensity_changed',
+                  properties: {'intensity': value.name},
+                );
+                if (mounted) setState(() => _feedbackHapticIntensity = value);
+              },
+            ),
+            _buildToggleTile(
+              key: const Key('feedback_scanner_barcode_toggle'),
+              icon: Icons.qr_code_scanner,
+              label: 'Barcode Scan Success',
+              subtitle: 'Vibrate and beep when barcode is recognized',
+              value: _feedbackBarcodeEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.barcodeSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_scanner_toggle_changed',
+                  properties: {'scanner': 'barcodeSuccess', 'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackBarcodeEnabled = value);
+              },
+            ),
+            _buildToggleTile(
+              key: const Key('feedback_scanner_expiry_toggle'),
+              icon: Icons.event,
+              label: 'Expiry Date Recognition',
+              subtitle: 'Vibrate and beep when expiry date is captured',
+              value: _feedbackExpiryEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.expirySuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_scanner_toggle_changed',
+                  properties: {'scanner': 'expirySuccess', 'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackExpiryEnabled = value);
+              },
+            ),
+            _buildToggleTile(
+              key: const Key('feedback_scanner_receipt_toggle'),
+              icon: Icons.receipt_long,
+              label: 'Receipt Recognition',
+              subtitle: 'Vibrate and beep when receipt items are extracted',
+              value: _feedbackReceiptEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.receiptSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_scanner_toggle_changed',
+                  properties: {'scanner': 'receiptSuccess', 'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackReceiptEnabled = value);
+              },
+            ),
+            _buildToggleTile(
+              key: const Key('feedback_scanner_produce_toggle'),
+              icon: Icons.local_grocery_store,
+              label: 'Produce Label Recognition',
+              subtitle: 'Vibrate and beep when produce sticker is read',
+              value: _feedbackProduceEnabled,
+              onChanged: (value) {
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(
+                    svc.setScannerEnabled(FeedbackType.produceSuccess, value),
+                  );
+                }
+                _trackFeedbackPreferenceChange(
+                  ref,
+                  name: 'feedback_scanner_toggle_changed',
+                  properties: {'scanner': 'produceSuccess', 'enabled': value},
+                );
+                if (mounted) setState(() => _feedbackProduceEnabled = value);
+              },
+            ),
+          ]),
+          const SizedBox(height: AppSpacing.xl),
           _buildSectionHeader('NOTIFICATIONS & ALERTS'),
           _buildCard([
             _buildToggleTile(
@@ -645,6 +846,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildToggleTile({
+    Key? key,
     required IconData icon,
     required String label,
     String? subtitle,
@@ -658,6 +860,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       enabled: onChanged != null,
       onTap: onChanged != null ? () => onChanged(!value) : null,
       child: ListTile(
+        key: key,
         contentPadding: EdgeInsets.zero,
         leading: Icon(icon, color: theme.colorScheme.onSurface),
         title: Text(label, style: theme.textTheme.bodyMedium),
@@ -684,6 +887,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildDropdownTile<T>({
+    Key? key,
     required IconData icon,
     required String label,
     required T value,
@@ -694,6 +898,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final theme = Theme.of(context);
 
     return ListTile(
+      key: key,
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: theme.colorScheme.onSurface),
       title: Text(label, style: theme.textTheme.bodyMedium),
@@ -713,6 +918,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         onChanged: (val) {
           if (val != null) onChanged(val);
         },
+      ),
+    );
+  }
+
+  Widget _buildSliderTile({
+    Key? key,
+    required IconData icon,
+    required String label,
+    String? subtitle,
+    required double value,
+    required ValueChanged<double> onChanged,
+    ValueChanged<double>? onChangeEnd,
+  }) {
+    final theme = Theme.of(context);
+
+    return ListTile(
+      key: key,
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: theme.textTheme.bodyMedium),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle, style: theme.textTheme.bodySmall),
+      trailing: SizedBox(
+        width: 164,
+        child: Slider(
+          value: value.clamp(0.0, 1.0),
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
+        ),
       ),
     );
   }
@@ -771,9 +1006,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String key,
     required String value,
     required VoidCallback onUpdate,
+    VoidCallback? onChange,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, value);
+    onChange?.call();
     if (!mounted) return;
     setState(onUpdate);
   }
@@ -1025,6 +1262,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       'name': 'theme_changed',
       'properties': {'theme': darkModeEnabled ? 'dark' : 'light'},
     });
+  }
+
+  void _trackFeedbackPreferenceChange(
+    WidgetRef ref, {
+    required String name,
+    required Map<String, dynamic> properties,
+  }) {
+    final telemetry = ref.read(telemetryClientProvider);
+    telemetry.enqueue({'name': name, 'properties': properties});
   }
 }
 
