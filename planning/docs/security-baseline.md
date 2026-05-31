@@ -123,6 +123,20 @@ Create checklist with verification steps for each security domain:
 - [ ] External security audit (M5, optional for Pro tier)
 - [ ] Anomaly detection & monitoring (M5)
 
+### M3/206 Reference Pack Delivery Hardening (Firebase Storage + Remote Config)
+- [x] Firebase Storage initialized for project `zerospoils-23dae`.
+- [x] Reference pack artifacts hosted in Firebase project storage and reachable via HTTPS.
+- [x] Remote Config parameter `reference_pack_manifest_url` published and pointing to active manifest.
+- [ ] Add Storage object lifecycle rule for stale pack versions (retain N latest versions per pack type/region).
+- [ ] Add release checklist gate: verify manifest and pack URLs return HTTP 200 before publishing Remote Config changes.
+- [ ] Add telemetry dashboard tile/alert for `reference_pack_activation_failed` and `reference_pack_activation_rolled_back` spikes.
+- [ ] Track reference pack download volume anomalies (abuse/egress monitoring).
+- [ ] Introduce staged App Check enforcement for reference-pack delivery:
+	- Phase 0 (current): public read URLs for manifest + pack artifacts with immutable versioned object paths.
+	- Phase 1: monitor App Check metrics and download anomalies; no hard enforcement on pack reads.
+	- Phase 2: move distribution behind an App Check-aware fetch path (Storage SDK or server-issued signed URLs).
+	- Phase 3: enforce App Check for protected delivery path and remove direct public read for manifest/pack objects.
+
 ### Open Gaps
 - Receipt image lifecycle/retention policy (30-day max for Pro tier, currently undefined)
 - Webhook signature verification (deferred to M5 when IoT integrations planned)
