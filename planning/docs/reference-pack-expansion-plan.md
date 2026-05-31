@@ -9,7 +9,7 @@ This plan covers:
 - Categories
 - Locations
 - Generic reference lists
-- Consent-based unknown-value feedback from users
+- Consent-based unknown-value telemetry capture from users
 
 Out of scope:
 - Full cloud sync of user data
@@ -44,17 +44,16 @@ Principles:
 ## Unknown-Value Bubble-Up Flow
 When a user enters a value that the app cannot resolve locally:
 1. App shows the normal unknown-value fallback UI.
-2. App asks for explicit opt-in to submit the value for catalog improvement.
-3. If the user consents, the app submits a minimal suggestion payload.
-4. Backend stores the suggestion separately from the authoritative pack.
+2. If anonymous data collection is enabled, app emits a minimal telemetry event for the unknown value.
+3. Backend telemetry store captures unknown-value events separately from authoritative packs.
 5. Data ops review, normalize, dedupe, and promote accepted values into the next pack release.
 6. The updated pack is published and becomes available to all users on next sync.
 
 ### Consent Rules
-- Consent must be explicit and revocable.
-- Submission is opt-in only; default is no upload.
-- Payload must avoid PII unless the user explicitly provides it and it is needed for follow-up.
-- Unknown-value submissions are for product catalog improvement, not for telemetry.
+- Unknown-value capture is tied to the existing anonymous data collection consent toggle.
+- If anonymous data collection is disabled, no unknown-value telemetry is emitted.
+- Payload must avoid PII and contain only catalog-improvement fields.
+- Unknown-value telemetry is for product catalog improvement, not user profiling.
 
 ### Suggested Minimal Payload
 - `value`
@@ -63,12 +62,11 @@ When a user enters a value that the app cannot resolve locally:
 - `context` (screen or workflow name)
 - `app_version`
 - `locale`
-- `consent_granted` (`true`)
-- optional `user_comment`
+- `analytics_consent` (`true`)
 
 ## Backend Workflow
 Recommended backend flow:
-- Store consented unknown-value submissions in a separate review collection or queue.
+- Store consented unknown-value telemetry in an exportable review dataset.
 - Add moderation / curation tooling to approve, reject, or merge suggestions.
 - Convert accepted entries into the canonical reference-data source of truth.
 - Regenerate the affected pack and manifest entry.
@@ -83,11 +81,10 @@ Because the project is already using Firebase for manifest discovery:
 
 ## Security and Privacy Controls
 - Enforce user consent before any upload.
-- Strip PII from suggestion payloads by default.
-- Apply rate limiting for suggestion submission.
-- Require auth for submission if the payload can be tied to a user account.
+- Strip PII from unknown-value telemetry payloads by default.
+- Apply rate limiting and dedupe on ingestion/export processing.
 - Keep moderation and promotion outside the client app.
-- Log upload and promotion events for auditability.
+- Log extraction, curation, and promotion events for auditability.
 
 ## Rollout Phases
 ### Phase 1: Categories and Locations Packs
@@ -97,10 +94,10 @@ Because the project is already using Firebase for manifest discovery:
 - Add tests for precedence and offline fallback.
 
 ### Phase 2: Consent-Based Unknown-Value Suggestions
-- Add a suggestion submission endpoint or Firestore queue.
-- Add user consent UI in the unknown-value flow.
-- Add moderation workflow for suggested values.
-- Track promotion rate from suggestions into packs.
+- Add unknown-value telemetry events in inventory/category/location edit and add flows.
+- Gate event emission on anonymous analytics consent.
+- Add extraction workflow to review unknown values from telemetry exports.
+- Track promotion rate from unknown-value telemetry into packs.
 
 ### Phase 3: Pack Promotion Pipeline
 - Automate manifest generation for all pack types.
@@ -114,13 +111,12 @@ Because the project is already using Firebase for manifest discovery:
 - Add admin tooling for curation and rollback.
 
 ## Open Decisions
-- Whether unknown-value submissions should use the existing feedback pipeline or a dedicated collection/endpoint.
 - Whether categories/locations should be curated manually first or bootstrapped from seeded lookup tables.
 - Whether pack promotion should be manual, scheduled, or partially automated.
 
 ## Immediate Next Steps
-1. Define the minimal schema for unknown-value suggestions.
-2. Choose the submission path: reuse feedback storage or create a dedicated collection.
+1. Define unknown-value telemetry event schema and naming for inventory/category/location interactions.
+2. Implement event emission in relevant add/edit flows, gated by anonymous analytics consent.
 3. Add `categories` and `locations` to the manifest generator and pack publishing flow.
-4. Add consent UI and moderation workflow requirements to the relevant issue.
-5. Extend security hardening to cover suggestion intake and privacy controls.
+4. Define manual extraction and curation workflow from telemetry exports.
+5. Extend security hardening to cover telemetry-based unknown-value intake and privacy controls.
