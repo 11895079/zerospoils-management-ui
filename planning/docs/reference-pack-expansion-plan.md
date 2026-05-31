@@ -46,8 +46,8 @@ When a user enters a value that the app cannot resolve locally:
 1. App shows the normal unknown-value fallback UI.
 2. If anonymous data collection is enabled, app emits a minimal telemetry event for the unknown value.
 3. Backend telemetry store captures unknown-value events separately from authoritative packs.
-5. Data ops review, normalize, dedupe, and promote accepted values into the next pack release.
-6. The updated pack is published and becomes available to all users on next sync.
+4. Data ops review, normalize, dedupe, and promote accepted values into the next pack release.
+5. The updated pack is published and becomes available to all users on next sync.
 
 ### Consent Rules
 - Unknown-value capture is tied to the existing anonymous data collection consent toggle.
@@ -63,6 +63,40 @@ When a user enters a value that the app cannot resolve locally:
 - `app_version`
 - `locale`
 - `analytics_consent` (`true`)
+
+## Telemetry Event Contract
+
+Canonical event names:
+- `unknown_category_entered`
+- `unknown_location_entered`
+- `unknown_reference_value_entered`
+
+Emit points:
+- Inventory add/edit flows when category input is not recognized
+- Inventory add/edit flows when location input is not recognized
+- Any future reference-list field where value resolution fails
+
+Required event properties:
+- `value_type`: `category` | `location` | `reference_list` | `other`
+- `value_normalized`: normalized lowercase value with collapsed whitespace
+- `value_hash`: SHA-256 hash of normalized value (for safe aggregation)
+- `context`: `inventory_add` | `inventory_edit` | `quick_add` | `other`
+- `locale`
+- `region`
+- `app_version`
+- `platform`
+- `analytics_consent`: `true`
+
+Optional event properties:
+- `value_raw`: raw input value (only if policy approves and still non-PII)
+- `source_pack_version`: currently active pack version for this value type
+
+Do not include:
+- User identifiers, email, phone, IP address, precise location, free-form notes with potential PII.
+
+Dedup guidance:
+- Client-side: emit once per normalized value per session/context.
+- Backend-side: aggregate by `value_hash + value_type + region + locale`.
 
 ## Backend Workflow
 Recommended backend flow:
@@ -98,6 +132,14 @@ Because the project is already using Firebase for manifest discovery:
 - Gate event emission on anonymous analytics consent.
 - Add extraction workflow to review unknown values from telemetry exports.
 - Track promotion rate from unknown-value telemetry into packs.
+
+### Phase 2a: Implementation Tasks (Telemetry)
+- [ ] Add event emitters in inventory add/edit flows for unknown category and location values.
+- [ ] Add normalization + hashing utility for unknown reference values.
+- [ ] Add consent gate check (`analytics_consent == true`) before emission.
+- [ ] Add unit tests for emitter guardrails (consent off => no event; consent on => event emitted).
+- [ ] Add analytics extraction query templates for top unknown values by region and locale.
+- [ ] Add manual curation SOP: export -> review -> dedupe -> promote -> republish.
 
 ### Phase 3: Pack Promotion Pipeline
 - Automate manifest generation for all pack types.

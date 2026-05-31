@@ -10,6 +10,7 @@ Use this document when answering these product questions:
 - How often do users save an item after using camera assistance?
 - When camera is used, how often are the barcode and expiry values actually trusted and retained?
 - Which camera path is strongest: barcode only, expiry only, or combined?
+- Which unknown category/location values are most common and should be promoted into reference packs?
 
 ## Source of truth
 
@@ -26,7 +27,88 @@ Use scan-attempt events only as secondary diagnostics:
 - `camera_assisted_barcode_scanned`
 - `expiry_date_scanned`
 
+For reference-pack curation, also use unknown-value telemetry events:
+- `unknown_category_entered`
+- `unknown_location_entered`
+- `unknown_reference_value_entered`
+
 Those events answer attempt and failure questions, not accepted-save questions.
+
+## Unknown-Reference Curation Metrics
+
+Use these metrics to prioritize pack updates:
+
+- Top unknown values by region and locale
+- Distinct sessions affected by each unknown value
+- Unknown value recurrence over 7/30 day windows
+- Promotion conversion rate (unknown seen -> later resolved by pack)
+
+Canonical property expectations for unknown events:
+- `value_type`
+- `value_normalized`
+- `value_hash`
+- `context`
+- `region`
+- `locale`
+- `app_version`
+- `platform`
+- `analytics_consent` (must be true)
+
+### Query: Top Unknown Category Values
+
+```sql
+with unknown_values as (
+  select
+    date(timestamp) as event_date,
+    json_value(properties, '$.value_hash') as value_hash,
+    json_value(properties, '$.value_normalized') as value_normalized,
+    json_value(properties, '$.value_type') as value_type,
+    json_value(properties, '$.region') as region,
+    json_value(properties, '$.locale') as locale,
+    session_id
+  from telemetry_events
+  where name in ('unknown_category_entered', 'unknown_reference_value_entered')
+    and cast(json_value(properties, '$.analytics_consent') as boolean) = true
+)
+select
+  region,
+  locale,
+  value_normalized,
+  count(*) as events,
+  count(distinct session_id) as sessions
+from unknown_values
+where value_type = 'category'
+group by region, locale, value_normalized
+order by events desc
+limit 100;
+```
+
+### Query: Top Unknown Location Values
+
+```sql
+with unknown_values as (
+  select
+    json_value(properties, '$.value_normalized') as value_normalized,
+    json_value(properties, '$.value_type') as value_type,
+    json_value(properties, '$.region') as region,
+    json_value(properties, '$.locale') as locale,
+    session_id
+  from telemetry_events
+  where name in ('unknown_location_entered', 'unknown_reference_value_entered')
+    and cast(json_value(properties, '$.analytics_consent') as boolean) = true
+)
+select
+  region,
+  locale,
+  value_normalized,
+  count(*) as events,
+  count(distinct session_id) as sessions
+from unknown_values
+where value_type = 'location'
+group by region, locale, value_normalized
+order by events desc
+limit 100;
+```
 
 ## Canonical fields
 
