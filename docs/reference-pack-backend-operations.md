@@ -42,13 +42,20 @@ Example:
 ## Publish Workflow
 
 ### Canonical Publish Command
-The repo now includes a one-step publisher for the Wave A barcode packs:
+The repo now includes a one-step publisher for Wave A reference packs (barcode catalog, categories, and locations):
 
 ```bash
 node firebase/functions/scripts/publish_reference_packs.js
 ```
 
-That command uploads the versioned pack JSON files to the project Storage bucket, writes the manifest, makes the objects publicly readable, and updates `reference_pack_manifest_url` in Remote Config.
+That command uploads versioned pack JSON files to the project Storage bucket, writes the manifest, makes the objects publicly readable, and updates `reference_pack_manifest_url` in Remote Config.
+
+### GitHub Action Publish Path
+Manual publish is also available via workflow dispatch:
+
+- Workflow: `.github/workflows/publish-reference-packs.yml`
+- Required secret: `FIREBASE_SERVICE_ACCOUNT_JSON`
+- Supports dry-run mode, minimum app version override, barcode version override, and localized pack version override.
 
 ### Inputs
 - New pack JSON file (example: `barcode_catalog_ca.v1.0.0.json`)

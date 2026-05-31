@@ -1,0 +1,93 @@
+name: Publish Reference Packs
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Run publish flow without uploading or updating Remote Config
+        required: false
+        type: boolean
+        default: true
+      minimum_app_version:
+        description: Minimum app version for all published pack descriptors
+        required: false
+        type: string
+        default: 1.0.0
+      barcode_version:
+        description: Optional override for barcode pack version (default uses metadata dataset_version)
+        required: false
+        type: string
+      localized_version:
+        description: Optional override for categories/locations version (expects v<version>.json in locale folders)
+        required: false
+        type: string
+      manifest_object_path:
+        description: Storage object path for the published manifest
+        required: false
+        type: string
+        default: reference-packs/manifests/prod/latest.json
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Firebase Functions dependencies
+        run: npm ci
+        working-directory: firebase/functions
+
+      - name: Materialize Firebase service account key
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "Missing required secret FIREBASE_SERVICE_ACCOUNT_JSON" >&2
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/firebase-service-account.json"
+
+      - name: Publish reference packs to Firebase Storage and Remote Config
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          MIN_APP_VERSION: ${{ inputs.minimum_app_version }}
+          BARCODE_VERSION: ${{ inputs.barcode_version }}
+          LOCALIZED_VERSION: ${{ inputs.localized_version }}
+          MANIFEST_OBJECT_PATH: ${{ inputs.manifest_object_path }}
+          SERVICE_ACCOUNT_PATH: ${{ runner.temp }}/firebase-service-account.json
+        run: |
+          set -euo pipefail
+
+          cmd=(
+            node firebase/functions/scripts/publish_reference_packs.js
+            --service-account-json "$SERVICE_ACCOUNT_PATH"
+            --project-id zerospoils-23dae
+            --bucket zerospoils-23dae.firebasestorage.app
+            --minimum-app-version "$MIN_APP_VERSION"
+            --manifest-object-path "$MANIFEST_OBJECT_PATH"
+            --remote-config-auth service-account
+          )
+
+          if [ -n "$BARCODE_VERSION" ]; then
+            cmd+=(--version "$BARCODE_VERSION")
+          fi
+
+          if [ -n "$LOCALIZED_VERSION" ]; then
+            cmd+=(--localized-version "$LOCALIZED_VERSION")
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            cmd+=(--dry-run)
+          fi
+
+          echo "Running: ${cmd[*]}"
+          "${cmd[@]}"

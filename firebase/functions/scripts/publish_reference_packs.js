@@ -9,6 +9,7 @@ const admin = require('firebase-admin');
 function parseArgs(argv) {
   const args = {
     dryRun: false,
+    remoteConfigAuth: 'firebase-cli',
   };
 
   for (let index = 2; index < argv.length; index += 1) {
@@ -52,6 +53,22 @@ function parseArgs(argv) {
         args.generatedAt = next;
         index += 1;
         break;
+      case '--reference-pack-root':
+        args.referencePackRoot = next;
+        index += 1;
+        break;
+      case '--matrix-config':
+        args.matrixConfig = next;
+        index += 1;
+        break;
+      case '--localized-version':
+        args.localizedVersion = next;
+        index += 1;
+        break;
+      case '--remote-config-auth':
+        args.remoteConfigAuth = next;
+        index += 1;
+        break;
       default:
         throw new Error(`Unknown argument: ${token}`);
     }
@@ -68,23 +85,13 @@ function sha256Hex(data) {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
-function utcNowIso() {
-  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+function normalizePackVersion(fileName) {
+  const parsed = path.parse(fileName).name;
+  return parsed.startsWith('v') ? parsed.slice(1) : parsed;
 }
 
-async function uploadPublicJson(bucket, objectPath, payload) {
-  const file = bucket.file(objectPath);
-  await file.save(Buffer.from(JSON.stringify(payload, null, 2) + '\n', 'utf8'), {
-    resumable: false,
-    metadata: {
-      contentType: 'application/json; charset=utf-8',
-      cacheControl: objectPath.includes('/manifests/')
-        ? 'public, max-age=300, must-revalidate'
-        : 'public, max-age=31536000, immutable',
-    },
-  });
-  await file.makePublic();
-  return file.publicUrl();
+function utcNowIso() {
+  return new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
 function readFirebaseCliAccessToken() {
@@ -139,6 +146,179 @@ async function publishRemoteConfigTemplate(projectId, accessToken, etag, templat
   return response.json();
 }
 
+function ensureFileExists(localPath) {
+  if (!fs.existsSync(localPath)) {
+    throw new Error(`Required pack file not found: ${localPath}`);
+  }
+}
+
+function buildBarcodeDescriptors({ repoRoot, config, bucketName, explicitVersion, minimumAppVersion }) {
+  const descriptors = [];
+  let resolvedVersion = explicitVersion || null;
+
+  for (const source of config.sources || []) {
+    const region = String(source.region).toLowerCase();
+    const localPath = path.resolve(repoRoot, source.output_json);
+    ensureFileExists(localPath);
+
+    const payload = Buffer.from(fs.readFileSync(localPath, 'utf8'), 'utf8');
+    const parsed = JSON.parse(payload.toString('utf8'));
+    const datasetVersion = parsed.metadata && parsed.metadata.dataset_version;
+
+    const version = resolvedVersion || datasetVersion;
+    if (!version) {
+      throw new Error(`Unable to resolve barcode version for ${localPath}`);
+    }
+    if (!resolvedVersion) {
+      resolvedVersion = version;
+    }
+
+    const objectPath = `reference-packs/barcode_catalog/${region}/${version}.json`;
+    descriptors.push({
+      type: 'barcode_catalog',
+      region,
+      locale: null,
+      version,
+      minimum_app_version: minimumAppVersion,
+      checksum: sha256Hex(payload),
+      download_url: `https://storage.googleapis.com/${bucketName}/${objectPath}`,
+      object_path: objectPath,
+      local_path: localPath,
+      payload,
+    });
+  }
+
+  return descriptors;
+}
+
+function pickLocalizedPackFile(dirPath, localizedVersion) {
+  const entries = fs
+    .readdirSync(dirPath)
+    .filter((name) => name.endsWith('.json'))
+    .sort();
+
+  if (!entries.length) {
+    throw new Error(`No JSON pack file found in ${dirPath}`);
+  }
+
+  if (!localizedVersion) {
+    return entries[entries.length - 1];
+  }
+
+  const exact = `v${localizedVersion}.json`;
+  if (entries.includes(exact)) {
+    return exact;
+  }
+
+  throw new Error(`Expected ${exact} in ${dirPath}, found: ${entries.join(', ')}`);
+}
+
+function buildLocalizedDescriptors({ repoRoot, matrix, referencePackRoot, bucketName, localizedVersion, minimumAppVersion }) {
+  const descriptors = [];
+  const localizedTypes = (matrix.pack_types || [])
+    .filter((packType) => packType.locale_scoped)
+    .map((packType) => String(packType.type));
+
+  for (const packType of localizedTypes) {
+    for (const region of matrix.regions || []) {
+      const regionCode = String(region.code).toLowerCase();
+      for (const locale of region.locales || []) {
+        const localeTag = String(locale);
+        const localeDir = path.resolve(repoRoot, referencePackRoot, packType, regionCode, localeTag);
+        if (!fs.existsSync(localeDir)) {
+          throw new Error(`Missing localized pack directory: ${localeDir}`);
+        }
+
+        const packFile = pickLocalizedPackFile(localeDir, localizedVersion);
+        const version = normalizePackVersion(packFile);
+        const localPath = path.join(localeDir, packFile);
+        const payload = Buffer.from(fs.readFileSync(localPath, 'utf8'), 'utf8');
+        JSON.parse(payload.toString('utf8'));
+
+        const objectPath = `reference-packs/${packType}/${regionCode}/${localeTag}/${version}.json`;
+        descriptors.push({
+          type: packType,
+          region: regionCode,
+          locale: localeTag,
+          version,
+          minimum_app_version: minimumAppVersion,
+          checksum: sha256Hex(payload),
+          download_url: `https://storage.googleapis.com/${bucketName}/${objectPath}`,
+          object_path: objectPath,
+          local_path: localPath,
+          payload,
+        });
+      }
+    }
+  }
+
+  return descriptors;
+}
+
+function toManifestDescriptor(descriptor) {
+  const base = {
+    type: descriptor.type,
+    region: descriptor.region,
+    version: descriptor.version,
+    checksum: descriptor.checksum,
+    minimum_app_version: descriptor.minimum_app_version,
+    download_url: descriptor.download_url,
+  };
+  if (descriptor.locale) {
+    base.locale = descriptor.locale;
+  }
+  return base;
+}
+
+async function uploadPackDescriptor(bucket, descriptor, dryRun) {
+  if (dryRun) {
+    console.log(`[dry-run] upload ${descriptor.local_path} -> ${descriptor.object_path}`);
+    return;
+  }
+
+  await bucket.file(descriptor.object_path).save(descriptor.payload, {
+    resumable: false,
+    metadata: {
+      contentType: 'application/json; charset=utf-8',
+      cacheControl: 'public, max-age=31536000, immutable',
+    },
+  });
+  await bucket.file(descriptor.object_path).makePublic();
+  console.log(`Uploaded ${descriptor.object_path}`);
+}
+
+async function publishRemoteConfigWithFirebaseCliToken(projectId, manifestUrl) {
+  const accessToken = readFirebaseCliAccessToken();
+  const { etag, template } = await readRemoteConfigTemplate(projectId, accessToken);
+  const nextTemplate = {
+    ...template,
+    parameters: {
+      ...(template.parameters || {}),
+      reference_pack_manifest_url: {
+        defaultValue: { value: manifestUrl },
+        description: 'Reference pack manifest URL for reference data packs',
+      },
+    },
+  };
+
+  delete nextTemplate.version;
+  delete nextTemplate.etag;
+
+  await publishRemoteConfigTemplate(projectId, accessToken, etag, nextTemplate);
+}
+
+async function publishRemoteConfigWithServiceAccount(projectId, manifestUrl) {
+  const remoteConfig = admin.remoteConfig();
+  const template = await remoteConfig.getTemplate();
+  template.parameters = template.parameters || {};
+  template.parameters.reference_pack_manifest_url = {
+    defaultValue: { value: manifestUrl },
+    description: 'Reference pack manifest URL for reference data packs',
+  };
+  await remoteConfig.validateTemplate(template);
+  await remoteConfig.publishTemplate(template, { force: true });
+}
+
 async function main() {
   const repoRoot = path.resolve(__dirname, '../..', '..');
   const defaults = {
@@ -151,14 +331,20 @@ async function main() {
     projectId: 'zerospoils-23dae',
     manifestObjectPath: 'reference-packs/manifests/prod/latest.json',
     minimumAppVersion: '1.0.0',
+    referencePackRoot: 'app/assets/reference-data/reference-packs',
+    matrixConfig: path.join(repoRoot, 'scripts/reference_pack_wave_a_matrix.json'),
   };
 
   const args = { ...defaults, ...parseArgs(process.argv) };
   if (!args.config || !args.serviceAccountJson) {
     throw new Error('Missing required --config or --service-account-json argument');
   }
+  if (!['firebase-cli', 'service-account'].includes(args.remoteConfigAuth)) {
+    throw new Error('--remote-config-auth must be one of: firebase-cli, service-account');
+  }
 
   const config = readJson(path.resolve(args.config));
+  const matrix = readJson(path.resolve(args.matrixConfig));
   const serviceAccount = readJson(path.resolve(args.serviceAccountJson));
   const projectId = args.projectId || serviceAccount.project_id;
   const bucketName = args.bucket || `${projectId}.firebasestorage.app`;
@@ -171,67 +357,37 @@ async function main() {
   });
 
   const bucket = admin.storage().bucket();
-  const regionDescriptors = [];
-  let resolvedVersion = args.version;
+  const descriptors = [
+    ...buildBarcodeDescriptors({
+      repoRoot,
+      config,
+      bucketName,
+      explicitVersion: args.version,
+      minimumAppVersion: args.minimumAppVersion,
+    }),
+    ...buildLocalizedDescriptors({
+      repoRoot,
+      matrix,
+      referencePackRoot: args.referencePackRoot,
+      bucketName,
+      localizedVersion: args.localizedVersion,
+      minimumAppVersion: args.minimumAppVersion,
+    }),
+  ];
 
-  for (const source of config.sources || []) {
-    const region = String(source.region).toLowerCase();
-    const localJsonPath = path.resolve(repoRoot, source.output_json);
-    const packJson = readJson(localJsonPath);
-    const metadata = packJson.metadata || {};
-    const version = resolvedVersion || metadata.dataset_version;
-
-    if (!version) {
-      throw new Error(`Unable to resolve version for ${localJsonPath}`);
-    }
-
-    if (!resolvedVersion) {
-      resolvedVersion = version;
-    } else if (resolvedVersion !== version) {
-      throw new Error(`Mismatched pack versions: expected ${resolvedVersion}, got ${version} in ${localJsonPath}`);
-    }
-
-    const objectPath = `reference-packs/barcode_catalog/${region}/${version}.json`;
-    const payload = Buffer.from(JSON.stringify(packJson, null, 2) + '\n', 'utf8');
-
-    regionDescriptors.push({
-      type: 'barcode_catalog',
-      region,
-      version,
-      checksum: sha256Hex(payload),
-      minimum_app_version: args.minimumAppVersion,
-      download_url: `https://storage.googleapis.com/${bucketName}/${objectPath}`,
-      local_path: localJsonPath,
-      object_path: objectPath,
-    });
-
-    if (args.dryRun) {
-      console.log(`[dry-run] upload ${localJsonPath} -> ${objectPath}`);
-    } else {
-      await bucket.file(objectPath).save(payload, {
-        resumable: false,
-        metadata: {
-          contentType: 'application/json; charset=utf-8',
-          cacheControl: 'public, max-age=31536000, immutable',
-        },
-      });
-      await bucket.file(objectPath).makePublic();
-      console.log(`Uploaded ${objectPath}`);
-    }
-  }
-
-  if (!resolvedVersion) {
-    throw new Error('No reference-pack sources were found in the config');
-  }
-
-  regionDescriptors.sort((left, right) => {
-    return `${left.type}/${left.region}/${left.version}`.localeCompare(`${right.type}/${right.region}/${right.version}`);
+  descriptors.sort((left, right) => {
+    return `${left.type}/${left.region}/${left.locale || ''}/${left.version}`
+      .localeCompare(`${right.type}/${right.region}/${right.locale || ''}/${right.version}`);
   });
+
+  for (const descriptor of descriptors) {
+    await uploadPackDescriptor(bucket, descriptor, args.dryRun);
+  }
 
   const manifest = {
     schema_version: 1,
     generated_at: generatedAt,
-    packs: regionDescriptors.map(({ local_path, object_path, ...descriptor }) => descriptor),
+    packs: descriptors.map(toManifestDescriptor),
   };
 
   const manifestObjectPath = args.manifestObjectPath;
@@ -257,33 +413,22 @@ async function main() {
   if (args.dryRun) {
     console.log(`[dry-run] would publish Remote Config reference_pack_manifest_url=${manifestUrl}`);
   } else {
-    const accessToken = readFirebaseCliAccessToken();
-    const { etag, template } = await readRemoteConfigTemplate(projectId, accessToken);
-    const nextTemplate = {
-      ...template,
-      parameters: {
-        ...(template.parameters || {}),
-        reference_pack_manifest_url: {
-          defaultValue: { value: manifestUrl },
-          description: 'Reference pack manifest URL for barcode seed packs',
-        },
-      },
-    };
-
-    delete nextTemplate.version;
-    delete nextTemplate.etag;
-
-    await publishRemoteConfigTemplate(projectId, accessToken, etag, nextTemplate);
+    if (args.remoteConfigAuth === 'service-account') {
+      await publishRemoteConfigWithServiceAccount(projectId, manifestUrl);
+    } else {
+      await publishRemoteConfigWithFirebaseCliToken(projectId, manifestUrl);
+    }
     console.log(`Published Remote Config reference_pack_manifest_url=${manifestUrl}`);
   }
 
   console.log(JSON.stringify({
     projectId,
     bucketName,
-    resolvedVersion,
+    barcodeVersion: args.version || null,
+    remoteConfigAuth: args.remoteConfigAuth,
     manifestUrl,
     manifestObjectPath,
-    packs: regionDescriptors.map(({ local_path, object_path, ...descriptor }) => descriptor),
+    packs: descriptors.map(toManifestDescriptor),
   }, null, 2));
 }
 
