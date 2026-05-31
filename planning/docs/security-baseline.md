@@ -131,6 +131,8 @@ Create checklist with verification steps for each security domain:
 - [ ] Add release checklist gate: verify manifest and pack URLs return HTTP 200 before publishing Remote Config changes.
 - [ ] Add telemetry dashboard tile/alert for `reference_pack_activation_failed` and `reference_pack_activation_rolled_back` spikes.
 - [ ] Track reference pack download volume anomalies (abuse/egress monitoring).
+- [ ] Add explicit user consent flow for submitting previously unknown reference values back to the backend.
+- [ ] Ensure consented unknown-value submissions omit PII by default and use a minimal schema (value, type, context, locale, app version, consent flag).
 - [ ] Introduce staged App Check enforcement for reference-pack delivery:
 	- Phase 0 (current): public read URLs for manifest + pack artifacts with immutable versioned object paths.
 	- Phase 1: monitor App Check metrics and download anomalies; no hard enforcement on pack reads.
