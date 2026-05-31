@@ -6,6 +6,7 @@ import 'generated_l10n/app_localizations.dart';
 import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
+import 'presentation/di/localization_providers.dart';
 import 'presentation/di/service_locator.dart' hide itemRepositoryProvider;
 import 'presentation/di/repository_providers.dart';
 import 'presentation/di/theme_providers.dart';
@@ -94,6 +95,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
     if (saved != null) {
       ref.read(demoModeProvider.notifier).state = saved;
     }
+    await loadAppLocalePreference(ref);
     final hasManual = prefs.getBool('has_manual_items') ?? false;
     if (hasManual) {
       ref.read(hasManualItemsProvider.notifier).state = true;
@@ -115,9 +117,11 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
     }
 
     final themeMode = ref.watch(themeModeProvider);
+    final locale = resolveAppLocale(ref.watch(appLocaleTagProvider));
 
     return MaterialApp.router(
       title: 'ZeroSpoils',
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -144,14 +148,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
 
         return const Locale('en');
       },
-      supportedLocales: const [
-        Locale('en'),
-        Locale('fr'),
-        Locale('fr', 'CA'),
-        Locale('es'),
-        Locale('de'),
-        Locale('pt'),
-      ],
+      supportedLocales: supportedAppLocales,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,

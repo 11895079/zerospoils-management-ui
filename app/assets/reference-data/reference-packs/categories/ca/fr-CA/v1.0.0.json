@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "type": "categories",
+    "region": "ca",
+    "locale": "fr-CA",
+    "version": "1.0.0",
+    "dataset_version": "2026-05-31",
+    "generated_at": "2026-05-31T00:00:00Z",
+    "record_count": 12
+  },
+  "records": [
+    {
+      "id": "produce",
+      "label": "Fruits et legumes",
+      "synonyms": [
+        "fruit",
+        "legume"
+      ],
+      "emoji": "\ud83e\udd6c",
+      "source": "wave-a-seed",
+      "app_category": "produce"
+    },
+    {
+      "id": "dairy",
+      "label": "Produits laitiers",
+      "synonyms": [
+        "lait",
+        "fromage"
+      ],
+      "emoji": "\ud83e\udd5b",
+      "source": "wave-a-seed",
+      "app_category": "dairy"
+    },
+    {
+      "id": "meat",
+      "label": "Viande",
+      "synonyms": [
+        "boeuf",
+        "poulet"
+      ],
+      "emoji": "\ud83c\udf56",
+      "source": "wave-a-seed",
+      "app_category": "meat"
+    },
+    {
+      "id": "grains",
+      "label": "Cereales",
+      "synonyms": [
+        "riz",
+        "pates"
+      ],
+      "emoji": "\ud83c\udf3e",
+      "source": "wave-a-seed",
+      "app_category": "grains"
+    },
+    {
+      "id": "pantry",
+      "label": "Garde-manger",
+      "synonyms": [
+        "tablette"
+      ],
+      "emoji": "\ud83e\udd6b",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "protein",
+      "label": "Proteines",
+      "synonyms": [
+        "fruits de mer",
+        "oeufs"
+      ],
+      "emoji": "\ud83d\udcaa",
+      "source": "wave-a-seed",
+      "app_category": "meat"
+    },
+    {
+      "id": "bakery",
+      "label": "Boulangerie",
+      "synonyms": [
+        "pain",
+        "patisserie"
+      ],
+      "emoji": "\ud83e\udd50",
+      "source": "wave-a-seed",
+      "app_category": "grains"
+    },
+    {
+      "id": "beverages",
+      "label": "Boissons",
+      "synonyms": [
+        "breuvage",
+        "jus"
+      ],
+      "emoji": "\ud83e\udd64",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "condiments",
+      "label": "Condiments",
+      "synonyms": [
+        "sauce",
+        "assaisonnement"
+      ],
+      "emoji": "\ud83e\uddc2",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "snacks",
+      "label": "Collations",
+      "synonyms": [
+        "croustilles",
+        "craquelin"
+      ],
+      "emoji": "\ud83c\udf6a",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "frozen",
+      "label": "Surgeles",
+      "synonyms": [
+        "congele"
+      ],
+      "emoji": "\u2744\ufe0f",
+      "source": "wave-a-seed",
+      "app_category": "other"
+    },
+    {
+      "id": "other",
+      "label": "Autre",
+      "synonyms": [
+        "divers"
+      ],
+      "emoji": "\ud83d\udce6",
+      "source": "wave-a-seed",
+      "app_category": "other"
+    }
+  ]
+}

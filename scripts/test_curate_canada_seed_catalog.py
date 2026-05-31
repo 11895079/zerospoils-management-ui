@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import sys
+from types import SimpleNamespace
+import json
 
 import pytest
 
@@ -10,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from curate_canada_seed_catalog import (
     build_seed_catalog,
     normalize_barcode,
+    run_cli,
 )
 
 
@@ -161,3 +164,34 @@ def test_build_seed_catalog_fails_when_size_budget_is_exceeded():
             generated_at="2026-04-13T00:00:00Z",
             max_bytes=50,
         )
+
+
+def test_run_cli_respects_region_argument(tmp_path):
+    input_csv = tmp_path / 'input.csv'
+    input_csv.write_text(
+        'barcode,product_name,brand,category_hint,quantity_hint,unit_hint\n'
+        '055000132152,Instant Coffee,Nescafe,pantry,475,g\n',
+        encoding='utf-8',
+    )
+
+    output_json = tmp_path / 'output.json'
+    report_json = tmp_path / 'report.json'
+
+    args = SimpleNamespace(
+        input_csv=str(input_csv),
+        output_json=str(output_json),
+        report_json=str(report_json),
+        source_name='unit-test-source',
+        dataset_version='2026-05-31',
+        generated_at='2026-05-31T00:00:00Z',
+        max_bytes=10_000,
+        region='us',
+    )
+
+    exit_code = run_cli(args)
+
+    assert exit_code == 0
+    payload = json.loads(output_json.read_text(encoding='utf-8'))
+    assert payload['metadata']['region'] == 'us'
+    assert payload['records'][0]['region'] == 'us'
+

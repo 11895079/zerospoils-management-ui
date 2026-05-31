@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "type": "categories",
+    "region": "ca",
+    "locale": "en",
+    "version": "1.0.0",
+    "dataset_version": "2026-05-31",
+    "generated_at": "2026-05-31T00:00:00Z",
+    "record_count": 12
+  },
+  "records": [
+    {
+      "id": "produce",
+      "label": "Produce",
+      "synonyms": [
+        "fruit",
+        "vegetable"
+      ],
+      "emoji": "\ud83e\udd6c",
+      "source": "wave-a-seed",
+      "app_category": "produce"
+    },
+    {
+      "id": "dairy",
+      "label": "Dairy",
+      "synonyms": [
+        "milk",
+        "cheese"
+      ],
+      "emoji": "\ud83e\udd5b",
+      "source": "wave-a-seed",
+      "app_category": "dairy"
+    },
+    {
+      "id": "meat",
+      "label": "Meat",
+      "synonyms": [
+        "beef",
+        "chicken"
+      ],
+      "emoji": "\ud83c\udf56",
+      "source": "wave-a-seed",
+      "app_category": "meat"
+    },
+    {
+      "id": "grains",
+      "label": "Grains",
+      "synonyms": [
+        "rice",
+        "pasta"
+      ],
+      "emoji": "\ud83c\udf3e",
+      "source": "wave-a-seed",
+      "app_category": "grains"
+    },
+    {
+      "id": "pantry",
+      "label": "Pantry",
+      "synonyms": [
+        "shelf stable"
+      ],
+      "emoji": "\ud83e\udd6b",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "protein",
+      "label": "Protein",
+      "synonyms": [
+        "seafood",
+        "eggs"
+      ],
+      "emoji": "\ud83d\udcaa",
+      "source": "wave-a-seed",
+      "app_category": "meat"
+    },
+    {
+      "id": "bakery",
+      "label": "Bakery",
+      "synonyms": [
+        "bread",
+        "pastry"
+      ],
+      "emoji": "\ud83e\udd50",
+      "source": "wave-a-seed",
+      "app_category": "grains"
+    },
+    {
+      "id": "beverages",
+      "label": "Beverages",
+      "synonyms": [
+        "drink",
+        "juice"
+      ],
+      "emoji": "\ud83e\udd64",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "condiments",
+      "label": "Condiments",
+      "synonyms": [
+        "sauce",
+        "seasoning"
+      ],
+      "emoji": "\ud83e\uddc2",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "snacks",
+      "label": "Snacks",
+      "synonyms": [
+        "chips",
+        "cracker"
+      ],
+      "emoji": "\ud83c\udf6a",
+      "source": "wave-a-seed",
+      "app_category": "pantry"
+    },
+    {
+      "id": "frozen",
+      "label": "Frozen",
+      "synonyms": [
+        "freezer item"
+      ],
+      "emoji": "\u2744\ufe0f",
+      "source": "wave-a-seed",
+      "app_category": "other"
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "synonyms": [
+        "misc"
+      ],
+      "emoji": "\ud83d\udce6",
+      "source": "wave-a-seed",
+      "app_category": "other"
+    }
+  ]
+}

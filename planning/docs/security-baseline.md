@@ -133,6 +133,9 @@ Create checklist with verification steps for each security domain:
 - [ ] Track reference pack download volume anomalies (abuse/egress monitoring).
 - [ ] Gate unknown-value telemetry capture on anonymous analytics consent for inventory/category/location add/edit flows.
 - [ ] Ensure unknown-value telemetry payloads omit PII by default and use a minimal schema (value, type, context, locale, app version, consent flag).
+- [ ] Add region/locale rollout guardrails (wave-based enablement, kill-switch, and rollback per region).
+- [ ] Add CI checks for per-pack size budgets across region/locale artifacts.
+- [ ] Add fallback validation tests for locale chain: region+locale -> region default -> global -> bundled defaults.
 - [ ] Introduce staged App Check enforcement for reference-pack delivery:
 	- Phase 0 (current): public read URLs for manifest + pack artifacts with immutable versioned object paths.
 	- Phase 1: monitor App Check metrics and download anomalies; no hard enforcement on pack reads.

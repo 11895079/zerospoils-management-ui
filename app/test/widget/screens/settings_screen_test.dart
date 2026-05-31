@@ -79,6 +79,13 @@ void main() {
     return find.byKey(key);
   }
 
+  Finder dropdownForKey(Key key) {
+    return find.descendant(
+      of: tileForKey(key),
+      matching: find.byType(DropdownButton<String>),
+    );
+  }
+
   Finder switchForKey(Key key) {
     return find.descendant(of: tileForKey(key), matching: find.byType(Switch));
   }
@@ -558,6 +565,50 @@ void main() {
           'Manifest source: Firebase Remote Config (${ReferencePackRemoteConfigKeys.manifestUrl})',
         ),
         findsOneWidget,
+      );
+    });
+
+    testWidgets('Language selection loads and persists preference', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+        'app_locale': 'fr_CA',
+      });
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('language_dropdown_tile')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<DropdownButton<String>>(
+          dropdownForKey(const Key('language_dropdown_tile')),
+        ).value,
+        'fr_CA',
+      );
+
+      await tester.tap(dropdownForKey(const Key('language_dropdown_tile')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('English').last);
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('app_locale'), 'en');
+      expect(
+        tester.widget<DropdownButton<String>>(
+          dropdownForKey(const Key('language_dropdown_tile')),
+        ).value,
+        'en',
       );
     });
 

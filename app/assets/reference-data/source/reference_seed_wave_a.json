@@ -1,0 +1,246 @@
+{
+  "categories": [
+    {
+      "id": "produce",
+      "app_category": "produce",
+      "emoji": "\ud83e\udd6c",
+      "labels": {
+        "en": "Produce",
+        "fr-CA": "Fruits et legumes",
+        "es-419": "Frutas y verduras"
+      },
+      "synonyms": {
+        "en": ["fruit", "vegetable"],
+        "fr-CA": ["fruit", "legume"],
+        "es-419": ["fruta", "verdura"]
+      }
+    },
+    {
+      "id": "dairy",
+      "app_category": "dairy",
+      "emoji": "\ud83e\udd5b",
+      "labels": {
+        "en": "Dairy",
+        "fr-CA": "Produits laitiers",
+        "es-419": "Lacteos"
+      },
+      "synonyms": {
+        "en": ["milk", "cheese"],
+        "fr-CA": ["lait", "fromage"],
+        "es-419": ["leche", "queso"]
+      }
+    },
+    {
+      "id": "meat",
+      "app_category": "meat",
+      "emoji": "\ud83c\udf56",
+      "labels": {
+        "en": "Meat",
+        "fr-CA": "Viande",
+        "es-419": "Carnes"
+      },
+      "synonyms": {
+        "en": ["beef", "chicken"],
+        "fr-CA": ["boeuf", "poulet"],
+        "es-419": ["carne", "pollo"]
+      }
+    },
+    {
+      "id": "grains",
+      "app_category": "grains",
+      "emoji": "\ud83c\udf3e",
+      "labels": {
+        "en": "Grains",
+        "fr-CA": "Cereales",
+        "es-419": "Granos"
+      },
+      "synonyms": {
+        "en": ["rice", "pasta"],
+        "fr-CA": ["riz", "pates"],
+        "es-419": ["arroz", "pasta"]
+      }
+    },
+    {
+      "id": "pantry",
+      "app_category": "pantry",
+      "emoji": "\ud83e\udd6b",
+      "labels": {
+        "en": "Pantry",
+        "fr-CA": "Garde-manger",
+        "es-419": "Despensa"
+      },
+      "synonyms": {
+        "en": ["shelf stable"],
+        "fr-CA": ["tablette"],
+        "es-419": ["alacena"]
+      }
+    },
+    {
+      "id": "protein",
+      "app_category": "meat",
+      "emoji": "\ud83d\udcaa",
+      "labels": {
+        "en": "Protein",
+        "fr-CA": "Proteines",
+        "es-419": "Proteinas"
+      },
+      "synonyms": {
+        "en": ["seafood", "eggs"],
+        "fr-CA": ["fruits de mer", "oeufs"],
+        "es-419": ["mariscos", "huevos"]
+      }
+    },
+    {
+      "id": "bakery",
+      "app_category": "grains",
+      "emoji": "\ud83e\udd50",
+      "labels": {
+        "en": "Bakery",
+        "fr-CA": "Boulangerie",
+        "es-419": "Panaderia"
+      },
+      "synonyms": {
+        "en": ["bread", "pastry"],
+        "fr-CA": ["pain", "patisserie"],
+        "es-419": ["pan", "pasteleria"]
+      }
+    },
+    {
+      "id": "beverages",
+      "app_category": "pantry",
+      "emoji": "\ud83e\udd64",
+      "labels": {
+        "en": "Beverages",
+        "fr-CA": "Boissons",
+        "es-419": "Bebidas"
+      },
+      "synonyms": {
+        "en": ["drink", "juice"],
+        "fr-CA": ["breuvage", "jus"],
+        "es-419": ["bebida", "jugo"]
+      }
+    },
+    {
+      "id": "condiments",
+      "app_category": "pantry",
+      "emoji": "\ud83e\uddc2",
+      "labels": {
+        "en": "Condiments",
+        "fr-CA": "Condiments",
+        "es-419": "Condimentos"
+      },
+      "synonyms": {
+        "en": ["sauce", "seasoning"],
+        "fr-CA": ["sauce", "assaisonnement"],
+        "es-419": ["salsa", "aderezo"]
+      }
+    },
+    {
+      "id": "snacks",
+      "app_category": "pantry",
+      "emoji": "\ud83c\udf6a",
+      "labels": {
+        "en": "Snacks",
+        "fr-CA": "Collations",
+        "es-419": "Botanas"
+      },
+      "synonyms": {
+        "en": ["chips", "cracker"],
+        "fr-CA": ["croustilles", "craquelin"],
+        "es-419": ["papitas", "galletas"]
+      }
+    },
+    {
+      "id": "frozen",
+      "app_category": "other",
+      "emoji": "\u2744\ufe0f",
+      "labels": {
+        "en": "Frozen",
+        "fr-CA": "Surgeles",
+        "es-419": "Congelados"
+      },
+      "synonyms": {
+        "en": ["freezer item"],
+        "fr-CA": ["congele"],
+        "es-419": ["producto congelado"]
+      }
+    },
+    {
+      "id": "other",
+      "app_category": "other",
+      "emoji": "\ud83d\udce6",
+      "labels": {
+        "en": "Other",
+        "fr-CA": "Autre",
+        "es-419": "Otro"
+      },
+      "synonyms": {
+        "en": ["misc"],
+        "fr-CA": ["divers"],
+        "es-419": ["varios"]
+      }
+    }
+  ],
+  "locations": [
+    {
+      "id": "fridge",
+      "app_location": "fridge",
+      "emoji": "\u2744\ufe0f",
+      "labels": {
+        "en": "Fridge",
+        "fr-CA": "Refrigerateur",
+        "es-419": "Refrigerador"
+      },
+      "synonyms": {
+        "en": ["refrigerator", "cooler"],
+        "fr-CA": ["frigo"],
+        "es-419": ["nevera"]
+      }
+    },
+    {
+      "id": "pantry",
+      "app_location": "pantry",
+      "emoji": "\ud83d\uddc4\ufe0f",
+      "labels": {
+        "en": "Pantry",
+        "fr-CA": "Garde-manger",
+        "es-419": "Despensa"
+      },
+      "synonyms": {
+        "en": ["cabinet", "cupboard"],
+        "fr-CA": ["armoire"],
+        "es-419": ["alacena"]
+      }
+    },
+    {
+      "id": "freezer",
+      "app_location": "freezer",
+      "emoji": "\ud83e\uddca",
+      "labels": {
+        "en": "Freezer",
+        "fr-CA": "Congelateur",
+        "es-419": "Congelador"
+      },
+      "synonyms": {
+        "en": ["deep freeze"],
+        "fr-CA": ["surgelateur"],
+        "es-419": ["freezer"]
+      }
+    },
+    {
+      "id": "other",
+      "app_location": "other",
+      "emoji": "\ud83d\udccd",
+      "labels": {
+        "en": "Other",
+        "fr-CA": "Autre",
+        "es-419": "Otro"
+      },
+      "synonyms": {
+        "en": ["misc"],
+        "fr-CA": ["ailleurs"],
+        "es-419": ["otro lugar"]
+      }
+    }
+  ]
+}

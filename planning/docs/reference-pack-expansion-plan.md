@@ -10,6 +10,8 @@ This plan covers:
 - Locations
 - Generic reference lists
 - Consent-based unknown-value telemetry capture from users
+- Western Hemisphere regional coverage for barcode and reference packs
+- Locale-aware reference labels aligned with supported app language packages
 
 Out of scope:
 - Full cloud sync of user data
@@ -26,6 +28,13 @@ Supported types:
 - `locations`
 - `reference_list`
 
+Regionalization and localization model:
+- Region code follows BCP-47 country form where possible (examples: `ca`, `us`, `mx`, `br`, `ar`, `cl`, `co`, `pe`).
+- Locale uses app-supported language tags (examples: `en`, `fr-CA`, `es-419`, `pt-BR`).
+- Packs may include one or both dimensions:
+	- region-specific data packs (barcode sets, location defaults)
+	- locale-specific label packs (category/location display strings and synonyms)
+
 Common pack attributes:
 - `type`
 - `region`
@@ -40,6 +49,7 @@ Principles:
 - Manifest is the only mutable pointer.
 - Client precedence stays: `user-defined / learned local data -> downloaded pack -> bundled default`.
 - Remote Config only points to the manifest URL; it never carries the actual data payload.
+- Rollout is staged by region to control quality and payload growth.
 
 ## Unknown-Value Bubble-Up Flow
 When a user enters a value that the app cannot resolve locally:
@@ -98,6 +108,48 @@ Dedup guidance:
 - Client-side: emit once per normalized value per session/context.
 - Backend-side: aggregate by `value_hash + value_type + region + locale`.
 
+## Western Hemisphere Expansion Plan
+
+Target regions (initial):
+- `ca`, `us`, `mx`, `br`, `ar`, `cl`, `co`, `pe`
+
+Target locale packs (initial):
+- `en`
+- `fr-CA`
+- `es-419`
+- `pt-BR`
+
+Rollout waves:
+1. Wave A: `ca`, `us` with `en`, `fr-CA`, `es-419`
+2. Wave B: `mx`, `co`, `pe`, `cl` with `es-419`
+3. Wave C: `br`, `ar` with `pt-BR`, `es-419`
+
+Data quality gates per wave:
+- Unknown-value telemetry volume trending down in target region.
+- Curation backlog for region below threshold.
+- Pack activation failure rate below threshold.
+- Pack size budget within mobile constraints.
+
+## Artifact Strategy for Regional + Locale Packs
+
+Recommended object paths:
+- `reference-packs/barcode_catalog/{region}/{version}.json`
+- `reference-packs/categories/{region}/{locale}/{version}.json`
+- `reference-packs/locations/{region}/{locale}/{version}.json`
+- `reference-packs/reference_list/{list_id}/{region}/{locale}/{version}.json`
+
+Manifest entry guidance:
+- Keep one descriptor per `(type, region, locale)` tuple where locale is relevant.
+- Continue using checksum + minimum app version per descriptor.
+- Introduce optional `locale` field in descriptor for locale-scoped packs.
+
+Backward compatibility:
+- If locale-scoped pack is unavailable, fallback order is:
+	1) region + locale
+	2) region default locale
+	3) global default pack
+	4) bundled defaults
+
 ## Backend Workflow
 Recommended backend flow:
 - Store consented unknown-value telemetry in an exportable review dataset.
@@ -126,6 +178,7 @@ Because the project is already using Firebase for manifest discovery:
 - Keep barcode pack delivery unchanged.
 - Add diagnostics to show active pack version per type.
 - Add tests for precedence and offline fallback.
+- Add locale-aware category/location display labels with region fallback.
 
 ### Phase 2: Consent-Based Unknown-Value Suggestions
 - Add unknown-value telemetry events in inventory/category/location edit and add flows.
@@ -141,6 +194,13 @@ Because the project is already using Firebase for manifest discovery:
 - [ ] Add analytics extraction query templates for top unknown values by region and locale.
 - [ ] Add manual curation SOP: export -> review -> dedupe -> promote -> republish.
 
+### Phase 2b: Western Hemisphere Coverage
+- [ ] Add region-aware manifest selection in the app bootstrap path.
+- [ ] Add locale-aware category/location pack loading with fallback chain.
+- [ ] Define per-region artifact generation jobs and release cadence.
+- [ ] Add pack-size budgets and CI checks per region/locale pack.
+- [ ] Add rollout feature flag/kill-switch per region wave.
+
 ### Phase 3: Pack Promotion Pipeline
 - Automate manifest generation for all pack types.
 - Add lifecycle rules for old pack versions.
@@ -155,10 +215,13 @@ Because the project is already using Firebase for manifest discovery:
 ## Open Decisions
 - Whether categories/locations should be curated manually first or bootstrapped from seeded lookup tables.
 - Whether pack promotion should be manual, scheduled, or partially automated.
+- Whether locale labels live in the same pack payload as value definitions or in separate locale overlay packs.
 
 ## Immediate Next Steps
 1. Define unknown-value telemetry event schema and naming for inventory/category/location interactions.
 2. Implement event emission in relevant add/edit flows, gated by anonymous analytics consent.
 3. Add `categories` and `locations` to the manifest generator and pack publishing flow.
-4. Define manual extraction and curation workflow from telemetry exports.
-5. Extend security hardening to cover telemetry-based unknown-value intake and privacy controls.
+4. Add optional `locale` support to manifest descriptors and pack selectors.
+5. Define Wave A (`ca`, `us`) data sourcing and curation process.
+6. Define manual extraction and curation workflow from telemetry exports.
+7. Extend security hardening to cover telemetry-based unknown-value intake and privacy controls.

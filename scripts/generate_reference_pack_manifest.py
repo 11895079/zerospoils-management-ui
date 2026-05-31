@@ -29,13 +29,14 @@ SUPPORTED_TYPES = {
 class Descriptor:
     pack_type: str
     region: str
+    locale: str | None
     version: str
     checksum: str
     minimum_app_version: str
     download_url: str
 
     def as_dict(self) -> dict[str, str]:
-        return {
+        descriptor = {
             "type": self.pack_type,
             "region": self.region,
             "version": self.version,
@@ -43,6 +44,9 @@ class Descriptor:
             "minimum_app_version": self.minimum_app_version,
             "download_url": self.download_url,
         }
+        if self.locale:
+            descriptor["locale"] = self.locale
+        return descriptor
 
 
 def parse_args() -> argparse.Namespace:
@@ -56,6 +60,12 @@ def parse_args() -> argparse.Namespace:
         help="Reference pack type",
     )
     parser.add_argument("--region", required=True, help="Region code, e.g. ca")
+    parser.add_argument(
+        "--locale",
+        help=(
+            "Optional locale tag for localized packs, e.g. en, fr-CA, es-419"
+        ),
+    )
     parser.add_argument("--version", required=True, help="Pack semantic version")
     parser.add_argument(
         "--minimum-app-version",
@@ -81,7 +91,7 @@ def parse_args() -> argparse.Namespace:
         "--base-manifest",
         help=(
             "Optional existing manifest JSON to update. "
-            "When provided, matching (type, region) entries are replaced."
+            "When provided, matching (type, region, locale) entries are replaced."
         ),
     )
     parser.add_argument(
@@ -179,6 +189,7 @@ def main() -> int:
     descriptor = Descriptor(
         pack_type=args.pack_type,
         region=args.region,
+        locale=args.locale,
         version=args.version,
         checksum=checksum,
         minimum_app_version=args.minimum_app_version,
@@ -203,12 +214,19 @@ def main() -> int:
         if (
             item.get("type") == descriptor.pack_type
             and item.get("region") == descriptor.region
+            and item.get("locale") == descriptor.locale
         ):
             continue
         filtered.append(item)
 
     filtered.append(descriptor.as_dict())
-    filtered.sort(key=lambda p: (str(p.get("type", "")), str(p.get("region", ""))))
+    filtered.sort(
+        key=lambda p: (
+            str(p.get("type", "")),
+            str(p.get("region", "")),
+            str(p.get("locale", "")),
+        )
+    )
     logger.info("Manifest packs after update: %d", len(filtered))
 
     manifest["schema_version"] = args.schema_version
@@ -223,7 +241,12 @@ def main() -> int:
     )
 
     logger.info("Manifest written: %s", output_path.resolve())
-    logger.info("Pack type/region: %s/%s", descriptor.pack_type, descriptor.region)
+    logger.info(
+        "Pack type/region/locale: %s/%s/%s",
+        descriptor.pack_type,
+        descriptor.region,
+        descriptor.locale or "default",
+    )
     logger.info("Pack version: %s", descriptor.version)
     return 0
 

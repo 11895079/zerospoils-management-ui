@@ -14,6 +14,7 @@ import '../../core/reference/reference_pack_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../di/localization_providers.dart';
 import '../../core/feedback/feedback_service.dart';
 import '../../core/feedback/feedback_providers.dart';
 import '../../core/notifications/notification_preferences.dart';
@@ -111,6 +112,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final referencePackStatus = await ReferencePackService(
       preferences: prefs,
     ).barcodeCatalogStatus();
+    await loadAppLocalePreference(ref);
     if (!mounted) return;
     setState(() {
       _notificationsEnabled =
@@ -354,6 +356,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final demoEnabled = ref.watch(demoModeProvider);
+    final localeTag = ref.watch(appLocaleTagProvider);
 
     return Scaffold(
       key: const Key('screen_settings'),
@@ -723,6 +726,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   value: value,
                   onUpdate: () => _dateFormat = value,
                 );
+              },
+            ),
+            _buildDropdownTile<String>(
+              key: const Key('language_dropdown_tile'),
+              icon: Icons.language,
+              label: 'Language',
+              value: localeTag,
+              items: appLocaleOptions.map((option) => option.tag).toList(),
+              itemLabel: appLocaleLabelForTag,
+              onChanged: (value) {
+                unawaited(setAppLocalePreference(ref, value));
               },
             ),
             _buildToggleTile(

@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "type": "locations",
+    "region": "us",
+    "locale": "es-419",
+    "version": "1.0.0",
+    "dataset_version": "2026-05-31",
+    "generated_at": "2026-05-31T00:00:00Z",
+    "record_count": 4
+  },
+  "records": [
+    {
+      "id": "fridge",
+      "label": "Refrigerador",
+      "synonyms": [
+        "nevera"
+      ],
+      "emoji": "\u2744\ufe0f",
+      "source": "wave-a-seed",
+      "app_location": "fridge"
+    },
+    {
+      "id": "pantry",
+      "label": "Despensa",
+      "synonyms": [
+        "alacena"
+      ],
+      "emoji": "\ud83d\uddc4\ufe0f",
+      "source": "wave-a-seed",
+      "app_location": "pantry"
+    },
+    {
+      "id": "freezer",
+      "label": "Congelador",
+      "synonyms": [
+        "freezer"
+      ],
+      "emoji": "\ud83e\uddca",
+      "source": "wave-a-seed",
+      "app_location": "freezer"
+    },
+    {
+      "id": "other",
+      "label": "Otro",
+      "synonyms": [
+        "otro lugar"
+      ],
+      "emoji": "\ud83d\udccd",
+      "source": "wave-a-seed",
+      "app_location": "other"
+    }
+  ]
+}

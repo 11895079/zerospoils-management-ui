@@ -14,6 +14,12 @@ Client contract (already in app):
 Use immutable, versioned pack paths plus a mutable manifest pointer:
 
 - `reference-packs/barcode_catalog/ca/v1.0.0.json`
+- `reference-packs/barcode_catalog/us/v1.0.0.json`
+- `reference-packs/barcode_catalog/mx/v1.0.0.json`
+- `reference-packs/categories/ca/en/v1.0.0.json`
+- `reference-packs/categories/ca/fr-CA/v1.0.0.json`
+- `reference-packs/locations/us/en/v1.0.0.json`
+- `reference-packs/locations/mx/es-419/v1.0.0.json`
 - `reference-packs/manifests/prod/latest.json`
 
 Recommended environments:
@@ -35,10 +41,20 @@ Example:
 
 ## Publish Workflow
 
+### Canonical Publish Command
+The repo now includes a one-step publisher for the Wave A barcode packs:
+
+```bash
+node firebase/functions/scripts/publish_reference_packs.js
+```
+
+That command uploads the versioned pack JSON files to the project Storage bucket, writes the manifest, makes the objects publicly readable, and updates `reference_pack_manifest_url` in Remote Config.
+
 ### Inputs
 - New pack JSON file (example: `barcode_catalog_ca.v1.0.0.json`)
 - Hosted pack URL
 - Version metadata (`type`, `region`, `version`, `minimum_app_version`)
+- Locale metadata when applicable (`locale`, examples: `en`, `fr-CA`, `es-419`, `pt-BR`)
 
 ### Step 1: Upload Pack Artifact
 Example with `gsutil`:
@@ -59,6 +75,20 @@ python3 scripts/generate_reference_pack_manifest.py \
   --minimum-app-version 1.0.0 \
   --pack-json ./dist/barcode_catalog_ca.v1.0.0.json \
   --download-url https://storage.googleapis.com/<bucket>/reference-packs/barcode_catalog/ca/v1.0.0.json \
+  --base-manifest ./dist/latest.manifest.json \
+  --manifest-output ./dist/latest.manifest.json
+```
+
+Example for locale-scoped category pack:
+
+```bash
+python3 scripts/generate_reference_pack_manifest.py \
+  --pack-type categories \
+  --region ca \
+  --version 1.0.0 \
+  --minimum-app-version 1.0.0 \
+  --pack-json ./dist/categories_ca_en.v1.0.0.json \
+  --download-url https://storage.googleapis.com/<bucket>/reference-packs/categories/ca/en/v1.0.0.json \
   --base-manifest ./dist/latest.manifest.json \
   --manifest-output ./dist/latest.manifest.json
 ```
@@ -105,6 +135,15 @@ Replace `latest.json` manifest with one that points to previous known-good pack 
       "checksum": "<sha256-of-pack-json>",
       "minimum_app_version": "1.0.0",
       "download_url": "https://storage.googleapis.com/<bucket>/reference-packs/barcode_catalog/ca/v1.0.0.json"
+    },
+    {
+      "type": "categories",
+      "region": "ca",
+      "locale": "en",
+      "version": "1.0.0",
+      "checksum": "<sha256-of-pack-json>",
+      "minimum_app_version": "1.0.0",
+      "download_url": "https://storage.googleapis.com/<bucket>/reference-packs/categories/ca/en/v1.0.0.json"
     }
   ]
 }
