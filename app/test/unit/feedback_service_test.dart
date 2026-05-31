@@ -20,6 +20,22 @@ void main() {
       expect(feedbackService.audioEnabled, isTrue);
       expect(feedbackService.beepVolume, closeTo(0.8, 0.01));
       expect(feedbackService.hapticIntensity, HapticIntensity.medium);
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.barcodeSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.expirySuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.receiptSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.produceSuccess),
+        isTrue,
+      );
     });
 
     test('toggles haptic feedback', () async {
@@ -70,6 +86,22 @@ void main() {
       await feedbackService.setAudioEnabled(false);
       await feedbackService.setBeepVolume(0.3);
       await feedbackService.setHapticIntensity(HapticIntensity.light);
+      await feedbackService.setScannerEnabled(
+        FeedbackType.barcodeSuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.expirySuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.receiptSuccess,
+        false,
+      );
+      await feedbackService.setScannerEnabled(
+        FeedbackType.produceSuccess,
+        false,
+      );
 
       // Create new instance and verify persistence
       final newService = FeedbackService();
@@ -79,6 +111,42 @@ void main() {
       expect(newService.audioEnabled, isFalse);
       expect(newService.beepVolume, closeTo(0.3, 0.01));
       expect(newService.hapticIntensity, HapticIntensity.light);
+      expect(newService.scannerEnabled(FeedbackType.barcodeSuccess), isFalse);
+      expect(newService.scannerEnabled(FeedbackType.expirySuccess), isFalse);
+      expect(newService.scannerEnabled(FeedbackType.receiptSuccess), isFalse);
+      expect(newService.scannerEnabled(FeedbackType.produceSuccess), isFalse);
+    });
+
+    test('scanner toggle disables feedback for that scanner only', () async {
+      await feedbackService.setScannerEnabled(
+        FeedbackType.produceSuccess,
+        false,
+      );
+
+      // Disabled scanner is reported as such.
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.produceSuccess),
+        isFalse,
+      );
+      // Other scanner types remain unaffected.
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.receiptSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.barcodeSuccess),
+        isTrue,
+      );
+      expect(
+        feedbackService.scannerEnabled(FeedbackType.expirySuccess),
+        isTrue,
+      );
+
+      // Triggering still completes without error (dispatch is skipped
+      // internally; verifying the absence of platform calls would require
+      // injecting a platform-channel mock, which is out of scope here).
+      await feedbackService.triggerOcrSuccess(FeedbackType.produceSuccess);
+      await feedbackService.triggerOcrSuccess(FeedbackType.receiptSuccess);
     });
 
     test('triggers OCR success feedback without errors', () async {
