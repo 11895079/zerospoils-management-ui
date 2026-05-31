@@ -5,9 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../core/reference/reference_pack_fetchers.dart';
+import '../../core/reference/reference_pack_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -43,6 +46,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _mealPlanningEnabled = false;
   bool _dataSyncEnabled = false;
   bool _analyticsConsent = true;
+  String? _barcodePackVersion;
+  DateTime? _barcodePackUpdatedAt;
+  int _barcodePackRecordCount = 0;
   bool _feedbackHapticEnabled = true;
   bool _feedbackAudioEnabled = true;
   double _feedbackBeepVolume = 0.8;
@@ -102,6 +108,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final referencePackStatus = await ReferencePackService(
+      preferences: prefs,
+    ).barcodeCatalogStatus();
     if (!mounted) return;
     setState(() {
       _notificationsEnabled =
@@ -116,9 +125,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _mealPlanningEnabled = prefs.getBool('meal_planning_enabled') ?? false;
       _dataSyncEnabled = prefs.getBool('data_sync_enabled') ?? false;
       _analyticsConsent = prefs.getBool('analytics_consent') ?? true;
-      // Feedback & Sounds initial state is loaded from FeedbackService in
-      // initState (feedbackServiceProvider.future.then) to avoid duplicating
-      // the prefs key strings maintained inside FeedbackService.
+      _barcodePackVersion = referencePackStatus.version;
+      _barcodePackUpdatedAt = referencePackStatus.updatedAt;
+      _barcodePackRecordCount = referencePackStatus.recordCount;
       _leadTimeDays =
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
@@ -449,6 +458,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: 'Restore Backup',
               subtitle: 'Import a backup file',
               onTap: () => _importBackup(context, ref),
+            ),
+            _buildInfoTile(
+              icon: Icons.dataset_linked,
+              label: 'Reference Data Packs',
+              subtitle: _referencePackDiagnosticsSubtitle(),
             ),
             _buildDangerTile(
               icon: Icons.delete_forever,
@@ -845,6 +859,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String label,
+    String? subtitle,
+  }) {
+    final theme = Theme.of(context);
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon, color: theme.colorScheme.onSurface),
+      title: Text(label, style: theme.textTheme.bodyMedium),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle, style: theme.textTheme.bodySmall),
+    );
+  }
+
   Widget _buildToggleTile({
     Key? key,
     required IconData icon,
@@ -1141,6 +1172,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  String _referencePackDiagnosticsSubtitle() {
+    final version = _barcodePackVersion ?? 'Bundled default only';
+    final updatedAt = _barcodePackUpdatedAt == null
+        ? 'Never updated'
+        : DateFormat(
+            'yyyy-MM-dd HH:mm',
+          ).format(_barcodePackUpdatedAt!.toLocal());
+
+    return 'Active barcode pack: $version ($_barcodePackRecordCount records)\n'
+        'Last update: $updatedAt\n'
+        'Manifest source: Firebase Remote Config '
+        '(${ReferencePackRemoteConfigKeys.manifestUrl})';
   }
 
   String _accountSubtitle() {
