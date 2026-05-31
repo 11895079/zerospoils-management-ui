@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -96,7 +97,18 @@ def parse_args() -> argparse.Namespace:
             "Default: now in UTC"
         ),
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable verbose logging",
+    )
     return parser.parse_args()
+
+
+def configure_logging(verbose: bool) -> logging.Logger:
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(level=level, format="%(levelname)s: %(message)s")
+    return logging.getLogger("reference-pack-manifest")
 
 
 def read_pack_bytes(path: Path) -> bytes:
@@ -146,18 +158,23 @@ def load_existing_manifest(path: Path) -> dict[str, Any]:
 
 def main() -> int:
     args = parse_args()
+    logger = configure_logging(args.verbose)
 
     validate_absolute_url(args.download_url, "--download-url")
 
     pack_path = Path(args.pack_json)
     output_path = Path(args.manifest_output)
+    logger.info("Pack JSON path: %s", pack_path.resolve())
+    logger.info("Manifest output path: %s", output_path.resolve())
 
     pack_bytes = read_pack_bytes(pack_path)
     pack_json = validate_json_bytes(pack_bytes, "pack JSON")
     if not isinstance(pack_json, dict):
         raise ValueError("Pack JSON must be a JSON object")
+    logger.info("Validated pack JSON object")
 
     checksum = hashlib.sha256(pack_bytes).hexdigest()
+    logger.info("Computed pack checksum: %s", checksum)
 
     descriptor = Descriptor(
         pack_type=args.pack_type,
@@ -169,11 +186,15 @@ def main() -> int:
     )
 
     if args.base_manifest:
-        manifest = load_existing_manifest(Path(args.base_manifest))
+        base_manifest_path = Path(args.base_manifest)
+        logger.info("Base manifest path: %s", base_manifest_path.resolve())
+        manifest = load_existing_manifest(base_manifest_path)
         existing_packs = manifest.get("packs") or []
+        logger.info("Loaded base manifest packs: %d", len(existing_packs))
     else:
         manifest = {}
         existing_packs = []
+        logger.info("No base manifest provided; creating a new manifest")
 
     filtered: list[dict[str, Any]] = []
     for item in existing_packs:
@@ -188,21 +209,22 @@ def main() -> int:
 
     filtered.append(descriptor.as_dict())
     filtered.sort(key=lambda p: (str(p.get("type", "")), str(p.get("region", ""))))
+    logger.info("Manifest packs after update: %d", len(filtered))
 
     manifest["schema_version"] = args.schema_version
     manifest["generated_at"] = normalize_generated_at(args.generated_at)
     manifest["packs"] = filtered
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    logger.debug("Ensured output directory exists: %s", output_path.parent.resolve())
     output_path.write_text(
         json.dumps(manifest, indent=2, ensure_ascii=True) + "\n",
         encoding="utf-8",
     )
 
-    print("Manifest written:", output_path)
-    print("Pack checksum (sha256):", checksum)
-    print("Pack type/region:", f"{descriptor.pack_type}/{descriptor.region}")
-    print("Pack version:", descriptor.version)
+    logger.info("Manifest written: %s", output_path.resolve())
+    logger.info("Pack type/region: %s/%s", descriptor.pack_type, descriptor.region)
+    logger.info("Pack version: %s", descriptor.version)
     return 0
 
 
