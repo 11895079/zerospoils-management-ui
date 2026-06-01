@@ -219,7 +219,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                     ),
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Row(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AnimatedBuilder(
@@ -244,11 +244,14 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
                               // Header uses textPrimary (#333) instead of
                               // the accent green so contrast against the
                               // cream bubble (#FFFAEC) meets WCAG AA. The
@@ -264,14 +267,17 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              Text(
-                                _state.currentMessage!,
-                                key: const Key('zesto_message_text'),
-                                style: AppTextStyles.body.copyWith(
-                                  color: AppColors.textPrimary,
+                                Text(
+                                  _state.currentMessage!,
+                                  key: const Key('zesto_message_text'),
+                                  maxLines: 4,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.body.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         Container(
