@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../core/reference/reference_pack_fetchers.dart';
+import '../../core/reference/reference_pack_keys.dart';
 import '../../core/reference/reference_pack_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -113,6 +114,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       preferences: prefs,
     ).barcodeCatalogStatus();
     await loadAppLocalePreference(ref);
+    await loadReferencePackPreferences(ref);
     if (!mounted) return;
     setState(() {
       _notificationsEnabled =
@@ -134,6 +136,57 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
       _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
     });
+  }
+
+  Future<void> _syncReferencePacks() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final region = effectiveReferencePackRegion(
+        regionTag: ref.read(referencePackRegionTagProvider),
+        activeBarcodeRegion: prefs.getString(
+          ReferencePackKeys.activeBarcodePackRegion,
+        ),
+      );
+      final locale = effectiveReferencePackLanguage(
+        languageTag: ref.read(referencePackLanguageTagProvider),
+        appLocaleTag: ref.read(appLocaleTagProvider),
+      );
+
+      final service = ReferencePackService(preferences: prefs);
+      final manifestProvider = FirebaseRemoteConfigManifestUrlProvider();
+      final downloader = HttpReferencePackDownloader();
+
+      await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+      );
+      await service.syncCategoriesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
+      await service.syncLocationsPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
+
+      final updatedStatus = await service.barcodeCatalogStatus();
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _barcodePackVersion = updatedStatus.version;
+        _barcodePackUpdatedAt = updatedStatus.updatedAt;
+        _barcodePackRecordCount = updatedStatus.recordCount;
+      });
+    } catch (_) {
+      // Best-effort refresh only. Preference changes should still persist.
+    }
   }
 
   Future<void> _persistDemoMode(bool enabled) async {
@@ -357,6 +410,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final demoEnabled = ref.watch(demoModeProvider);
     final localeTag = ref.watch(appLocaleTagProvider);
+    final referencePackRegionTag = ref.watch(referencePackRegionTagProvider);
+    final referencePackLanguageTag = ref.watch(
+      referencePackLanguageTagProvider,
+    );
 
     return Scaffold(
       key: const Key('screen_settings'),
@@ -731,12 +788,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDropdownTile<String>(
               key: const Key('language_dropdown_tile'),
               icon: Icons.language,
-              label: 'Language',
+              label: 'App Language',
               value: localeTag,
               items: appLocaleOptions.map((option) => option.tag).toList(),
               itemLabel: appLocaleLabelForTag,
               onChanged: (value) {
-                unawaited(setAppLocalePreference(ref, value));
+                unawaited(() async {
+                  await setAppLocalePreference(ref, value);
+                  await _syncReferencePacks();
+                }());
+              },
+            ),
+            _buildDropdownTile<String>(
+              key: const Key('reference_region_dropdown_tile'),
+              icon: Icons.public,
+              label: 'Reference Data Region',
+              value: referencePackRegionTag,
+              items: referencePackRegionOptions
+                  .map((option) => option.tag)
+                  .toList(),
+              itemLabel: referencePackRegionLabelForTag,
+              onChanged: (value) {
+                unawaited(() async {
+                  await setReferencePackRegionPreference(ref, value);
+                  await _syncReferencePacks();
+                }());
+              },
+            ),
+            _buildDropdownTile<String>(
+              key: const Key('reference_language_dropdown_tile'),
+              icon: Icons.translate,
+              label: 'Reference Data Language',
+              value: referencePackLanguageTag,
+              items: referencePackLanguageOptions
+                  .map((option) => option.tag)
+                  .toList(),
+              itemLabel: referencePackLanguageLabelForTag,
+              onChanged: (value) {
+                unawaited(() async {
+                  await setReferencePackLanguagePreference(ref, value);
+                  await _syncReferencePacks();
+                }());
               },
             ),
             _buildToggleTile(

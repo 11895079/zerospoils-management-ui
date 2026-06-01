@@ -96,6 +96,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       ref.read(demoModeProvider.notifier).state = saved;
     }
     await loadAppLocalePreference(ref);
+    await loadReferencePackPreferences(ref);
     final hasManual = prefs.getBool('has_manual_items') ?? false;
     if (hasManual) {
       ref.read(hasManualItemsProvider.notifier).state = true;

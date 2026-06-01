@@ -25,6 +25,7 @@ class ReferencePackDescriptor {
   const ReferencePackDescriptor({
     required this.type,
     required this.region,
+    this.locale,
     required this.version,
     required this.checksum,
     required this.minimumAppVersion,
@@ -33,6 +34,7 @@ class ReferencePackDescriptor {
 
   final ReferencePackType type;
   final String region;
+  final String? locale;
   final String version;
   final String checksum;
   final String minimumAppVersion;
@@ -90,10 +92,14 @@ class ReferencePackManifest {
       }
 
       final region = raw['region'];
+      final localeRaw = raw['locale'];
       final version = raw['version'];
       final checksum = raw['checksum'];
       final minimumAppVersion = raw['minimum_app_version'];
       final downloadUrlRaw = raw['download_url'];
+      final locale = localeRaw is String && localeRaw.trim().isNotEmpty
+          ? localeRaw.trim()
+          : null;
 
       if (region is! String || region.isEmpty) {
         throw const FormatException('pack.region is required');
@@ -120,6 +126,7 @@ class ReferencePackManifest {
         ReferencePackDescriptor(
           type: type,
           region: region,
+          locale: locale,
           version: version,
           checksum: checksum,
           minimumAppVersion: minimumAppVersion,

@@ -13,6 +13,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/domain/models/item_model.dart';
 import 'package:zerospoils/domain/models/user_category.dart';
+import 'package:zerospoils/presentation/di/localization_providers.dart';
 
 /// Backup metadata
 class BackupMetadata {
@@ -680,6 +681,14 @@ class BackupRestoreService {
       'data_sync_enabled': prefs.getBool('data_sync_enabled') ?? false,
       'expiry_lead_time_days': prefs.getInt('expiry_lead_time_days') ?? 3,
       'date_format': prefs.getString('date_format') ?? 'MM/DD/YYYY',
+      'app_locale':
+          prefs.getString(appLocalePreferenceKey) ?? appLocaleSystemTag,
+      'reference_pack_region':
+          prefs.getString(referencePackRegionPreferenceKey) ??
+          referencePackAutomaticTag,
+      'reference_pack_language':
+          prefs.getString(referencePackLanguagePreferenceKey) ??
+          referencePackAutomaticTag,
       'demo_mode_enabled': prefs.getBool('demo_mode_enabled') ?? true,
     };
   }
@@ -728,6 +737,24 @@ class BackupRestoreService {
     }
     if (settings.containsKey('date_format')) {
       await prefs.setString('date_format', settings['date_format'] as String);
+    }
+    if (settings.containsKey('app_locale')) {
+      await prefs.setString(
+        appLocalePreferenceKey,
+        settings['app_locale'] as String,
+      );
+    }
+    if (settings.containsKey('reference_pack_region')) {
+      await prefs.setString(
+        referencePackRegionPreferenceKey,
+        settings['reference_pack_region'] as String,
+      );
+    }
+    if (settings.containsKey('reference_pack_language')) {
+      await prefs.setString(
+        referencePackLanguagePreferenceKey,
+        settings['reference_pack_language'] as String,
+      );
     }
     if (settings.containsKey('demo_mode_enabled')) {
       await prefs.setBool(

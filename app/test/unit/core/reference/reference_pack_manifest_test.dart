@@ -30,6 +30,30 @@ void main() {
       expect(manifest.packs.first.region, 'ca');
     });
 
+    test('parses optional locale on locale-scoped pack descriptors', () {
+      const manifestJson = '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "categories",
+      "region": "ca",
+      "locale": "fr-CA",
+      "version": "1.0.0",
+      "checksum": "abc123",
+      "minimum_app_version": "1.0.0",
+      "download_url": "https://example.com/categories-ca-fr.json"
+    }
+  ]
+}
+''';
+
+      final manifest = ReferencePackManifest.parse(manifestJson);
+
+      expect(manifest.packs.single.type, ReferencePackType.categories);
+      expect(manifest.packs.single.locale, 'fr-CA');
+    });
+
     test('throws when required fields are missing', () {
       const manifestJson = '''
 {

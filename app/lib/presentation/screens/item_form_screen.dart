@@ -9,10 +9,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/feature_flags/feature_flag_key.dart';
 import '../../core/feature_flags/feature_flags_provider.dart';
 import '../../core/ocr/expiry_date_ocr_service.dart';
+import '../../core/reference/reference_pack_fetchers.dart';
+import '../../core/reference/reference_pack_keys.dart';
+import '../../core/reference/reference_pack_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -27,6 +31,7 @@ import '../widgets/item_icon.dart';
 import '../widgets/quantity_toggle.dart';
 import '../barcode/barcode_capture_launcher.dart';
 import '../di/repository_providers.dart';
+import '../di/localization_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../fresh_item/fresh_item_capture_launcher.dart';
 import '../ocr/expiry_ocr_capture_launcher.dart';
@@ -141,6 +146,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   List<ReceiptBatch> _availableReceiptBatches = const [];
   List<_RecentItemDefaults> _recentItemDefaults = const [];
   List<String> _recentBrands = const [];
+  final Map<ItemCategory, String> _referenceCategoryLabels = {};
+  final Map<ItemCategory, Set<String>> _referenceCategoryTerms = {};
+  final Map<StorageLocation, String> _referenceLocationLabels = {};
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -157,6 +165,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     _loadUserCategories();
     _loadRecentItemDefaults();
     _loadReceiptBatches();
+    _loadReferencePackSuggestions();
     if (!_isEditMode) {
       if (widget.initialName != null && widget.initialName!.trim().isNotEmpty) {
         _nameController.text = widget.initialName!.trim();
@@ -168,6 +177,93 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     }
     if (_isEditMode) {
       _loadItem();
+    }
+  }
+
+  Future<void> _loadReferencePackSuggestions() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final region = effectiveReferencePackRegion(
+        regionTag:
+            prefs.getString(referencePackRegionPreferenceKey) ??
+            referencePackAutomaticTag,
+        activeBarcodeRegion: prefs.getString(
+          ReferencePackKeys.activeBarcodePackRegion,
+        ),
+      );
+      final locale = effectiveReferencePackLanguage(
+        languageTag:
+            prefs.getString(referencePackLanguagePreferenceKey) ??
+            referencePackAutomaticTag,
+        appLocaleTag:
+            prefs.getString(appLocalePreferenceKey) ?? appLocaleSystemTag,
+      );
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final manifestProvider = FirebaseRemoteConfigManifestUrlProvider();
+      final downloader = HttpReferencePackDownloader();
+
+      await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+      );
+      await service.syncCategoriesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
+      await service.syncLocationsPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
+
+      final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
+      final locationRecords = ReferencePackService.activeLocationRecords(prefs);
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _referenceCategoryLabels
+          ..clear()
+          ..addEntries(
+            categoryRecords.map(
+              (record) => MapEntry(record.appCategory, record.label),
+            ),
+          );
+
+        _referenceCategoryTerms
+          ..clear()
+          ..addEntries(
+            categoryRecords.map((record) {
+              final terms = <String>{
+                record.label.toLowerCase(),
+                record.id.toLowerCase(),
+                ...record.synonyms.map((synonym) => synonym.toLowerCase()),
+              };
+              return MapEntry(record.appCategory, terms);
+            }),
+          );
+
+        _referenceLocationLabels
+          ..clear()
+          ..addEntries(
+            locationRecords.map(
+              (record) => MapEntry(record.appLocation, record.label),
+            ),
+          );
+      });
+    } catch (_) {
+      // Best-effort enhancement only. Built-in category/location flows remain usable.
     }
   }
 
@@ -529,6 +625,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
     final name = value.trim().toLowerCase();
     if (name.isEmpty) return null;
 
+    for (final entry in _referenceCategoryTerms.entries) {
+      for (final term in entry.value) {
+        if (term.isNotEmpty && name.contains(term)) {
+          return entry.key;
+        }
+      }
+    }
+
     // Dairy
     if (name.contains('milk') ||
         name.contains('cheese') ||
@@ -609,7 +713,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         .map(
           (category) => _CategoryOption(
             id: 'builtin_${category.name}',
-            label: category.displayName,
+            label: _referenceCategoryLabels[category] ?? category.displayName,
             isCustom: false,
             builtIn: category,
           ),
@@ -2008,7 +2112,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                               style: const TextStyle(fontSize: 18),
                             ),
                             const SizedBox(width: 8),
-                            Text(loc.displayName),
+                            Text(
+                              _referenceLocationLabels[loc] ?? loc.displayName,
+                            ),
                           ],
                         ),
                       ),

@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/models/item_model.dart';
 import 'reference_pack_fetchers.dart';
 import 'reference_pack_keys.dart';
 import 'reference_pack_manifest.dart';
@@ -37,6 +38,34 @@ class ReferencePackStatus {
   final String? checksum;
   final DateTime? updatedAt;
   final int recordCount;
+}
+
+class ReferenceCategoryRecord {
+  const ReferenceCategoryRecord({
+    required this.id,
+    required this.label,
+    required this.appCategory,
+    required this.synonyms,
+  });
+
+  final String id;
+  final String label;
+  final ItemCategory appCategory;
+  final List<String> synonyms;
+}
+
+class ReferenceLocationRecord {
+  const ReferenceLocationRecord({
+    required this.id,
+    required this.label,
+    required this.appLocation,
+    required this.synonyms,
+  });
+
+  final String id;
+  final String label;
+  final StorageLocation appLocation;
+  final List<String> synonyms;
 }
 
 class ReferencePackService {
@@ -90,16 +119,20 @@ class ReferencePackService {
   }
 
   Future<ReferencePackActivationResult> syncBarcodeCatalogPack({
-    required ReferencePackManifestUrlProvider manifestUrlProvider,
-    required ReferencePackDownloader downloader,
+    ReferencePackManifestUrlProvider? manifestUrlProvider,
+    ReferencePackDownloader? downloader,
     String region = 'ca',
   }) async {
+    final resolvedManifestProvider =
+        manifestUrlProvider ?? FirebaseRemoteConfigManifestUrlProvider();
+    final resolvedDownloader = downloader ?? HttpReferencePackDownloader();
+
     _telemetry?.call('reference_pack_check_started', {
       'pack_type': ReferencePackType.barcodeCatalog.wireName,
       'region': region,
     });
 
-    final manifestUrl = await manifestUrlProvider.getManifestUrl();
+    final manifestUrl = await resolvedManifestProvider.getManifestUrl();
     if (manifestUrl == null) {
       _telemetry?.call('reference_pack_check_failed', {
         'pack_type': ReferencePackType.barcodeCatalog.wireName,
@@ -113,7 +146,7 @@ class ReferencePackService {
 
     final String manifestJson;
     try {
-      manifestJson = await downloader.downloadJson(manifestUrl);
+      manifestJson = await resolvedDownloader.downloadJson(manifestUrl);
     } catch (_) {
       _telemetry?.call('reference_pack_check_failed', {
         'pack_type': ReferencePackType.barcodeCatalog.wireName,
@@ -139,14 +172,12 @@ class ReferencePackService {
       );
     }
 
-    ReferencePackDescriptor? descriptor;
-    for (final pack in manifest.packs) {
-      if (pack.type == ReferencePackType.barcodeCatalog &&
-          pack.region == region) {
-        descriptor = pack;
-        break;
-      }
-    }
+    final descriptor = _selectPackDescriptor(
+      manifest: manifest,
+      type: ReferencePackType.barcodeCatalog,
+      region: region,
+      locale: null,
+    );
 
     if (descriptor == null) {
       _telemetry?.call('reference_pack_check_failed', {
@@ -162,7 +193,7 @@ class ReferencePackService {
 
     final String packJson;
     try {
-      packJson = await downloader.downloadJson(descriptor.downloadUrl);
+      packJson = await resolvedDownloader.downloadJson(descriptor.downloadUrl);
     } catch (_) {
       _telemetry?.call('reference_pack_download_failed', {
         'pack_type': descriptor.type.wireName,
@@ -197,6 +228,146 @@ class ReferencePackService {
     });
 
     return activation;
+  }
+
+  Future<ReferencePackActivationResult> syncCategoriesPack({
+    ReferencePackManifestUrlProvider? manifestUrlProvider,
+    ReferencePackDownloader? downloader,
+    String region = 'ca',
+    String locale = 'en',
+  }) async {
+    final resolvedManifestProvider =
+        manifestUrlProvider ?? FirebaseRemoteConfigManifestUrlProvider();
+    final resolvedDownloader = downloader ?? HttpReferencePackDownloader();
+
+    _telemetry?.call('reference_pack_check_started', {
+      'pack_type': ReferencePackType.categories.wireName,
+      'region': region,
+      'locale': locale,
+    });
+
+    final manifestUrl = await resolvedManifestProvider.getManifestUrl();
+    if (manifestUrl == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_url_unset',
+      );
+    }
+
+    final String manifestJson;
+    try {
+      manifestJson = await resolvedDownloader.downloadJson(manifestUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_download_failed',
+      );
+    }
+
+    final ReferencePackManifest manifest;
+    try {
+      manifest = ReferencePackManifest.parse(manifestJson);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_invalid',
+      );
+    }
+
+    final descriptor = _selectPackDescriptor(
+      manifest: manifest,
+      type: ReferencePackType.categories,
+      region: region,
+      locale: locale,
+    );
+    if (descriptor == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_not_found_for_region',
+      );
+    }
+
+    final String packJson;
+    try {
+      packJson = await resolvedDownloader.downloadJson(descriptor.downloadUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_download_failed',
+      );
+    }
+
+    return activateCategoriesPack(descriptor: descriptor, packJson: packJson);
+  }
+
+  Future<ReferencePackActivationResult> syncLocationsPack({
+    ReferencePackManifestUrlProvider? manifestUrlProvider,
+    ReferencePackDownloader? downloader,
+    String region = 'ca',
+    String locale = 'en',
+  }) async {
+    final resolvedManifestProvider =
+        manifestUrlProvider ?? FirebaseRemoteConfigManifestUrlProvider();
+    final resolvedDownloader = downloader ?? HttpReferencePackDownloader();
+
+    _telemetry?.call('reference_pack_check_started', {
+      'pack_type': ReferencePackType.locations.wireName,
+      'region': region,
+      'locale': locale,
+    });
+
+    final manifestUrl = await resolvedManifestProvider.getManifestUrl();
+    if (manifestUrl == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_url_unset',
+      );
+    }
+
+    final String manifestJson;
+    try {
+      manifestJson = await resolvedDownloader.downloadJson(manifestUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_download_failed',
+      );
+    }
+
+    final ReferencePackManifest manifest;
+    try {
+      manifest = ReferencePackManifest.parse(manifestJson);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_invalid',
+      );
+    }
+
+    final descriptor = _selectPackDescriptor(
+      manifest: manifest,
+      type: ReferencePackType.locations,
+      region: region,
+      locale: locale,
+    );
+    if (descriptor == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_not_found_for_region',
+      );
+    }
+
+    final String packJson;
+    try {
+      packJson = await resolvedDownloader.downloadJson(descriptor.downloadUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_download_failed',
+      );
+    }
+
+    return activateLocationsPack(descriptor: descriptor, packJson: packJson);
   }
 
   Future<ReferencePackActivationResult> activateBarcodeCatalogPack({
@@ -300,67 +471,322 @@ class ReferencePackService {
     return const ReferencePackActivationResult(success: true);
   }
 
+  Future<ReferencePackActivationResult> activateCategoriesPack({
+    required ReferencePackDescriptor descriptor,
+    required String packJson,
+  }) async {
+    if (descriptor.type != ReferencePackType.categories) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'unsupported_pack_type',
+      );
+    }
+
+    final currentVersion = await _appVersion();
+    if (_compareVersions(currentVersion, descriptor.minimumAppVersion) < 0) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'minimum_app_version_not_met',
+      );
+    }
+
+    final normalizedExpectedChecksum = descriptor.checksum.toLowerCase();
+    final normalizedActualChecksum = sha256
+        .convert(utf8.encode(packJson))
+        .toString();
+    if (normalizedActualChecksum != normalizedExpectedChecksum) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'checksum_mismatch',
+      );
+    }
+
+    final validation = _validateCategoriesPack(packJson);
+    if (validation != null) {
+      return ReferencePackActivationResult(
+        success: false,
+        failureReason: validation,
+      );
+    }
+
+    final prefs = await _prefs();
+    final snapshot = _snapshotCategoriesState(prefs);
+    try {
+      await prefs.setString(
+        ReferencePackKeys.activeCategoriesPackRecordsJson,
+        packJson,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeCategoriesPackVersion,
+        descriptor.version,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeCategoriesPackRegion,
+        descriptor.region,
+      );
+      if (descriptor.locale != null) {
+        await prefs.setString(
+          ReferencePackKeys.activeCategoriesPackLocale,
+          descriptor.locale!,
+        );
+      } else {
+        await prefs.remove(ReferencePackKeys.activeCategoriesPackLocale);
+      }
+      await prefs.setString(
+        ReferencePackKeys.activeCategoriesPackChecksum,
+        normalizedActualChecksum,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeCategoriesPackUpdatedAt,
+        DateTime.now().toUtc().toIso8601String(),
+      );
+    } catch (_) {
+      await _restoreCategoriesState(prefs, snapshot);
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'activation_failed_rolled_back',
+      );
+    }
+
+    return const ReferencePackActivationResult(success: true);
+  }
+
+  Future<ReferencePackActivationResult> activateLocationsPack({
+    required ReferencePackDescriptor descriptor,
+    required String packJson,
+  }) async {
+    if (descriptor.type != ReferencePackType.locations) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'unsupported_pack_type',
+      );
+    }
+
+    final currentVersion = await _appVersion();
+    if (_compareVersions(currentVersion, descriptor.minimumAppVersion) < 0) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'minimum_app_version_not_met',
+      );
+    }
+
+    final normalizedExpectedChecksum = descriptor.checksum.toLowerCase();
+    final normalizedActualChecksum = sha256
+        .convert(utf8.encode(packJson))
+        .toString();
+    if (normalizedActualChecksum != normalizedExpectedChecksum) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'checksum_mismatch',
+      );
+    }
+
+    final validation = _validateLocationsPack(packJson);
+    if (validation != null) {
+      return ReferencePackActivationResult(
+        success: false,
+        failureReason: validation,
+      );
+    }
+
+    final prefs = await _prefs();
+    final snapshot = _snapshotLocationsState(prefs);
+    try {
+      await prefs.setString(
+        ReferencePackKeys.activeLocationsPackRecordsJson,
+        packJson,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeLocationsPackVersion,
+        descriptor.version,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeLocationsPackRegion,
+        descriptor.region,
+      );
+      if (descriptor.locale != null) {
+        await prefs.setString(
+          ReferencePackKeys.activeLocationsPackLocale,
+          descriptor.locale!,
+        );
+      } else {
+        await prefs.remove(ReferencePackKeys.activeLocationsPackLocale);
+      }
+      await prefs.setString(
+        ReferencePackKeys.activeLocationsPackChecksum,
+        normalizedActualChecksum,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeLocationsPackUpdatedAt,
+        DateTime.now().toUtc().toIso8601String(),
+      );
+    } catch (_) {
+      await _restoreLocationsState(prefs, snapshot);
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'activation_failed_rolled_back',
+      );
+    }
+
+    return const ReferencePackActivationResult(success: true);
+  }
+
   static List<Map<String, dynamic>> activeBarcodeCatalogRecords(
     SharedPreferences prefs,
   ) {
-    final raw = prefs.getString(ReferencePackKeys.activeBarcodePackRecordsJson);
-    if (raw == null || raw.isEmpty) {
-      return const [];
+    return _extractPackRecords(
+      prefs.getString(ReferencePackKeys.activeBarcodePackRecordsJson),
+    );
+  }
+
+  static List<ReferenceCategoryRecord> activeCategoryRecords(
+    SharedPreferences prefs,
+  ) {
+    final records = _extractPackRecords(
+      prefs.getString(ReferencePackKeys.activeCategoriesPackRecordsJson),
+    );
+
+    final result = <ReferenceCategoryRecord>[];
+    for (final row in records) {
+      final id = row['id'] as String?;
+      final label = row['label'] as String?;
+      final appCategoryRaw = row['app_category'] as String?;
+      if (id == null || id.isEmpty || label == null || label.isEmpty) {
+        continue;
+      }
+
+      if (appCategoryRaw == null || appCategoryRaw.isEmpty) {
+        continue;
+      }
+      final appCategory = ItemCategory.fromString(appCategoryRaw);
+
+      final synonymsRaw = row['synonyms'];
+      final synonyms = synonymsRaw is List
+          ? synonymsRaw
+                .whereType<String>()
+                .where((s) => s.trim().isNotEmpty)
+                .toList()
+          : const <String>[];
+
+      result.add(
+        ReferenceCategoryRecord(
+          id: id,
+          label: label,
+          appCategory: appCategory,
+          synonyms: synonyms,
+        ),
+      );
     }
 
-    try {
-      final decoded = jsonDecode(raw);
-      if (decoded is! Map<String, dynamic>) {
-        return const [];
-      }
-      final schemaVersion = decoded['schema_version'];
-      if (schemaVersion is! int || schemaVersion <= 0) {
-        return const [];
-      }
-      final records = decoded['records'];
-      if (records is! List) {
-        return const [];
+    return result;
+  }
+
+  static List<ReferenceLocationRecord> activeLocationRecords(
+    SharedPreferences prefs,
+  ) {
+    final records = _extractPackRecords(
+      prefs.getString(ReferencePackKeys.activeLocationsPackRecordsJson),
+    );
+
+    final result = <ReferenceLocationRecord>[];
+    for (final row in records) {
+      final id = row['id'] as String?;
+      final label = row['label'] as String?;
+      final appLocationRaw = row['app_location'] as String?;
+      if (id == null || id.isEmpty || label == null || label.isEmpty) {
+        continue;
       }
 
-      return records.whereType<Map<String, dynamic>>().toList();
-    } catch (_) {
-      return const [];
+      if (appLocationRaw == null || appLocationRaw.isEmpty) {
+        continue;
+      }
+      final appLocation = StorageLocation.fromString(appLocationRaw);
+
+      final synonymsRaw = row['synonyms'];
+      final synonyms = synonymsRaw is List
+          ? synonymsRaw
+                .whereType<String>()
+                .where((s) => s.trim().isNotEmpty)
+                .toList()
+          : const <String>[];
+
+      result.add(
+        ReferenceLocationRecord(
+          id: id,
+          label: label,
+          appLocation: appLocation,
+          synonyms: synonyms,
+        ),
+      );
     }
+
+    return result;
   }
 
   String? _validateBarcodePack(String packJson) {
-    try {
-      final decoded = jsonDecode(packJson);
-      if (decoded is! Map<String, dynamic>) {
-        return 'invalid_pack_json';
-      }
-      final schemaVersion = decoded['schema_version'];
-      if (schemaVersion is! int || schemaVersion <= 0) {
-        return 'invalid_schema_version';
-      }
-      final records = decoded['records'];
-      if (records is! List) {
-        return 'records_missing';
-      }
-
-      for (final record in records) {
-        if (record is! Map<String, dynamic>) {
-          return 'invalid_record';
-        }
-        final barcode = record['barcode'];
-        final productName = record['product_name'];
-        if (barcode is! String || barcode.isEmpty) {
-          return 'invalid_record_barcode';
-        }
-        if (productName is! String || productName.isEmpty) {
-          return 'invalid_record_product_name';
-        }
-      }
-
-      return null;
-    } catch (_) {
-      return 'invalid_pack_json';
+    final records = _extractPackRecords(packJson);
+    if (records.isEmpty) {
+      return 'records_missing';
     }
+
+    for (final record in records) {
+      final barcode = record['barcode'];
+      final productName = record['product_name'];
+      if (barcode is! String || barcode.isEmpty) {
+        return 'invalid_record_barcode';
+      }
+      if (productName is! String || productName.isEmpty) {
+        return 'invalid_record_product_name';
+      }
+    }
+
+    return null;
+  }
+
+  String? _validateCategoriesPack(String packJson) {
+    final records = _extractPackRecords(packJson);
+    if (records.isEmpty) {
+      return 'records_missing';
+    }
+
+    for (final record in records) {
+      final label = record['label'];
+      final appCategory = record['app_category'];
+      if (label is! String || label.isEmpty) {
+        return 'invalid_record_label';
+      }
+      if (appCategory is! String ||
+          !ItemCategory.values.any(
+            (category) => category.name == appCategory,
+          )) {
+        return 'invalid_record_app_category';
+      }
+    }
+
+    return null;
+  }
+
+  String? _validateLocationsPack(String packJson) {
+    final records = _extractPackRecords(packJson);
+    if (records.isEmpty) {
+      return 'records_missing';
+    }
+
+    for (final record in records) {
+      final label = record['label'];
+      final appLocation = record['app_location'];
+      if (label is! String || label.isEmpty) {
+        return 'invalid_record_label';
+      }
+      if (appLocation is! String ||
+          !StorageLocation.values.any(
+            (location) => location.name == appLocation,
+          )) {
+        return 'invalid_record_app_location';
+      }
+    }
+
+    return null;
   }
 
   Map<String, String?> _snapshotBarcodeState(SharedPreferences prefs) {
@@ -383,6 +809,52 @@ class ReferencePackService {
     };
   }
 
+  Map<String, String?> _snapshotCategoriesState(SharedPreferences prefs) {
+    return {
+      ReferencePackKeys.activeCategoriesPackRecordsJson: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackRecordsJson,
+      ),
+      ReferencePackKeys.activeCategoriesPackVersion: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackVersion,
+      ),
+      ReferencePackKeys.activeCategoriesPackRegion: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackRegion,
+      ),
+      ReferencePackKeys.activeCategoriesPackLocale: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackLocale,
+      ),
+      ReferencePackKeys.activeCategoriesPackChecksum: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackChecksum,
+      ),
+      ReferencePackKeys.activeCategoriesPackUpdatedAt: prefs.getString(
+        ReferencePackKeys.activeCategoriesPackUpdatedAt,
+      ),
+    };
+  }
+
+  Map<String, String?> _snapshotLocationsState(SharedPreferences prefs) {
+    return {
+      ReferencePackKeys.activeLocationsPackRecordsJson: prefs.getString(
+        ReferencePackKeys.activeLocationsPackRecordsJson,
+      ),
+      ReferencePackKeys.activeLocationsPackVersion: prefs.getString(
+        ReferencePackKeys.activeLocationsPackVersion,
+      ),
+      ReferencePackKeys.activeLocationsPackRegion: prefs.getString(
+        ReferencePackKeys.activeLocationsPackRegion,
+      ),
+      ReferencePackKeys.activeLocationsPackLocale: prefs.getString(
+        ReferencePackKeys.activeLocationsPackLocale,
+      ),
+      ReferencePackKeys.activeLocationsPackChecksum: prefs.getString(
+        ReferencePackKeys.activeLocationsPackChecksum,
+      ),
+      ReferencePackKeys.activeLocationsPackUpdatedAt: prefs.getString(
+        ReferencePackKeys.activeLocationsPackUpdatedAt,
+      ),
+    };
+  }
+
   Future<void> _restoreBarcodeState(
     SharedPreferences prefs,
     Map<String, String?> snapshot,
@@ -395,6 +867,127 @@ class ReferencePackService {
         await prefs.setString(entry.key, value);
       }
     }
+  }
+
+  Future<void> _restoreCategoriesState(
+    SharedPreferences prefs,
+    Map<String, String?> snapshot,
+  ) async {
+    for (final entry in snapshot.entries) {
+      final value = entry.value;
+      if (value == null) {
+        await prefs.remove(entry.key);
+      } else {
+        await prefs.setString(entry.key, value);
+      }
+    }
+  }
+
+  Future<void> _restoreLocationsState(
+    SharedPreferences prefs,
+    Map<String, String?> snapshot,
+  ) async {
+    for (final entry in snapshot.entries) {
+      final value = entry.value;
+      if (value == null) {
+        await prefs.remove(entry.key);
+      } else {
+        await prefs.setString(entry.key, value);
+      }
+    }
+  }
+
+  static List<Map<String, dynamic>> _extractPackRecords(String? rawJson) {
+    if (rawJson == null || rawJson.isEmpty) {
+      return const [];
+    }
+
+    try {
+      final decoded = jsonDecode(rawJson);
+      if (decoded is! Map<String, dynamic>) {
+        return const [];
+      }
+
+      final schemaVersion =
+          decoded['schema_version'] ??
+          (decoded['metadata'] is Map<String, dynamic>
+              ? (decoded['metadata'] as Map<String, dynamic>)['schema_version']
+              : null);
+      if (schemaVersion is! int || schemaVersion <= 0) {
+        return const [];
+      }
+
+      final records = decoded['records'];
+      if (records is! List) {
+        return const [];
+      }
+
+      return records.whereType<Map<String, dynamic>>().toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  ReferencePackDescriptor? _selectPackDescriptor({
+    required ReferencePackManifest manifest,
+    required ReferencePackType type,
+    required String region,
+    required String? locale,
+  }) {
+    final typed = manifest.packs
+        .where((pack) => pack.type == type && pack.region == region)
+        .toList();
+    if (typed.isEmpty) {
+      return null;
+    }
+
+    if (type == ReferencePackType.barcodeCatalog || locale == null) {
+      return typed.first;
+    }
+
+    final candidates = _localeCandidates(region: region, locale: locale);
+    for (final candidate in candidates) {
+      for (final pack in typed) {
+        if (pack.locale == candidate) {
+          return pack;
+        }
+      }
+    }
+
+    for (final pack in typed) {
+      if (pack.locale == null || pack.locale!.trim().isEmpty) {
+        return pack;
+      }
+    }
+
+    return typed.first;
+  }
+
+  List<String> _localeCandidates({
+    required String region,
+    required String locale,
+  }) {
+    final normalized = locale.replaceAll('_', '-').trim();
+    final defaultsByRegion = {'ca': 'en', 'us': 'en'};
+
+    final candidates = <String>[];
+    if (normalized.isNotEmpty) {
+      candidates.add(normalized);
+      final language = normalized.split('-').first;
+      if (!candidates.contains(language)) {
+        candidates.add(language);
+      }
+      if (language == 'es' && !candidates.contains('es-419')) {
+        candidates.add('es-419');
+      }
+    }
+
+    final regionDefault = defaultsByRegion[region.toLowerCase()];
+    if (regionDefault != null && !candidates.contains(regionDefault)) {
+      candidates.add(regionDefault);
+    }
+
+    return candidates;
   }
 
   int _compareVersions(String left, String right) {

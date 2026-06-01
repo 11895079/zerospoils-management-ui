@@ -224,6 +224,119 @@ void main() {
       expect(status.recordCount, 1);
     });
 
+    test('accepts barcode packs with metadata.schema_version format', () async {
+      const packJson =
+          '{"metadata":{"schema_version":1,"region":"ca"},"records":[{"barcode":"055000132152","product_name":"Metadata Coffee","category_hint":"pantry"}]}';
+      final checksum = sha256.convert(utf8.encode(packJson)).toString();
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final descriptor = ReferencePackDescriptor(
+        type: ReferencePackType.barcodeCatalog,
+        region: 'ca',
+        version: 'v10',
+        checksum: checksum,
+        minimumAppVersion: '1.0.0',
+        downloadUrl: Uri.parse('https://example.com/barcode-ca-v10.json'),
+      );
+
+      final result = await service.activateBarcodeCatalogPack(
+        descriptor: descriptor,
+        packJson: packJson,
+      );
+
+      expect(result.success, isTrue);
+      final status = await service.barcodeCatalogStatus();
+      expect(status.version, 'v10');
+      expect(status.recordCount, 1);
+    });
+
+    test('syncs locale-scoped categories and locations packs', () async {
+      const manifestUrl =
+          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+      const categoriesUrl =
+          'https://firebase.storage.googleapis.com/packs/categories-ca-fr.json';
+      const locationsUrl =
+          'https://firebase.storage.googleapis.com/packs/locations-ca-fr.json';
+
+      const categoriesPack =
+          '{"metadata":{"schema_version":1,"type":"categories","region":"ca","locale":"fr-CA"},"records":[{"id":"produce","label":"Fruits et legumes","app_category":"produce","synonyms":["fruit"]}] }';
+      const locationsPack =
+          '{"metadata":{"schema_version":1,"type":"locations","region":"ca","locale":"fr-CA"},"records":[{"id":"fridge","label":"Frigo","app_location":"fridge","synonyms":["refrigerateur"]}] }';
+
+      final categoriesChecksum = sha256
+          .convert(utf8.encode(categoriesPack))
+          .toString();
+      final locationsChecksum = sha256
+          .convert(utf8.encode(locationsPack))
+          .toString();
+
+      final manifestJson =
+          '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "categories",
+      "region": "ca",
+      "locale": "fr-CA",
+      "version": "1.0.0",
+      "checksum": "$categoriesChecksum",
+      "minimum_app_version": "1.0.0",
+      "download_url": "$categoriesUrl"
+    },
+    {
+      "type": "locations",
+      "region": "ca",
+      "locale": "fr-CA",
+      "version": "1.0.0",
+      "checksum": "$locationsChecksum",
+      "minimum_app_version": "1.0.0",
+      "download_url": "$locationsUrl"
+    }
+  ]
+}
+''';
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final downloader = _MapDownloader({
+        manifestUrl: manifestJson,
+        categoriesUrl: categoriesPack,
+        locationsUrl: locationsPack,
+      });
+      final manifestProvider = _FakeManifestUrlProvider(Uri.parse(manifestUrl));
+
+      final categoriesResult = await service.syncCategoriesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: 'ca',
+        locale: 'fr-CA',
+      );
+      final locationsResult = await service.syncLocationsPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: 'ca',
+        locale: 'fr-CA',
+      );
+
+      expect(categoriesResult.success, isTrue);
+      expect(locationsResult.success, isTrue);
+
+      final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
+      final locationRecords = ReferencePackService.activeLocationRecords(prefs);
+      expect(categoryRecords, hasLength(1));
+      expect(categoryRecords.single.label, 'Fruits et legumes');
+      expect(locationRecords, hasLength(1));
+      expect(locationRecords.single.label, 'Frigo');
+    });
+
     test('fails sync when manifest URL is unset', () async {
       final service = ReferencePackService(
         preferences: prefs,
