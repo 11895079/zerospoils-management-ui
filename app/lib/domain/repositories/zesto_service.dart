@@ -271,12 +271,6 @@ class ZestoService {
       'timestamp': now.toIso8601String(),
     });
 
-    // If no UI is listening yet, avoid scheduling delayed dismissal timers.
-    if (!_stateController.hasListener) {
-      _dismissMascot('auto');
-      return;
-    }
-
     // Auto-dismiss after a readable duration. Tips/messages with more text
     // stay longer so users can actually consume the content. Stored as a
     // cancellable Timer so a manual dismiss (or a new showMascot) doesn't

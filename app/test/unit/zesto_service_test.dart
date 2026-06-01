@@ -146,5 +146,26 @@ void main() {
 
       expect(shownTypes, ['dailyWelcome']);
     });
+
+    test('showMascot keeps message visible before first listener subscribes', () async {
+      final service = ZestoService(
+        getSettings: () => const MascotSettings(
+          enabled: true,
+          frequency: MascotFrequency.always,
+        ),
+        now: () => now,
+        random: Random(1),
+        displayDuration: const Duration(seconds: 10),
+        telemetryLogger: (name, properties) {
+          telemetry.add({'name': name, ...properties});
+        },
+      );
+
+      await service.showMascot(MascotMessageType.dailyWelcome);
+
+      expect(service.currentState.isVisible, isTrue);
+      expect(service.currentState.currentMessage, isNotNull);
+      expect(service.currentState.currentMessageType, MascotMessageType.dailyWelcome);
+    });
   });
 }
