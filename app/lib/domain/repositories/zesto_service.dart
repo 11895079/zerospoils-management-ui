@@ -271,6 +271,13 @@ class ZestoService {
       'timestamp': now.toIso8601String(),
     });
 
+    // If no UI listener is attached yet, keep the mascot state visible but
+    // skip auto-dismiss scheduling. This prevents timer leaks in widget tests
+    // and avoids dropping startup messages before the overlay subscribes.
+    if (!_stateController.hasListener) {
+      return;
+    }
+
     // Auto-dismiss after a readable duration. Tips/messages with more text
     // stay longer so users can actually consume the content. Stored as a
     // cancellable Timer so a manual dismiss (or a new showMascot) doesn't
