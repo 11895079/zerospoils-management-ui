@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:async';
 import 'generated_l10n/app_localizations.dart';
 import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
@@ -22,10 +23,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Bootstrap Firebase services (telemetry, crash reporting, remote config)
-  await FirebaseBootstrapService.initialize();
+  await FirebaseBootstrapService.initialize().timeout(
+    const Duration(seconds: 8),
+    onTimeout: () {},
+  );
 
   // Bootstrap Supabase services (auth, entitlements)
-  await SupabaseBootstrapService.initialize();
+  await SupabaseBootstrapService.initialize().timeout(
+    const Duration(seconds: 8),
+    onTimeout: () {},
+  );
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
@@ -42,8 +49,10 @@ void main() async {
   Hive.registerAdapter(ReceiptBatchAdapter());
   Hive.registerAdapter(UserCategoryAdapter());
 
-  // Initialize notifications
-  await NotificationService().initialize();
+  final prefs = await SharedPreferences.getInstance();
+  configureLaunchRouting(
+    onboardingComplete: prefs.getBool('onboarding_complete') ?? false,
+  );
 
   runApp(const ProviderScope(child: ZeroSpoilsApp()));
 }
@@ -74,6 +83,11 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
   }
 
   Future<void> _initPrefs() async {
+    await NotificationService().initialize().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {},
+    );
+
     final telemetry = ref.read(telemetryClientProvider);
     NotificationService().setTelemetryCallback((eventName, properties) {
       telemetry.enqueue({'name': eventName, 'properties': properties});
@@ -162,7 +176,15 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
       builder: (context, child) {
         return Stack(
           fit: StackFit.expand,
-          children: [if (child case != null) child, const ZestoOverlay()],
+          children: [
+            if (child case != null)
+              child
+            else
+              const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
+            const ZestoOverlay(),
+          ],
         );
       },
       debugShowCheckedModeBanner: false,

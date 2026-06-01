@@ -219,7 +219,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                     ),
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         AnimatedBuilder(

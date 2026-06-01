@@ -4,6 +4,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 import '../auth/firebase_auth_service.dart';
 import '../auth/secure_token_service.dart';
 import '../distribution/app_distribution_service.dart';
@@ -97,15 +98,16 @@ class FirebaseBootstrapService {
         ReferencePackRemoteConfigKeys.manifestUrl: '',
       });
 
-      // Fetch and activate remote config
-      await remoteConfig.fetchAndActivate();
+      // Fetch/activate in background so first frame is never blocked.
+      unawaited(remoteConfig.fetchAndActivate());
 
       // Initialize Firebase Cloud Messaging (FCM) for push notifications.
-      await _initializeFcm();
+      // Keep this async from app startup to avoid pre-runApp stalls.
+      unawaited(_initializeFcm());
 
       // Initialize App Distribution Tester SDK (beta/debug builds only).
       // This is a no-op in production builds and never blocks startup.
-      await AppDistributionService.instance.initialize();
+      unawaited(AppDistributionService.instance.initialize());
 
       debugPrint(
         '[Firebase] Bootstrap complete: Core + Auth (anonymous, token cached) '
@@ -124,13 +126,10 @@ class FirebaseBootstrapService {
 
     final messaging = FirebaseMessaging.instance;
 
-    // Request notification permission (required on iOS; optional prompt on Android 13+).
-    final settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
+    // Never prompt during bootstrap. The app already exposes an explicit
+    // in-app permission flow; prompting here can block first-frame rendering
+    // on iOS and produce a blank native window before Flutter paints.
+    final settings = await messaging.getNotificationSettings();
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional) {

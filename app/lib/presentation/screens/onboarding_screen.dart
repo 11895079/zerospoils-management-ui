@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import '../routing/router.dart';
 import '../widgets/notification_permission_prompt.dart';
 import '../widgets/camera_permission_prompt.dart';
 import '../../presentation/di/service_locator.dart';
@@ -77,6 +78,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _selectedPresetIds.toList(),
     );
     await prefs.setBool('onboarding_complete', true);
+    configureLaunchRouting(onboardingComplete: true);
 
     _emitTelemetry('onboarding_completed', {'pages': _numPages});
 

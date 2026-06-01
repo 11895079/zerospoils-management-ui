@@ -93,9 +93,9 @@ class NotificationService {
     const AndroidInitializationSettings androidInit =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const DarwinInitializationSettings iosInit = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
     );
 
     const InitializationSettings initSettings = InitializationSettings(
@@ -120,6 +120,30 @@ class NotificationService {
         ?.createNotificationChannel(defaultChannel);
 
     _initialized = true;
+  }
+
+  Future<bool> requestPermissions() async {
+    try {
+      final androidResult = await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+      final iosResult = await _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+      final macResult = await _plugin
+          .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin
+          >()
+          ?.requestPermissions(alert: true, badge: true, sound: true);
+
+      return androidResult == true || iosResult == true || macResult == true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Derive a schedule time based on expiry date and lead time.
