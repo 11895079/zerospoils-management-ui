@@ -227,7 +227,9 @@ void main() {
     test('upgrades an existing active barcode pack to a newer version', () async {
       const initialPack =
           '{"schema_version":1,"records":[{"barcode":"055000132152","product_name":"Legacy Coffee","category_hint":"pantry"}]}';
-      final initialChecksum = sha256.convert(utf8.encode(initialPack)).toString();
+      final initialChecksum = sha256
+          .convert(utf8.encode(initialPack))
+          .toString();
 
       const upgradedPackUrl =
           'https://firebase.storage.googleapis.com/packs/barcode-ca-v10.json';
