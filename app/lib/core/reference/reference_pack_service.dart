@@ -956,7 +956,10 @@ class ReferencePackService {
       candidates = typed;
     } else {
       candidates = [];
-      final localeCandidates = _localeCandidates(region: region, locale: locale);
+      final localeCandidates = _localeCandidates(
+        region: region,
+        locale: locale,
+      );
       for (final candidate in localeCandidates) {
         for (final pack in typed) {
           if (pack.locale == candidate && !candidates.contains(pack)) {
@@ -978,12 +981,16 @@ class ReferencePackService {
     }
 
     final compatible = candidates
-        .where((pack) => _compareVersions(appVersion, pack.minimumAppVersion) >= 0)
+        .where(
+          (pack) => _compareVersions(appVersion, pack.minimumAppVersion) >= 0,
+        )
         .toList();
 
     final pool = compatible.isNotEmpty ? compatible : candidates;
     return pool.reduce((best, current) {
-      return _compareVersions(current.version, best.version) > 0 ? current : best;
+      return _compareVersions(current.version, best.version) > 0
+          ? current
+          : best;
     });
   }
 

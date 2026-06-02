@@ -526,23 +526,25 @@ void main() {
       expect(records.single['product_name'], 'Pack V2');
     });
 
-    test('sync falls back to highest version when no descriptor is compatible', () async {
-      const manifestUrl =
-          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
-      const packV2Url =
-          'https://firebase.storage.googleapis.com/packs/barcode-ca-v2.json';
-      const packV5Url =
-          'https://firebase.storage.googleapis.com/packs/barcode-ca-v5.json';
+    test(
+      'sync falls back to highest version when no descriptor is compatible',
+      () async {
+        const manifestUrl =
+            'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+        const packV2Url =
+            'https://firebase.storage.googleapis.com/packs/barcode-ca-v2.json';
+        const packV5Url =
+            'https://firebase.storage.googleapis.com/packs/barcode-ca-v5.json';
 
-      const packV2 =
-          '{"schema_version":1,"records":[{"barcode":"111111111111","product_name":"Pack V2"}]}';
-      const packV5 =
-          '{"schema_version":1,"records":[{"barcode":"222222222222","product_name":"Pack V5"}]}';
-      final checksumV2 = sha256.convert(utf8.encode(packV2)).toString();
-      final checksumV5 = sha256.convert(utf8.encode(packV5)).toString();
+        const packV2 =
+            '{"schema_version":1,"records":[{"barcode":"111111111111","product_name":"Pack V2"}]}';
+        const packV5 =
+            '{"schema_version":1,"records":[{"barcode":"222222222222","product_name":"Pack V5"}]}';
+        final checksumV2 = sha256.convert(utf8.encode(packV2)).toString();
+        final checksumV5 = sha256.convert(utf8.encode(packV5)).toString();
 
-      final manifestJson =
-          '''
+        final manifestJson =
+            '''
 {
   "schema_version": 1,
   "packs": [
@@ -566,27 +568,28 @@ void main() {
 }
 ''';
 
-      final service = ReferencePackService(
-        preferences: prefs,
-        appVersionProvider: () async => '1.0.0',
-      );
+        final service = ReferencePackService(
+          preferences: prefs,
+          appVersionProvider: () async => '1.0.0',
+        );
 
-      final result = await service.syncBarcodeCatalogPack(
-        manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
-        downloader: _MapDownloader({
-          manifestUrl: manifestJson,
-          packV2Url: packV2,
-          packV5Url: packV5,
-        }),
-        region: 'ca',
-      );
+        final result = await service.syncBarcodeCatalogPack(
+          manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
+          downloader: _MapDownloader({
+            manifestUrl: manifestJson,
+            packV2Url: packV2,
+            packV5Url: packV5,
+          }),
+          region: 'ca',
+        );
 
-      expect(result.success, isFalse);
-      expect(result.failureReason, 'minimum_app_version_not_met');
+        expect(result.success, isFalse);
+        expect(result.failureReason, 'minimum_app_version_not_met');
 
-      final status = await service.barcodeCatalogStatus();
-      expect(status.version, isNull);
-      expect(status.recordCount, 0);
-    });
+        final status = await service.barcodeCatalogStatus();
+        expect(status.version, isNull);
+        expect(status.recordCount, 0);
+      },
+    );
   });
 }
