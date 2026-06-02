@@ -387,16 +387,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       restoreResult.itemsImported,
                       restoreResult.migrationsApplied,
                     )
-                  : l10n.settingsRestoreCompleted(
-                      restoreResult.itemsImported,
-                    ),
+                  : l10n.settingsRestoreCompleted(restoreResult.itemsImported),
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.settingsRestoreFailed(restoreResult.error ?? '')),
+            content: Text(
+              l10n.settingsRestoreFailed(restoreResult.error ?? ''),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -871,7 +871,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildLinkTile(
               icon: Icons.help_outline,
               label: l10n.settingsHelpFaq,
-              onTap: () => _showSnack(context, l10n.settingsHelpCenterComingSoon),
+              onTap: () =>
+                  _showSnack(context, l10n.settingsHelpCenterComingSoon),
             ),
             _buildLinkTile(
               icon: Icons.feedback_outlined,
@@ -899,7 +900,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildLinkTile(
               icon: Icons.privacy_tip_outlined,
               label: l10n.settingsPrivacyPolicy,
-              onTap: () => _showSnack(context, l10n.settingsPrivacyPolicyComingSoon),
+              onTap: () =>
+                  _showSnack(context, l10n.settingsPrivacyPolicyComingSoon),
             ),
             _buildLinkTile(
               icon: Icons.gavel_outlined,
@@ -910,8 +912,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.info_outline,
               label: l10n.settingsAbout,
               subtitle: l10n.settingsAboutSubtitle,
-              onTap: () =>
-                  _showSnack(context, l10n.settingsAboutSnackMessage),
+              onTap: () => _showSnack(context, l10n.settingsAboutSnackMessage),
             ),
           ]),
         ],
@@ -1309,7 +1310,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   String _referencePackDiagnosticsSubtitle() {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
-    final version = _barcodePackVersion ?? l10n.settingsReferencePackBundledDefaultOnly;
+    final version =
+        _barcodePackVersion ?? l10n.settingsReferencePackBundledDefaultOnly;
     final updatedAt = _barcodePackUpdatedAt == null
         ? l10n.settingsReferencePackNeverUpdated
         : DateFormat(
@@ -1589,7 +1591,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                    : Text(l10n.settingsCreateAccount),
+                : Text(l10n.settingsCreateAccount),
           ),
           FilledButton(
             key: const Key('account_signin_button'),
@@ -1610,7 +1612,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                    : Text(l10n.settingsSignIn),
+                : Text(l10n.settingsSignIn),
           ),
           FilledButton.tonal(
             key: const Key('account_google_signin_button'),
@@ -1627,7 +1629,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                    : Text(l10n.settingsContinueWithGoogle),
+                : Text(l10n.settingsContinueWithGoogle),
           ),
           FilledButton.tonal(
             key: const Key('account_apple_signin_button'),
@@ -1636,9 +1638,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                 : () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(
-                          l10n.settingsAppleSignInSoonMessage,
-                        ),
+                        content: Text(l10n.settingsAppleSignInSoonMessage),
                       ),
                     );
                   },

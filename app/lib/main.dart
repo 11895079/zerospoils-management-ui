@@ -159,12 +159,11 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
         await loadThemeModePreference(ref);
       });
     } finally {
-      if (!mounted) {
-        return;
+      if (mounted) {
+        setState(() {
+          _initialized = true;
+        });
       }
-      setState(() {
-        _initialized = true;
-      });
     }
   }
 

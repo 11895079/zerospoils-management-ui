@@ -12,7 +12,8 @@ abstract class AudioFeedbackPlayer {
 /// Plays a short generated sine beep via an in-memory WAV payload so volume
 /// can be controlled directly from app settings.
 class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
-  DefaultAudioFeedbackPlayer({AudioPlayer? player}) : _player = player ?? AudioPlayer();
+  DefaultAudioFeedbackPlayer({AudioPlayer? player})
+    : _player = player ?? AudioPlayer();
 
   final AudioPlayer _player;
   Uint8List? _cachedTone;
@@ -70,9 +71,10 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
     for (var i = 0; i < sampleCount; i++) {
       final t = i / sampleRate;
       final envelope = math.min(1.0, i / (sampleRate * 0.006));
-      final sample = (math.sin(2 * math.pi * frequencyHz * t) * maxAmp * envelope)
-          .round()
-          .clamp(-32768, 32767);
+      final sample =
+          (math.sin(2 * math.pi * frequencyHz * t) * maxAmp * envelope)
+              .round()
+              .clamp(-32768, 32767);
       bytes.setInt16(44 + i * 2, sample, Endian.little);
     }
 
