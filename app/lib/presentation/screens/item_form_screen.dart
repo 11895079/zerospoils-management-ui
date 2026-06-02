@@ -183,6 +183,21 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   Future<void> _loadReferencePackSuggestions() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Populate from cached reference packs immediately — no network on the
+      // critical path when opening the form.
+      _applyReferenceRecords(prefs);
+      // Refresh opportunistically in the background. This never blocks the
+      // form, and a failed sync never becomes an unhandled async error.
+      unawaited(_refreshReferencePacksInBackground(prefs));
+    } catch (_) {
+      // Best-effort enhancement only. Built-in category/location flows remain usable.
+    }
+  }
+
+  Future<void> _refreshReferencePacksInBackground(
+    SharedPreferences prefs,
+  ) async {
+    try {
       final region = effectiveReferencePackRegion(
         regionTag:
             prefs.getString(referencePackRegionPreferenceKey) ??
@@ -222,46 +237,51 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         locale: locale,
       );
 
-      final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
-      final locationRecords = ReferencePackService.activeLocationRecords(prefs);
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _referenceCategoryLabels
-          ..clear()
-          ..addEntries(
-            categoryRecords.map(
-              (record) => MapEntry(record.appCategory, record.label),
-            ),
-          );
-
-        _referenceCategoryTerms
-          ..clear()
-          ..addEntries(
-            categoryRecords.map((record) {
-              final terms = <String>{
-                record.label.toLowerCase(),
-                record.id.toLowerCase(),
-                ...record.synonyms.map((synonym) => synonym.toLowerCase()),
-              };
-              return MapEntry(record.appCategory, terms);
-            }),
-          );
-
-        _referenceLocationLabels
-          ..clear()
-          ..addEntries(
-            locationRecords.map(
-              (record) => MapEntry(record.appLocation, record.label),
-            ),
-          );
-      });
+      // Re-apply with freshly synced records once the network catches up.
+      _applyReferenceRecords(prefs);
     } catch (_) {
-      // Best-effort enhancement only. Built-in category/location flows remain usable.
+      // Network refresh is best-effort; cached data already populated the UI.
     }
+  }
+
+  void _applyReferenceRecords(SharedPreferences prefs) {
+    final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
+    final locationRecords = ReferencePackService.activeLocationRecords(prefs);
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _referenceCategoryLabels
+        ..clear()
+        ..addEntries(
+          categoryRecords.map(
+            (record) => MapEntry(record.appCategory, record.label),
+          ),
+        );
+
+      _referenceCategoryTerms
+        ..clear()
+        ..addEntries(
+          categoryRecords.map((record) {
+            final terms = <String>{
+              record.label.toLowerCase(),
+              record.id.toLowerCase(),
+              ...record.synonyms.map((synonym) => synonym.toLowerCase()),
+            };
+            return MapEntry(record.appCategory, terms);
+          }),
+        );
+
+      _referenceLocationLabels
+        ..clear()
+        ..addEntries(
+          locationRecords.map(
+            (record) => MapEntry(record.appLocation, record.label),
+          ),
+        );
+    });
   }
 
   Future<void> _loadReceiptBatches() async {

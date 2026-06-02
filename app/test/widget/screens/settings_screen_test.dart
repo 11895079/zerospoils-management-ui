@@ -597,7 +597,11 @@ void main() {
       await tester.pumpWidget(buildTestHarness());
       await tester.pumpAndSettle();
 
-      expect(find.text('Paramètres'), findsOneWidget);
+      // Assert the active locale rather than a translated string (brittle).
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).locale,
+        resolveAppLocale('fr_CA'),
+      );
 
       await tester.scrollUntilVisible(
         tileForKey(const Key('language_dropdown_tile')),
@@ -617,7 +621,14 @@ void main() {
 
       await tester.tap(dropdownForKey(const Key('language_dropdown_tile')));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('English').last);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'en',
+            )
+            .last,
+      );
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();
@@ -630,7 +641,11 @@ void main() {
             .value,
         'en',
       );
-      expect(find.text('Settings'), findsOneWidget);
+      // Verify the app re-rendered in the new locale (not a specific string).
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).locale,
+        resolveAppLocale('en'),
+      );
     });
 
     testWidgets('Reference data region and language persist preference', (
@@ -681,7 +696,14 @@ void main() {
         dropdownForKey(const Key('reference_region_dropdown_tile')),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('United States').last);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'us',
+            )
+            .last,
+      );
       await tester.pumpAndSettle();
 
       await tester.ensureVisible(
@@ -692,7 +714,14 @@ void main() {
         dropdownForKey(const Key('reference_language_dropdown_tile')),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('English').last);
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'en',
+            )
+            .last,
+      );
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();

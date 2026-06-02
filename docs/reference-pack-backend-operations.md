@@ -42,11 +42,15 @@ Example:
 ## Publish Workflow
 
 ### Canonical Publish Command
-The repo now includes a one-step publisher for Wave A reference packs (barcode catalog, categories, and locations):
+The repo includes a one-step publisher for Wave A reference packs (barcode catalog, categories, and locations). It **requires a Firebase service account JSON** — there is no default path, and a fresh checkout has no `distribution/` directory:
 
 ```bash
-node firebase/functions/scripts/publish_reference_packs.js
+node firebase/functions/scripts/publish_reference_packs.js \
+  --service-account-json ./path/to/service-account.json \
+  --remote-config-auth service-account
 ```
+
+> Most maintainers should publish via the GitHub Action instead (see below). The Action injects the service account from the `FIREBASE_SERVICE_ACCOUNT_JSON` secret, so no local credentials are required.
 
 That command uploads versioned pack JSON files to the project Storage bucket, writes the manifest, makes the objects publicly readable, and updates `reference_pack_manifest_url` in Remote Config.
 

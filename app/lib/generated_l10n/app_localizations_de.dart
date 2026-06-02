@@ -348,6 +348,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLanguage => 'Sprache';
 
   @override
+  String get settingsReferenceDataRegion => 'Region der Referenzdaten';
+
+  @override
+  String get settingsReferenceDataLanguage => 'Sprache der Referenzdaten';
+
+  @override
   String get settingsDateFormat => 'Datumsformat';
 
   @override

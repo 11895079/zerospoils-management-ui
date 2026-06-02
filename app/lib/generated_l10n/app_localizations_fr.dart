@@ -347,6 +347,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguage => 'Langue';
 
   @override
+  String get settingsReferenceDataRegion => 'Région des données de référence';
+
+  @override
+  String get settingsReferenceDataLanguage => 'Langue des données de référence';
+
+  @override
   String get settingsDateFormat => 'Format de date';
 
   @override
@@ -864,6 +870,12 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
 
   @override
   String get settingsLanguage => 'Langue';
+
+  @override
+  String get settingsReferenceDataRegion => 'Région des données de référence';
+
+  @override
+  String get settingsReferenceDataLanguage => 'Langue des données de référence';
 
   @override
   String get settingsDateFormat => 'Format de date';

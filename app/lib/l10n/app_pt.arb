@@ -125,6 +125,8 @@
   "settingsPrivacy": "Privacidade e dados",
   "settingsDarkMode": "Modo escuro",
   "settingsLanguage": "Idioma",
+  "settingsReferenceDataRegion": "Região dos dados de referência",
+  "settingsReferenceDataLanguage": "Idioma dos dados de referência",
   "settingsDateFormat": "Formato de data",
   "settingsVersion": "Versão",
   "settingsExportData": "Exportar dados",

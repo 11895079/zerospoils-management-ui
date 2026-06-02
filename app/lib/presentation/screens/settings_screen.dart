@@ -805,7 +805,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDropdownTile<String>(
               key: const Key('reference_region_dropdown_tile'),
               icon: Icons.public,
-              label: 'Reference Data Region',
+              label: l10n.settingsReferenceDataRegion,
               value: referencePackRegionTag,
               items: referencePackRegionOptions
                   .map((option) => option.tag)
@@ -821,7 +821,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDropdownTile<String>(
               key: const Key('reference_language_dropdown_tile'),
               icon: Icons.translate,
-              label: 'Reference Data Language',
+              label: l10n.settingsReferenceDataLanguage,
               value: referencePackLanguageTag,
               items: referencePackLanguageOptions
                   .map((option) => option.tag)

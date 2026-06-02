@@ -99,15 +99,30 @@ class FirebaseBootstrapService {
       });
 
       // Fetch/activate in background so first frame is never blocked.
-      unawaited(remoteConfig.fetchAndActivate());
+      // Errors are handled here so a failed fetch never becomes an unhandled
+      // async exception (which can crash debug builds / flake tests).
+      unawaited(
+        remoteConfig.fetchAndActivate().catchError((Object e) {
+          debugPrint('[Firebase] Remote Config fetch/activate failed: $e');
+          return false;
+        }),
+      );
 
       // Initialize Firebase Cloud Messaging (FCM) for push notifications.
       // Keep this async from app startup to avoid pre-runApp stalls.
-      unawaited(_initializeFcm());
+      unawaited(
+        _initializeFcm().catchError((Object e) {
+          debugPrint('[Firebase] FCM initialization failed: $e');
+        }),
+      );
 
       // Initialize App Distribution Tester SDK (beta/debug builds only).
       // This is a no-op in production builds and never blocks startup.
-      unawaited(AppDistributionService.instance.initialize());
+      unawaited(
+        AppDistributionService.instance.initialize().catchError((Object e) {
+          debugPrint('[Firebase] App Distribution init failed: $e');
+        }),
+      );
 
       debugPrint(
         '[Firebase] Bootstrap complete: Core + Auth (anonymous, token cached) '

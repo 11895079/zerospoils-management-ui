@@ -323,10 +323,6 @@ async function main() {
   const repoRoot = path.resolve(__dirname, '../..', '..');
   const defaults = {
     config: path.join(repoRoot, 'scripts/reference_pack_barcode_sources.wave_a.json'),
-    serviceAccountJson: path.join(
-      repoRoot,
-      'distribution/zerospoils-23dae-firebase-adminsdk-fbsvc-56a6aa596d.json',
-    ),
     bucket: 'zerospoils-23dae.firebasestorage.app',
     projectId: 'zerospoils-23dae',
     manifestObjectPath: 'reference-packs/manifests/prod/latest.json',
@@ -336,8 +332,20 @@ async function main() {
   };
 
   const args = { ...defaults, ...parseArgs(process.argv) };
-  if (!args.config || !args.serviceAccountJson) {
-    throw new Error('Missing required --config or --service-account-json argument');
+  if (!args.config) {
+    throw new Error('Missing required --config argument');
+  }
+  if (!args.serviceAccountJson) {
+    throw new Error(
+      '--service-account-json is required: pass the path to a Firebase service ' +
+        'account JSON (e.g. --service-account-json ./service-account.json), or run ' +
+        'via the publish-reference-packs GitHub Action, which injects it from the ' +
+        'FIREBASE_SERVICE_ACCOUNT_JSON secret.',
+    );
+  }
+  const serviceAccountPath = path.resolve(args.serviceAccountJson);
+  if (!fs.existsSync(serviceAccountPath)) {
+    throw new Error(`Service account JSON not found at: ${serviceAccountPath}`);
   }
   if (!['firebase-cli', 'service-account'].includes(args.remoteConfigAuth)) {
     throw new Error('--remote-config-auth must be one of: firebase-cli, service-account');
@@ -345,7 +353,7 @@ async function main() {
 
   const config = readJson(path.resolve(args.config));
   const matrix = readJson(path.resolve(args.matrixConfig));
-  const serviceAccount = readJson(path.resolve(args.serviceAccountJson));
+  const serviceAccount = readJson(serviceAccountPath);
   const projectId = args.projectId || serviceAccount.project_id;
   const bucketName = args.bucket || `${projectId}.firebasestorage.app`;
   const generatedAt = args.generatedAt || utcNowIso();

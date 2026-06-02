@@ -57,7 +57,7 @@ jobs:
             ${{ runner.temp }}/wave-a-jobs.md
 
   validate-wave-a-rows:
-    name: Validate ${{ matrix.pack_type }} / ${{ matrix.region }} / ${{ matrix.locale }}
+    name: Scaffold log (no validation yet) ${{ matrix.pack_type }} / ${{ matrix.region }} / ${{ matrix.locale }}
     runs-on: ubuntu-latest
     needs: generate-wave-a-matrix
     strategy:
@@ -67,9 +67,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Placeholder validation
+      - name: Log scaffold row (no validation performed yet)
         run: |
-          echo "Validating scaffold row"
+          echo "Scaffold logging only — this job does NOT validate anything yet."
           echo "pack_type=${{ matrix.pack_type }}"
           echo "region=${{ matrix.region }}"
           echo "locale=${{ matrix.locale }}"

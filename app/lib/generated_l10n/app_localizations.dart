@@ -765,6 +765,18 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @settingsReferenceDataRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Data Region'**
+  String get settingsReferenceDataRegion;
+
+  /// No description provided for @settingsReferenceDataLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Data Language'**
+  String get settingsReferenceDataLanguage;
+
   /// No description provided for @settingsDateFormat.
   ///
   /// In en, this message translates to:
