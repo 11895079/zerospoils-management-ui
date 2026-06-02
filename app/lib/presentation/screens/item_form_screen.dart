@@ -199,10 +199,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
             prefs.getString(appLocalePreferenceKey) ?? appLocaleSystemTag,
       );
 
-      final service = ReferencePackService(
-        preferences: prefs,
-        appVersionProvider: () async => '1.0.0',
-      );
+      final service = ReferencePackService(preferences: prefs);
 
       final manifestProvider = FirebaseRemoteConfigManifestUrlProvider();
       final downloader = HttpReferencePackDownloader();

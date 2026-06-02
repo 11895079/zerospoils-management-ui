@@ -172,11 +172,14 @@ class ReferencePackService {
       );
     }
 
+    final currentVersion = await _appVersion();
+
     final descriptor = _selectPackDescriptor(
       manifest: manifest,
       type: ReferencePackType.barcodeCatalog,
       region: region,
       locale: null,
+      appVersion: currentVersion,
     );
 
     if (descriptor == null) {
@@ -274,11 +277,14 @@ class ReferencePackService {
       );
     }
 
+    final currentVersion = await _appVersion();
+
     final descriptor = _selectPackDescriptor(
       manifest: manifest,
       type: ReferencePackType.categories,
       region: region,
       locale: locale,
+      appVersion: currentVersion,
     );
     if (descriptor == null) {
       return const ReferencePackActivationResult(
@@ -344,11 +350,14 @@ class ReferencePackService {
       );
     }
 
+    final currentVersion = await _appVersion();
+
     final descriptor = _selectPackDescriptor(
       manifest: manifest,
       type: ReferencePackType.locations,
       region: region,
       locale: locale,
+      appVersion: currentVersion,
     );
     if (descriptor == null) {
       return const ReferencePackActivationResult(
@@ -933,6 +942,7 @@ class ReferencePackService {
     required ReferencePackType type,
     required String region,
     required String? locale,
+    required String appVersion,
   }) {
     final typed = manifest.packs
         .where((pack) => pack.type == type && pack.region == region)
@@ -941,26 +951,40 @@ class ReferencePackService {
       return null;
     }
 
+    final List<ReferencePackDescriptor> candidates;
     if (type == ReferencePackType.barcodeCatalog || locale == null) {
-      return typed.first;
-    }
-
-    final candidates = _localeCandidates(region: region, locale: locale);
-    for (final candidate in candidates) {
-      for (final pack in typed) {
-        if (pack.locale == candidate) {
-          return pack;
+      candidates = typed;
+    } else {
+      candidates = [];
+      final localeCandidates = _localeCandidates(region: region, locale: locale);
+      for (final candidate in localeCandidates) {
+        for (final pack in typed) {
+          if (pack.locale == candidate && !candidates.contains(pack)) {
+            candidates.add(pack);
+          }
         }
       }
-    }
 
-    for (final pack in typed) {
-      if (pack.locale == null || pack.locale!.trim().isEmpty) {
-        return pack;
+      for (final pack in typed) {
+        if ((pack.locale == null || pack.locale!.trim().isEmpty) &&
+            !candidates.contains(pack)) {
+          candidates.add(pack);
+        }
+      }
+
+      if (candidates.isEmpty) {
+        candidates.addAll(typed);
       }
     }
 
-    return typed.first;
+    final compatible = candidates
+        .where((pack) => _compareVersions(appVersion, pack.minimumAppVersion) >= 0)
+        .toList();
+
+    final pool = compatible.isNotEmpty ? compatible : candidates;
+    return pool.reduce((best, current) {
+      return _compareVersions(current.version, best.version) > 0 ? current : best;
+    });
   }
 
   List<String> _localeCandidates({

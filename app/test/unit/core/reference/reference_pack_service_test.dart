@@ -462,5 +462,131 @@ void main() {
       expect(result.success, isFalse);
       expect(result.failureReason, 'pack_not_found_for_region');
     });
+
+    test('sync selects highest compatible barcode pack version', () async {
+      const manifestUrl =
+          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+      const packV2Url =
+          'https://firebase.storage.googleapis.com/packs/barcode-ca-v2.json';
+      const packV5Url =
+          'https://firebase.storage.googleapis.com/packs/barcode-ca-v5.json';
+
+      const packV2 =
+          '{"schema_version":1,"records":[{"barcode":"111111111111","product_name":"Pack V2"}]}';
+      const packV5 =
+          '{"schema_version":1,"records":[{"barcode":"222222222222","product_name":"Pack V5"}]}';
+      final checksumV2 = sha256.convert(utf8.encode(packV2)).toString();
+      final checksumV5 = sha256.convert(utf8.encode(packV5)).toString();
+
+      final manifestJson =
+          '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "barcode_catalog",
+      "region": "ca",
+      "version": "v2",
+      "checksum": "$checksumV2",
+      "minimum_app_version": "1.0.0",
+      "download_url": "$packV2Url"
+    },
+    {
+      "type": "barcode_catalog",
+      "region": "ca",
+      "version": "v5",
+      "checksum": "$checksumV5",
+      "minimum_app_version": "2.0.0",
+      "download_url": "$packV5Url"
+    }
+  ]
+}
+''';
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.5.0',
+      );
+
+      final result = await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
+        downloader: _MapDownloader({
+          manifestUrl: manifestJson,
+          packV2Url: packV2,
+          packV5Url: packV5,
+        }),
+        region: 'ca',
+      );
+
+      expect(result.success, isTrue);
+
+      final status = await service.barcodeCatalogStatus();
+      expect(status.version, 'v2');
+      final records = ReferencePackService.activeBarcodeCatalogRecords(prefs);
+      expect(records.single['product_name'], 'Pack V2');
+    });
+
+    test('sync falls back to highest version when no descriptor is compatible', () async {
+      const manifestUrl =
+          'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
+      const packV2Url =
+          'https://firebase.storage.googleapis.com/packs/barcode-ca-v2.json';
+      const packV5Url =
+          'https://firebase.storage.googleapis.com/packs/barcode-ca-v5.json';
+
+      const packV2 =
+          '{"schema_version":1,"records":[{"barcode":"111111111111","product_name":"Pack V2"}]}';
+      const packV5 =
+          '{"schema_version":1,"records":[{"barcode":"222222222222","product_name":"Pack V5"}]}';
+      final checksumV2 = sha256.convert(utf8.encode(packV2)).toString();
+      final checksumV5 = sha256.convert(utf8.encode(packV5)).toString();
+
+      final manifestJson =
+          '''
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "type": "barcode_catalog",
+      "region": "ca",
+      "version": "v2",
+      "checksum": "$checksumV2",
+      "minimum_app_version": "2.0.0",
+      "download_url": "$packV2Url"
+    },
+    {
+      "type": "barcode_catalog",
+      "region": "ca",
+      "version": "v5",
+      "checksum": "$checksumV5",
+      "minimum_app_version": "3.0.0",
+      "download_url": "$packV5Url"
+    }
+  ]
+}
+''';
+
+      final service = ReferencePackService(
+        preferences: prefs,
+        appVersionProvider: () async => '1.0.0',
+      );
+
+      final result = await service.syncBarcodeCatalogPack(
+        manifestUrlProvider: _FakeManifestUrlProvider(Uri.parse(manifestUrl)),
+        downloader: _MapDownloader({
+          manifestUrl: manifestJson,
+          packV2Url: packV2,
+          packV5Url: packV5,
+        }),
+        region: 'ca',
+      );
+
+      expect(result.success, isFalse);
+      expect(result.failureReason, 'minimum_app_version_not_met');
+
+      final status = await service.barcodeCatalogStatus();
+      expect(status.version, isNull);
+      expect(status.recordCount, 0);
+    });
   });
 }
