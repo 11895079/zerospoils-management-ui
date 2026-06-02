@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart'
     show Item, ItemCategory, ItemStatus, Unit;
 import '../../domain/models/shopping_list_item.dart';
@@ -39,6 +41,7 @@ class ShoppingListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     // Track screen view
     _trackScreenViewed(ref);
 
@@ -50,16 +53,22 @@ class ShoppingListScreen extends ConsumerWidget {
         key: const Key('screen_shopping_list'),
         appBar: AppBar(
           title: Text(
-            'Shopping List',
+            l10n.screenTitleShoppingList,
             style: theme.appBarTheme.titleTextStyle?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           elevation: 1,
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(key: Key('shopping_list_tab'), text: 'List'),
-              Tab(key: Key('shopping_history_tab'), text: 'History 🧾'),
+              Tab(
+                key: const Key('shopping_list_tab'),
+                text: l10n.navigationShoppingList,
+              ),
+              Tab(
+                key: const Key('shopping_history_tab'),
+                text: l10n.navigationShoppingHistory,
+              ),
             ],
           ),
         ),

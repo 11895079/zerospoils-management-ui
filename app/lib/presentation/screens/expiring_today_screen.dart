@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/utils/expiry_classifier.dart';
 import '../../domain/models/expiry_bucket.dart';
@@ -101,11 +103,12 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return Scaffold(
       key: const Key('screen_expiring_today'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('Expiring Soon')),
+      appBar: AppBar(title: Text(l10n.expiringSoonLabel)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null

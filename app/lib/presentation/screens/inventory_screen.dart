@@ -8,6 +8,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
@@ -729,6 +731,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final itemsAsync = ref.watch(itemsFutureProvider);
     final filterState = ref.watch(inventoryFilterProvider);
     final progressStatsAsync = ref.watch(progressStatsProvider);
@@ -743,7 +746,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Inventory'),
+        title: Text(l10n.navigationInventory),
         elevation: 1,
         actions: [
           _buildViewModeToggle(viewMode, filterState, filteredCount),

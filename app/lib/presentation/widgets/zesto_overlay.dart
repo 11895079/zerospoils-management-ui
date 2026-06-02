@@ -161,6 +161,50 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
     }
   }
 
+  String _zestoName(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    switch (lang) {
+      case 'fr':
+      case 'es':
+      case 'de':
+      case 'pt':
+      default:
+        return 'Zesto';
+    }
+  }
+
+  String _zestoSaysLabel(BuildContext context, String message) {
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    switch (lang) {
+      case 'fr':
+        return 'Zesto dit: $message';
+      case 'es':
+        return 'Zesto dice: $message';
+      case 'de':
+        return 'Zesto sagt: $message';
+      case 'pt':
+        return 'Zesto diz: $message';
+      default:
+        return 'Zesto says: $message';
+    }
+  }
+
+  String _dismissZestoLabel(BuildContext context) {
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    switch (lang) {
+      case 'fr':
+        return 'Fermer Zesto';
+      case 'es':
+        return 'Cerrar Zesto';
+      case 'de':
+        return 'Zesto schliessen';
+      case 'pt':
+        return 'Dispensar Zesto';
+      default:
+        return 'Dismiss Zesto';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Render nothing — and contribute no Semantics — when there's no
@@ -216,7 +260,10 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                       child: Semantics(
                         container: true,
                         liveRegion: _state.isVisible,
-                        label: 'Zesto says: ${_state.currentMessage!}',
+                        label: _zestoSaysLabel(
+                          context,
+                          _state.currentMessage!,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             gradient: _bubbleGradient,
@@ -266,7 +313,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                     // accent still carries color identity via
                                     // the border + dismiss-icon background.
                                     Text(
-                                      'Zesto',
+                                      _zestoName(context),
                                       key: const Key('zesto_name'),
                                       style: AppTextStyles.caption.copyWith(
                                         color: AppColors.textPrimary,
@@ -300,7 +347,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                 // stays compact at 18px.
                                 child: Semantics(
                                   button: true,
-                                  label: 'Dismiss Zesto',
+                                  label: _dismissZestoLabel(context),
                                   child: IconButton(
                                     key: const Key('zesto_dismiss_button'),
                                     iconSize: 18,

@@ -6,6 +6,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/presentation/di/localization_providers.dart';
 import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/barcode/open_food_facts_client.dart';
@@ -139,6 +140,7 @@ final zestoServiceProvider = Provider<ZestoService>((ref) {
       showDailyWelcome: true,
     ),
     displayDuration: isTest ? Duration.zero : const Duration(seconds: 5),
+    localeTagResolver: () => ref.read(appLocaleTagProvider),
     telemetryLogger: (eventName, properties) {
       telemetry.enqueue({'name': eventName, 'properties': properties});
     },
