@@ -8,6 +8,7 @@
   "navigationShoppingList": "Shopping",
   "navigationShoppingHistory": "History",
   "navigationSettings": "Settings",
+  "navigationOnboarding": "Onboarding",
   
   "screenTitleInventory": "Inventory",
   "screenTitleShoppingList": "Shopping List",
@@ -153,6 +154,36 @@
   "settingsHelpFaq": "Help & FAQ",
   "settingsHelpCenterComingSoon": "Help center coming soon",
   "settingsSendFeedback": "Send Feedback",
+  "feedbackDrawerBarrierLabel": "Feedback",
+  "feedbackDrawerTitle": "Send Feedback",
+  "feedbackDrawerCloseTooltip": "Close feedback",
+  "feedbackDrawerIntro": "Tell us what is working or broken. We include app metadata automatically.",
+  "feedbackDrawerCategoryLabel": "Category",
+  "feedbackCategoryBugReport": "Bug report",
+  "feedbackCategoryFeatureRequest": "Feature request",
+  "feedbackCategoryUxFeedback": "UX feedback",
+  "feedbackCategoryDarkModeReadability": "Dark mode readability",
+  "feedbackCategoryOther": "Other",
+  "feedbackDrawerMessageLabel": "Message",
+  "feedbackDrawerMessageHint": "What happened? What should we improve?",
+  "feedbackDrawerMessageValidation": "Please enter feedback before submitting.",
+  "feedbackDrawerEmailLabel": "Email (optional)",
+  "feedbackDrawerEmailHint": "you@example.com",
+  "feedbackDrawerSourceLocale": "Source: {source} • Locale: {locale}",
+  "@feedbackDrawerSourceLocale": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackDrawerSubmitting": "Submitting...",
+  "feedbackDrawerSubmit": "Submit",
+  "feedbackDrawerSent": "Feedback sent. Thank you.",
+  "feedbackDrawerSignInRequired": "Please sign in before sending feedback.",
   "settingsRateApp": "Rate App",
   "settingsThanksForSupport": "Thanks for the support!",
   "settingsViewTutorial": "View Tutorial",

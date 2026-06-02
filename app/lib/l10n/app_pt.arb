@@ -8,6 +8,7 @@
   "navigationShoppingList": "Compras",
   "navigationShoppingHistory": "Histórico",
   "navigationSettings": "Definições",
+  "navigationOnboarding": "Início",
 
   "screenTitleInventory": "Inventário",
   "screenTitleShoppingList": "Lista de Compras",
@@ -153,6 +154,36 @@
   "settingsHelpFaq": "Ajuda e FAQ",
   "settingsHelpCenterComingSoon": "Centro de ajuda disponível em breve",
   "settingsSendFeedback": "Enviar feedback",
+  "feedbackDrawerBarrierLabel": "Feedback",
+  "feedbackDrawerTitle": "Enviar feedback",
+  "feedbackDrawerCloseTooltip": "Fechar painel de feedback",
+  "feedbackDrawerIntro": "Diz-nos o que está a funcionar ou a falhar. Incluímos metadados da app automaticamente.",
+  "feedbackDrawerCategoryLabel": "Categoria",
+  "feedbackCategoryBugReport": "Relatório de erro",
+  "feedbackCategoryFeatureRequest": "Pedido de funcionalidade",
+  "feedbackCategoryUxFeedback": "Feedback de UX",
+  "feedbackCategoryDarkModeReadability": "Legibilidade no modo escuro",
+  "feedbackCategoryOther": "Outro",
+  "feedbackDrawerMessageLabel": "Mensagem",
+  "feedbackDrawerMessageHint": "O que aconteceu? O que devemos melhorar?",
+  "feedbackDrawerMessageValidation": "Introduz feedback antes de enviar.",
+  "feedbackDrawerEmailLabel": "Email (opcional)",
+  "feedbackDrawerEmailHint": "tu@exemplo.com",
+  "feedbackDrawerSourceLocale": "Origem: {source} • Idioma: {locale}",
+  "@feedbackDrawerSourceLocale": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackDrawerSubmitting": "A enviar...",
+  "feedbackDrawerSubmit": "Enviar",
+  "feedbackDrawerSent": "Feedback enviado. Obrigado.",
+  "feedbackDrawerSignInRequired": "Inicia sessão antes de enviar feedback.",
   "settingsRateApp": "Avaliar app",
   "settingsThanksForSupport": "Obrigado pelo apoio!",
   "settingsViewTutorial": "Ver tutorial",

@@ -28,6 +28,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navigationSettings => 'Einstellungen';
 
   @override
+  String get navigationOnboarding => 'Einstieg';
+
+  @override
   String get screenTitleInventory => 'Inventar';
 
   @override
@@ -434,6 +437,72 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsSendFeedback => 'Feedback senden';
+
+  @override
+  String get feedbackDrawerBarrierLabel => 'Feedback';
+
+  @override
+  String get feedbackDrawerTitle => 'Feedback senden';
+
+  @override
+  String get feedbackDrawerCloseTooltip => 'Feedback schließen';
+
+  @override
+  String get feedbackDrawerIntro =>
+      'Sag uns, was funktioniert oder kaputt ist. App-Metadaten werden automatisch hinzugefügt.';
+
+  @override
+  String get feedbackDrawerCategoryLabel => 'Kategorie';
+
+  @override
+  String get feedbackCategoryBugReport => 'Fehler melden';
+
+  @override
+  String get feedbackCategoryFeatureRequest => 'Funktionswunsch';
+
+  @override
+  String get feedbackCategoryUxFeedback => 'UX-Feedback';
+
+  @override
+  String get feedbackCategoryDarkModeReadability => 'Lesbarkeit im Dunkelmodus';
+
+  @override
+  String get feedbackCategoryOther => 'Sonstiges';
+
+  @override
+  String get feedbackDrawerMessageLabel => 'Nachricht';
+
+  @override
+  String get feedbackDrawerMessageHint =>
+      'Was ist passiert? Was sollen wir verbessern?';
+
+  @override
+  String get feedbackDrawerMessageValidation =>
+      'Bitte gib vor dem Senden Feedback ein.';
+
+  @override
+  String get feedbackDrawerEmailLabel => 'E-Mail (optional)';
+
+  @override
+  String get feedbackDrawerEmailHint => 'du@beispiel.de';
+
+  @override
+  String feedbackDrawerSourceLocale(String source, String locale) {
+    return 'Quelle: $source • Sprache: $locale';
+  }
+
+  @override
+  String get feedbackDrawerSubmitting => 'Wird gesendet...';
+
+  @override
+  String get feedbackDrawerSubmit => 'Senden';
+
+  @override
+  String get feedbackDrawerSent => 'Feedback gesendet. Danke.';
+
+  @override
+  String get feedbackDrawerSignInRequired =>
+      'Bitte melde dich an, bevor du Feedback sendest.';
 
   @override
   String get settingsRateApp => 'App bewerten';

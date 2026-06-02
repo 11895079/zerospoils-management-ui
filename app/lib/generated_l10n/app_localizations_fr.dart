@@ -27,6 +27,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get navigationSettings => 'Paramètres';
 
   @override
+  String get navigationOnboarding => 'Démarrage';
+
+  @override
   String get screenTitleInventory => 'Inventaire';
 
   @override
@@ -435,6 +438,72 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsSendFeedback => 'Envoyer des commentaires';
+
+  @override
+  String get feedbackDrawerBarrierLabel => 'Rétroaction';
+
+  @override
+  String get feedbackDrawerTitle => 'Envoyer des commentaires';
+
+  @override
+  String get feedbackDrawerCloseTooltip => 'Fermer le panneau de rétroaction';
+
+  @override
+  String get feedbackDrawerIntro =>
+      'Dites-nous ce qui fonctionne ou ce qui pose problème. Les métadonnées de l\'application sont ajoutées automatiquement.';
+
+  @override
+  String get feedbackDrawerCategoryLabel => 'Catégorie';
+
+  @override
+  String get feedbackCategoryBugReport => 'Rapport de bogue';
+
+  @override
+  String get feedbackCategoryFeatureRequest => 'Demande de fonctionnalité';
+
+  @override
+  String get feedbackCategoryUxFeedback => 'Rétroaction UX';
+
+  @override
+  String get feedbackCategoryDarkModeReadability => 'Lisibilité du mode sombre';
+
+  @override
+  String get feedbackCategoryOther => 'Autre';
+
+  @override
+  String get feedbackDrawerMessageLabel => 'Message';
+
+  @override
+  String get feedbackDrawerMessageHint =>
+      'Que s\'est-il passé? Que devrions-nous améliorer?';
+
+  @override
+  String get feedbackDrawerMessageValidation =>
+      'Veuillez saisir un commentaire avant l\'envoi.';
+
+  @override
+  String get feedbackDrawerEmailLabel => 'Courriel (facultatif)';
+
+  @override
+  String get feedbackDrawerEmailHint => 'vous@exemple.com';
+
+  @override
+  String feedbackDrawerSourceLocale(String source, String locale) {
+    return 'Source : $source • Langue : $locale';
+  }
+
+  @override
+  String get feedbackDrawerSubmitting => 'Envoi en cours...';
+
+  @override
+  String get feedbackDrawerSubmit => 'Envoyer';
+
+  @override
+  String get feedbackDrawerSent => 'Commentaire envoyé. Merci.';
+
+  @override
+  String get feedbackDrawerSignInRequired =>
+      'Veuillez vous connecter avant d\'envoyer un commentaire.';
 
   @override
   String get settingsRateApp => 'Évaluer l\'application';
@@ -895,6 +964,9 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
   String get navigationSettings => 'Paramètres';
 
   @override
+  String get navigationOnboarding => 'Démarrage';
+
+  @override
   String get screenTitleInventory => 'Inventaire';
 
   @override
@@ -1303,6 +1375,72 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
 
   @override
   String get settingsSendFeedback => 'Envoyer des commentaires';
+
+  @override
+  String get feedbackDrawerBarrierLabel => 'Rétroaction';
+
+  @override
+  String get feedbackDrawerTitle => 'Envoyer des commentaires';
+
+  @override
+  String get feedbackDrawerCloseTooltip => 'Fermer le panneau de rétroaction';
+
+  @override
+  String get feedbackDrawerIntro =>
+      'Dites-nous ce qui fonctionne ou ce qui ne va pas. Les métadonnées de l\'application sont incluses automatiquement.';
+
+  @override
+  String get feedbackDrawerCategoryLabel => 'Catégorie';
+
+  @override
+  String get feedbackCategoryBugReport => 'Signaler un bogue';
+
+  @override
+  String get feedbackCategoryFeatureRequest => 'Demande de fonctionnalité';
+
+  @override
+  String get feedbackCategoryUxFeedback => 'Rétroaction UX';
+
+  @override
+  String get feedbackCategoryDarkModeReadability => 'Lisibilité du mode sombre';
+
+  @override
+  String get feedbackCategoryOther => 'Autre';
+
+  @override
+  String get feedbackDrawerMessageLabel => 'Message';
+
+  @override
+  String get feedbackDrawerMessageHint =>
+      'Que s\'est-il passé? Que devrait-on améliorer?';
+
+  @override
+  String get feedbackDrawerMessageValidation =>
+      'Veuillez saisir un commentaire avant l\'envoi.';
+
+  @override
+  String get feedbackDrawerEmailLabel => 'Courriel (optionnel)';
+
+  @override
+  String get feedbackDrawerEmailHint => 'vous@exemple.com';
+
+  @override
+  String feedbackDrawerSourceLocale(String source, String locale) {
+    return 'Source : $source • Langue : $locale';
+  }
+
+  @override
+  String get feedbackDrawerSubmitting => 'Envoi en cours...';
+
+  @override
+  String get feedbackDrawerSubmit => 'Envoyer';
+
+  @override
+  String get feedbackDrawerSent => 'Commentaire envoyé. Merci.';
+
+  @override
+  String get feedbackDrawerSignInRequired =>
+      'Veuillez vous connecter avant d\'envoyer un commentaire.';
 
   @override
   String get settingsRateApp => 'Évaluer l\'application';

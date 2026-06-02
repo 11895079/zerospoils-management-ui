@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/feedback/feedback_submission_service.dart';
+import '../../generated_l10n/app_localizations.dart';
 import '../di/service_locator.dart';
 
 const Key feedbackDrawerKey = Key('feedback_drawer');
@@ -23,7 +24,8 @@ Future<void> showFeedbackDrawer(
 
   await showGeneralDialog<void>(
     context: context,
-    barrierLabel: 'Feedback',
+    barrierLabel:
+        AppLocalizations.of(context)?.feedbackDrawerBarrierLabel ?? 'Feedback',
     barrierDismissible: true,
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 220),
@@ -90,6 +92,7 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final l10n = AppLocalizations.of(context);
 
     return Material(
       key: feedbackDrawerKey,
@@ -107,9 +110,9 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                   children: [
                     const Icon(Icons.feedback_outlined),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Send Feedback',
+                        l10n?.feedbackDrawerTitle ?? 'Send Feedback',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -117,7 +120,9 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Close feedback',
+                      tooltip:
+                          l10n?.feedbackDrawerCloseTooltip ??
+                          'Close feedback',
                       onPressed: _isSubmitting
                           ? null
                           : () => Navigator.of(context).pop(),
@@ -127,40 +132,52 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Tell us what is working or broken. We include app metadata automatically.',
+                  l10n?.feedbackDrawerIntro ??
+                      'Tell us what is working or broken. We include app metadata automatically.',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   key: const Key('feedback_category_field'),
                   initialValue: _category,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
+                  decoration: InputDecoration(
+                    labelText: l10n?.feedbackDrawerCategoryLabel ?? 'Category',
                     border: OutlineInputBorder(),
                   ),
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'bug_report',
-                      child: Text('Bug report'),
+                      child: Text(
+                        l10n?.feedbackCategoryBugReport ?? 'Bug report',
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'feature_request',
-                      child: Text('Feature request'),
+                      child: Text(
+                        l10n?.feedbackCategoryFeatureRequest ??
+                            'Feature request',
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'ux_feedback',
-                      child: Text('UX feedback'),
+                      child: Text(
+                        l10n?.feedbackCategoryUxFeedback ?? 'UX feedback',
+                      ),
                     ),
                     DropdownMenuItem(
                       value: _darkModeReadabilityCategory,
                       child: Text(
-                        'Dark mode readability',
+                        l10n?.feedbackCategoryDarkModeReadability ??
+                            'Dark mode readability',
                         key: Key(
                           'feedback_category_option_dark_mode_readability',
                         ),
                       ),
                     ),
-                    DropdownMenuItem(value: 'other', child: Text('Other')),
+                    DropdownMenuItem(
+                      value: 'other',
+                      child: Text(l10n?.feedbackCategoryOther ?? 'Other'),
+                    ),
                   ],
                   onChanged: _isSubmitting
                       ? null
@@ -177,14 +194,17 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                   minLines: 6,
                   maxLines: 10,
                   enabled: !_isSubmitting,
-                  decoration: const InputDecoration(
-                    labelText: 'Message',
-                    hintText: 'What happened? What should we improve?',
+                  decoration: InputDecoration(
+                    labelText: l10n?.feedbackDrawerMessageLabel ?? 'Message',
+                    hintText:
+                        l10n?.feedbackDrawerMessageHint ??
+                        'What happened? What should we improve?',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter feedback before submitting.';
+                      return l10n?.feedbackDrawerMessageValidation ??
+                          'Please enter feedback before submitting.';
                     }
                     return null;
                   },
@@ -194,15 +214,18 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                   key: const Key('feedback_email_field'),
                   controller: _emailController,
                   enabled: !_isSubmitting,
-                  decoration: const InputDecoration(
-                    labelText: 'Email (optional)',
-                    hintText: 'you@example.com',
+                  decoration: InputDecoration(
+                    labelText:
+                        l10n?.feedbackDrawerEmailLabel ?? 'Email (optional)',
+                    hintText:
+                        l10n?.feedbackDrawerEmailHint ?? 'you@example.com',
                     border: OutlineInputBorder(),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Source: ${widget.source} • Locale: $locale',
+                  l10n?.feedbackDrawerSourceLocale(widget.source, locale) ??
+                      'Source: ${widget.source} • Locale: $locale',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 const Spacer(),
@@ -220,7 +243,11 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.send),
-                    label: Text(_isSubmitting ? 'Submitting...' : 'Submit'),
+                    label: Text(
+                      _isSubmitting
+                          ? (l10n?.feedbackDrawerSubmitting ?? 'Submitting...')
+                          : (l10n?.feedbackDrawerSubmit ?? 'Submit'),
+                    ),
                   ),
                 ),
               ],
@@ -232,6 +259,8 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
   }
 
   Future<void> _submitFeedback(BuildContext context, String locale) async {
+    final l10n = AppLocalizations.of(context);
+
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -285,7 +314,7 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
       // Always show a positive confirmation.  The service queues locally first
       // so feedback is durable regardless of connectivity or server rate limits.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        const SnackBar(content: Text('Feedback sent. Thank you.')),
+        SnackBar(content: Text(l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.')),
       );
     } on StateError catch (error) {
       if (!context.mounted) {
@@ -308,10 +337,11 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
         SnackBar(
           content: Text(
             authRequired
-                ? 'Please sign in before sending feedback.'
+                ? (l10n?.feedbackDrawerSignInRequired ??
+                      'Please sign in before sending feedback.')
                 // Queue-first: payload was already persisted before this error.
                 // Show success so the user knows their message is saved.
-                : 'Feedback sent. Thank you.',
+                : (l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.'),
           ),
         ),
       );
@@ -329,7 +359,7 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
       // Unexpected error (e.g. SharedPreferences failure) — show success
       // because the payload was queued before this point in the happy path.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        const SnackBar(content: Text('Feedback sent. Thank you.')),
+        SnackBar(content: Text(l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.')),
       );
     } finally {
       if (mounted) {

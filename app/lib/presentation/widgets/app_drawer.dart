@@ -47,7 +47,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.school,
               iconColor: const Color(0xFF00897B),
-              label: 'Onboarding',
+              label: l10n.navigationOnboarding,
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -78,7 +78,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.shopping_cart,
               iconColor: const Color(0xFF1565C0),
-              label: l10n.screenTitleShoppingList,
+              label: l10n.navigationShoppingList,
               selected: currentIndex == 2,
               onTap: () => _switchTab(context, ref, 2),
             ),

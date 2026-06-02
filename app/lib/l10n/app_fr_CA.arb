@@ -8,6 +8,7 @@
   "navigationShoppingList": "Magasinage",
   "navigationShoppingHistory": "Historique",
   "navigationSettings": "Paramètres",
+  "navigationOnboarding": "Démarrage",
   
   "screenTitleInventory": "Inventaire",
   "screenTitleShoppingList": "Liste d'épicerie",
@@ -153,6 +154,36 @@
   "settingsHelpFaq": "Aide et FAQ",
   "settingsHelpCenterComingSoon": "Centre d'aide bientôt disponible",
   "settingsSendFeedback": "Envoyer des commentaires",
+  "feedbackDrawerBarrierLabel": "Rétroaction",
+  "feedbackDrawerTitle": "Envoyer des commentaires",
+  "feedbackDrawerCloseTooltip": "Fermer le panneau de rétroaction",
+  "feedbackDrawerIntro": "Dites-nous ce qui fonctionne ou ce qui ne va pas. Les métadonnées de l'application sont incluses automatiquement.",
+  "feedbackDrawerCategoryLabel": "Catégorie",
+  "feedbackCategoryBugReport": "Signaler un bogue",
+  "feedbackCategoryFeatureRequest": "Demande de fonctionnalité",
+  "feedbackCategoryUxFeedback": "Rétroaction UX",
+  "feedbackCategoryDarkModeReadability": "Lisibilité du mode sombre",
+  "feedbackCategoryOther": "Autre",
+  "feedbackDrawerMessageLabel": "Message",
+  "feedbackDrawerMessageHint": "Que s'est-il passé? Que devrait-on améliorer?",
+  "feedbackDrawerMessageValidation": "Veuillez saisir un commentaire avant l'envoi.",
+  "feedbackDrawerEmailLabel": "Courriel (optionnel)",
+  "feedbackDrawerEmailHint": "vous@exemple.com",
+  "feedbackDrawerSourceLocale": "Source : {source} • Langue : {locale}",
+  "@feedbackDrawerSourceLocale": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackDrawerSubmitting": "Envoi en cours...",
+  "feedbackDrawerSubmit": "Envoyer",
+  "feedbackDrawerSent": "Commentaire envoyé. Merci.",
+  "feedbackDrawerSignInRequired": "Veuillez vous connecter avant d'envoyer un commentaire.",
   "settingsRateApp": "Évaluer l'application",
   "settingsThanksForSupport": "Merci pour votre soutien!",
   "settingsViewTutorial": "Voir le tutoriel",

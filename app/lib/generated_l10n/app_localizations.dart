@@ -141,6 +141,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navigationSettings;
 
+  /// No description provided for @navigationOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding'**
+  String get navigationOnboarding;
+
   /// No description provided for @screenTitleInventory.
   ///
   /// In en, this message translates to:
@@ -932,6 +938,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send Feedback'**
   String get settingsSendFeedback;
+
+  /// No description provided for @feedbackDrawerBarrierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedbackDrawerBarrierLabel;
+
+  /// No description provided for @feedbackDrawerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Feedback'**
+  String get feedbackDrawerTitle;
+
+  /// No description provided for @feedbackDrawerCloseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close feedback'**
+  String get feedbackDrawerCloseTooltip;
+
+  /// No description provided for @feedbackDrawerIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what is working or broken. We include app metadata automatically.'**
+  String get feedbackDrawerIntro;
+
+  /// No description provided for @feedbackDrawerCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get feedbackDrawerCategoryLabel;
+
+  /// No description provided for @feedbackCategoryBugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug report'**
+  String get feedbackCategoryBugReport;
+
+  /// No description provided for @feedbackCategoryFeatureRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature request'**
+  String get feedbackCategoryFeatureRequest;
+
+  /// No description provided for @feedbackCategoryUxFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'UX feedback'**
+  String get feedbackCategoryUxFeedback;
+
+  /// No description provided for @feedbackCategoryDarkModeReadability.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode readability'**
+  String get feedbackCategoryDarkModeReadability;
+
+  /// No description provided for @feedbackCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get feedbackCategoryOther;
+
+  /// No description provided for @feedbackDrawerMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get feedbackDrawerMessageLabel;
+
+  /// No description provided for @feedbackDrawerMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? What should we improve?'**
+  String get feedbackDrawerMessageHint;
+
+  /// No description provided for @feedbackDrawerMessageValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter feedback before submitting.'**
+  String get feedbackDrawerMessageValidation;
+
+  /// No description provided for @feedbackDrawerEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get feedbackDrawerEmailLabel;
+
+  /// No description provided for @feedbackDrawerEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'you@example.com'**
+  String get feedbackDrawerEmailHint;
+
+  /// No description provided for @feedbackDrawerSourceLocale.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source} • Locale: {locale}'**
+  String feedbackDrawerSourceLocale(String source, String locale);
+
+  /// No description provided for @feedbackDrawerSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting...'**
+  String get feedbackDrawerSubmitting;
+
+  /// No description provided for @feedbackDrawerSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get feedbackDrawerSubmit;
+
+  /// No description provided for @feedbackDrawerSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback sent. Thank you.'**
+  String get feedbackDrawerSent;
+
+  /// No description provided for @feedbackDrawerSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in before sending feedback.'**
+  String get feedbackDrawerSignInRequired;
 
   /// No description provided for @settingsRateApp.
   ///

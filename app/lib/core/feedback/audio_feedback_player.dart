@@ -17,7 +17,6 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
 
   final AudioPlayer _player;
   Uint8List? _cachedTone;
-  bool _isConfigured = false;
 
   @override
   Future<void> playBeep({required double volume}) async {
@@ -40,10 +39,6 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
   }
 
   Future<void> _configureForScannerBeep() async {
-    if (_isConfigured) {
-      return;
-    }
-
     try {
       await _player.setPlayerMode(PlayerMode.lowLatency);
     } catch (_) {}
@@ -62,17 +57,15 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
             audioFocus: AndroidAudioFocus.gainTransientMayDuck,
           ),
           iOS: AudioContextIOS(
-            category: AVAudioSessionCategory.playAndRecord,
+            category: AVAudioSessionCategory.playback,
             options: const {
-              AVAudioSessionOptions.defaultToSpeaker,
               AVAudioSessionOptions.mixWithOthers,
+              AVAudioSessionOptions.duckOthers,
             },
           ),
         ),
       );
     } catch (_) {}
-
-    _isConfigured = true;
   }
 
   Uint8List _generateWavTone({
