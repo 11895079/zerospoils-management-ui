@@ -124,6 +124,7 @@ Create checklist with verification steps for each security domain:
 - [ ] Anomaly detection & monitoring (M5)
 
 ### M3/206 Reference Pack Delivery Hardening (Firebase Storage + Remote Config)
+Core manifest-backed reference-pack delivery is implemented in M3/206; the items below are hardening and rollout follow-ups.
 - [x] Firebase Storage initialized for project `zerospoils-23dae`.
 - [x] Reference pack artifacts hosted in Firebase project storage and reachable via HTTPS.
 - [x] Remote Config parameter `reference_pack_manifest_url` published and pointing to active manifest.

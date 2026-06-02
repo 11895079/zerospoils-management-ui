@@ -1,7 +1,7 @@
 # Reference Pack Expansion Plan
 
 ## Purpose
-Extend M3/206 from barcode packs into a broader reference-data system for categories, locations, and other app-managed lists, while adding a consent-based loop so previously unknown user-entered values can be reviewed and promoted into backend packs for all users.
+Build on the shipped M3/206 reference-pack system and extend it into a broader consent-based reference-data loop for categories, locations, and other app-managed lists, while adding a path for previously unknown user-entered values to be reviewed and promoted into backend packs for all users.
 
 ## Scope
 This plan covers:
@@ -12,6 +12,10 @@ This plan covers:
 - Consent-based unknown-value telemetry capture from users
 - Western Hemisphere regional coverage for barcode and reference packs
 - Locale-aware reference labels aligned with supported app language packages
+
+Current implementation status:
+- M3/206 now covers barcode catalogs, categories, and locations with manifest-backed download, validation, activation, rollback, and offline reuse.
+- This plan now focuses on the remaining generic `reference_list` and consent-based unknown-value promotion work.
 
 Out of scope:
 - Full cloud sync of user data

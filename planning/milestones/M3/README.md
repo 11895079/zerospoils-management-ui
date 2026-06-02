@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** May 17, 2026 — **Progress:** 16/24 issues complete (67%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203/206 remain partial
+**Last Updated:** June 1, 2026 — **Progress:** 18/24 issues complete (75%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 remain partial; 206 reference-pack delivery implemented and documented
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -61,7 +61,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **203** | Haptic and sound feedback settings | ⚠️ Partial | — | `FeedbackService` (prefs store + haptic/beep dispatch), `FeedbackRuntime` (static lazy-init accessor for non-Riverpod screens), and `FeedbackSettingsNotifier` Riverpod provider all implemented; all four scanner screens wired. Missing: "Feedback & Sounds" section in Settings UI, per-scanner individual toggles, and beep volume slider |
 | **204** | Onboarding polish with Zesto mascot intro | ➡️ Moved → M4 | — | Issue file moved to `planning/milestones/M4/`; promoted as user-activation/beta-retention work |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
-| **206** | Downloadable reference-data update packs | ⚠️ Stub Only | — | `LocalBarcodeCatalog` loads bundled `barcode_seed_ca.v2.json` from assets (design is update-pack compatible per docs). No remote manifest fetch, pack validation, atomic activation, or rollback implemented yet |
+| **206** | Downloadable reference-data update packs | ✅ Complete | [#136](https://github.com/11895079/zerospoils/pull/136) | Remote manifest-backed packs now support barcode catalogs, categories, and locations with checksum validation, atomic activation/rollback, region/locale selection, active-version diagnostics, and offline reuse of the activated pack |
 | **210** | Shopping list UI (Next Shop) | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | ShoppingListScreen with add/delete; CRUD persists to SQLite |
 | **220** | Convert purchased list items → inventory | ✅ Complete | [#76](https://github.com/11895079/zerospoils/pull/76) | Convert dialog with expiry date + optional location; telemetry tracking |
 | **230** | Offline-first verification suite | ✅ Complete | — | `test/unit/offline_first_verification_test.dart`: 5 groups covering item Hive persistence, shopping list Hive, barcode catalog (local-only), expiry parser (pure Dart), receipt parser (pure Dart); all tests verify no network dependency |
