@@ -28,11 +28,9 @@ void main() async {
     onTimeout: () {},
   );
 
-  // Bootstrap Supabase services (auth, entitlements)
-  await SupabaseBootstrapService.initialize().timeout(
-    const Duration(seconds: 8),
-    onTimeout: () {},
-  );
+  // Supabase bootstrap is intentionally disabled for now.
+  // We keep the integration code/dependencies in-repo but avoid invoking it
+  // during startup until backend rollout is re-enabled.
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
