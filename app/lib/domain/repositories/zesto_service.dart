@@ -131,10 +131,7 @@ class ZestoService {
   localizedMessagePools = {
     'fr': {
       MascotMessageType.consumed: ['Sauvé! 🎉', 'Zéro gaspillage! 💚'],
-      MascotMessageType.quickSave: [
-        'Juste à temps! ⏰',
-        'Beau sauvetage! 💚',
-      ],
+      MascotMessageType.quickSave: ['Juste à temps! ⏰', 'Beau sauvetage! 💚'],
       MascotMessageType.badgeUnlocked: ['Nouveau badge! 🏆'],
       MascotMessageType.streakMilestone: ['Super série! 🔥'],
       MascotMessageType.savingsMilestone: ['Économies débloquées! 💰'],
@@ -148,10 +145,7 @@ class ZestoService {
     },
     'fr_ca': {
       MascotMessageType.consumed: ['Sauvé! 🎉', 'Zéro gaspillage! 💚'],
-      MascotMessageType.quickSave: [
-        'Juste à temps! ⏰',
-        'Beau sauvetage! 💚',
-      ],
+      MascotMessageType.quickSave: ['Juste à temps! ⏰', 'Beau sauvetage! 💚'],
       MascotMessageType.badgeUnlocked: ['Nouveau badge! 🏆'],
       MascotMessageType.streakMilestone: ['Super série! 🔥'],
       MascotMessageType.savingsMilestone: ['Économies débloquées! 💰'],
@@ -260,7 +254,7 @@ class ZestoService {
     AssetBundle? assetBundle,
     bool skipPersistence = false,
   }) : _now = now ?? DateTime.now,
-      _localeTagResolver = localeTagResolver,
+       _localeTagResolver = localeTagResolver,
        _random = random ?? Random(),
        _telemetryLogger = telemetryLogger,
        _displayDuration = displayDuration,

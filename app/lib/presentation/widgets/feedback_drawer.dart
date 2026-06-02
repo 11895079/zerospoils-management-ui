@@ -121,8 +121,7 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
                     ),
                     IconButton(
                       tooltip:
-                          l10n?.feedbackDrawerCloseTooltip ??
-                          'Close feedback',
+                          l10n?.feedbackDrawerCloseTooltip ?? 'Close feedback',
                       onPressed: _isSubmitting
                           ? null
                           : () => Navigator.of(context).pop(),
@@ -314,7 +313,11 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
       // Always show a positive confirmation.  The service queues locally first
       // so feedback is durable regardless of connectivity or server rate limits.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        SnackBar(content: Text(l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.')),
+        SnackBar(
+          content: Text(
+            l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.',
+          ),
+        ),
       );
     } on StateError catch (error) {
       if (!context.mounted) {
@@ -359,7 +362,11 @@ class _FeedbackDrawerState extends ConsumerState<_FeedbackDrawer> {
       // Unexpected error (e.g. SharedPreferences failure) — show success
       // because the payload was queued before this point in the happy path.
       ScaffoldMessenger.of(widget.rootContext).showSnackBar(
-        SnackBar(content: Text(l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.')),
+        SnackBar(
+          content: Text(
+            l10n?.feedbackDrawerSent ?? 'Feedback sent. Thank you.',
+          ),
+        ),
       );
     } finally {
       if (mounted) {

@@ -260,10 +260,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                       child: Semantics(
                         container: true,
                         liveRegion: _state.isVisible,
-                        label: _zestoSaysLabel(
-                          context,
-                          _state.currentMessage!,
-                        ),
+                        label: _zestoSaysLabel(context, _state.currentMessage!),
                         child: Container(
                           decoration: BoxDecoration(
                             gradient: _bubbleGradient,
