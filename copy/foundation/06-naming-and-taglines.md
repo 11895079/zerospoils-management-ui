@@ -38,6 +38,7 @@ Use the hero for brand; use these where the context needs clarity or the hook:
 | Context | Line |
 |---------|------|
 | Money-explicit hook (ads, paid) | "The groceries you forget are money in the bin. ZeroSpoils makes sure you don't." |
+| Effortless promise (Pillar 2) | "ZeroSpoils remembers, so you don't have to." |
 | App Store subtitle (clarity + keywords) | "Track expiry dates. Waste less. Save money." |
 | Social bio | "The app that remembers your groceries, so good food (and your money) doesn't go to waste. 🌍" |
 | One-liner for intros | "ZeroSpoils scans your groceries and reminds you to use them before they're gone." |
