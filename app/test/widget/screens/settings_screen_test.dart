@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/generated_l10n/app_localizations.dart';
 import 'package:zerospoils/core/reference/reference_pack_fetchers.dart';
 import 'package:zerospoils/core/theme/app_colors.dart';
 import 'package:zerospoils/presentation/di/localization_providers.dart';
@@ -15,8 +16,19 @@ import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
 
 void main() {
   Widget buildTestHarness() {
-    return MaterialApp(
-      home: ProviderScope(child: Scaffold(body: SettingsScreen())),
+    return ProviderScope(
+      child: Consumer(
+        builder: (context, ref, _) {
+          final locale = resolveAppLocale(ref.watch(appLocaleTagProvider)) ??
+              const Locale('en');
+          return MaterialApp(
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(body: SettingsScreen()),
+          );
+        },
+      ),
     );
   }
 
@@ -584,6 +596,8 @@ void main() {
       await tester.pumpWidget(buildTestHarness());
       await tester.pumpAndSettle();
 
+      expect(find.text('Paramètres'), findsOneWidget);
+
       await tester.scrollUntilVisible(
         tileForKey(const Key('language_dropdown_tile')),
         500,
@@ -615,6 +629,7 @@ void main() {
             .value,
         'en',
       );
+      expect(find.text('Settings'), findsOneWidget);
     });
 
     testWidgets('Reference data region and language persist preference', (

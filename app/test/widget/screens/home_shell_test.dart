@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/home_shell.dart';
+import 'package:zerospoils/presentation/widgets/zesto_overlay.dart';
 import 'package:zerospoils/domain/models/item_model.dart' show Item;
 import 'package:zerospoils/domain/models/zesto_model.dart';
 import 'package:zerospoils/domain/repositories/zesto_service.dart';
@@ -212,7 +213,6 @@ void main() {
 
   testWidgets(
     'shows visible Zesto overlay when mascot trigger fires',
-    skip: true, // TODO: Fix test context/Overlay issues
     (WidgetTester tester) async {
       // Mock AssetBundle to provide storage tips without loading from filesystem
       final mockAssetBundle = MockAssetBundle();
@@ -222,7 +222,7 @@ void main() {
           enabled: true,
           frequency: MascotFrequency.always,
         ),
-        displayDuration: Duration.zero,
+        displayDuration: const Duration(seconds: 1),
         assetBundle: mockAssetBundle,
       );
       addTearDown(zestoService.dispose);
@@ -239,21 +239,29 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(home: HomeShell()),
+          child: const MaterialApp(
+            home: Stack(
+              fit: StackFit.expand,
+              children: [HomeShell(), ZestoOverlay()],
+            ),
+          ),
         ),
       );
 
-      // Allow HomeShell to initialize
+      // Allow HomeShell and the root overlay to initialize.
       await tester.pumpAndSettle();
 
       // Show the mascot
       await container
           .read(zestoServiceProvider)
-          .showMascot(MascotMessageType.firstItem);
+          .showMascot(
+            MascotMessageType.firstItem,
+            bypassAntiSpam: true,
+          );
       // Pump to let the state change propagate
       await tester.pump(const Duration(milliseconds: 50));
 
-      // The overlay should now be visible in the HomeShell's own Overlay
+      // The overlay should now be visible above the shell.
       expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
       expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
 

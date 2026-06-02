@@ -12,6 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/reference/reference_pack_fetchers.dart';
 import '../../core/reference/reference_pack_keys.dart';
 import '../../core/reference/reference_pack_service.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -408,6 +410,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final demoEnabled = ref.watch(demoModeProvider);
     final localeTag = ref.watch(appLocaleTagProvider);
     final referencePackRegionTag = ref.watch(referencePackRegionTagProvider);
@@ -419,7 +422,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       key: const Key('screen_settings'),
       appBar: AppBar(
         title: Text(
-          'Settings',
+          l10n.screenTitleSettings,
           style: Theme.of(
             context,
           ).appBarTheme.titleTextStyle?.copyWith(fontWeight: FontWeight.w600),
@@ -788,7 +791,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDropdownTile<String>(
               key: const Key('language_dropdown_tile'),
               icon: Icons.language,
-              label: 'App Language',
+              label: l10n.settingsLanguage,
               value: localeTag,
               items: appLocaleOptions.map((option) => option.tag).toList(),
               itemLabel: appLocaleLabelForTag,
