@@ -1,0 +1,54 @@
+{
+  "metadata": {
+    "schema_version": 1,
+    "type": "locations",
+    "region": "ca",
+    "locale": "fr-CA",
+    "version": "1.0.0",
+    "dataset_version": "2026-05-31",
+    "generated_at": "2026-05-31T00:00:00Z",
+    "record_count": 4
+  },
+  "records": [
+    {
+      "id": "fridge",
+      "label": "Refrigerateur",
+      "synonyms": [
+        "frigo"
+      ],
+      "emoji": "\u2744\ufe0f",
+      "source": "wave-a-seed",
+      "app_location": "fridge"
+    },
+    {
+      "id": "pantry",
+      "label": "Garde-manger",
+      "synonyms": [
+        "armoire"
+      ],
+      "emoji": "\ud83d\uddc4\ufe0f",
+      "source": "wave-a-seed",
+      "app_location": "pantry"
+    },
+    {
+      "id": "freezer",
+      "label": "Congelateur",
+      "synonyms": [
+        "surgelateur"
+      ],
+      "emoji": "\ud83e\uddca",
+      "source": "wave-a-seed",
+      "app_location": "freezer"
+    },
+    {
+      "id": "other",
+      "label": "Autre",
+      "synonyms": [
+        "ailleurs"
+      ],
+      "emoji": "\ud83d\udccd",
+      "source": "wave-a-seed",
+      "app_location": "other"
+    }
+  ]
+}

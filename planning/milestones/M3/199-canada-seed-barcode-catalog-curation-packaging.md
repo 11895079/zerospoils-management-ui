@@ -51,7 +51,7 @@ Create a Canada-first seed barcode catalog artifact, curation workflow, and pack
 - Favor a curated subset over a full raw export so install size remains controlled
 - If OpenFoodFacts or another open dataset is used, record exact source version, attribution text, and any share-alike obligations before shipping
 - Keep the artifact format simple and app-consumable, such as normalized SQLite or compact JSONL converted into app assets during build
-- Design the artifact so it can be reused unchanged by the future update-pack system from issue 206
+- Design the artifact so it can be reused unchanged by the shipped update-pack system from issue 206
 - User-confirmed learned mappings in the app must always be able to override this seed data at runtime
 
 ## Test plan
@@ -69,4 +69,4 @@ Create a Canada-first seed barcode catalog artifact, curation workflow, and pack
 
 ## Dependencies
 - M3/197 hybrid packaged-item fast add (consumer of the resulting catalog)
-- M3/206 downloadable reference-data update packs (optional future delivery mechanism)
+- M3/206 downloadable reference-data update packs (shipped delivery mechanism for catalog updates)

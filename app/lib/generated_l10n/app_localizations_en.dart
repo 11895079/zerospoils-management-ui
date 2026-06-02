@@ -345,6 +345,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguage => 'Language';
 
   @override
+  String get settingsReferenceDataRegion => 'Reference Data Region';
+
+  @override
+  String get settingsReferenceDataLanguage => 'Reference Data Language';
+
+  @override
   String get settingsDateFormat => 'Date Format';
 
   @override

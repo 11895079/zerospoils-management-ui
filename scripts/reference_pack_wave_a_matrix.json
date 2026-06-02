@@ -1,0 +1,33 @@
+{
+  "wave": "A",
+  "description": "Initial Western Hemisphere rollout for region and locale-aware reference packs",
+  "regions": [
+    {
+      "code": "ca",
+      "default_locale": "en",
+      "locales": ["en", "fr-CA", "es-419"]
+    },
+    {
+      "code": "us",
+      "default_locale": "en",
+      "locales": ["en", "es-419"]
+    }
+  ],
+  "pack_types": [
+    {
+      "type": "barcode_catalog",
+      "locale_scoped": false,
+      "size_budget_kib": 2048
+    },
+    {
+      "type": "categories",
+      "locale_scoped": true,
+      "size_budget_kib": 128
+    },
+    {
+      "type": "locations",
+      "locale_scoped": true,
+      "size_budget_kib": 64
+    }
+  ]
+}

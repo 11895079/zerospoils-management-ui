@@ -116,5 +116,5 @@ Deliver a hybrid packaged-item fast-add flow that uses barcode scanning for prod
 - M3/130 feature flags framework
 - M3/196 live expiry OCR multi-angle capture
 - M3/199 Canada seed barcode catalog curation and packaging (optional follow-up for cold-start catalog coverage)
-- M3/206 downloadable reference-data update packs (optional follow-up for post-release catalog/list updates)
+- M3/206 downloadable reference-data update packs (shipped reference-pack delivery for post-release catalog/list updates)
 - M1/080 data model support for barcode-backed packaged items

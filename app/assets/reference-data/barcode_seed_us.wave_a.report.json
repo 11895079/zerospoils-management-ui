@@ -1,0 +1,37 @@
+{
+  "duplicates_collapsed": 0,
+  "fetch_diagnostics": {
+    "accepted": 2104,
+    "after_elbow": 127843,
+    "bottom_accepted_scan_count": 1,
+    "category_counts": {
+      "bakery": 2,
+      "beverages": 300,
+      "condiments": 300,
+      "dairy": 300,
+      "frozen": 300,
+      "pantry": 300,
+      "produce": 2,
+      "protein": 300,
+      "snacks": 300
+    },
+    "country_label": "United States",
+    "country_tags": [
+      "en:united-states",
+      "en:us",
+      "en:usa"
+    ],
+    "dump_path": "data/off/en.openfoodfacts.org.products.csv.gz",
+    "elbow_at_index": 127843,
+    "rejected_by_category_cap": 125739,
+    "source_mode": "dump",
+    "top_scan_count": 3410,
+    "total_country_with_scans": 127843
+  },
+  "input_rows": 2104,
+  "max_bytes": 1800000,
+  "record_count": 2077,
+  "rejected_malformed_barcode": 27,
+  "rejected_missing_required": 0,
+  "size_bytes": 703770
+}

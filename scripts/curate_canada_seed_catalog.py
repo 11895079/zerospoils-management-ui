@@ -179,6 +179,7 @@ def run_cli(args: argparse.Namespace) -> int:
         dataset_version=args.dataset_version,
         generated_at=generated_at,
         max_bytes=args.max_bytes,
+        region=args.region,
     )
 
     output_path = Path(args.output_json)
@@ -215,6 +216,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dataset-version", required=True)
     parser.add_argument("--generated-at")
     parser.add_argument("--max-bytes", type=int, default=1_500_000)
+    parser.add_argument("--region", default="ca")
     return parser
 
 

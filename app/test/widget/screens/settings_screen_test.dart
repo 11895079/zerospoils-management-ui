@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/generated_l10n/app_localizations.dart';
 import 'package:zerospoils/core/reference/reference_pack_fetchers.dart';
 import 'package:zerospoils/core/theme/app_colors.dart';
+import 'package:zerospoils/presentation/di/localization_providers.dart';
 import 'package:zerospoils/presentation/di/theme_providers.dart';
 import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/di/repository_providers.dart';
@@ -14,8 +16,20 @@ import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
 
 void main() {
   Widget buildTestHarness() {
-    return MaterialApp(
-      home: ProviderScope(child: Scaffold(body: SettingsScreen())),
+    return ProviderScope(
+      child: Consumer(
+        builder: (context, ref, _) {
+          final locale =
+              resolveAppLocale(ref.watch(appLocaleTagProvider)) ??
+              const Locale('en');
+          return MaterialApp(
+            locale: locale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(body: SettingsScreen()),
+          );
+        },
+      ),
     );
   }
 
@@ -77,6 +91,13 @@ void main() {
 
   Finder tileForKey(Key key) {
     return find.byKey(key);
+  }
+
+  Finder dropdownForKey(Key key) {
+    return find.descendant(
+      of: tileForKey(key),
+      matching: find.byType(DropdownButton<String>),
+    );
   }
 
   Finder switchForKey(Key key) {
@@ -559,6 +580,153 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('Language selection loads and persists preference', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+        'app_locale': 'fr_CA',
+      });
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      // Assert the active locale rather than a translated string (brittle).
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).locale,
+        resolveAppLocale('fr_CA'),
+      );
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('language_dropdown_tile')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<DropdownButton<String>>(
+              dropdownForKey(const Key('language_dropdown_tile')),
+            )
+            .value,
+        'fr_CA',
+      );
+
+      await tester.tap(dropdownForKey(const Key('language_dropdown_tile')));
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'en',
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(appLocalePreferenceKey), 'en');
+      expect(
+        tester
+            .widget<DropdownButton<String>>(
+              dropdownForKey(const Key('language_dropdown_tile')),
+            )
+            .value,
+        'en',
+      );
+      // Verify the app re-rendered in the new locale (not a specific string).
+      expect(
+        tester.widget<MaterialApp>(find.byType(MaterialApp)).locale,
+        resolveAppLocale('en'),
+      );
+    });
+
+    testWidgets('Reference data region and language persist preference', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'notifications_enabled': true,
+        'expiry_lead_time_days': 3,
+        'sound_enabled': true,
+        'vibration_enabled': true,
+        'date_format': 'MM/DD/YYYY',
+        referencePackRegionPreferenceKey: 'ca',
+        referencePackLanguagePreferenceKey: 'fr-CA',
+      });
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('reference_language_dropdown_tile')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<DropdownButton<String>>(
+              dropdownForKey(const Key('reference_region_dropdown_tile')),
+            )
+            .value,
+        'ca',
+      );
+      expect(
+        tester
+            .widget<DropdownButton<String>>(
+              dropdownForKey(const Key('reference_language_dropdown_tile')),
+            )
+            .value,
+        'fr-CA',
+      );
+
+      await tester.ensureVisible(
+        tileForKey(const Key('reference_region_dropdown_tile')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        dropdownForKey(const Key('reference_region_dropdown_tile')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'us',
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(
+        tileForKey(const Key('reference_language_dropdown_tile')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        dropdownForKey(const Key('reference_language_dropdown_tile')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is DropdownMenuItem<String> && widget.value == 'en',
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(referencePackRegionPreferenceKey), 'us');
+      expect(prefs.getString(referencePackLanguagePreferenceKey), 'en');
     });
 
     testWidgets('Feedback settings controls render', (

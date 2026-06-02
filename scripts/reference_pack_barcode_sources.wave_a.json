@@ -1,0 +1,33 @@
+{
+  "wave": "A",
+  "description": "Wave A barcode source configuration for CA and US",
+  "sources": [
+    {
+      "region": "ca",
+      "country_query": "canada",
+      "country_label": "Canada",
+      "country_tags": ["en:canada", "en:ca"],
+      "output_csv": "app/assets/reference-data/source/canada_top_ca_wave_a.csv",
+      "output_json": "app/assets/reference-data/barcode_seed_ca.wave_a.json",
+      "report_json": "app/assets/reference-data/barcode_seed_ca.wave_a.report.json",
+      "source_name": "openfoodfacts-wave-a-ca-top-scanned"
+    },
+    {
+      "region": "us",
+      "country_query": "united-states",
+      "country_label": "United States",
+      "country_tags": ["en:united-states", "en:usa", "en:us"],
+      "output_csv": "app/assets/reference-data/source/united_states_top_us_wave_a.csv",
+      "output_json": "app/assets/reference-data/barcode_seed_us.wave_a.json",
+      "report_json": "app/assets/reference-data/barcode_seed_us.wave_a.report.json",
+      "source_name": "openfoodfacts-wave-a-us-top-scanned"
+    }
+  ],
+  "defaults": {
+    "drop_threshold": 0.5,
+    "max_per_category": 300,
+    "min_results": 120,
+    "max_results": 1200,
+    "max_bytes": 1800000
+  }
+}

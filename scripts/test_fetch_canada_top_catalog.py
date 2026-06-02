@@ -9,6 +9,7 @@ from fetch_canada_top_catalog import (
     find_elbow_index,
     _category_hint_from_tags,
     _parse_quantity,
+    fetch_top_region,
     fetch_top_canada,
 )
 
@@ -135,9 +136,10 @@ def test_fetch_top_canada_applies_elbow_and_category_cap(monkeypatch):
 
     call_count = [0]
 
-    def mock_fetch_page(page: int, page_size: int, *, timeout: int = 20) -> dict:
+    def mock_fetch_page(page: int, page_size: int, country_query: str, *, timeout: int = 20, max_retries: int = 4) -> dict:
         idx = call_count[0]
         call_count[0] += 1
+        assert country_query == "canada"
         if idx < len(page_responses):
             return page_responses[idx]
         return {"products": []}
@@ -160,7 +162,7 @@ def test_fetch_top_canada_applies_elbow_and_category_cap(monkeypatch):
 
 
 def test_fetch_top_canada_skips_entries_without_name_or_scans(monkeypatch):
-    def mock_fetch_page(page: int, page_size: int, *, timeout: int = 20) -> dict:
+    def mock_fetch_page(page: int, page_size: int, country_query: str, *, timeout: int = 20, max_retries: int = 4) -> dict:
         if page == 1:
             return {
                 "products": [
@@ -184,3 +186,32 @@ def test_fetch_top_canada_skips_entries_without_name_or_scans(monkeypatch):
     # Only the valid product should come through
     assert len(rows) == 1
     assert rows[0]["product_name"] == "Valid Product"
+
+
+def test_fetch_top_region_uses_custom_country_query(monkeypatch):
+    captured_queries = []
+
+    def mock_fetch_page(page: int, page_size: int, country_query: str, *, timeout: int = 20, max_retries: int = 4) -> dict:
+        captured_queries.append(country_query)
+        if page == 1:
+            return {
+                "products": [
+                    _make_ofx_product("055000132152", "Valid Product", 1000),
+                ]
+            }
+        return {"products": []}
+
+    monkeypatch.setattr("fetch_canada_top_catalog._fetch_page", mock_fetch_page)
+
+    rows, diagnostics = fetch_top_region(
+        country_query="united-states",
+        drop_threshold=0.50,
+        max_per_category=10,
+        min_results=1,
+        max_results=50,
+        rate_limit_seconds=0,
+    )
+
+    assert len(rows) == 1
+    assert diagnostics["country_query"] == "united-states"
+    assert captured_queries[0] == "united-states"

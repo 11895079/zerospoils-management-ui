@@ -3,6 +3,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/beta_feedback_button.dart';
@@ -36,6 +38,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final bottomNavigationTheme = Theme.of(context).bottomNavigationBarTheme;
     final selectedIndex = ref.watch(homeTabIndexProvider);
     final screens = [
@@ -74,22 +77,22 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         backgroundColor: bottomNavigationTheme.backgroundColor,
         selectedItemColor: bottomNavigationTheme.selectedItemColor,
         unselectedItemColor: bottomNavigationTheme.unselectedItemColor,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory_2, key: Key('nav_inventory')),
-            label: 'Inventory',
+            label: l10n.navigationInventory,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.schedule, key: Key('nav_expiring')),
-            label: 'Expiring',
+            label: l10n.expiryTodayLabel,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart, key: Key('nav_shopping')),
-            label: 'Shopping',
+            label: l10n.navigationShoppingList,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insights, key: Key('nav_progress')),
-            label: 'Progress',
+            label: l10n.screenTitleProgress,
           ),
         ],
       ),

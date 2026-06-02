@@ -347,6 +347,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsLanguage => 'Idioma';
 
   @override
+  String get settingsReferenceDataRegion => 'Região dos dados de referência';
+
+  @override
+  String get settingsReferenceDataLanguage => 'Idioma dos dados de referência';
+
+  @override
   String get settingsDateFormat => 'Formato de data';
 
   @override

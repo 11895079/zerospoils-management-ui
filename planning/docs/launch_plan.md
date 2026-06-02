@@ -15,8 +15,8 @@ Reference input: launch framework notes synthesized from Chris Raroque's app-lau
 - Remaining M3 quality gaps that affect launch confidence:
 	- Issue 201: receipt review UX completion (tri-color overlay + promote/demote workflow)
 	- Issue 202: confirmation confidence indicators + telemetry verification
-	- Issue 206: remote update packs not ready (can defer if bundled catalog is acceptable for v1)
 	- Issue 361: Firebase App Distribution tester workflow still open
+	- Reference-data update packs are implemented and no longer a launch blocker; keep any extra rollout guardrails in the post-launch hardening backlog only if telemetry or ops need more work.
 
 ### Beta and hardening readiness
 - M4/370 is near-complete; one critical item remains: server-side endpoint gating.

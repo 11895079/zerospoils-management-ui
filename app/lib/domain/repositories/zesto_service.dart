@@ -271,9 +271,10 @@ class ZestoService {
       'timestamp': now.toIso8601String(),
     });
 
-    // If no UI is listening yet, avoid scheduling delayed dismissal timers.
+    // If no UI listener is attached yet, keep the mascot state visible but
+    // skip auto-dismiss scheduling. This prevents timer leaks in widget tests
+    // and avoids dropping startup messages before the overlay subscribes.
     if (!_stateController.hasListener) {
-      _dismissMascot('auto');
       return;
     }
 

@@ -2,6 +2,8 @@
 
 This document describes the release workflow for ZeroSpoils mobile app builds.
 
+For M3/206 downloadable reference-data pack backend operations (Firebase Storage + Remote Config manifest URL), see [reference-pack-backend-operations.md](reference-pack-backend-operations.md).
+
 For the full end-to-end develop-build-release strategy across iOS TestFlight, Android Firebase distribution, and Google Play internal testing (including custom Xcode Cloud trigger design aligned to tags), see [mobile-release-cycle-ios-android.md](mobile-release-cycle-ios-android.md).
 
 For Windows desktop closed testing through Microsoft Store private audience or Store flighting, see [Windows Store closed-testing plan](windows-store-closed-testing.md).

@@ -1,8 +1,8 @@
-"""Extract top-scanned Canadian products from the OFx full CSV dump.
+"""Extract top-scanned country-scoped products from the OFx full CSV dump.
 
 The full dump is a gzip-compressed, tab-separated CSV (~4 GB compressed).
 This script streams it without loading the whole file into memory, filters
-for Canadian products, then applies elbow detection and category diversity cap
+for country-tagged products, then applies elbow detection and category diversity cap
 before writing output compatible with curate_canada_seed_catalog.py.
 
 Download the dump from:
@@ -12,7 +12,9 @@ Usage
 -----
     python scripts/extract_canada_top_from_dump.py \\
         --dump-gz /path/to/en.openfoodfacts.org.products.csv.gz \\
-        --output-csv app/assets/reference-data/source/canada_top_ca_2026-04-19.csv \\
+        --output-csv app/assets/reference-data/source/canada_top_ca_2026-04-19.csv \
+        --country-tags en:canada,en:ca \
+        --country-label Canada \
         --drop-threshold 0.50 \\
         --max-per-category 20
 
@@ -71,18 +73,18 @@ _CSV_FIELDS = [
     "unit_hint",
 ]
 
-_CANADA_TAGS = {"en:canada", "en:ca"}
+_DEFAULT_COUNTRY_TAGS = {"en:canada", "en:ca"}
 
 
 # ---------------------------------------------------------------------------
 # Streaming reader
 # ---------------------------------------------------------------------------
 
-def _is_canadian(countries_tags: str) -> bool:
+def _matches_country_tags(countries_tags: str, allowed_tags: set[str]) -> bool:
     if not countries_tags:
         return False
     tags = {t.strip().lower() for t in countries_tags.split(",")}
-    return bool(tags & _CANADA_TAGS)
+    return bool(tags & allowed_tags)
 
 
 def _clean(value: str) -> str:
@@ -102,15 +104,17 @@ def _open_dump(dump_path: Path):
         return fh, fh
 
 
-def stream_canadian_products(
+def stream_country_products(
     dump_path: Path,
     *,
+    allowed_country_tags: set[str],
+    country_label: str,
     verbose: bool = True,
 ) -> list[dict[str, Any]]:
-    """Stream the dump (gzip or plain CSV) and return all Canadian products with scan counts."""
+    """Stream the dump and return all products matching configured country tags."""
     products: list[dict[str, Any]] = []
     rows_read = 0
-    canada_found = 0
+    matched_found = 0
     skipped_no_name = 0
     skipped_no_scans = 0
     report_every = 500_000
@@ -139,12 +143,12 @@ def stream_canadian_products(
             if verbose and rows_read % report_every == 0:
                 elapsed = time.monotonic() - start
                 print(
-                    f"  Rows read: {rows_read:,}  |  Canadian found: {canada_found:,}  "
+                    f"  Rows read: {rows_read:,}  |  {country_label} found: {matched_found:,}  "
                     f"|  Elapsed: {elapsed:.0f}s",
                     file=sys.stderr,
                 )
 
-            if not _is_canadian(row.get("countries_tags", "")):
+            if not _matches_country_tags(row.get("countries_tags", ""), allowed_country_tags):
                 continue
 
             name = _clean(row.get("product_name", ""))
@@ -178,7 +182,7 @@ def stream_canadian_products(
                     "unique_scans_n": scans,
                 }
             )
-            canada_found += 1
+            matched_found += 1
     finally:
         handle.close()
 
@@ -187,7 +191,7 @@ def stream_canadian_products(
         print(
             f"\n  Stream complete in {elapsed:.0f}s"
             f"\n  Total rows read:        {rows_read:,}"
-            f"\n  Canadian products:      {canada_found:,}"
+            f"\n  {country_label} products:      {matched_found:,}"
             f"\n  Skipped (no name/code): {skipped_no_name:,}"
             f"\n  Skipped (zero scans):   {skipped_no_scans:,}",
             file=sys.stderr,
@@ -247,7 +251,7 @@ def apply_elbow_and_cap(
     ]
 
     diagnostics = {
-        "total_canadian_with_scans": len(products),
+        "total_country_with_scans": len(products),
         "after_elbow": len(before_cap),
         "rejected_by_category_cap": rejected_cap,
         "accepted": len(rows),
@@ -272,10 +276,27 @@ def run_cli(args: argparse.Namespace) -> int:
 
     print(f"Streaming {dump_path.name} ({dump_path.stat().st_size / 1_073_741_824:.2f} GB) …", file=sys.stderr)
 
-    products = stream_canadian_products(dump_path, verbose=True)
+    allowed_country_tags = {
+        token.strip().lower()
+        for token in args.country_tags.split(",")
+        if token.strip()
+    }
+    if not allowed_country_tags:
+        print("ERROR: --country-tags must contain at least one tag", file=sys.stderr)
+        return 1
+
+    products = stream_country_products(
+        dump_path,
+        allowed_country_tags=allowed_country_tags,
+        country_label=args.country_label,
+        verbose=True,
+    )
 
     if not products:
-        print("ERROR: No Canadian products with scan counts found. Check the dump file.", file=sys.stderr)
+        print(
+            "ERROR: No matching products with scan counts found for configured country tags.",
+            file=sys.stderr,
+        )
         return 1
 
     rows, diagnostics = apply_elbow_and_cap(
@@ -286,7 +307,7 @@ def run_cli(args: argparse.Namespace) -> int:
     )
 
     print(
-        f"\n  Canadian products with scans: {diagnostics['total_canadian_with_scans']:,}"
+        f"\n  {args.country_label} products with scans: {diagnostics['total_country_with_scans']:,}"
         f"\n  After elbow (index {diagnostics['elbow_at_index']}):     {diagnostics['after_elbow']:,}"
         f"\n  Rejected (category cap):      {diagnostics['rejected_by_category_cap']:,}"
         f"\n  Accepted for CSV:             {diagnostics['accepted']:,}"
@@ -307,10 +328,11 @@ def run_cli(args: argparse.Namespace) -> int:
         f"\nNext step — run through curation pipeline:\n"
         f"  python scripts/curate_canada_seed_catalog.py \\\n"
         f"    --input-csv {args.output_csv} \\\n"
-        f"    --output-json app/assets/reference-data/barcode_seed_ca.v2.json \\\n"
-        f"    --report-json app/assets/reference-data/barcode_seed_ca.v2.report.json \\\n"
-        f"    --source-name openfoodfacts-full-dump-canada-top-scanned \\\n"
-        f"    --dataset-version 2026-04-19",
+        f"    --output-json app/assets/reference-data/barcode_seed_{args.region}.v1.json \\\n "
+        f"    --report-json app/assets/reference-data/barcode_seed_{args.region}.v1.report.json \\\n "
+        f"    --source-name openfoodfacts-full-dump-{args.region}-top-scanned \\\n "
+        f"    --region {args.region} \\\n "
+        f"    --dataset-version $(date +%F)",
         file=sys.stderr,
     )
     return 0
@@ -330,6 +352,24 @@ def _build_parser() -> argparse.ArgumentParser:
         "--output-csv",
         required=True,
         help="Path to write the output CSV (input for curate_canada_seed_catalog.py).",
+    )
+    p.add_argument(
+        "--country-tags",
+        default=",".join(sorted(_DEFAULT_COUNTRY_TAGS)),
+        help=(
+            "Comma-separated OpenFoodFacts country tags to match in countries_tags. "
+            "Default: en:ca,en:canada"
+        ),
+    )
+    p.add_argument(
+        "--country-label",
+        default="Canada",
+        help="Human-readable label used in logs/diagnostics.",
+    )
+    p.add_argument(
+        "--region",
+        default="ca",
+        help="Region code used in downstream curation command examples.",
     )
     p.add_argument(
         "--drop-threshold",

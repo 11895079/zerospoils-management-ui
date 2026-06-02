@@ -14,8 +14,12 @@ class MockFlutterLocalNotificationsPlugin
     implements FlutterLocalNotificationsPlugin {
   final List<Map<String, dynamic>> scheduledNotifications = [];
   final List<int> cancelledNotifications = [];
+  final mockAndroid = MockAndroidFlutterLocalNotificationsPlugin();
+  final mockIos = MockIOSFlutterLocalNotificationsPlugin();
+  final mockMacOs = MockMacOSFlutterLocalNotificationsPlugin();
   bool initializeCalled = false;
   bool channelCreated = false;
+  InitializationSettings? initializationSettings;
 
   @override
   Future<bool?> initialize({
@@ -25,6 +29,7 @@ class MockFlutterLocalNotificationsPlugin
     onDidReceiveBackgroundNotificationResponse,
   }) async {
     initializeCalled = true;
+    initializationSettings = settings;
     return true;
   }
 
@@ -34,10 +39,14 @@ class MockFlutterLocalNotificationsPlugin
   >() {
     channelCreated = true;
     if (T == AndroidFlutterLocalNotificationsPlugin) {
-      return MockAndroidFlutterLocalNotificationsPlugin(
-            onChannelCreated: () => channelCreated = true,
-          )
-          as T;
+      mockAndroid.onChannelCreated = () => channelCreated = true;
+      return mockAndroid as T;
+    }
+    if (T == IOSFlutterLocalNotificationsPlugin) {
+      return mockIos as T;
+    }
+    if (T == MacOSFlutterLocalNotificationsPlugin) {
+      return mockMacOs as T;
     }
     return null;
   }
@@ -85,15 +94,61 @@ class MockFlutterLocalNotificationsPlugin
 
 class MockAndroidFlutterLocalNotificationsPlugin
     extends AndroidFlutterLocalNotificationsPlugin {
-  final void Function()? onChannelCreated;
-
   MockAndroidFlutterLocalNotificationsPlugin({this.onChannelCreated});
+
+  void Function()? onChannelCreated;
+  bool requestNotificationsPermissionCalled = false;
+  bool requestNotificationsPermissionResult = true;
 
   @override
   Future<void> createNotificationChannel(
     AndroidNotificationChannel channel,
   ) async {
     onChannelCreated?.call();
+  }
+
+  @override
+  Future<bool?> requestNotificationsPermission() async {
+    requestNotificationsPermissionCalled = true;
+    return requestNotificationsPermissionResult;
+  }
+}
+
+class MockIOSFlutterLocalNotificationsPlugin
+    extends IOSFlutterLocalNotificationsPlugin {
+  bool requestPermissionsCalled = false;
+  bool requestPermissionsResult = true;
+
+  @override
+  Future<bool?> requestPermissions({
+    bool alert = false,
+    bool badge = false,
+    bool sound = false,
+    bool critical = false,
+    bool provisional = false,
+    bool providesAppNotificationSettings = false,
+  }) async {
+    requestPermissionsCalled = true;
+    return requestPermissionsResult;
+  }
+}
+
+class MockMacOSFlutterLocalNotificationsPlugin
+    extends MacOSFlutterLocalNotificationsPlugin {
+  bool requestPermissionsCalled = false;
+  bool requestPermissionsResult = true;
+
+  @override
+  Future<bool?> requestPermissions({
+    bool alert = false,
+    bool badge = false,
+    bool sound = false,
+    bool critical = false,
+    bool provisional = false,
+    bool providesAppNotificationSettings = false,
+  }) async {
+    requestPermissionsCalled = true;
+    return requestPermissionsResult;
   }
 }
 
@@ -270,6 +325,30 @@ void main() {
   });
 
   group('NotificationService - telemetry integration', () {
+    test('initialize does not request iOS permissions eagerly', () async {
+      await notificationService.initialize();
+
+      final iosSettings = mockPlugin.initializationSettings?.iOS;
+      if (iosSettings != null) {
+        expect(iosSettings.requestAlertPermission, isFalse);
+        expect(iosSettings.requestBadgePermission, isFalse);
+        expect(iosSettings.requestSoundPermission, isFalse);
+      }
+      expect(mockPlugin.mockIos.requestPermissionsCalled, isFalse);
+    });
+
+    test('requestPermissions delegates to platform implementations', () async {
+      final granted = await notificationService.requestPermissions();
+
+      expect(granted, isTrue);
+      expect(
+        mockPlugin.mockAndroid.requestNotificationsPermissionCalled,
+        isTrue,
+      );
+      expect(mockPlugin.mockIos.requestPermissionsCalled, isTrue);
+      expect(mockPlugin.mockMacOs.requestPermissionsCalled, isTrue);
+    });
+
     test('scheduleForItem emits notification_scheduled event', () async {
       SharedPreferences.setMockInitialValues({
         'notifications_enabled': true,

@@ -1,8 +1,8 @@
-"""Fetch the top-scanned Canadian grocery products from OpenFoodFacts and produce a seed CSV.
+"""Fetch top-scanned grocery products for a country query from OpenFoodFacts.
 
 Algorithm
 ---------
-1. Hit OFx API v2 search sorted by unique_scans_n (Canada, food products).
+1. Hit OFx API v2 search sorted by unique_scans_n (country-scoped, food products).
 2. Collect pages until an *elbow* is detected in the scan-count distribution:
    an entry whose scan count has dropped by more than `--drop-threshold` (default 0.50)
    relative to the previous entry signals the long tail boundary.
@@ -11,8 +11,10 @@ Algorithm
 
 Usage
 -----
-    python scripts/fetch_canada_top_catalog.py \\
+    python scripts/fetch_canada_top_catalog.py \
         --output-csv app/assets/reference-data/source/canada_top_ca_$(date +%F).csv \\
+        --country-query canada \
+        --region ca \
         --drop-threshold 0.50 \\
         --max-per-category 10 \\
         --min-results 30 \\
@@ -31,6 +33,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -89,10 +92,10 @@ def _category_hint_from_tags(tags_raw: str) -> str:
 # OFx API client
 # ---------------------------------------------------------------------------
 
-_OFX_SEARCH_URL = (
+_OFX_SEARCH_URL_TEMPLATE = (
     "https://world.openfoodfacts.org/cgi/search.pl"
     "?action=process"
-    "&tagtype_0=countries&tag_contains_0=contains&tag_0=canada"
+    "&tagtype_0=countries&tag_contains_0=contains&tag_0={country_query}"
     "&sort_by=unique_scans_n"
     "&page_size={page_size}"
     "&page={page}"
@@ -106,11 +109,17 @@ _USER_AGENT = "ZeroSpoils-CatalogFetcher/1.0 (github.com/11895079/zerospoils)"
 def _fetch_page(
     page: int,
     page_size: int,
+    country_query: str,
     *,
     timeout: int = 30,
     max_retries: int = 4,
 ) -> dict[str, Any]:
-    url = _OFX_SEARCH_URL.format(page=page, page_size=page_size)
+    encoded_country_query = urllib.parse.quote_plus(country_query)
+    url = _OFX_SEARCH_URL_TEMPLATE.format(
+        page=page,
+        page_size=page_size,
+        country_query=encoded_country_query,
+    )
     req = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
     delay = 5.0
     for attempt in range(max_retries):
@@ -183,8 +192,9 @@ def find_elbow_index(scan_counts: list[int], drop_threshold: float) -> int:
 # Core fetch + filter logic
 # ---------------------------------------------------------------------------
 
-def fetch_top_canada(
+def fetch_top_region(
     *,
+    country_query: str,
     drop_threshold: float,
     max_per_category: int,
     min_results: int,
@@ -193,7 +203,7 @@ def fetch_top_canada(
     rate_limit_seconds: float = 1.0,
     verbose: bool = False,
 ) -> tuple[list[dict[str, str]], dict[str, Any]]:
-    """Fetch OFx Canada products and return (rows, diagnostics).
+    """Fetch OFx products for a country query and return (rows, diagnostics).
 
     rows are dicts matching curate_canada_seed_catalog.py column schema:
         barcode, product_name, brand, category_hint, quantity_hint, unit_hint
@@ -206,7 +216,11 @@ def fetch_top_canada(
         if verbose:
             print(f"  Fetching OFx page {page} …", file=sys.stderr)
 
-        data = _fetch_page(page, page_size=min(page_size, max_results - total_fetched))
+        data = _fetch_page(
+            page,
+            page_size=min(page_size, max_results - total_fetched),
+            country_query=country_query,
+        )
         products = data.get("products", [])
         if not products:
             break
@@ -289,6 +303,7 @@ def fetch_top_canada(
     ]
 
     diagnostics = {
+        "country_query": country_query,
         "total_fetched_from_api": total_fetched,
         "after_basic_filter": len(all_products),
         "rejected_by_category_cap": rejected_cat_cap,
@@ -299,6 +314,29 @@ def fetch_top_canada(
     }
 
     return rows, diagnostics
+
+
+def fetch_top_canada(
+    *,
+    drop_threshold: float,
+    max_per_category: int,
+    min_results: int,
+    max_results: int,
+    page_size: int = 100,
+    rate_limit_seconds: float = 1.0,
+    verbose: bool = False,
+) -> tuple[list[dict[str, str]], dict[str, Any]]:
+    """Backward-compatible alias for Canada behavior."""
+    return fetch_top_region(
+        country_query="canada",
+        drop_threshold=drop_threshold,
+        max_per_category=max_per_category,
+        min_results=min_results,
+        max_results=max_results,
+        page_size=page_size,
+        rate_limit_seconds=rate_limit_seconds,
+        verbose=verbose,
+    )
 
 
 def _parse_quantity(raw: str) -> tuple[str, str]:
@@ -334,10 +372,16 @@ def run_cli(args: argparse.Namespace) -> int:
         print(f"  max-per-category:  {args.max_per_category}")
         print(f"  min-results:       {args.min_results}")
         print(f"  max-results:       {args.max_results}")
+        print(f"  country-query:     {args.country_query}")
+        print(f"  region:            {args.region}")
         return 0
 
-    print("Fetching from OpenFoodFacts (Canada, sorted by unique_scans_n) …")
-    rows, diagnostics = fetch_top_canada(
+    print(
+        "Fetching from OpenFoodFacts "
+        f"(country query: {args.country_query}, sorted by unique_scans_n) ..."
+    )
+    rows, diagnostics = fetch_top_region(
+        country_query=args.country_query,
         drop_threshold=args.drop_threshold,
         max_per_category=args.max_per_category,
         min_results=args.min_results,
@@ -352,6 +396,7 @@ def run_cli(args: argparse.Namespace) -> int:
         f"\n  Accepted for CSV:        {diagnostics['accepted']}"
         f"\n  Scan range:              {diagnostics['bottom_scan_count']} – "
         f"{diagnostics['top_scan_count']}"
+        f"\n  Country query:           {diagnostics['country_query']}"
         f"\n  Category breakdown:      {json.dumps(diagnostics['category_counts'], indent=4)}"
     )
 
@@ -367,9 +412,10 @@ def run_cli(args: argparse.Namespace) -> int:
         "\nNext step — run through curation pipeline:\n"
         f"  python scripts/curate_canada_seed_catalog.py \\\n"
         f"    --input-csv {args.output_csv} \\\n"
-        f"    --output-json app/assets/reference-data/barcode_seed_ca.v2.json \\\n"
-        f"    --report-json app/assets/reference-data/barcode_seed_ca.v2.report.json \\\n"
-        f"    --source-name openfoodfacts-canada-top-scanned \\\n"
+        f"    --output-json app/assets/reference-data/barcode_seed_{args.region}.v1.json \\\n "
+        f"    --report-json app/assets/reference-data/barcode_seed_{args.region}.v1.report.json \\\n "
+        f"    --source-name openfoodfacts-{args.country_query}-top-scanned \\\n "
+        f"    --region {args.region} \\\n "
         f"    --dataset-version $(date +%F)"
     )
     return 0
@@ -378,6 +424,19 @@ def run_cli(args: argparse.Namespace) -> int:
 def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--output-csv", required=True, help="Path to write the output CSV.")
+    p.add_argument(
+        "--country-query",
+        default="canada",
+        help=(
+            "OpenFoodFacts country query value for tag_0 filter. "
+            "Examples: canada, united-states. Default: canada."
+        ),
+    )
+    p.add_argument(
+        "--region",
+        default="ca",
+        help="Region code used downstream for seed artifact metadata. Default: ca.",
+    )
     p.add_argument(
         "--drop-threshold",
         type=float,
