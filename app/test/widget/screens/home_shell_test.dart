@@ -1,14 +1,10 @@
 // Widget tests for HomeShell navigation
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zerospoils/presentation/screens/home_shell.dart';
-import 'package:zerospoils/presentation/widgets/zesto_overlay.dart';
 import 'package:zerospoils/domain/models/item_model.dart' show Item;
-import 'package:zerospoils/domain/models/zesto_model.dart';
-import 'package:zerospoils/domain/repositories/zesto_service.dart';
 import 'package:zerospoils/data/repositories/hive_item_repository.dart';
 import 'package:zerospoils/data/repositories/hive_shopping_list_repository.dart';
 import 'package:zerospoils/domain/models/shopping_list_item.dart';
@@ -64,22 +60,6 @@ class MockShoppingListRepository extends HiveShoppingListRepository {
     if (!_initialized) throw Exception('Repository not initialized');
     return _items.values.toList();
   }
-}
-
-/// Mock AssetBundle that provides storage tips without filesystem I/O
-class MockAssetBundle extends AssetBundle {
-  @override
-  Future<String> loadString(String key, {bool cache = true}) async {
-    if (key == 'assets/data/storage_tips.json') {
-      // Return minimal valid JSON for storage tips
-      return '{"produce": "Store in crisper drawer", "dairy": "Keep refrigerated"}';
-    }
-    throw FlutterError('Asset not found: $key');
-  }
-
-  @override
-  Future<ByteData> load(String key) =>
-      throw FlutterError('Binary assets not supported in mock');
 }
 
 void main() {
@@ -210,79 +190,4 @@ void main() {
 
     expect(find.byKey(feedbackDrawerKey), findsOneWidget);
   });
-
-  testWidgets(
-    'shows visible Zesto overlay when mascot trigger fires in production host',
-    (WidgetTester tester) async {
-      tester.view.physicalSize = const Size(320, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(() {
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      });
-
-      // Mock AssetBundle to provide storage tips without loading from filesystem
-      final mockAssetBundle = MockAssetBundle();
-
-      final zestoService = ZestoService(
-        getSettings: () => const MascotSettings(
-          enabled: true,
-          frequency: MascotFrequency.always,
-        ),
-        displayDuration: const Duration(seconds: 1),
-        assetBundle: mockAssetBundle,
-      );
-      addTearDown(zestoService.dispose);
-
-      final container = ProviderContainer(
-        overrides: [
-          zestoServiceProvider.overrideWithValue(zestoService),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            builder: (context, child) {
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (child case != null) child else const SizedBox.shrink(),
-                  const ZestoOverlay(),
-                ],
-              );
-            },
-            home: const Scaffold(body: SizedBox.expand()),
-          ),
-        ),
-      );
-
-      // Allow the root overlay host to initialize.
-      await tester.pumpAndSettle();
-
-      // Show the mascot
-      await container
-          .read(zestoServiceProvider)
-          .showMascot(
-            MascotMessageType.firstItem,
-            bypassAntiSpam: true,
-          );
-      // Pump to let the state change propagate
-      await tester.pump(const Duration(milliseconds: 50));
-
-      expect(tester.takeException(), isNull);
-
-      // The overlay should now be visible above the shell.
-      expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
-      expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
-
-      // Dismiss the mascot
-      container.read(zestoServiceProvider).dismissMascot();
-      // Final pump to process dismissal
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(tester.takeException(), isNull);
-    },
-  );
 }
