@@ -180,9 +180,7 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
             if (child case != null)
               child
             else
-              const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              ),
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
             const ZestoOverlay(),
           ],
         );

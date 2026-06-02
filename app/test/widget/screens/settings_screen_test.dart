@@ -19,7 +19,8 @@ void main() {
     return ProviderScope(
       child: Consumer(
         builder: (context, ref, _) {
-          final locale = resolveAppLocale(ref.watch(appLocaleTagProvider)) ??
+          final locale =
+              resolveAppLocale(ref.watch(appLocaleTagProvider)) ??
               const Locale('en');
           return MaterialApp(
             locale: locale,

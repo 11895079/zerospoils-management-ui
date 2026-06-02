@@ -72,10 +72,9 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      await container.read(zestoServiceProvider).showMascot(
-        MascotMessageType.firstItem,
-        bypassAntiSpam: true,
-      );
+      await container
+          .read(zestoServiceProvider)
+          .showMascot(MascotMessageType.firstItem, bypassAntiSpam: true);
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(tester.takeException(), isNull);

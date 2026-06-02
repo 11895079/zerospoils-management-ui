@@ -190,13 +190,17 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
             return IgnorePointer(
               ignoring: !_state.isVisible,
               child: AnimatedSlide(
-                offset: _state.isVisible ? Offset.zero : const Offset(0.2, 0.25),
+                offset: _state.isVisible
+                    ? Offset.zero
+                    : const Offset(0.2, 0.25),
                 duration: disableAnimations ? Duration.zero : _slideDuration,
                 curve: Curves.easeOutCubic,
                 child: AnimatedOpacity(
                   key: const Key('zesto_overlay'),
                   opacity: _state.isVisible ? 1 : 0,
-                  duration: disableAnimations ? Duration.zero : _opacityDuration,
+                  duration: disableAnimations
+                      ? Duration.zero
+                      : _opacityDuration,
                   curve: Curves.easeOut,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(maxWidth: bubbleWidth),
@@ -216,7 +220,9 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                         child: Container(
                           decoration: BoxDecoration(
                             gradient: _bubbleGradient,
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
                             border: Border.all(
                               color: accent.withValues(alpha: 0.35),
                               width: 1,
@@ -227,87 +233,89 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                             mainAxisSize: MainAxisSize.max,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                        AnimatedBuilder(
-                          animation: _bobAnimation,
-                          builder: (context, child) {
-                            final dy = disableAnimations
-                                ? 0.0
-                                : _bobAnimation.value;
-                            return Transform.translate(
-                              offset: Offset(0, dy),
-                              child: child,
-                            );
-                          },
-                          // Decorative emoji; the Semantics wrapper above
-                          // already announces the full message.
-                          child: ExcludeSemantics(
-                            child: Text(
-                              avatar,
-                              key: const Key('zesto_avatar'),
-                              style: const TextStyle(fontSize: 28),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Header uses textPrimary (#333) instead of
-                              // the accent green so contrast against the
-                              // cream bubble (#FFFAEC) meets WCAG AA. The
-                              // accent still carries color identity via
-                              // the border + dismiss-icon background.
-                              Text(
-                                'Zesto',
-                                key: const Key('zesto_name'),
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                                Text(
-                                  _state.currentMessage!,
-                                  key: const Key('zesto_message_text'),
-                                  maxLines: 4,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.body.copyWith(
-                                    color: AppColors.textPrimary,
+                              AnimatedBuilder(
+                                animation: _bobAnimation,
+                                builder: (context, child) {
+                                  final dy = disableAnimations
+                                      ? 0.0
+                                      : _bobAnimation.value;
+                                  return Transform.translate(
+                                    offset: Offset(0, dy),
+                                    child: child,
+                                  );
+                                },
+                                // Decorative emoji; the Semantics wrapper above
+                                // already announces the full message.
+                                child: ExcludeSemantics(
+                                  child: Text(
+                                    avatar,
+                                    key: const Key('zesto_avatar'),
+                                    style: const TextStyle(fontSize: 28),
                                   ),
                                 ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(left: 4),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                          ),
-                          // Default IconButton sizing (48×48) gives a
-                          // ≥44pt tap target per DoD/WCAG; the icon glyph
-                          // stays compact at 18px.
-                          child: Semantics(
-                            button: true,
-                            label: 'Dismiss Zesto',
-                            child: IconButton(
-                              key: const Key('zesto_dismiss_button'),
-                              iconSize: 18,
-                              onPressed: () {
-                                ref.read(zestoServiceProvider).dismissMascot();
-                              },
-                              icon: const Icon(
-                                Icons.close,
-                                color: AppColors.textSecondary,
                               ),
-                            ),
-                          ),
-                        ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // Header uses textPrimary (#333) instead of
+                                    // the accent green so contrast against the
+                                    // cream bubble (#FFFAEC) meets WCAG AA. The
+                                    // accent still carries color identity via
+                                    // the border + dismiss-icon background.
+                                    Text(
+                                      'Zesto',
+                                      key: const Key('zesto_name'),
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      _state.currentMessage!,
+                                      key: const Key('zesto_message_text'),
+                                      maxLines: 4,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTextStyles.body.copyWith(
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(left: 4),
+                                decoration: BoxDecoration(
+                                  color: accent.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd,
+                                  ),
+                                ),
+                                // Default IconButton sizing (48×48) gives a
+                                // ≥44pt tap target per DoD/WCAG; the icon glyph
+                                // stays compact at 18px.
+                                child: Semantics(
+                                  button: true,
+                                  label: 'Dismiss Zesto',
+                                  child: IconButton(
+                                    key: const Key('zesto_dismiss_button'),
+                                    iconSize: 18,
+                                    onPressed: () {
+                                      ref
+                                          .read(zestoServiceProvider)
+                                          .dismissMascot();
+                                    },
+                                    icon: const Icon(
+                                      Icons.close,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
