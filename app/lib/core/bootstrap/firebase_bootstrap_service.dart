@@ -35,6 +35,29 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// - Remote Config (for feature flag remote overrides)
 /// - Cloud Messaging / FCM (push notifications for expiry alerts)
 class FirebaseBootstrapService {
+  static void recordStartupBreadcrumb(String message) {
+    debugPrint('[Startup] $message');
+    if (!kDebugMode && Firebase.apps.isNotEmpty) {
+      FirebaseCrashlytics.instance.log('[Startup] $message');
+    }
+  }
+
+  static void recordStartupError(
+    String step,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    debugPrint('[Startup] $step: $error');
+    if (!kDebugMode && Firebase.apps.isNotEmpty) {
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stackTrace,
+        reason: step,
+        fatal: false,
+      );
+    }
+  }
+
   static Future<void> initialize() async {
     try {
       // Initialize Firebase Core

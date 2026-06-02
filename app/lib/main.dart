@@ -23,16 +23,28 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Bootstrap Firebase services (telemetry, crash reporting, remote config)
-  await FirebaseBootstrapService.initialize().timeout(
-    const Duration(seconds: 8),
-    onTimeout: () {},
+  unawaited(
+    FirebaseBootstrapService.initialize()
+        .timeout(
+          const Duration(seconds: 8),
+          onTimeout: () {
+            FirebaseBootstrapService.recordStartupBreadcrumb(
+              'startup/firebase_bootstrap_timeout',
+            );
+          },
+        )
+        .catchError((Object e, StackTrace stackTrace) {
+          FirebaseBootstrapService.recordStartupError(
+            'firebase_bootstrap_background',
+            e,
+            stackTrace,
+          );
+        }),
   );
 
-  // Bootstrap Supabase services (auth, entitlements)
-  await SupabaseBootstrapService.initialize().timeout(
-    const Duration(seconds: 8),
-    onTimeout: () {},
-  );
+  // Supabase bootstrap is intentionally disabled for now.
+  // We keep the integration code/dependencies in-repo but avoid invoking it
+  // during startup until backend rollout is re-enabled.
 
   // Initialize Hive for local storage
   await Hive.initFlutter();
@@ -72,6 +84,30 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
   // Removed unused _initialLocation
   bool _initialized = false;
 
+  Future<void> _runInitStep(
+    String name,
+    Future<void> Function() action, {
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    FirebaseBootstrapService.recordStartupBreadcrumb('startup/$name/start');
+    try {
+      await action().timeout(timeout);
+      FirebaseBootstrapService.recordStartupBreadcrumb('startup/$name/ok');
+    } on TimeoutException catch (e, stackTrace) {
+      FirebaseBootstrapService.recordStartupError(
+        'startup/$name/timeout',
+        e,
+        stackTrace,
+      );
+    } catch (e, stackTrace) {
+      FirebaseBootstrapService.recordStartupError(
+        'startup/$name/fail',
+        e,
+        stackTrace,
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -83,44 +119,52 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
   }
 
   Future<void> _initPrefs() async {
-    await NotificationService().initialize().timeout(
-      const Duration(seconds: 5),
-      onTimeout: () {},
-    );
-
-    final telemetry = ref.read(telemetryClientProvider);
-    NotificationService().setTelemetryCallback((eventName, properties) {
-      telemetry.enqueue({'name': eventName, 'properties': properties});
-    });
-    telemetry.trackAppInstalled(isFirstInstall: true);
-
-    // Restore scheduled notifications from saved items
     try {
-      final itemRepository = ref.read(itemRepositoryProvider);
-      await itemRepository.init();
-      final items = await itemRepository.getAllItems();
-      await NotificationService().restoreScheduled(items: items);
-    } catch (e) {
-      // Silently fail; notifications will still be scheduled per item
-    }
+      await _runInitStep('notifications_initialize', () async {
+        await NotificationService().initialize();
+      }, timeout: const Duration(seconds: 5));
 
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getBool('demo_mode_enabled');
-    if (saved != null) {
-      ref.read(demoModeProvider.notifier).state = saved;
-    }
-    await loadAppLocalePreference(ref);
-    await loadReferencePackPreferences(ref);
-    final hasManual = prefs.getBool('has_manual_items') ?? false;
-    if (hasManual) {
-      ref.read(hasManualItemsProvider.notifier).state = true;
-    }
+      await _runInitStep('telemetry_wireup', () async {
+        final telemetry = ref.read(telemetryClientProvider);
+        NotificationService().setTelemetryCallback((eventName, properties) {
+          telemetry.enqueue({'name': eventName, 'properties': properties});
+        });
+        telemetry.trackAppInstalled(isFirstInstall: true);
+      });
 
-    await loadThemeModePreference(ref);
+      await _runInitStep('notification_restore', () async {
+        final itemRepository = ref.read(itemRepositoryProvider);
+        await itemRepository.init();
+        final items = await itemRepository.getAllItems();
+        await NotificationService().restoreScheduled(items: items);
+      });
 
-    setState(() {
-      _initialized = true;
-    });
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getBool('demo_mode_enabled');
+      if (saved != null) {
+        ref.read(demoModeProvider.notifier).state = saved;
+      }
+
+      await _runInitStep('locale_preferences_load', () async {
+        await loadAppLocalePreference(ref);
+        await loadReferencePackPreferences(ref);
+      });
+
+      final hasManual = prefs.getBool('has_manual_items') ?? false;
+      if (hasManual) {
+        ref.read(hasManualItemsProvider.notifier).state = true;
+      }
+
+      await _runInitStep('theme_preferences_load', () async {
+        await loadThemeModePreference(ref);
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _initialized = true;
+        });
+      }
+    }
   }
 
   @override

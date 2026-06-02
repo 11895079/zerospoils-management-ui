@@ -2,17 +2,55 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/core/feedback/audio_feedback_player.dart';
 import 'package:zerospoils/core/feedback/feedback_service.dart';
+
+class _RecordingAudioFeedbackPlayer implements AudioFeedbackPlayer {
+  final List<double> playedVolumes = <double>[];
+
+  @override
+  Future<void> playBeep({required double volume}) async {
+    playedVolumes.add(volume);
+  }
+}
 
 void main() {
   group('FeedbackService', () {
     late FeedbackService feedbackService;
+    late _RecordingAudioFeedbackPlayer audioPlayer;
 
     setUp(() async {
       // Initialize SharedPreferences for testing
       SharedPreferences.setMockInitialValues({});
-      feedbackService = FeedbackService();
+      audioPlayer = _RecordingAudioFeedbackPlayer();
+      feedbackService = FeedbackService(audioPlayer: audioPlayer);
       await feedbackService.initialize();
+    });
+
+    test('preview beep uses slider volume when audio is enabled', () async {
+      await feedbackService.setAudioEnabled(true);
+      await feedbackService.previewBeepVolume(0.42);
+
+      expect(audioPlayer.playedVolumes, hasLength(1));
+      expect(audioPlayer.playedVolumes.single, closeTo(0.42, 0.001));
+    });
+
+    test('preview beep is skipped when audio is disabled', () async {
+      await feedbackService.setAudioEnabled(false);
+      await feedbackService.previewBeepVolume(0.9);
+
+      expect(audioPlayer.playedVolumes, isEmpty);
+    });
+
+    test('ocr success beep uses persisted beep volume', () async {
+      await feedbackService.setAudioEnabled(true);
+      await feedbackService.setHapticEnabled(false);
+      await feedbackService.setBeepVolume(0.61);
+
+      await feedbackService.triggerOcrSuccess(FeedbackType.barcodeSuccess);
+
+      expect(audioPlayer.playedVolumes, hasLength(1));
+      expect(audioPlayer.playedVolumes.single, closeTo(0.61, 0.001));
     });
 
     test('initializes with default settings', () {
@@ -104,7 +142,9 @@ void main() {
       );
 
       // Create new instance and verify persistence
-      final newService = FeedbackService();
+      final newService = FeedbackService(
+        audioPlayer: _RecordingAudioFeedbackPlayer(),
+      );
       await newService.initialize();
 
       expect(newService.hapticEnabled, isFalse);

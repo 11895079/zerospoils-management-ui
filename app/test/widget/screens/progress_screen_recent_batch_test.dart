@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,7 +132,7 @@ void main() {
           receiptBatchRepositoryProvider.overrideWithValue(
             MockReceiptBatchRepository([batch]),
           ),
-          progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          progressStatsProvider.overrideWith((ref) => Stream.value(fakeStats)),
           zestoTestOverride(),
         ],
         child: const MaterialApp(home: ProgressScreen()),
@@ -186,7 +188,7 @@ void main() {
           receiptBatchRepositoryProvider.overrideWithValue(
             MockReceiptBatchRepository(const []),
           ),
-          progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          progressStatsProvider.overrideWith((ref) => Stream.value(fakeStats)),
           zestoTestOverride(),
         ],
         child: MaterialApp(
@@ -255,7 +257,7 @@ void main() {
           receiptBatchRepositoryProvider.overrideWithValue(
             MockReceiptBatchRepository(const []),
           ),
-          progressStatsProvider.overrideWith((ref) => Future.value(fakeStats)),
+          progressStatsProvider.overrideWith((ref) => Stream.value(fakeStats)),
           zestoTestOverride(),
         ],
         child: MaterialApp(
@@ -275,5 +277,93 @@ void main() {
     final theme = Theme.of(tester.element(find.byType(ProgressScreen)));
 
     expect(heading.style?.color, theme.textTheme.headlineMedium?.color);
+  });
+
+  testWidgets('Progress summary tiles update when stats stream emits', (
+    WidgetTester tester,
+  ) async {
+    ProgressStats buildStats({required int totalItems}) {
+      return ProgressStats(
+        totalItems: totalItems,
+        availableItems: totalItems,
+        consumedItems: 0,
+        wastedItems: 0,
+        categoryCounts: {ItemCategory.dairy: totalItems},
+        locationCounts: {StorageLocation.fridge: totalItems},
+        typeCounts: {ItemType.raw: totalItems},
+        expiringTodayCount: 0,
+        expiringThisWeekCount: 0,
+        expiringSoonCount: 0,
+        expiredCount: 0,
+        noExpiryCount: totalItems,
+        totalValue: 4.99 * totalItems,
+        consumedValue: 0,
+        wastedValue: 0,
+        savedValue: 0,
+        addedLast7Days: totalItems,
+        addedLast30Days: totalItems,
+        updatedLast7Days: 0,
+        updatedLast30Days: 0,
+        noWasteStreak: StreakData(
+          badgeType: BadgeType.noWasteWeek,
+          streakDays: 1,
+          streakStartDate: DateTime(2026, 2, 8),
+          lastActivityDate: DateTime(2026, 2, 9),
+          isActive: false,
+        ),
+        badgeProgress: const {},
+        telemetry: TelemetryAggregates.empty(),
+      );
+    }
+
+    final controller = StreamController<ProgressStats>();
+    addTearDown(controller.close);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(
+            MockItemRepository(const []),
+          ),
+          receiptBatchRepositoryProvider.overrideWithValue(
+            MockReceiptBatchRepository(const []),
+          ),
+          progressStatsProvider.overrideWith((ref) => controller.stream),
+          zestoTestOverride(),
+        ],
+        child: const MaterialApp(home: ProgressScreen()),
+      ),
+    );
+
+    controller.add(buildStats(totalItems: 1));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('progress_stat_card_total_items')),
+        matching: find.byKey(const Key('progress_stat_value_total_items')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const Key('progress_stat_value_total_items')),
+          )
+          .data,
+      '1',
+    );
+
+    controller.add(buildStats(totalItems: 3));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const Key('progress_stat_value_total_items')),
+          )
+          .data,
+      '3',
+    );
   });
 }
