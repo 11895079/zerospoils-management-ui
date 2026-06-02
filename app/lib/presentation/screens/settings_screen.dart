@@ -593,9 +593,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // when the drag ends to avoid dozens of disk writes per second.
               onChanged: (value) {
                 if (mounted) setState(() => _feedbackBeepVolume = value);
+                // Live preview only (throttled) while dragging — never persist
+                // here; the value is written once in onChangeEnd.
                 final svc = ref.read(feedbackServiceProvider).value;
                 if (svc != null) {
-                  unawaited(svc.setBeepVolume(value));
                   final now = DateTime.now();
                   final last = _lastBeepPreviewAt;
                   if (last == null ||

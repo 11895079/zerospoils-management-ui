@@ -346,22 +346,24 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.descendant(
-        of: find.byKey(const Key('progress_stat_card_total_items')),
-        matching: find.text('1'),
-      ),
-      findsOneWidget,
+      tester
+          .widget<Text>(
+            find.byKey(const Key('progress_stat_value_total_items')),
+          )
+          .data,
+      '1',
     );
 
     controller.add(buildStats(totalItems: 3));
     await tester.pumpAndSettle();
 
     expect(
-      find.descendant(
-        of: find.byKey(const Key('progress_stat_card_total_items')),
-        matching: find.text('3'),
-      ),
-      findsOneWidget,
+      tester
+          .widget<Text>(
+            find.byKey(const Key('progress_stat_value_total_items')),
+          )
+          .data,
+      '3',
     );
   });
 }

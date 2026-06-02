@@ -65,21 +65,25 @@ class ProgressScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
+            id: 'total_items',
             label: 'Total Items',
             value: '${stats.totalItems}',
             onTap: () => _openInventoryWithStatus(ref, null),
           ),
           _StatTile(
+            id: 'available',
             label: 'Available',
             value: '${stats.availableItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.available),
           ),
           _StatTile(
+            id: 'consumed',
             label: 'Consumed',
             value: '${stats.consumedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.consumed),
           ),
           _StatTile(
+            id: 'wasted',
             label: 'Wasted',
             value: '${stats.wastedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.wasted),
@@ -90,40 +94,77 @@ class ProgressScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
+            id: 'expiring_today',
             label: 'Expiring Today',
             value: '${stats.expiringTodayCount}',
           ),
           _StatTile(
+            id: 'this_week',
             label: 'This Week',
             value: '${stats.expiringThisWeekCount}',
           ),
           _StatTile(
+            id: 'expiring_soon',
             label: 'Expiring Soon',
             value: '${stats.expiringSoonCount}',
           ),
-          _StatTile(label: 'Expired', value: '${stats.expiredCount}'),
-          _StatTile(label: 'No Expiry', value: '${stats.noExpiryCount}'),
+          _StatTile(
+            id: 'expired',
+            label: 'Expired',
+            value: '${stats.expiredCount}',
+          ),
+          _StatTile(
+            id: 'no_expiry',
+            label: 'No Expiry',
+            value: '${stats.noExpiryCount}',
+          ),
         ]),
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle(context, 'Value Impact'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
-          _StatTile(label: 'Total Value', value: _currency(stats.totalValue)),
           _StatTile(
+            id: 'total_value',
+            label: 'Total Value',
+            value: _currency(stats.totalValue),
+          ),
+          _StatTile(
+            id: 'consumed_value',
             label: 'Consumed Value',
             value: _currency(stats.consumedValue),
           ),
-          _StatTile(label: 'Wasted Value', value: _currency(stats.wastedValue)),
-          _StatTile(label: 'Saved (est.)', value: _currency(stats.savedValue)),
+          _StatTile(
+            id: 'wasted_value',
+            label: 'Wasted Value',
+            value: _currency(stats.wastedValue),
+          ),
+          _StatTile(
+            id: 'saved_est',
+            label: 'Saved (est.)',
+            value: _currency(stats.savedValue),
+          ),
         ]),
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle(context, 'Activity'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
-          _StatTile(label: 'Added (7d)', value: '${stats.addedLast7Days}'),
-          _StatTile(label: 'Added (30d)', value: '${stats.addedLast30Days}'),
-          _StatTile(label: 'Updated (7d)', value: '${stats.updatedLast7Days}'),
           _StatTile(
+            id: 'added_7d',
+            label: 'Added (7d)',
+            value: '${stats.addedLast7Days}',
+          ),
+          _StatTile(
+            id: 'added_30d',
+            label: 'Added (30d)',
+            value: '${stats.addedLast30Days}',
+          ),
+          _StatTile(
+            id: 'updated_7d',
+            label: 'Updated (7d)',
+            value: '${stats.updatedLast7Days}',
+          ),
+          _StatTile(
+            id: 'updated_30d',
             label: 'Updated (30d)',
             value: '${stats.updatedLast30Days}',
           ),
@@ -469,16 +510,23 @@ class ProgressScreen extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         _buildSummaryGrid([
-          _StatTile(label: 'Total Events', value: '$totalEvents'),
           _StatTile(
+            id: 'total_events',
+            label: 'Total Events',
+            value: '$totalEvents',
+          ),
+          _StatTile(
+            id: 'items_added',
             label: 'Items Added',
             value: '${telemetry.eventCounts['item_added'] ?? 0}',
           ),
           _StatTile(
+            id: 'items_wasted',
             label: 'Items Wasted',
             value: '${telemetry.eventCounts['item_wasted'] ?? 0}',
           ),
           _StatTile(
+            id: 'reminders_opened',
             label: 'Reminders Opened',
             value: '${telemetry.eventCounts['reminder_opened'] ?? 0}',
           ),
@@ -657,11 +705,18 @@ class ProgressScreen extends ConsumerWidget {
 }
 
 class _StatTile {
+  /// Stable, non-localized identifier used for widget keys (copy/locale-safe).
+  final String id;
   final String label;
   final String value;
   final VoidCallback? onTap;
 
-  const _StatTile({required this.label, required this.value, this.onTap});
+  const _StatTile({
+    required this.id,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
 }
 
 class _StatCard extends StatelessWidget {
@@ -669,17 +724,10 @@ class _StatCard extends StatelessWidget {
 
   const _StatCard({required this.tile});
 
-  String _keySuffix(String label) {
-    return label
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-        .replaceAll(RegExp(r'^_|_$'), '');
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final keySuffix = _keySuffix(tile.label);
+    final keySuffix = tile.id;
     final content = Container(
       key: Key('progress_stat_card_$keySuffix'),
       padding: const EdgeInsets.all(AppSpacing.md),

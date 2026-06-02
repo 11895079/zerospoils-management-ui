@@ -88,8 +88,11 @@ final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
   final statsService = ref.watch(progressStatsServiceProvider);
   final telemetry = ref.watch(telemetryClientProvider);
 
+  // Initialize once up front; buildSnapshot then only reads items + builds
+  // stats, so the per-change / polling hot path stays lightweight.
+  await repository.init();
+
   Future<ProgressStats> buildSnapshot() async {
-    await repository.init();
     final items = await repository.getAllItems();
     return statsService.build(items: items, telemetryEvents: telemetry.events);
   }
