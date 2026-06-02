@@ -4,24 +4,30 @@ The verbal system. A hero line we own, supporting lines per context, pitches at
 three lengths, the press boilerplate, and the rules for naming things (including
 Zesto). All in the warm voice (`03`), all laddering to the spine.
 
-> **Spine:** ZeroSpoils turns the food you forget into money you keep.
+> **Spine:** ZeroSpoils remembers your groceries, so you don't waste them.
 
 ---
 
 ## Hero tagline
 
-**Recommended:**
-> ## Use it. Don't lose it.
+**Locked:**
+> ## Make every grocery count.
 
-Four words, warm, rhythmic, money implied without nagging. Works in a logo lock-up,
-an ad, or said out loud. Pairs with a money-explicit line when context needs the
-hook spelled out (below).
+Warm, money-leaning, and honest to the mechanism: every grocery you buy gets
+used, not binned. Works in a logo lock-up, an ad, or said aloud. Pairs with a
+money-explicit line when a cold context needs the hook spelled out (below).
 
-**Alternatives to test:**
-- *Nothing good goes to waste.* (warm, brand-y, food + planet)
-- *Your fridge has a memory now.* (the effortless promise)
-- *Waste less. Keep more.* (balanced money + planet)
-- *Stop binning money.* (sharpest money hook — slightly more edge than warm)
+**Alternatives (on the bench):**
+- *Good food, never forgotten.* (warm, tight; mechanism-first)
+- *Nothing good goes to waste.* (warm, brand-y; food + planet)
+- *Forget nothing. Waste nothing.* (punchy, parallel)
+- *Stop binning money.* (sharpest money hook — more edge than warm)
+
+**Retired (with reason):**
+- *Use it. Don't lose it.* — "use it or lose it" is a worn idiom owned by
+  fitness/memory; borrowed, not ownable, wrong association.
+- *Your fridge has a memory now.* — risks smart-fridge category confusion
+  (Samsung Family Hub, LG InstaView) and me-too positioning.
 
 ---
 
@@ -31,7 +37,7 @@ Use the hero for brand; use these where the context needs clarity or the hook:
 
 | Context | Line |
 |---------|------|
-| Money-explicit hook (ads, paid) | "The food you forget is money in the bin. Keep it." |
+| Money-explicit hook (ads, paid) | "The groceries you forget are money in the bin. ZeroSpoils makes sure you don't." |
 | App Store subtitle (clarity + keywords) | "Track expiry dates. Waste less. Save money." |
 | Social bio | "The app that remembers your groceries, so good food (and your money) doesn't go to waste. 🌍" |
 | One-liner for intros | "ZeroSpoils scans your groceries and reminds you to use them before they're gone." |

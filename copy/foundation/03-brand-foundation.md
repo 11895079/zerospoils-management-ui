@@ -58,7 +58,7 @@ quoting landfill statistics over dessert.
 |-----------|-------|-------------|
 | **Warm** | On the reader's side, human | "Heads up — that salmon's best used by Friday." |
 | **Plain** | Short words, short sentences | "Scan it. We'll remember." |
-| **Quietly witty** | A light touch, never trying too hard | "Your fridge has a memory now. You don't have to." |
+| **Quietly witty** | A light touch, never trying too hard | "We remember, so you can forget." |
 | **Encouraging** | Progress over perfection | "Nice — that's three things saved this week." |
 
 **Tone** (flexes by moment):

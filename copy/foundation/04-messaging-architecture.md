@@ -9,7 +9,7 @@ line in Part B must trace to a pillar here.
 ## 🏠 Roof — the core narrative
 
 **One line:**
-> ZeroSpoils turns the food you forget into money you keep.
+> ZeroSpoils remembers your groceries, so you don't waste them.
 
 **One paragraph:**
 > Good food goes to waste in busy homes — not from carelessness, but because
@@ -68,7 +68,7 @@ adds up.
 ## 🧱 Foundation
 
 Sits on the approved positioning (`02`) and the voice rules (`03`). Spine:
-**"ZeroSpoils turns the food you forget into money you keep."**
+**"ZeroSpoils remembers your groceries, so you don't waste them."**
 
 ---
 

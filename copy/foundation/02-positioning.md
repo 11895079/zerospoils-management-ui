@@ -20,7 +20,7 @@ right, the rest writes itself.
 
 ## The one-line spine
 
-**ZeroSpoils turns the food you forget into money you keep.**
+**ZeroSpoils remembers your groceries, so you don't waste them.**
 
 (Everything we say should ladder back to this sentence.)
 
