@@ -40,7 +40,9 @@ class ProgressScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Text(
               'Unable to load progress: $error',
-              style: AppTextStyles.body.copyWith(color: AppColors.danger),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.danger),
               textAlign: TextAlign.center,
             ),
           ),
@@ -63,21 +65,25 @@ class ProgressScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
+            id: 'total_items',
             label: 'Total Items',
             value: '${stats.totalItems}',
             onTap: () => _openInventoryWithStatus(ref, null),
           ),
           _StatTile(
+            id: 'available',
             label: 'Available',
             value: '${stats.availableItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.available),
           ),
           _StatTile(
+            id: 'consumed',
             label: 'Consumed',
             value: '${stats.consumedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.consumed),
           ),
           _StatTile(
+            id: 'wasted',
             label: 'Wasted',
             value: '${stats.wastedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.wasted),
@@ -88,40 +94,77 @@ class ProgressScreen extends ConsumerWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
+            id: 'expiring_today',
             label: 'Expiring Today',
             value: '${stats.expiringTodayCount}',
           ),
           _StatTile(
+            id: 'this_week',
             label: 'This Week',
             value: '${stats.expiringThisWeekCount}',
           ),
           _StatTile(
+            id: 'expiring_soon',
             label: 'Expiring Soon',
             value: '${stats.expiringSoonCount}',
           ),
-          _StatTile(label: 'Expired', value: '${stats.expiredCount}'),
-          _StatTile(label: 'No Expiry', value: '${stats.noExpiryCount}'),
+          _StatTile(
+            id: 'expired',
+            label: 'Expired',
+            value: '${stats.expiredCount}',
+          ),
+          _StatTile(
+            id: 'no_expiry',
+            label: 'No Expiry',
+            value: '${stats.noExpiryCount}',
+          ),
         ]),
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle(context, 'Value Impact'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
-          _StatTile(label: 'Total Value', value: _currency(stats.totalValue)),
           _StatTile(
+            id: 'total_value',
+            label: 'Total Value',
+            value: _currency(stats.totalValue),
+          ),
+          _StatTile(
+            id: 'consumed_value',
             label: 'Consumed Value',
             value: _currency(stats.consumedValue),
           ),
-          _StatTile(label: 'Wasted Value', value: _currency(stats.wastedValue)),
-          _StatTile(label: 'Saved (est.)', value: _currency(stats.savedValue)),
+          _StatTile(
+            id: 'wasted_value',
+            label: 'Wasted Value',
+            value: _currency(stats.wastedValue),
+          ),
+          _StatTile(
+            id: 'saved_est',
+            label: 'Saved (est.)',
+            value: _currency(stats.savedValue),
+          ),
         ]),
         const SizedBox(height: AppSpacing.lg),
         _buildSectionTitle(context, 'Activity'),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
-          _StatTile(label: 'Added (7d)', value: '${stats.addedLast7Days}'),
-          _StatTile(label: 'Added (30d)', value: '${stats.addedLast30Days}'),
-          _StatTile(label: 'Updated (7d)', value: '${stats.updatedLast7Days}'),
           _StatTile(
+            id: 'added_7d',
+            label: 'Added (7d)',
+            value: '${stats.addedLast7Days}',
+          ),
+          _StatTile(
+            id: 'added_30d',
+            label: 'Added (30d)',
+            value: '${stats.addedLast30Days}',
+          ),
+          _StatTile(
+            id: 'updated_7d',
+            label: 'Updated (7d)',
+            value: '${stats.updatedLast7Days}',
+          ),
+          _StatTile(
+            id: 'updated_30d',
             label: 'Updated (30d)',
             value: '${stats.updatedLast30Days}',
           ),
@@ -198,17 +241,23 @@ class ProgressScreen extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
+          final theme = Theme.of(context);
           return Text(
             'Unable to load recent batch',
-            style: AppTextStyles.body.copyWith(color: AppColors.danger),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.danger,
+            ),
           );
         }
 
         final batch = snapshot.data;
         if (batch == null) {
+          final theme = Theme.of(context);
           return Text(
             'No recent receipt batches yet.',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
           );
         }
 
@@ -461,16 +510,23 @@ class ProgressScreen extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         _buildSummaryGrid([
-          _StatTile(label: 'Total Events', value: '$totalEvents'),
           _StatTile(
+            id: 'total_events',
+            label: 'Total Events',
+            value: '$totalEvents',
+          ),
+          _StatTile(
+            id: 'items_added',
             label: 'Items Added',
             value: '${telemetry.eventCounts['item_added'] ?? 0}',
           ),
           _StatTile(
+            id: 'items_wasted',
             label: 'Items Wasted',
             value: '${telemetry.eventCounts['item_wasted'] ?? 0}',
           ),
           _StatTile(
+            id: 'reminders_opened',
             label: 'Reminders Opened',
             value: '${telemetry.eventCounts['reminder_opened'] ?? 0}',
           ),
@@ -514,19 +570,21 @@ class ProgressScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: theme.colorScheme.onPrimaryContainer.withValues(
+                alpha: 0.14,
+              ),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -597,14 +655,14 @@ class ProgressScreen extends ConsumerWidget {
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               child: Text(
                 '${entry.key}: ${entry.value}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
@@ -618,16 +676,15 @@ class ProgressScreen extends ConsumerWidget {
     required String label,
     required Map<String, int> values,
   }) {
-    final theme = Theme.of(context);
     final topEntries = _topEntries(values, 4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: AppSpacing.xs),
         _buildChipWrap(context, topEntries),
@@ -648,11 +705,18 @@ class ProgressScreen extends ConsumerWidget {
 }
 
 class _StatTile {
+  /// Stable, non-localized identifier used for widget keys (copy/locale-safe).
+  final String id;
   final String label;
   final String value;
   final VoidCallback? onTap;
 
-  const _StatTile({required this.label, required this.value, this.onTap});
+  const _StatTile({
+    required this.id,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
 }
 
 class _StatCard extends StatelessWidget {
@@ -663,7 +727,9 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final keySuffix = tile.id;
     final content = Container(
+      key: Key('progress_stat_card_$keySuffix'),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: theme.cardColor,
@@ -682,9 +748,14 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tile.label, style: theme.textTheme.bodySmall),
+          Text(
+            key: Key('progress_stat_label_$keySuffix'),
+            tile.label,
+            style: theme.textTheme.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
+            key: Key('progress_stat_value_$keySuffix'),
             tile.value,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w600,
@@ -745,7 +816,7 @@ class _BadgeProgressTile extends StatelessWidget {
             value: progress.progressPercentage.clamp(0, 1),
             minHeight: 8,
             backgroundColor: theme.dividerColor,
-            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+            valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
           ),
         ],
       ),

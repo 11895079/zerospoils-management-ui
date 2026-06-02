@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
+import 'audio_feedback_player.dart';
+
 enum FeedbackType {
   barcodeSuccess,
   expirySuccess,
@@ -17,6 +19,9 @@ enum FeedbackType {
 enum HapticIntensity { light, medium, heavy }
 
 class FeedbackService {
+  FeedbackService({AudioFeedbackPlayer? audioPlayer})
+    : _audioPlayer = audioPlayer ?? DefaultAudioFeedbackPlayer();
+
   static const _hapticEnabledKey = 'feedback_haptic_enabled';
   static const _audioEnabledKey = 'feedback_audio_enabled';
   static const _beepVolumeKey = 'feedback_beep_volume';
@@ -35,6 +40,7 @@ class FeedbackService {
   late bool _expiryScannerEnabledValue;
   late bool _receiptScannerEnabledValue;
   late bool _produceScannerEnabledValue;
+  final AudioFeedbackPlayer _audioPlayer;
 
   bool get hapticEnabled => _hapticEnabledValue;
   bool get audioEnabled => _audioEnabledValue;
@@ -55,6 +61,10 @@ class FeedbackService {
 
   Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
+    _loadCachedValues();
+  }
+
+  void _loadCachedValues() {
     _hapticEnabledValue = _prefs.getBool(_hapticEnabledKey) ?? true;
     _audioEnabledValue = _prefs.getBool(_audioEnabledKey) ?? true;
     _beepVolumeValue = _prefs.getDouble(_beepVolumeKey) ?? 0.8;
@@ -68,6 +78,10 @@ class FeedbackService {
         _prefs.getBool(_receiptScannerEnabledKey) ?? true;
     _produceScannerEnabledValue =
         _prefs.getBool(_produceScannerEnabledKey) ?? true;
+  }
+
+  Future<void> refreshSettings() async {
+    _loadCachedValues();
   }
 
   HapticIntensity _parseHapticIntensity(String? value) {
@@ -95,6 +109,14 @@ class FeedbackService {
   Future<void> setBeepVolume(double volume) async {
     _beepVolumeValue = volume.clamp(0.0, 1.0);
     await _prefs.setDouble(_beepVolumeKey, _beepVolumeValue);
+  }
+
+  Future<void> previewBeepVolume(double volume) async {
+    final previewVolume = volume.clamp(0.0, 1.0);
+    if (!_audioEnabledValue || previewVolume <= 0) {
+      return;
+    }
+    await _triggerBeep(volumeOverride: previewVolume);
   }
 
   Future<void> setHapticIntensity(HapticIntensity intensity) async {
@@ -176,9 +198,13 @@ class FeedbackService {
   }
 
   /// Trigger a lightweight system click sound.
-  Future<void> _triggerBeep() async {
+  Future<void> _triggerBeep({double? volumeOverride}) async {
     try {
-      await SystemSound.play(SystemSoundType.click);
+      final volume = (volumeOverride ?? _beepVolumeValue).clamp(0.0, 1.0);
+      if (volume <= 0) {
+        return;
+      }
+      await _audioPlayer.playBeep(volume: volume);
     } catch (_) {
       // Silently fail if system audio feedback is not available
     }

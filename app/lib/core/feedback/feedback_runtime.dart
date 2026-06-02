@@ -20,7 +20,7 @@ class FeedbackRuntime {
 
   static Future<FeedbackService> _getService() {
     if (_service != null) {
-      return Future.value(_service);
+      return _service!.refreshSettings().then((_) => _service!);
     }
 
     final inFlight = _initializing;

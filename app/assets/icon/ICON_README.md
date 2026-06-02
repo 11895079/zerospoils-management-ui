@@ -1,39 +1,37 @@
 # ZeroSpoils App Icon
 
-## Quick Setup
+## Design
 
-1. **Create your app icon** (1024x1024 PNG with transparency):
-   - Simple design: Green circular background with white "0" or leaf symbol
-   - Color scheme: Primary green (#4CAF50) for food/sustainability theme
-   - Save as `app_icon.png` in this folder
+A grocery bag (die-cut handle) guarded by a shield with a check — *"your
+groceries, preserved."* Brand green (`#2F9E44` → `#51CF66` gradient), cream bag,
+dark-green shield. The motif maps to the brand promise: protect food (and money)
+from being wasted.
 
-2. **Create adaptive foreground** (1024x1024 PNG):
-   - Same icon but with padding/margins for Android adaptive icons
-   - Save as `app_icon_foreground.png` in this folder
+## Source of truth
 
-3. **Generate launcher icons**:
-   ```bash
-   cd app
-   flutter pub get
-   dart run flutter_launcher_icons
-   ```
+The icon is authored as **SVG** and rasterized to PNG:
 
-## Temporary Placeholder
+| File | Purpose |
+|------|---------|
+| `app_icon.svg` / `app_icon.png` | Full-bleed 1024² master (iOS + legacy Android) |
+| `app_icon_foreground.svg` / `app_icon_foreground.png` | Transparent, centered motif for the Android adaptive foreground |
 
-Until you create custom icons, here's a simple approach:
+Edit the `.svg` files, then re-render the PNGs (any SVG renderer; we use macOS
+`qlmanage -t -s 1024 -o . app_icon.svg`).
 
-**Option A - Use online tool:**
-1. Visit https://icon.kitchen or https://www.appicon.co
-2. Upload a simple design (green circle with "0" or leaf)
-3. Download and extract to this folder
+## Regenerate all launcher icons
 
-**Option B - Use existing Flutter icon (for testing):**
-The default Flutter icon will be used until you replace it.
+```bash
+cd app
+flutter pub get
+dart run flutter_launcher_icons
+```
 
-## Icon Design Tips
+Config lives in `pubspec.yaml` under `flutter_launcher_icons:`
+- `adaptive_icon_background: "#2F9E44"` (brand green)
+- `remove_alpha_ios: true` (Apple rejects icons with an alpha channel)
 
-- **Keep it simple**: Recognizable at 48x48px
-- **High contrast**: Clear against any background
-- **No text** (except single letter/number)
-- **Brand colors**: Green for food waste/sustainability theme
-- **Test on device**: Check how it looks on home screen
+## Notes
+
+- Keep important detail inside the central ~66% (Android adaptive safe zone).
+- Verify legibility down to ~48px before shipping.

@@ -458,11 +458,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           ),
                         ),
                       ),
-                      Text('Filters', style: AppTextStyles.h3),
+                      Text('Filters', style: theme.textTheme.titleLarge),
                       const SizedBox(height: AppSpacing.md),
                       Text(
                         'Category',
-                        style: AppTextStyles.body.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -493,7 +493,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         'Location',
-                        style: AppTextStyles.body.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -526,7 +526,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       const SizedBox(height: AppSpacing.lg),
                       Text(
                         'Added date',
-                        style: AppTextStyles.body.copyWith(
+                        style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -824,14 +824,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'Unable to load items',
-                  style: AppTextStyles.h3,
+                  style: theme.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   error.toString(),
-                  style: AppTextStyles.body.copyWith(
-                    color: AppColors.textSecondary,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -1321,7 +1321,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 item.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: AppSpacing.xs),
               _buildExpiryChip(item),
@@ -1347,7 +1349,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       child: Text(
         status.displayName,
-        style: AppTextStyles.caption.copyWith(
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
         ),
@@ -1383,7 +1385,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       child: Text(
         label,
-        style: AppTextStyles.caption.copyWith(
+        style: theme.textTheme.bodySmall?.copyWith(
           color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
         ),
@@ -1405,7 +1407,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       child: Text(
         item.location.displayName,
-        style: AppTextStyles.caption.copyWith(
+        style: theme.textTheme.bodySmall?.copyWith(
           color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
         ),
@@ -1518,12 +1520,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Active filters:',
-            style: TextStyle(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -1612,7 +1613,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('Clear all', style: TextStyle(fontSize: 12)),
+            child: Text(
+              'Clear all',
+              style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
+            ),
           ),
         ],
       ),
@@ -1629,25 +1633,31 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.35),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(width: 4),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(Icons.close, size: 14, color: AppColors.primary),
+            child: Icon(
+              Icons.close,
+              size: 14,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ],
       ),
@@ -1678,7 +1688,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         },
         decoration: InputDecoration(
           hintText: 'Search items...',
-          hintStyle: AppTextStyles.body.copyWith(
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.textTheme.bodySmall?.color,
           ),
           prefixIcon: Icon(
@@ -1711,14 +1721,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Your inventory is empty',
-              style: AppTextStyles.h2,
+              style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Start tracking your food to reduce waste and save money',
-              style: AppTextStyles.body.copyWith(
-                color: AppColors.textSecondary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
               textAlign: TextAlign.center,
             ),

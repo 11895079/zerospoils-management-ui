@@ -807,6 +807,581 @@ abstract class AppLocalizations {
   /// **'Delete All Data'**
   String get settingsDeleteAllData;
 
+  /// No description provided for @settingsSectionAccountData.
+  ///
+  /// In en, this message translates to:
+  /// **'ACCOUNT & DATA'**
+  String get settingsSectionAccountData;
+
+  /// No description provided for @settingsAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get settingsAccount;
+
+  /// No description provided for @settingsDataSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Sync'**
+  String get settingsDataSync;
+
+  /// No description provided for @settingsDemoMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Mode'**
+  String get settingsDemoMode;
+
+  /// No description provided for @settingsSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Soon'**
+  String get settingsSoon;
+
+  /// No description provided for @settingsDemoModeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo mode enabled'**
+  String get settingsDemoModeEnabled;
+
+  /// No description provided for @settingsDemoModeDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo mode disabled'**
+  String get settingsDemoModeDisabled;
+
+  /// No description provided for @settingsShareAnonymousUsageData.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Anonymous Usage Data'**
+  String get settingsShareAnonymousUsageData;
+
+  /// No description provided for @settingsShareAnonymousUsageDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Grants permission for cloud export when available (not yet available)'**
+  String get settingsShareAnonymousUsageDataSubtitle;
+
+  /// No description provided for @settingsCloudAnalyticsExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Analytics Export'**
+  String get settingsCloudAnalyticsExport;
+
+  /// No description provided for @settingsCloudAnalyticsExportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send telemetry data to cloud'**
+  String get settingsCloudAnalyticsExportSubtitle;
+
+  /// No description provided for @settingsExportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download your inventory and settings'**
+  String get settingsExportSubtitle;
+
+  /// No description provided for @settingsImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import a backup file'**
+  String get settingsImportSubtitle;
+
+  /// No description provided for @settingsReferenceDataPacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference Data Packs'**
+  String get settingsReferenceDataPacks;
+
+  /// No description provided for @settingsDeleteAllDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently remove all data (irreversible)'**
+  String get settingsDeleteAllDataSubtitle;
+
+  /// No description provided for @settingsSectionPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'PREFERENCES'**
+  String get settingsSectionPreferences;
+
+  /// No description provided for @settingsMealPlanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Planning'**
+  String get settingsMealPlanning;
+
+  /// No description provided for @settingsSectionSupportFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'SUPPORT & FEEDBACK'**
+  String get settingsSectionSupportFeedback;
+
+  /// No description provided for @settingsHelpFaq.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & FAQ'**
+  String get settingsHelpFaq;
+
+  /// No description provided for @settingsHelpCenterComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Help center coming soon'**
+  String get settingsHelpCenterComingSoon;
+
+  /// No description provided for @settingsSendFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Feedback'**
+  String get settingsSendFeedback;
+
+  /// No description provided for @settingsRateApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate App'**
+  String get settingsRateApp;
+
+  /// No description provided for @settingsThanksForSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for the support!'**
+  String get settingsThanksForSupport;
+
+  /// No description provided for @settingsViewTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'View Tutorial'**
+  String get settingsViewTutorial;
+
+  /// No description provided for @settingsSectionLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'LEGAL'**
+  String get settingsSectionLegal;
+
+  /// No description provided for @settingsPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get settingsPrivacyPolicy;
+
+  /// No description provided for @settingsPrivacyPolicyComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy coming soon'**
+  String get settingsPrivacyPolicyComingSoon;
+
+  /// No description provided for @settingsTermsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get settingsTermsOfService;
+
+  /// No description provided for @settingsTermsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms coming soon'**
+  String get settingsTermsComingSoon;
+
+  /// No description provided for @settingsAboutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ZeroSpoils v1.0.0'**
+  String get settingsAboutSubtitle;
+
+  /// No description provided for @settingsAboutSnackMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'ZeroSpoils helps reduce food waste.'**
+  String get settingsAboutSnackMessage;
+
+  /// No description provided for @settingsHapticIntensityLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsHapticIntensityLight;
+
+  /// No description provided for @settingsHapticIntensityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get settingsHapticIntensityMedium;
+
+  /// No description provided for @settingsHapticIntensityHeavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy'**
+  String get settingsHapticIntensityHeavy;
+
+  /// No description provided for @settingsLeadTimeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String settingsLeadTimeDays(int days);
+
+  /// No description provided for @settingsChooseExportFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose export format:'**
+  String get settingsChooseExportFormat;
+
+  /// No description provided for @settingsExportJsonCompleteBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON (Complete Backup)'**
+  String get settingsExportJsonCompleteBackup;
+
+  /// No description provided for @settingsExportCsvInventoryOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'CSV (Inventory Only)'**
+  String get settingsExportCsvInventoryOnly;
+
+  /// No description provided for @settingsSaveExportAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Save {format} export as'**
+  String settingsSaveExportAs(String format);
+
+  /// No description provided for @settingsExportSavedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'{format} export saved to: {path}'**
+  String settingsExportSavedTo(String format, String path);
+
+  /// No description provided for @settingsExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String settingsExportFailed(String error);
+
+  /// No description provided for @settingsRestoreWillRestoreItems.
+  ///
+  /// In en, this message translates to:
+  /// **'This will restore {count} items.'**
+  String settingsRestoreWillRestoreItems(int count);
+
+  /// No description provided for @settingsRestoreMigrationRequiredFromVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Migration required from version {version}'**
+  String settingsRestoreMigrationRequiredFromVersion(String version);
+
+  /// No description provided for @settingsRestoreReplaceAllDataPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'All existing data will be replaced. Continue?'**
+  String get settingsRestoreReplaceAllDataPrompt;
+
+  /// No description provided for @settingsRestoreCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored {items} items'**
+  String settingsRestoreCompleted(int items);
+
+  /// No description provided for @settingsRestoreCompletedWithMigrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored {items} items ({migrations} migrations applied)'**
+  String settingsRestoreCompletedWithMigrations(int items, int migrations);
+
+  /// No description provided for @settingsRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: {error}'**
+  String settingsRestoreFailed(String error);
+
+  /// No description provided for @settingsDeleteDataPromptIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete ALL your data including:'**
+  String get settingsDeleteDataPromptIntro;
+
+  /// No description provided for @settingsDeleteDataBulletInventoryItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory items'**
+  String get settingsDeleteDataBulletInventoryItems;
+
+  /// No description provided for @settingsDeleteDataBulletShoppingLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping lists'**
+  String get settingsDeleteDataBulletShoppingLists;
+
+  /// No description provided for @settingsDeleteDataBulletWasteTrackingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Waste tracking data'**
+  String get settingsDeleteDataBulletWasteTrackingData;
+
+  /// No description provided for @settingsDeleteDataBulletAllSettingsPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'All settings and preferences'**
+  String get settingsDeleteDataBulletAllSettingsPreferences;
+
+  /// No description provided for @settingsDeleteDataTypeDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Type \"DELETE\" to confirm:'**
+  String get settingsDeleteDataTypeDeleteConfirm;
+
+  /// No description provided for @settingsDeleteDataHintTypeDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Type DELETE'**
+  String get settingsDeleteDataHintTypeDelete;
+
+  /// No description provided for @settingsDeletePermanently.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Permanently'**
+  String get settingsDeletePermanently;
+
+  /// No description provided for @settingsDeleteAllDataSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'All data permanently deleted'**
+  String get settingsDeleteAllDataSuccess;
+
+  /// No description provided for @settingsDeletionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Deletion failed: {error}'**
+  String settingsDeletionFailed(String error);
+
+  /// No description provided for @settingsReferencePackBundledDefaultOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundled default only'**
+  String get settingsReferencePackBundledDefaultOnly;
+
+  /// No description provided for @settingsReferencePackNeverUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Never updated'**
+  String get settingsReferencePackNeverUpdated;
+
+  /// No description provided for @settingsReferencePackDiagnostics.
+  ///
+  /// In en, this message translates to:
+  /// **'Active barcode pack: {version} ({records} records)\nLast update: {updatedAt}\nManifest source: Firebase Remote Config ({manifestUrl})'**
+  String settingsReferencePackDiagnostics(
+    String version,
+    int records,
+    String updatedAt,
+    String manifestUrl,
+  );
+
+  /// No description provided for @settingsAccountNotSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get settingsAccountNotSignedIn;
+
+  /// No description provided for @settingsAccountAnonymousSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous session'**
+  String get settingsAccountAnonymousSession;
+
+  /// No description provided for @settingsAccountSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get settingsAccountSignedIn;
+
+  /// No description provided for @settingsAuthServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication service is unavailable.'**
+  String get settingsAuthServiceUnavailable;
+
+  /// No description provided for @settingsAccountSignedInAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {email}'**
+  String settingsAccountSignedInAs(String email);
+
+  /// No description provided for @settingsAccountSignOutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You can sign out to return to an anonymous session.'**
+  String get settingsAccountSignOutHint;
+
+  /// No description provided for @settingsAccountUpgradeAnonymousHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade your anonymous session to an email account.'**
+  String get settingsAccountUpgradeAnonymousHint;
+
+  /// No description provided for @settingsAccountSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with email to submit authenticated feedback.'**
+  String get settingsAccountSignInHint;
+
+  /// No description provided for @settingsLabelEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get settingsLabelEmail;
+
+  /// No description provided for @settingsLabelPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get settingsLabelPassword;
+
+  /// No description provided for @settingsPasswordMin6Hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get settingsPasswordMin6Hint;
+
+  /// No description provided for @settingsForgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get settingsForgotPassword;
+
+  /// No description provided for @settingsSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get settingsSignOut;
+
+  /// No description provided for @settingsSignOutSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out'**
+  String get settingsSignOutSuccess;
+
+  /// No description provided for @settingsCreateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get settingsCreateAccount;
+
+  /// No description provided for @settingsCreateAccountSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created'**
+  String get settingsCreateAccountSuccess;
+
+  /// No description provided for @settingsSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get settingsSignIn;
+
+  /// No description provided for @settingsSignInSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in'**
+  String get settingsSignInSuccess;
+
+  /// No description provided for @settingsSignInWithGoogleSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Google'**
+  String get settingsSignInWithGoogleSuccess;
+
+  /// No description provided for @settingsContinueWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google'**
+  String get settingsContinueWithGoogle;
+
+  /// No description provided for @settingsContinueWithAppleSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Apple (Soon)'**
+  String get settingsContinueWithAppleSoon;
+
+  /// No description provided for @settingsAppleSignInSoonMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Sign-In will be enabled after email and Google sign-in are fully verified on-device.'**
+  String get settingsAppleSignInSoonMessage;
+
+  /// No description provided for @settingsEnterAccountEmailFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your account email first.'**
+  String get settingsEnterAccountEmailFirst;
+
+  /// No description provided for @settingsPasswordResetEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset email sent to {email}.'**
+  String settingsPasswordResetEmailSent(String email);
+
+  /// No description provided for @settingsPasswordResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start password reset.'**
+  String get settingsPasswordResetFailed;
+
+  /// No description provided for @settingsEnterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get settingsEnterValidEmail;
+
+  /// No description provided for @settingsPasswordMin6Error.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters.'**
+  String get settingsPasswordMin6Error;
+
+  /// No description provided for @settingsAuthenticationFailedTryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed. Try again.'**
+  String get settingsAuthenticationFailedTryAgain;
+
+  /// No description provided for @settingsAuthErrorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account found for this email.'**
+  String get settingsAuthErrorUserNotFound;
+
+  /// No description provided for @settingsAuthErrorInvalidCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect email or password.'**
+  String get settingsAuthErrorInvalidCredentials;
+
+  /// No description provided for @settingsAuthErrorEmailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'An account with this email already exists.'**
+  String get settingsAuthErrorEmailAlreadyInUse;
+
+  /// No description provided for @settingsAuthErrorInvalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email format is invalid.'**
+  String get settingsAuthErrorInvalidEmail;
+
+  /// No description provided for @settingsAuthErrorOperationNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Email/Password in Firebase Authentication settings.'**
+  String get settingsAuthErrorOperationNotAllowed;
+
+  /// No description provided for @settingsAuthErrorWeakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a stronger password.'**
+  String get settingsAuthErrorWeakPassword;
+
+  /// No description provided for @settingsAuthErrorUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed ({code}).'**
+  String settingsAuthErrorUnknown(String code);
+
   /// No description provided for @feedbackHapticFeedback.
   ///
   /// In en, this message translates to:
