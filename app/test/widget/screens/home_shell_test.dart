@@ -212,8 +212,15 @@ void main() {
   });
 
   testWidgets(
-    'shows visible Zesto overlay when mascot trigger fires',
+    'shows visible Zesto overlay when mascot trigger fires in production host',
     (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(320, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       // Mock AssetBundle to provide storage tips without loading from filesystem
       final mockAssetBundle = MockAssetBundle();
 
@@ -229,8 +236,6 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
-          itemRepositoryProvider.overrideWithValue(mockRepo),
-          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
           zestoServiceProvider.overrideWithValue(zestoService),
         ],
       );
@@ -239,16 +244,22 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: const MaterialApp(
-            home: Stack(
-              fit: StackFit.expand,
-              children: [HomeShell(), ZestoOverlay()],
-            ),
+          child: MaterialApp(
+            builder: (context, child) {
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (child case != null) child else const SizedBox.shrink(),
+                  const ZestoOverlay(),
+                ],
+              );
+            },
+            home: const Scaffold(body: SizedBox.expand()),
           ),
         ),
       );
 
-      // Allow HomeShell and the root overlay to initialize.
+      // Allow the root overlay host to initialize.
       await tester.pumpAndSettle();
 
       // Show the mascot
@@ -261,6 +272,8 @@ void main() {
       // Pump to let the state change propagate
       await tester.pump(const Duration(milliseconds: 50));
 
+      expect(tester.takeException(), isNull);
+
       // The overlay should now be visible above the shell.
       expect(find.byKey(const Key('zesto_overlay')), findsOneWidget);
       expect(find.byKey(const Key('zesto_message_text')), findsOneWidget);
@@ -269,6 +282,7 @@ void main() {
       container.read(zestoServiceProvider).dismissMascot();
       // Final pump to process dismissal
       await tester.pump(const Duration(milliseconds: 50));
+      expect(tester.takeException(), isNull);
     },
   );
 }

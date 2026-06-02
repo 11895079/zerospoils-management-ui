@@ -183,45 +183,50 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
           left: AppSpacing.md,
           bottom: 96,
         ),
-        child: IgnorePointer(
-          ignoring: !_state.isVisible,
-          child: AnimatedSlide(
-            offset: _state.isVisible ? Offset.zero : const Offset(0.2, 0.25),
-            duration: disableAnimations ? Duration.zero : _slideDuration,
-            curve: Curves.easeOutCubic,
-            child: AnimatedOpacity(
-              key: const Key('zesto_overlay'),
-              opacity: _state.isVisible ? 1 : 0,
-              duration: disableAnimations ? Duration.zero : _opacityDuration,
-              curve: Curves.easeOut,
-              child: Material(
-                elevation: 8,
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                // Announce the mascot message to screen readers when it
-                // appears. `liveRegion: true` triggers re-announcement on
-                // each new message; the explicit label preserves message
-                // text for assistive tech (which may not pick up the
-                // gradient-rendered Text widget consistently otherwise).
-                child: Semantics(
-                  container: true,
-                  liveRegion: _state.isVisible,
-                  label: 'Zesto says: ${_state.currentMessage!}',
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 320),
-                    decoration: BoxDecoration(
-                      gradient: _bubbleGradient,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bubbleWidth = constraints.maxWidth.clamp(0.0, 320.0);
+
+            return IgnorePointer(
+              ignoring: !_state.isVisible,
+              child: AnimatedSlide(
+                offset: _state.isVisible ? Offset.zero : const Offset(0.2, 0.25),
+                duration: disableAnimations ? Duration.zero : _slideDuration,
+                curve: Curves.easeOutCubic,
+                child: AnimatedOpacity(
+                  key: const Key('zesto_overlay'),
+                  opacity: _state.isVisible ? 1 : 0,
+                  duration: disableAnimations ? Duration.zero : _opacityDuration,
+                  curve: Curves.easeOut,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: bubbleWidth),
+                    child: Material(
+                      elevation: 8,
+                      color: Colors.transparent,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                      border: Border.all(
-                        color: accent.withValues(alpha: 0.35),
-                        width: 1,
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      // Announce the mascot message to screen readers when it
+                      // appears. `liveRegion: true` triggers re-announcement on
+                      // each new message; the explicit label preserves message
+                      // text for assistive tech (which may not pick up the
+                      // gradient-rendered Text widget consistently otherwise).
+                      child: Semantics(
+                        container: true,
+                        liveRegion: _state.isVisible,
+                        label: 'Zesto says: ${_state.currentMessage!}',
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: _bubbleGradient,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                            border: Border.all(
+                              color: accent.withValues(alpha: 0.35),
+                              width: 1,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                         AnimatedBuilder(
                           animation: _bobAnimation,
                           builder: (context, child) {
@@ -244,14 +249,11 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        Flexible(
-                          fit: FlexFit.loose,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 220),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               // Header uses textPrimary (#333) instead of
                               // the accent green so contrast against the
                               // cream bubble (#FFFAEC) meets WCAG AA. The
@@ -276,8 +278,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                     color: AppColors.textPrimary,
                                   ),
                                 ),
-                              ],
-                            ),
+                            ],
                           ),
                         ),
                         Container(
@@ -291,26 +292,32 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                           // Default IconButton sizing (48×48) gives a
                           // ≥44pt tap target per DoD/WCAG; the icon glyph
                           // stays compact at 18px.
-                          child: IconButton(
-                            key: const Key('zesto_dismiss_button'),
-                            tooltip: 'Dismiss Zesto',
-                            iconSize: 18,
-                            onPressed: () {
-                              ref.read(zestoServiceProvider).dismissMascot();
-                            },
-                            icon: const Icon(
-                              Icons.close,
-                              color: AppColors.textSecondary,
+                          child: Semantics(
+                            button: true,
+                            label: 'Dismiss Zesto',
+                            child: IconButton(
+                              key: const Key('zesto_dismiss_button'),
+                              iconSize: 18,
+                              onPressed: () {
+                                ref.read(zestoServiceProvider).dismissMascot();
+                              },
+                              icon: const Icon(
+                                Icons.close,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
                         ),
-                      ],
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
