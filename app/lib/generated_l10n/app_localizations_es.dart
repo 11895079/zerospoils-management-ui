@@ -368,6 +368,348 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsDeleteAllData => 'Eliminar Todos los Datos';
 
   @override
+  String get settingsSectionAccountData => 'CUENTA Y DATOS';
+
+  @override
+  String get settingsAccount => 'Cuenta';
+
+  @override
+  String get settingsDataSync => 'Sincronización de datos';
+
+  @override
+  String get settingsDemoMode => 'Modo demo';
+
+  @override
+  String get settingsSoon => 'Pronto';
+
+  @override
+  String get settingsDemoModeEnabled => 'Modo demo activado';
+
+  @override
+  String get settingsDemoModeDisabled => 'Modo demo desactivado';
+
+  @override
+  String get settingsShareAnonymousUsageData =>
+      'Compartir datos de uso anónimos';
+
+  @override
+  String get settingsShareAnonymousUsageDataSubtitle =>
+      'Otorga permiso para exportación a la nube cuando esté disponible (aún no disponible)';
+
+  @override
+  String get settingsCloudAnalyticsExport =>
+      'Exportación de analíticas en la nube';
+
+  @override
+  String get settingsCloudAnalyticsExportSubtitle =>
+      'Enviar datos de telemetría a la nube';
+
+  @override
+  String get settingsExportSubtitle => 'Descarga tu inventario y configuración';
+
+  @override
+  String get settingsImportSubtitle => 'Importar un archivo de respaldo';
+
+  @override
+  String get settingsReferenceDataPacks => 'Paquetes de datos de referencia';
+
+  @override
+  String get settingsDeleteAllDataSubtitle =>
+      'Eliminar permanentemente todos los datos (irreversible)';
+
+  @override
+  String get settingsSectionPreferences => 'PREFERENCIAS';
+
+  @override
+  String get settingsMealPlanning => 'Planificación de comidas';
+
+  @override
+  String get settingsSectionSupportFeedback => 'SOPORTE Y COMENTARIOS';
+
+  @override
+  String get settingsHelpFaq => 'Ayuda y FAQ';
+
+  @override
+  String get settingsHelpCenterComingSoon => 'Centro de ayuda próximamente';
+
+  @override
+  String get settingsSendFeedback => 'Enviar comentarios';
+
+  @override
+  String get settingsRateApp => 'Calificar la app';
+
+  @override
+  String get settingsThanksForSupport => '¡Gracias por tu apoyo!';
+
+  @override
+  String get settingsViewTutorial => 'Ver tutorial';
+
+  @override
+  String get settingsSectionLegal => 'LEGAL';
+
+  @override
+  String get settingsPrivacyPolicy => 'Política de privacidad';
+
+  @override
+  String get settingsPrivacyPolicyComingSoon =>
+      'Política de privacidad próximamente';
+
+  @override
+  String get settingsTermsOfService => 'Términos del servicio';
+
+  @override
+  String get settingsTermsComingSoon => 'Términos próximamente';
+
+  @override
+  String get settingsAboutSubtitle => 'ZeroSpoils v1.0.0';
+
+  @override
+  String get settingsAboutSnackMessage =>
+      'ZeroSpoils ayuda a reducir el desperdicio de alimentos.';
+
+  @override
+  String get settingsHapticIntensityLight => 'Ligera';
+
+  @override
+  String get settingsHapticIntensityMedium => 'Media';
+
+  @override
+  String get settingsHapticIntensityHeavy => 'Fuerte';
+
+  @override
+  String settingsLeadTimeDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get settingsChooseExportFormat => 'Choose export format:';
+
+  @override
+  String get settingsExportJsonCompleteBackup => 'JSON (Complete Backup)';
+
+  @override
+  String get settingsExportCsvInventoryOnly => 'CSV (Inventory Only)';
+
+  @override
+  String settingsSaveExportAs(String format) {
+    return 'Save $format export as';
+  }
+
+  @override
+  String settingsExportSavedTo(String format, String path) {
+    return '$format export saved to: $path';
+  }
+
+  @override
+  String settingsExportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String settingsRestoreWillRestoreItems(int count) {
+    return 'This will restore $count items.';
+  }
+
+  @override
+  String settingsRestoreMigrationRequiredFromVersion(String version) {
+    return 'Migration required from version $version';
+  }
+
+  @override
+  String get settingsRestoreReplaceAllDataPrompt =>
+      'All existing data will be replaced. Continue?';
+
+  @override
+  String settingsRestoreCompleted(int items) {
+    return 'Restored $items items';
+  }
+
+  @override
+  String settingsRestoreCompletedWithMigrations(int items, int migrations) {
+    return 'Restored $items items ($migrations migrations applied)';
+  }
+
+  @override
+  String settingsRestoreFailed(String error) {
+    return 'Restore failed: $error';
+  }
+
+  @override
+  String get settingsDeleteDataPromptIntro =>
+      'This will permanently delete ALL your data including:';
+
+  @override
+  String get settingsDeleteDataBulletInventoryItems => 'Inventory items';
+
+  @override
+  String get settingsDeleteDataBulletShoppingLists => 'Shopping lists';
+
+  @override
+  String get settingsDeleteDataBulletWasteTrackingData => 'Waste tracking data';
+
+  @override
+  String get settingsDeleteDataBulletAllSettingsPreferences =>
+      'All settings and preferences';
+
+  @override
+  String get settingsDeleteDataTypeDeleteConfirm =>
+      'Type \"DELETE\" to confirm:';
+
+  @override
+  String get settingsDeleteDataHintTypeDelete => 'Type DELETE';
+
+  @override
+  String get settingsDeletePermanently => 'Delete Permanently';
+
+  @override
+  String get settingsDeleteAllDataSuccess => 'All data permanently deleted';
+
+  @override
+  String settingsDeletionFailed(String error) {
+    return 'Deletion failed: $error';
+  }
+
+  @override
+  String get settingsReferencePackBundledDefaultOnly => 'Bundled default only';
+
+  @override
+  String get settingsReferencePackNeverUpdated => 'Never updated';
+
+  @override
+  String settingsReferencePackDiagnostics(
+    String version,
+    int records,
+    String updatedAt,
+    String manifestUrl,
+  ) {
+    return 'Active barcode pack: $version ($records records)\nLast update: $updatedAt\nManifest source: Firebase Remote Config ($manifestUrl)';
+  }
+
+  @override
+  String get settingsAccountNotSignedIn => 'Not signed in';
+
+  @override
+  String get settingsAccountAnonymousSession => 'Anonymous session';
+
+  @override
+  String get settingsAccountSignedIn => 'Signed in';
+
+  @override
+  String get settingsAuthServiceUnavailable =>
+      'Authentication service is unavailable.';
+
+  @override
+  String settingsAccountSignedInAs(String email) {
+    return 'Signed in as $email';
+  }
+
+  @override
+  String get settingsAccountSignOutHint =>
+      'You can sign out to return to an anonymous session.';
+
+  @override
+  String get settingsAccountUpgradeAnonymousHint =>
+      'Upgrade your anonymous session to an email account.';
+
+  @override
+  String get settingsAccountSignInHint =>
+      'Sign in with email to submit authenticated feedback.';
+
+  @override
+  String get settingsLabelEmail => 'Email';
+
+  @override
+  String get settingsLabelPassword => 'Password';
+
+  @override
+  String get settingsPasswordMin6Hint =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get settingsForgotPassword => 'Forgot password?';
+
+  @override
+  String get settingsSignOut => 'Sign Out';
+
+  @override
+  String get settingsSignOutSuccess => 'Signed out';
+
+  @override
+  String get settingsCreateAccount => 'Create Account';
+
+  @override
+  String get settingsCreateAccountSuccess => 'Account created';
+
+  @override
+  String get settingsSignIn => 'Sign In';
+
+  @override
+  String get settingsSignInSuccess => 'Signed in';
+
+  @override
+  String get settingsSignInWithGoogleSuccess => 'Signed in with Google';
+
+  @override
+  String get settingsContinueWithGoogle => 'Continue with Google';
+
+  @override
+  String get settingsContinueWithAppleSoon => 'Continue with Apple (Soon)';
+
+  @override
+  String get settingsAppleSignInSoonMessage =>
+      'Apple Sign-In will be enabled after email and Google sign-in are fully verified on-device.';
+
+  @override
+  String get settingsEnterAccountEmailFirst =>
+      'Enter your account email first.';
+
+  @override
+  String settingsPasswordResetEmailSent(String email) {
+    return 'Password reset email sent to $email.';
+  }
+
+  @override
+  String get settingsPasswordResetFailed => 'Could not start password reset.';
+
+  @override
+  String get settingsEnterValidEmail => 'Enter a valid email address.';
+
+  @override
+  String get settingsPasswordMin6Error =>
+      'Password must be at least 6 characters.';
+
+  @override
+  String get settingsAuthenticationFailedTryAgain =>
+      'Authentication failed. Try again.';
+
+  @override
+  String get settingsAuthErrorUserNotFound =>
+      'No account found for this email.';
+
+  @override
+  String get settingsAuthErrorInvalidCredentials =>
+      'Incorrect email or password.';
+
+  @override
+  String get settingsAuthErrorEmailAlreadyInUse =>
+      'An account with this email already exists.';
+
+  @override
+  String get settingsAuthErrorInvalidEmail => 'Email format is invalid.';
+
+  @override
+  String get settingsAuthErrorOperationNotAllowed =>
+      'Enable Email/Password in Firebase Authentication settings.';
+
+  @override
+  String get settingsAuthErrorWeakPassword => 'Choose a stronger password.';
+
+  @override
+  String settingsAuthErrorUnknown(String code) {
+    return 'Authentication failed ($code).';
+  }
+
+  @override
   String get feedbackHapticFeedback => 'Retroalimentación Háptica';
 
   @override

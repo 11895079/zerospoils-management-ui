@@ -40,7 +40,9 @@ class ProgressScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Text(
               'Unable to load progress: $error',
-              style: AppTextStyles.body.copyWith(color: AppColors.danger),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.danger),
               textAlign: TextAlign.center,
             ),
           ),
@@ -198,17 +200,23 @@ class ProgressScreen extends ConsumerWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
+          final theme = Theme.of(context);
           return Text(
             'Unable to load recent batch',
-            style: AppTextStyles.body.copyWith(color: AppColors.danger),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.danger,
+            ),
           );
         }
 
         final batch = snapshot.data;
         if (batch == null) {
+          final theme = Theme.of(context);
           return Text(
             'No recent receipt batches yet.',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodySmall?.color,
+            ),
           );
         }
 
@@ -514,19 +522,21 @@ class ProgressScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: theme.colorScheme.onPrimaryContainer.withValues(
+                alpha: 0.14,
+              ),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: AppColors.primary),
+            child: Icon(icon, color: theme.colorScheme.onPrimaryContainer),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -597,14 +607,14 @@ class ProgressScreen extends ConsumerWidget {
                 vertical: AppSpacing.xs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: theme.colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               child: Text(
                 '${entry.key}: ${entry.value}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.onPrimaryContainer,
                 ),
               ),
             ),
@@ -618,14 +628,13 @@ class ProgressScreen extends ConsumerWidget {
     required String label,
     required Map<String, int> values,
   }) {
-    final theme = Theme.of(context);
     final topEntries = _topEntries(values, 4);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -660,10 +669,19 @@ class _StatCard extends StatelessWidget {
 
   const _StatCard({required this.tile});
 
+  String _keySuffix(String label) {
+    return label
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final keySuffix = _keySuffix(tile.label);
     final content = Container(
+      key: Key('progress_stat_card_$keySuffix'),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: theme.cardColor,
@@ -682,9 +700,14 @@ class _StatCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tile.label, style: theme.textTheme.bodySmall),
+          Text(
+            key: Key('progress_stat_label_$keySuffix'),
+            tile.label,
+            style: theme.textTheme.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Text(
+            key: Key('progress_stat_value_$keySuffix'),
             tile.value,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w600,
@@ -745,7 +768,7 @@ class _BadgeProgressTile extends StatelessWidget {
             value: progress.progressPercentage.clamp(0, 1),
             minHeight: 8,
             backgroundColor: theme.dividerColor,
-            valueColor: const AlwaysStoppedAnimation(AppColors.primary),
+            valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
           ),
         ],
       ),

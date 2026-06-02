@@ -43,6 +43,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   StreamSubscription<User?>? _authStateSubscription;
+  DateTime? _lastBeepPreviewAt;
   bool _notificationsEnabled = true;
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
@@ -197,20 +198,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _exportBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     // Show export format selector
     final format = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Format'),
-        content: const Text('Choose export format:'),
+        title: Text(l10n.settingsExportData),
+        content: Text(l10n.settingsChooseExportFormat),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'json'),
-            child: const Text('JSON (Complete Backup)'),
+            child: Text(l10n.settingsExportJsonCompleteBackup),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, 'csv'),
-            child: const Text('CSV (Inventory Only)'),
+            child: Text(l10n.settingsExportCsvInventoryOnly),
           ),
         ],
       ),
@@ -227,7 +229,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
       final extension = format == 'json' ? 'json' : 'csv';
       final savePath = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save $format export as',
+        dialogTitle: l10n.settingsSaveExportAs(format),
         fileName: preparedExport.suggestedFileName,
         type: FileType.custom,
         allowedExtensions: [extension],
@@ -284,7 +286,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$format export saved to: ${result.filePath}'),
+            content: Text(l10n.settingsExportSavedTo(format, result.filePath)),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -299,7 +301,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Export failed: ${e.toString()}'),
+            content: Text(l10n.settingsExportFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -308,6 +310,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _importBackup(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     try {
       final telemetry = ref.read(telemetryClientProvider);
 
@@ -331,21 +334,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Restore Backup'),
+          title: Text(l10n.settingsImportData),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('This will restore ${preview.itemCount} items.'),
+              Text(l10n.settingsRestoreWillRestoreItems(preview.itemCount)),
               const SizedBox(height: 8),
               if (preview.requiresMigration)
                 Text(
-                  'Migration required from version ${preview.schemaVersionFrom}',
+                  l10n.settingsRestoreMigrationRequiredFromVersion(
+                    preview.schemaVersionFrom,
+                  ),
                   style: const TextStyle(fontStyle: FontStyle.italic),
                 ),
               const SizedBox(height: 8),
-              const Text(
-                'All existing data will be replaced. Continue?',
+              Text(
+                l10n.settingsRestoreReplaceAllDataPrompt,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -353,11 +358,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(l10n.buttonCancel),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Restore'),
+              child: Text(l10n.buttonImport),
             ),
           ],
         ),
@@ -377,15 +382,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Restored ${restoreResult.itemsImported} items'
-              '${restoreResult.migrationsApplied > 0 ? " (${restoreResult.migrationsApplied} migrations applied)" : ""}',
+              restoreResult.migrationsApplied > 0
+                  ? l10n.settingsRestoreCompletedWithMigrations(
+                      restoreResult.itemsImported,
+                      restoreResult.migrationsApplied,
+                    )
+                  : l10n.settingsRestoreCompleted(
+                      restoreResult.itemsImported,
+                    ),
             ),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Restore failed: ${restoreResult.error}'),
+            content: Text(l10n.settingsRestoreFailed(restoreResult.error ?? '')),
             backgroundColor: Colors.red,
           ),
         );
@@ -400,7 +411,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Restore failed: ${e.toString()}'),
+            content: Text(l10n.settingsRestoreFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -432,24 +443,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [
-          _buildSectionHeader('ACCOUNT & DATA'),
+          _buildSectionHeader(l10n.settingsSectionAccountData),
           _buildCard([
             _buildLinkTile(
               icon: Icons.person,
-              label: 'Account',
-              subtitle: _accountSubtitle(),
+              label: l10n.settingsAccount,
+              subtitle: _accountSubtitle(l10n),
               onTap: () => _showAccountDialog(context),
             ),
             _buildToggleTile(
               icon: Icons.cloud_sync,
-              label: 'Data Sync',
+              label: l10n.settingsDataSync,
               value: _dataSyncEnabled,
               onChanged: null,
-              trailingLabel: 'Soon',
+              trailingLabel: l10n.settingsSoon,
             ),
             _buildToggleTile(
               icon: Icons.bug_report,
-              label: 'Demo Mode',
+              label: l10n.settingsDemoMode,
               value: demoEnabled,
               onChanged: (value) async {
                 ref.read(demoModeProvider.notifier).state = value;
@@ -466,20 +477,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 if (!context.mounted) return;
                 _showSnack(
                   context,
-                  value ? 'Demo mode enabled' : 'Demo mode disabled',
+                  value
+                      ? l10n.settingsDemoModeEnabled
+                      : l10n.settingsDemoModeDisabled,
                 );
               },
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('PRIVACY & DATA'),
+          _buildSectionHeader(l10n.settingsPrivacy),
           _buildCard([
             // TODO(M6): Remove "(not yet available)" when cloud sync launches
             _buildToggleTile(
               icon: Icons.analytics_outlined,
-              label: 'Share Anonymous Usage Data',
-              subtitle:
-                  'Grants permission for cloud export when available (not yet available)',
+              label: l10n.settingsShareAnonymousUsageData,
+              subtitle: l10n.settingsShareAnonymousUsageDataSubtitle,
               value: _analyticsConsent,
               onChanged: (value) => _setBool(
                 key: 'analytics_consent',
@@ -497,8 +509,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   data: (enabled) => enabled
                       ? _buildToggleTile(
                           icon: Icons.cloud_upload,
-                          label: 'Cloud Analytics Export',
-                          subtitle: 'Send telemetry data to cloud',
+                          label: l10n.settingsCloudAnalyticsExport,
+                          subtitle: l10n.settingsCloudAnalyticsExportSubtitle,
                           value: _analyticsConsent,
                           onChanged: (value) => _setBool(
                             key: 'cloud_analytics_export_enabled',
@@ -512,36 +524,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
             _buildLinkTile(
               icon: Icons.backup,
-              label: 'Export My Data',
-              subtitle: 'Download your inventory and settings',
+              label: l10n.settingsExportData,
+              subtitle: l10n.settingsExportSubtitle,
               onTap: () => _exportBackup(context, ref),
             ),
             _buildLinkTile(
               icon: Icons.restore,
-              label: 'Restore Backup',
-              subtitle: 'Import a backup file',
+              label: l10n.settingsImportData,
+              subtitle: l10n.settingsImportSubtitle,
               onTap: () => _importBackup(context, ref),
             ),
             _buildInfoTile(
               icon: Icons.dataset_linked,
-              label: 'Reference Data Packs',
+              label: l10n.settingsReferenceDataPacks,
               subtitle: _referencePackDiagnosticsSubtitle(),
             ),
             _buildDangerTile(
               icon: Icons.delete_forever,
-              label: 'Delete All Data',
-              subtitle: 'Permanently remove all data (irreversible)',
+              label: l10n.settingsDeleteAllData,
+              subtitle: l10n.settingsDeleteAllDataSubtitle,
               onTap: () => _confirmClearAllData(context),
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('FEEDBACK & SOUNDS'),
+          _buildSectionHeader(l10n.settingsFeedback),
           _buildCard([
             _buildToggleTile(
               key: const Key('feedback_haptic_toggle'),
               icon: Icons.vibration,
-              label: 'Haptic Feedback',
-              subtitle: 'Enable vibration on user interactions',
+              label: l10n.feedbackHapticFeedback,
+              subtitle: l10n.feedbackHapticFeedbackDescription,
               value: _feedbackHapticEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -557,8 +569,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildToggleTile(
               key: const Key('feedback_audio_toggle'),
               icon: Icons.volume_up,
-              label: 'Audio Feedback',
-              subtitle: 'Enable sound effects on interactions',
+              label: l10n.feedbackAudioFeedback,
+              subtitle: l10n.feedbackAudioFeedbackDescription,
               value: _feedbackAudioEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -574,13 +586,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildSliderTile(
               key: const Key('feedback_beep_volume_slider'),
               icon: Icons.graphic_eq,
-              label: 'Beep Volume',
-              subtitle: 'Adjust POS-style beep volume (0-100%)',
+              label: l10n.feedbackBeepVolume,
+              subtitle: l10n.feedbackBeepVolumeDescription,
               value: _feedbackBeepVolume,
               // Update local state on every tick for smooth UI; persist only
               // when the drag ends to avoid dozens of disk writes per second.
               onChanged: (value) {
                 if (mounted) setState(() => _feedbackBeepVolume = value);
+                final svc = ref.read(feedbackServiceProvider).value;
+                if (svc != null) {
+                  unawaited(svc.setBeepVolume(value));
+                  final now = DateTime.now();
+                  final last = _lastBeepPreviewAt;
+                  if (last == null ||
+                      now.difference(last).inMilliseconds >= 140) {
+                    _lastBeepPreviewAt = now;
+                    unawaited(svc.previewBeepVolume(value));
+                  }
+                }
               },
               onChangeEnd: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -595,13 +618,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildDropdownTile<HapticIntensity>(
               key: const Key('feedback_haptic_intensity_dropdown'),
               icon: Icons.flash_on,
-              label: 'Haptic Intensity',
+              label: l10n.feedbackHapticIntensity,
               value: _feedbackHapticIntensity,
               items: HapticIntensity.values,
               itemLabel: (value) => switch (value) {
-                HapticIntensity.light => 'Light',
-                HapticIntensity.medium => 'Medium',
-                HapticIntensity.heavy => 'Heavy',
+                HapticIntensity.light => l10n.settingsHapticIntensityLight,
+                HapticIntensity.medium => l10n.settingsHapticIntensityMedium,
+                HapticIntensity.heavy => l10n.settingsHapticIntensityHeavy,
               },
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -617,8 +640,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildToggleTile(
               key: const Key('feedback_scanner_barcode_toggle'),
               icon: Icons.qr_code_scanner,
-              label: 'Barcode Scan Success',
-              subtitle: 'Vibrate and beep when barcode is recognized',
+              label: l10n.feedbackOcrBarcodeSuccess,
+              subtitle: l10n.feedbackOcrBarcodeSuccessDescription,
               value: _feedbackBarcodeEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -638,8 +661,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildToggleTile(
               key: const Key('feedback_scanner_expiry_toggle'),
               icon: Icons.event,
-              label: 'Expiry Date Recognition',
-              subtitle: 'Vibrate and beep when expiry date is captured',
+              label: l10n.feedbackOcrExpirySuccess,
+              subtitle: l10n.feedbackOcrExpirySuccessDescription,
               value: _feedbackExpiryEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -659,8 +682,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildToggleTile(
               key: const Key('feedback_scanner_receipt_toggle'),
               icon: Icons.receipt_long,
-              label: 'Receipt Recognition',
-              subtitle: 'Vibrate and beep when receipt items are extracted',
+              label: l10n.feedbackOcrReceiptSuccess,
+              subtitle: l10n.feedbackOcrReceiptSuccessDescription,
               value: _feedbackReceiptEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -680,8 +703,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _buildToggleTile(
               key: const Key('feedback_scanner_produce_toggle'),
               icon: Icons.local_grocery_store,
-              label: 'Produce Label Recognition',
-              subtitle: 'Vibrate and beep when produce sticker is read',
+              label: l10n.feedbackOcrProduceSuccess,
+              subtitle: l10n.feedbackOcrProduceSuccessDescription,
               value: _feedbackProduceEnabled,
               onChanged: (value) {
                 final svc = ref.read(feedbackServiceProvider).value;
@@ -700,11 +723,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('NOTIFICATIONS & ALERTS'),
+          _buildSectionHeader(l10n.settingsReminders),
           _buildCard([
             _buildToggleTile(
               icon: Icons.notifications_active,
-              label: 'Notifications',
+              label: l10n.settingsNotifications,
               value: _notificationsEnabled,
               onChanged: (value) => _setBool(
                 key: NotificationPreferencesStore.notificationsEnabledKey,
@@ -718,10 +741,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildDropdownTile<int>(
               icon: Icons.timer,
-              label: 'Expiry Warning Lead Time',
+              label: l10n.remindersLeadTime,
               value: _leadTimeDays,
               items: const [1, 3, 7],
-              itemLabel: (val) => '$val days',
+              itemLabel: (val) => l10n.settingsLeadTimeDays(val),
               onChanged: (value) => _setInt(
                 key: NotificationPreferencesStore.leadTimeDaysKey,
                 value: value,
@@ -734,7 +757,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildToggleTile(
               icon: Icons.music_note,
-              label: 'Sound',
+              label: l10n.remindersSound,
               value: _soundEnabled,
               onChanged: (value) => _setBool(
                 key: NotificationPreferencesStore.soundEnabledKey,
@@ -745,7 +768,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildToggleTile(
               icon: Icons.vibration,
-              label: 'Vibration',
+              label: l10n.remindersVibration,
               value: _vibrationEnabled,
               onChanged: (value) => _setBool(
                 key: NotificationPreferencesStore.vibrationEnabledKey,
@@ -756,11 +779,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('PREFERENCES'),
+          _buildSectionHeader(l10n.settingsSectionPreferences),
           _buildCard([
             _buildToggleTile(
               icon: Icons.dark_mode,
-              label: 'Dark Mode',
+              label: l10n.settingsDarkMode,
               value: _darkModeEnabled,
               onChanged: (value) => _setBool(
                 key: 'dark_mode_enabled',
@@ -775,7 +798,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildDropdownTile<String>(
               icon: Icons.date_range,
-              label: 'Date Format',
+              label: l10n.settingsDateFormat,
               value: _dateFormat,
               items: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD'],
               itemLabel: (val) => val,
@@ -836,33 +859,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             _buildToggleTile(
               icon: Icons.restaurant,
-              label: 'Meal Planning',
+              label: l10n.settingsMealPlanning,
               value: _mealPlanningEnabled,
               onChanged: null,
-              trailingLabel: 'Soon',
+              trailingLabel: l10n.settingsSoon,
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('SUPPORT & FEEDBACK'),
+          _buildSectionHeader(l10n.settingsSectionSupportFeedback),
           _buildCard([
             _buildLinkTile(
               icon: Icons.help_outline,
-              label: 'Help & FAQ',
-              onTap: () => _showSnack(context, 'Help center coming soon'),
+              label: l10n.settingsHelpFaq,
+              onTap: () => _showSnack(context, l10n.settingsHelpCenterComingSoon),
             ),
             _buildLinkTile(
               icon: Icons.feedback_outlined,
-              label: 'Send Feedback',
+              label: l10n.settingsSendFeedback,
               onTap: () => showFeedbackDrawer(context, ref, source: 'settings'),
             ),
             _buildLinkTile(
               icon: Icons.star_rate,
-              label: 'Rate App',
-              onTap: () => _showSnack(context, 'Thanks for the support!'),
+              label: l10n.settingsRateApp,
+              onTap: () => _showSnack(context, l10n.settingsThanksForSupport),
             ),
             _buildLinkTile(
               icon: Icons.school_outlined,
-              label: 'View Tutorial',
+              label: l10n.settingsViewTutorial,
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const OnboardingScreen()),
@@ -871,24 +894,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           ]),
           const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader('LEGAL'),
+          _buildSectionHeader(l10n.settingsSectionLegal),
           _buildCard([
             _buildLinkTile(
               icon: Icons.privacy_tip_outlined,
-              label: 'Privacy Policy',
-              onTap: () => _showSnack(context, 'Privacy policy coming soon'),
+              label: l10n.settingsPrivacyPolicy,
+              onTap: () => _showSnack(context, l10n.settingsPrivacyPolicyComingSoon),
             ),
             _buildLinkTile(
               icon: Icons.gavel_outlined,
-              label: 'Terms of Service',
-              onTap: () => _showSnack(context, 'Terms coming soon'),
+              label: l10n.settingsTermsOfService,
+              onTap: () => _showSnack(context, l10n.settingsTermsComingSoon),
             ),
             _buildLinkTile(
               icon: Icons.info_outline,
-              label: 'About',
-              subtitle: 'ZeroSpoils v1.0.0',
+              label: l10n.settingsAbout,
+              subtitle: l10n.settingsAboutSubtitle,
               onTap: () =>
-                  _showSnack(context, 'ZeroSpoils helps reduce food waste.'),
+                  _showSnack(context, l10n.settingsAboutSnackMessage),
             ),
           ]),
         ],
@@ -1156,41 +1179,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Future<void> _confirmClearAllData(BuildContext context) async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     // Show confirmation dialog that requires typing "DELETE"
     final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete All Data?'),
+        title: Text(l10n.settingsDeleteAllData),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'This will permanently delete ALL your data including:',
+              Text(
+                l10n.settingsDeleteDataPromptIntro,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              const Text('• Inventory items'),
-              const Text('• Shopping lists'),
-              const Text('• Waste tracking data'),
-              const Text('• All settings and preferences'),
+              Text('• ${l10n.settingsDeleteDataBulletInventoryItems}'),
+              Text('• ${l10n.settingsDeleteDataBulletShoppingLists}'),
+              Text('• ${l10n.settingsDeleteDataBulletWasteTrackingData}'),
+              Text('• ${l10n.settingsDeleteDataBulletAllSettingsPreferences}'),
               const SizedBox(height: 16),
-              const Text(
-                'This action cannot be undone.',
+              Text(
+                l10n.privacyDeleteWarning,
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Type "DELETE" to confirm:'),
+              Text(l10n.settingsDeleteDataTypeDeleteConfirm),
               const SizedBox(height: 8),
               TextField(
                 controller: controller,
                 decoration: InputDecoration(
-                  hintText: 'Type DELETE',
+                  hintText: l10n.settingsDeleteDataHintTypeDelete,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -1208,7 +1232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.buttonCancel),
           ),
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
@@ -1223,7 +1247,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Navigator.pop(context, true);
                       }
                     : null,
-                child: const Text('Delete Permanently'),
+                child: Text(l10n.settingsDeletePermanently),
               );
             },
           ),
@@ -1254,7 +1278,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (!context.mounted) return;
 
       // Show success feedback
-      _showSnack(context, 'All data permanently deleted');
+      _showSnack(context, l10n.settingsDeleteAllDataSuccess);
 
       // Redirect to onboarding after short delay
       await Future.delayed(const Duration(milliseconds: 500));
@@ -1269,7 +1293,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Deletion failed: ${e.toString()}'),
+            content: Text(l10n.settingsDeletionFailed(e.toString())),
             backgroundColor: Colors.red,
           ),
         );
@@ -1284,35 +1308,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   String _referencePackDiagnosticsSubtitle() {
-    final version = _barcodePackVersion ?? 'Bundled default only';
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    final version = _barcodePackVersion ?? l10n.settingsReferencePackBundledDefaultOnly;
     final updatedAt = _barcodePackUpdatedAt == null
-        ? 'Never updated'
+        ? l10n.settingsReferencePackNeverUpdated
         : DateFormat(
             'yyyy-MM-dd HH:mm',
           ).format(_barcodePackUpdatedAt!.toLocal());
 
-    return 'Active barcode pack: $version ($_barcodePackRecordCount records)\n'
-        'Last update: $updatedAt\n'
-        'Manifest source: Firebase Remote Config '
-        '(${ReferencePackRemoteConfigKeys.manifestUrl})';
+    return l10n.settingsReferencePackDiagnostics(
+      version,
+      _barcodePackRecordCount,
+      updatedAt,
+      ReferencePackRemoteConfigKeys.manifestUrl,
+    );
   }
 
-  String _accountSubtitle() {
+  String _accountSubtitle(AppLocalizations l10n) {
     late final FirebaseAuthService authService;
     try {
       authService = ref.read(firebaseAuthServiceProvider);
     } catch (_) {
-      return 'Not signed in';
+      return l10n.settingsAccountNotSignedIn;
     }
 
     final user = authService.currentUser;
 
     if (user == null) {
-      return 'Not signed in';
+      return l10n.settingsAccountNotSignedIn;
     }
 
     if (user.isAnonymous) {
-      return 'Anonymous session';
+      return l10n.settingsAccountAnonymousSession;
     }
 
     final email = user.email;
@@ -1320,7 +1347,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       return email;
     }
 
-    return 'Signed in';
+    return l10n.settingsAccountSignedIn;
   }
 
   Future<void> _showAccountDialog(BuildContext context) async {
@@ -1328,7 +1355,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     try {
       authService = ref.read(firebaseAuthServiceProvider);
     } catch (_) {
-      _showSnack(context, 'Authentication service is unavailable.');
+      final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+      _showSnack(context, l10n.settingsAuthServiceUnavailable);
       return;
     }
 
@@ -1451,35 +1479,36 @@ class _AccountDialogState extends State<_AccountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final authService = widget.authService;
     final user = authService.currentUser;
     final isAnonymous = user?.isAnonymous ?? false;
     final isSignedIn = user != null && !isAnonymous;
 
     return AlertDialog(
-      title: const Text('Account'),
+      title: Text(l10n.settingsAccount),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (isSignedIn) ...[
-              Text('Signed in as ${user.email ?? 'unknown'}'),
+              Text(l10n.settingsAccountSignedInAs(user.email ?? 'unknown')),
               const SizedBox(height: AppSpacing.md),
-              const Text('You can sign out to return to an anonymous session.'),
+              Text(l10n.settingsAccountSignOutHint),
             ] else ...[
               Text(
                 isAnonymous
-                    ? 'Upgrade your anonymous session to an email account.'
-                    : 'Sign in with email to submit authenticated feedback.',
+                    ? l10n.settingsAccountUpgradeAnonymousHint
+                    : l10n.settingsAccountSignInHint,
               ),
               const SizedBox(height: AppSpacing.md),
               TextField(
                 key: const Key('account_email_field'),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+                decoration: InputDecoration(
+                  labelText: l10n.settingsLabelEmail,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -1488,14 +1517,14 @@ class _AccountDialogState extends State<_AccountDialog> {
                 key: const Key('account_password_field'),
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
+                decoration: InputDecoration(
+                  labelText: l10n.settingsLabelPassword,
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-              const Text(
-                'Password must be at least 6 characters.',
+              Text(
+                l10n.settingsPasswordMin6Hint,
                 style: TextStyle(fontSize: 12),
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -1506,7 +1535,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                   onPressed: _isSubmitting
                       ? null
                       : () => _requestPasswordReset(authService),
-                  child: const Text('Forgot password?'),
+                  child: Text(l10n.settingsForgotPassword),
                 ),
               ),
             ],
@@ -1520,7 +1549,7 @@ class _AccountDialogState extends State<_AccountDialog> {
               : () {
                   Navigator.of(context).pop();
                 },
-          child: const Text('Close'),
+          child: Text(l10n.buttonClose),
         ),
         if (isSignedIn)
           FilledButton.tonal(
@@ -1529,7 +1558,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                 ? null
                 : () => _performAuthAction(
                     action: () => authService.signOut(),
-                    successMessage: 'Signed out',
+                    successMessage: l10n.settingsSignOutSuccess,
                     closeDialogAfterSuccess: true,
                   ),
             child: _isSubmitting
@@ -1538,7 +1567,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Sign Out'),
+                : Text(l10n.settingsSignOut),
           )
         else ...[
           FilledButton.tonal(
@@ -1550,7 +1579,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                       email: _emailController.text,
                       password: _passwordController.text,
                     ),
-                    successMessage: 'Account created',
+                    successMessage: l10n.settingsCreateAccountSuccess,
                     closeDialogAfterSuccess: true,
                     requiresCredentials: true,
                   ),
@@ -1560,7 +1589,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Create Account'),
+                    : Text(l10n.settingsCreateAccount),
           ),
           FilledButton(
             key: const Key('account_signin_button'),
@@ -1571,7 +1600,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                       email: _emailController.text,
                       password: _passwordController.text,
                     ),
-                    successMessage: 'Signed in',
+                    successMessage: l10n.settingsSignInSuccess,
                     closeDialogAfterSuccess: true,
                     requiresCredentials: true,
                   ),
@@ -1581,7 +1610,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Sign In'),
+                    : Text(l10n.settingsSignIn),
           ),
           FilledButton.tonal(
             key: const Key('account_google_signin_button'),
@@ -1589,7 +1618,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                 ? null
                 : () => _performAuthAction(
                     action: () => authService.signInWithGoogle(),
-                    successMessage: 'Signed in with Google',
+                    successMessage: l10n.settingsSignInWithGoogleSuccess,
                     closeDialogAfterSuccess: true,
                   ),
             child: _isSubmitting
@@ -1598,7 +1627,7 @@ class _AccountDialogState extends State<_AccountDialog> {
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Continue with Google'),
+                    : Text(l10n.settingsContinueWithGoogle),
           ),
           FilledButton.tonal(
             key: const Key('account_apple_signin_button'),
@@ -1606,14 +1635,14 @@ class _AccountDialogState extends State<_AccountDialog> {
                 ? null
                 : () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content: Text(
-                          'Apple Sign-In will be enabled after email and Google sign-in are fully verified on-device.',
+                          l10n.settingsAppleSignInSoonMessage,
                         ),
                       ),
                     );
                   },
-            child: const Text('Continue with Apple (Soon)'),
+            child: Text(l10n.settingsContinueWithAppleSoon),
           ),
         ],
       ],
@@ -1621,12 +1650,13 @@ class _AccountDialogState extends State<_AccountDialog> {
   }
 
   Future<void> _requestPasswordReset(FirebaseAuthService authService) async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final messenger = ScaffoldMessenger.of(context);
     final email = _emailController.text.trim();
 
     if (email.isEmpty || !email.contains('@')) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Enter your account email first.')),
+        SnackBar(content: Text(l10n.settingsEnterAccountEmailFirst)),
       );
       return;
     }
@@ -1639,17 +1669,17 @@ class _AccountDialogState extends State<_AccountDialog> {
       await authService.sendPasswordResetEmail(email: email);
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text('Password reset email sent to $email.')),
+        SnackBar(content: Text(l10n.settingsPasswordResetEmailSent(email))),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text(_messageForAuthError(e.code))),
+        SnackBar(content: Text(_messageForAuthError(l10n, e.code))),
       );
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Could not start password reset.')),
+        SnackBar(content: Text(l10n.settingsPasswordResetFailed)),
       );
     } finally {
       if (mounted) {
@@ -1666,6 +1696,7 @@ class _AccountDialogState extends State<_AccountDialog> {
     required bool closeDialogAfterSuccess,
     bool requiresCredentials = false,
   }) async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final messenger = ScaffoldMessenger.of(context);
 
     final email = _emailController.text.trim();
@@ -1674,15 +1705,13 @@ class _AccountDialogState extends State<_AccountDialog> {
     if (requiresCredentials) {
       if (email.isEmpty || !email.contains('@')) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('Enter a valid email address.')),
+          SnackBar(content: Text(l10n.settingsEnterValidEmail)),
         );
         return;
       }
       if (password.length < 6) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Password must be at least 6 characters.'),
-          ),
+          SnackBar(content: Text(l10n.settingsPasswordMin6Error)),
         );
         return;
       }
@@ -1704,12 +1733,12 @@ class _AccountDialogState extends State<_AccountDialog> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       messenger.showSnackBar(
-        SnackBar(content: Text(_messageForAuthError(e.code))),
+        SnackBar(content: Text(_messageForAuthError(l10n, e.code))),
       );
     } catch (_) {
       if (!mounted) return;
       messenger.showSnackBar(
-        const SnackBar(content: Text('Authentication failed. Try again.')),
+        SnackBar(content: Text(l10n.settingsAuthenticationFailedTryAgain)),
       );
     } finally {
       if (mounted) {
@@ -1720,23 +1749,23 @@ class _AccountDialogState extends State<_AccountDialog> {
     }
   }
 
-  String _messageForAuthError(String code) {
+  String _messageForAuthError(AppLocalizations l10n, String code) {
     switch (code) {
       case 'user-not-found':
-        return 'No account found for this email.';
+        return l10n.settingsAuthErrorUserNotFound;
       case 'wrong-password':
       case 'invalid-credential':
-        return 'Incorrect email or password.';
+        return l10n.settingsAuthErrorInvalidCredentials;
       case 'email-already-in-use':
-        return 'An account with this email already exists.';
+        return l10n.settingsAuthErrorEmailAlreadyInUse;
       case 'invalid-email':
-        return 'Email format is invalid.';
+        return l10n.settingsAuthErrorInvalidEmail;
       case 'operation-not-allowed':
-        return 'Enable Email/Password in Firebase Authentication settings.';
+        return l10n.settingsAuthErrorOperationNotAllowed;
       case 'weak-password':
-        return 'Choose a stronger password.';
+        return l10n.settingsAuthErrorWeakPassword;
       default:
-        return 'Authentication failed ($code).';
+        return l10n.settingsAuthErrorUnknown(code);
     }
   }
 }

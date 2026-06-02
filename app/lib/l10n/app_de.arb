@@ -132,6 +132,214 @@
   "settingsExportData": "Daten exportieren",
   "settingsImportData": "Daten importieren",
   "settingsDeleteAllData": "Alle Daten löschen",
+  "settingsSectionAccountData": "KONTO UND DATEN",
+  "settingsAccount": "Konto",
+  "settingsDataSync": "Datensynchronisierung",
+  "settingsDemoMode": "Demo-Modus",
+  "settingsSoon": "Demnächst",
+  "settingsDemoModeEnabled": "Demo-Modus aktiviert",
+  "settingsDemoModeDisabled": "Demo-Modus deaktiviert",
+  "settingsShareAnonymousUsageData": "Anonyme Nutzungsdaten teilen",
+  "settingsShareAnonymousUsageDataSubtitle": "Erteilt die Erlaubnis für Cloud-Export, sobald verfügbar (noch nicht verfügbar)",
+  "settingsCloudAnalyticsExport": "Cloud-Analytics-Export",
+  "settingsCloudAnalyticsExportSubtitle": "Telemetriedaten in die Cloud senden",
+  "settingsExportSubtitle": "Inventar und Einstellungen herunterladen",
+  "settingsImportSubtitle": "Eine Sicherungsdatei importieren",
+  "settingsReferenceDataPacks": "Referenzdatenpakete",
+  "settingsDeleteAllDataSubtitle": "Alle Daten dauerhaft entfernen (irreversibel)",
+  "settingsSectionPreferences": "EINSTELLUNGEN",
+  "settingsMealPlanning": "Mahlzeitenplanung",
+  "settingsSectionSupportFeedback": "HILFE UND FEEDBACK",
+  "settingsHelpFaq": "Hilfe und FAQ",
+  "settingsHelpCenterComingSoon": "Hilfecenter demnächst verfügbar",
+  "settingsSendFeedback": "Feedback senden",
+  "settingsRateApp": "App bewerten",
+  "settingsThanksForSupport": "Danke für die Unterstützung!",
+  "settingsViewTutorial": "Tutorial ansehen",
+  "settingsSectionLegal": "RECHTLICHES",
+  "settingsPrivacyPolicy": "Datenschutzerklärung",
+  "settingsPrivacyPolicyComingSoon": "Datenschutzerklärung demnächst verfügbar",
+  "settingsTermsOfService": "Nutzungsbedingungen",
+  "settingsTermsComingSoon": "Bedingungen demnächst verfügbar",
+  "settingsAboutSubtitle": "ZeroSpoils v1.0.0",
+  "settingsAboutSnackMessage": "ZeroSpoils hilft, Lebensmittelverschwendung zu reduzieren.",
+  "settingsHapticIntensityLight": "Leicht",
+  "settingsHapticIntensityMedium": "Mittel",
+  "settingsHapticIntensityHeavy": "Stark",
+  "settingsLeadTimeDays": "{days} Tage",
+  "@settingsLeadTimeDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsChooseExportFormat": "Choose export format:",
+  "settingsExportJsonCompleteBackup": "JSON (Complete Backup)",
+  "settingsExportCsvInventoryOnly": "CSV (Inventory Only)",
+  "settingsSaveExportAs": "Save {format} export as",
+  "@settingsSaveExportAs": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExportSavedTo": "{format} export saved to: {path}",
+  "@settingsExportSavedTo": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      },
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExportFailed": "Export failed: {error}",
+  "@settingsExportFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreWillRestoreItems": "This will restore {count} items.",
+  "@settingsRestoreWillRestoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreMigrationRequiredFromVersion": "Migration required from version {version}",
+  "@settingsRestoreMigrationRequiredFromVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreReplaceAllDataPrompt": "All existing data will be replaced. Continue?",
+  "settingsRestoreCompleted": "Restored {items} items",
+  "@settingsRestoreCompleted": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreCompletedWithMigrations": "Restored {items} items ({migrations} migrations applied)",
+  "@settingsRestoreCompletedWithMigrations": {
+    "placeholders": {
+      "items": {
+        "type": "int"
+      },
+      "migrations": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRestoreFailed": "Restore failed: {error}",
+  "@settingsRestoreFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDeleteDataPromptIntro": "This will permanently delete ALL your data including:",
+  "settingsDeleteDataBulletInventoryItems": "Inventory items",
+  "settingsDeleteDataBulletShoppingLists": "Shopping lists",
+  "settingsDeleteDataBulletWasteTrackingData": "Waste tracking data",
+  "settingsDeleteDataBulletAllSettingsPreferences": "All settings and preferences",
+  "settingsDeleteDataTypeDeleteConfirm": "Type \"DELETE\" to confirm:",
+  "settingsDeleteDataHintTypeDelete": "Type DELETE",
+  "settingsDeletePermanently": "Delete Permanently",
+  "settingsDeleteAllDataSuccess": "All data permanently deleted",
+  "settingsDeletionFailed": "Deletion failed: {error}",
+  "@settingsDeletionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsReferencePackBundledDefaultOnly": "Bundled default only",
+  "settingsReferencePackNeverUpdated": "Never updated",
+  "settingsReferencePackDiagnostics": "Active barcode pack: {version} ({records} records)\nLast update: {updatedAt}\nManifest source: Firebase Remote Config ({manifestUrl})",
+  "@settingsReferencePackDiagnostics": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "records": {
+        "type": "int"
+      },
+      "updatedAt": {
+        "type": "String"
+      },
+      "manifestUrl": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAccountNotSignedIn": "Not signed in",
+  "settingsAccountAnonymousSession": "Anonymous session",
+  "settingsAccountSignedIn": "Signed in",
+  "settingsAuthServiceUnavailable": "Authentication service is unavailable.",
+  "settingsAccountSignedInAs": "Signed in as {email}",
+  "@settingsAccountSignedInAs": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAccountSignOutHint": "You can sign out to return to an anonymous session.",
+  "settingsAccountUpgradeAnonymousHint": "Upgrade your anonymous session to an email account.",
+  "settingsAccountSignInHint": "Sign in with email to submit authenticated feedback.",
+  "settingsLabelEmail": "Email",
+  "settingsLabelPassword": "Password",
+  "settingsPasswordMin6Hint": "Password must be at least 6 characters.",
+  "settingsForgotPassword": "Forgot password?",
+  "settingsSignOut": "Sign Out",
+  "settingsSignOutSuccess": "Signed out",
+  "settingsCreateAccount": "Create Account",
+  "settingsCreateAccountSuccess": "Account created",
+  "settingsSignIn": "Sign In",
+  "settingsSignInSuccess": "Signed in",
+  "settingsSignInWithGoogleSuccess": "Signed in with Google",
+  "settingsContinueWithGoogle": "Continue with Google",
+  "settingsContinueWithAppleSoon": "Continue with Apple (Soon)",
+  "settingsAppleSignInSoonMessage": "Apple Sign-In will be enabled after email and Google sign-in are fully verified on-device.",
+  "settingsEnterAccountEmailFirst": "Enter your account email first.",
+  "settingsPasswordResetEmailSent": "Password reset email sent to {email}.",
+  "@settingsPasswordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPasswordResetFailed": "Could not start password reset.",
+  "settingsEnterValidEmail": "Enter a valid email address.",
+  "settingsPasswordMin6Error": "Password must be at least 6 characters.",
+  "settingsAuthenticationFailedTryAgain": "Authentication failed. Try again.",
+  "settingsAuthErrorUserNotFound": "No account found for this email.",
+  "settingsAuthErrorInvalidCredentials": "Incorrect email or password.",
+  "settingsAuthErrorEmailAlreadyInUse": "An account with this email already exists.",
+  "settingsAuthErrorInvalidEmail": "Email format is invalid.",
+  "settingsAuthErrorOperationNotAllowed": "Enable Email/Password in Firebase Authentication settings.",
+  "settingsAuthErrorWeakPassword": "Choose a stronger password.",
+  "settingsAuthErrorUnknown": "Authentication failed ({code}).",
+  "@settingsAuthErrorUnknown": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
 
   "feedbackHapticFeedback": "Haptisches Feedback",
   "feedbackHapticFeedbackDescription": "Vibration bei Nutzerinteraktionen aktivieren",

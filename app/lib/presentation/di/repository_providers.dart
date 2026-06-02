@@ -4,6 +4,7 @@ library;
 /// Riverpod-based dependency injection for data layer
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
@@ -82,15 +83,33 @@ final openFoodFactsClientProvider = Provider<OpenFoodFactsClient>((ref) {
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)
-final progressStatsProvider = FutureProvider<ProgressStats>((ref) async {
+final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
   final repository = ref.watch(itemRepositoryProvider);
   final statsService = ref.watch(progressStatsServiceProvider);
   final telemetry = ref.watch(telemetryClientProvider);
 
-  await repository.init();
-  final items = await repository.getAllItems();
+  Future<ProgressStats> buildSnapshot() async {
+    await repository.init();
+    final items = await repository.getAllItems();
+    return statsService.build(items: items, telemetryEvents: telemetry.events);
+  }
 
-  return statsService.build(items: items, telemetryEvents: telemetry.events);
+  // Emit immediately so Progress renders current values without delay.
+  yield await buildSnapshot();
+
+  // In persisted mode, react to Hive writes/deletes in near real-time.
+  if (repository is HiveItemRepository && Hive.isBoxOpen('items')) {
+    final box = Hive.box<Item>('items');
+    await for (final _ in box.watch()) {
+      yield await buildSnapshot();
+    }
+    return;
+  }
+
+  // Fallback (e.g., demo/in-memory): lightweight polling while screen is open.
+  yield* Stream<ProgressStats>.periodic(
+    const Duration(seconds: 2),
+  ).asyncMap((_) => buildSnapshot());
 });
 
 /// Date format preference provider (reads from SharedPreferences)
