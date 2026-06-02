@@ -17,6 +17,7 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
 
   final AudioPlayer _player;
   Uint8List? _cachedTone;
+  bool _isConfigured = false;
 
   @override
   Future<void> playBeep({required double volume}) async {
@@ -24,6 +25,8 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
     if (safeVolume <= 0) {
       return;
     }
+
+    await _configureForScannerBeep();
 
     _cachedTone ??= _generateWavTone(
       frequencyHz: 1380,
@@ -34,6 +37,42 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
 
     await _player.setVolume(safeVolume);
     await _player.play(BytesSource(_cachedTone!));
+  }
+
+  Future<void> _configureForScannerBeep() async {
+    if (_isConfigured) {
+      return;
+    }
+
+    try {
+      await _player.setPlayerMode(PlayerMode.lowLatency);
+    } catch (_) {}
+
+    try {
+      await _player.setReleaseMode(ReleaseMode.stop);
+    } catch (_) {}
+
+    try {
+      await _player.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.assistanceSonification,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playAndRecord,
+            options: const {
+              AVAudioSessionOptions.defaultToSpeaker,
+              AVAudioSessionOptions.mixWithOthers,
+            },
+          ),
+        ),
+      );
+    } catch (_) {}
+
+    _isConfigured = true;
   }
 
   Uint8List _generateWavTone({
