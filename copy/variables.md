@@ -33,3 +33,15 @@ unsourced across artifacts. Filled during the verification pass.
 |-------|-------|--------|--------|
 | `{{STAT_HOUSEHOLD_WASTE_USD}}` | ~$1,500 / household / yr | _to source: USDA ERS / ReFED_ | ⚠️ unverified |
 | `{{STAT_FOOD_WASTE_EMISSIONS}}` | _TBD_ | _to source_ | ⚠️ unverified |
+
+## Launch-proof tokens (fill after soft launch)
+
+Phase 2 copy leads with real numbers earned during soft launch. Until then these
+stay as tokens; do not invent values.
+
+| Token | Meaning |
+|-------|---------|
+| `{{RATING}}` | Average store rating (e.g. 4.8) |
+| `{{RATING_COUNT}}` | Number of ratings |
+| `{{USER_COUNT}}` | Active users / downloads at launch |
+| `{{AVG_SAVED}}` | Representative user-reported saving (from consented testimonials) |
