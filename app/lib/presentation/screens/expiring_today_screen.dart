@@ -66,7 +66,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Error loading items: $e';
+          _errorMessage = e.toString();
           _isLoading = false;
         });
       }
@@ -118,13 +118,15 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
                 children: [
                   Text(
                     key: const Key('expiring_error_message'),
-                    _errorMessage!,
+                    (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                        .expiringLoadError(_errorMessage ?? ''),
                     style: AppTextStyles.body.copyWith(color: AppColors.danger),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   AppButton(
-                    text: 'Retry',
+                    text: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                        .buttonRetry,
                     onPressed: _loadItems,
                     secondary: true,
                     key: const Key('expiring_retry_button'),
@@ -172,6 +174,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
 
   Widget _buildEmptyState() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return Center(
       key: const ValueKey('expiring_empty_state'),
@@ -181,14 +184,14 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
           const Text('✨ 🎉 ✨', style: TextStyle(fontSize: 48)),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'All clear!',
+            l10n.expiringEmptyTitle,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!',
+            l10n.expiringEmptyMessage,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.textTheme.bodySmall?.color,
             ),
@@ -197,7 +200,7 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
           const SizedBox(height: AppSpacing.xl),
           AppButton(
             key: const ValueKey('expiring_review_inventory_button'),
-            text: 'Review Inventory',
+            text: l10n.expiringReviewInventory,
             onPressed: () {
               context.go('/');
             },
@@ -210,9 +213,10 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
 
   Widget _buildBucketSection(ExpiryBucket bucket, List<Item> items) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return Semantics(
-      label: 'Expiring ${bucket.displayName} section',
+      label: l10n.expiringBucketSemantics(bucket.displayName),
       child: Column(
         key: ValueKey('expiring_section_${bucket.name}'),
         crossAxisAlignment: CrossAxisAlignment.start,

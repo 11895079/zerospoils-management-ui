@@ -456,6 +456,248 @@
     }
   },
   
+  "inventoryFiltersTitle": "Filters",
+  "inventoryFilterAddedDate": "Added date",
+  "inventoryFilterFrom": "From",
+  "inventoryFilterTo": "To",
+  "inventoryFilterPreparedOnly": "Prepared only",
+  "inventoryFilterPreparedOnlyHint": "Show prepared items only",
+  "inventoryFilterExpiringSoonOnly": "Expiring soon only",
+  "inventoryFilterExpiringSoonOnlyHint": "Show items expiring within the next 3 days",
+  "inventoryFilterBatchLinkedOnly": "Batch-linked only",
+  "inventoryFilterBatchLinkedOnlyHint": "Show only items linked to shopping batches",
+  "inventoryFilterHideConsumedItems": "Hide consumed items",
+  "inventoryFilterHideConsumedItemsHint": "Hide items marked as consumed or wasted",
+  "inventoryFilterReset": "Reset",
+  "inventoryFilterApply": "Apply",
+  "inventoryBatchReceiptButton": "Batch receipt",
+  "inventoryDemoModeHint": "Showing sample items. Turn off in Settings to use real data.",
+  "inventoryStreakDays": "🔥 {days}-day streak",
+  "@inventoryStreakDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryLevelUp": "Level up",
+  "inventoryNoWasteWeek": "No Waste Week",
+  "inventoryStreakCompleted": "You made it! Keep the streak alive.",
+  "inventoryStreakRemaining": "Log {daysRemaining} more saves to level up",
+  "@inventoryStreakRemaining": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStreakFootnote": "Judgement-free: compare with friends only when you opt in.",
+  "inventoryViewList": "List view",
+  "inventoryViewTable": "Table view",
+  "inventoryViewGrid": "Grid view",
+  "inventoryTableName": "Name",
+  "inventoryTableCategory": "Category",
+  "inventoryTableLocation": "Location",
+  "inventoryTableExpiry": "Expiry",
+  "inventoryTableQuantity": "Qty",
+  "inventoryTableStatus": "Status",
+  "inventoryNoExpiry": "No expiry",
+  "inventoryExpiryShort": "Exp {date}",
+  "@inventoryExpiryShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryDeleteItemTitle": "Delete Item?",
+  "inventoryDeleteItemPrompt": "Are you sure you want to delete \"{itemName}\" from your inventory?",
+  "@inventoryDeleteItemPrompt": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryActiveFilters": "Active filters:",
+  "inventoryAddedFrom": "Added from {date}",
+  "@inventoryAddedFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddedTo": "Added to {date}",
+  "@inventoryAddedTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryClearAll": "Clear all",
+  "messageEmptyInventoryTitle": "Your inventory is empty",
+  "inventoryAddFirstItem": "Add your first item",
+  "shoppingUnableToLoadList": "Unable to load shopping list",
+  "shoppingNextShop": "Next Shop",
+  "shoppingPurchased": "Purchased",
+  "shoppingConvertPurchased": "Convert Purchased ({count})",
+  "@shoppingConvertPurchased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingSourceFromShoppingList": "From Shopping List",
+  "shoppingAddedToInventory": "{itemName} added to inventory",
+  "@shoppingAddedToInventory": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingDeleteItem": "Delete item",
+  "shoppingEmptyTitle": "Your shopping list is empty",
+  "shoppingStartList": "Start your shopping list",
+  "shoppingUnableToLoadHistory": "Unable to load shopping history",
+  "shoppingNoHistory": "No shopping trips recorded yet",
+  "progressUnableToLoad": "Unable to load progress: {error}",
+  "@progressUnableToLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "progressSectionSummary": "Summary",
+  "progressStatTotalItems": "Total Items",
+  "progressStatAvailable": "Available",
+  "progressStatConsumed": "Consumed",
+  "progressStatWasted": "Wasted",
+  "progressSectionExpiryHealth": "Expiry Health",
+  "progressStatExpiringToday": "Expiring Today",
+  "progressStatThisWeek": "This Week",
+  "progressStatExpiringSoon": "Expiring Soon",
+  "progressStatExpired": "Expired",
+  "progressStatNoExpiry": "No Expiry",
+  "progressSectionValueImpact": "Value Impact",
+  "progressStatTotalValue": "Total Value",
+  "progressStatConsumedValue": "Consumed Value",
+  "progressStatWastedValue": "Wasted Value",
+  "progressStatSavedEstimate": "Saved (est.)",
+  "progressSectionActivity": "Activity",
+  "progressStatAdded7d": "Added (7d)",
+  "progressStatAdded30d": "Added (30d)",
+  "progressStatUpdated7d": "Updated (7d)",
+  "progressStatUpdated30d": "Updated (30d)",
+  "progressSectionCategories": "Categories",
+  "progressSectionLocations": "Locations",
+  "progressSectionTypes": "Types",
+  "progressSectionBadges": "Badges & Achievements",
+  "progressSectionTelemetry": "Telemetry (Local Aggregation)",
+  "progressSectionRecentBatch": "Recent Receipt Batch",
+  "progressRecentBatchLoadError": "Unable to load recent batch",
+  "progressNoRecentBatches": "No recent receipt batches yet.",
+  "progressRecentBatchItemsTotal": "{count} items · {total} total",
+  "@progressRecentBatchItemsTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "progressRecentBatchSource": "Source: {source}",
+  "@progressRecentBatchSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLocalInsightsTitle": "Local Insights",
+  "progressLocalInsightsSubtitle": "These insights are computed on-device from your activity.",
+  "progressStatTotalEvents": "Total Events",
+  "progressStatItemsAdded": "Items Added",
+  "progressStatItemsWasted": "Items Wasted",
+  "progressStatRemindersOpened": "Reminders Opened",
+  "progressTopAddSources": "Top Add Sources",
+  "progressTopWasteReasons": "Top Waste Reasons",
+  "progressMostViewedScreens": "Most Viewed Screens",
+  "progressTabSwitches": "Tab Switches",
+  "progressNoDataYet": "No data yet",
+  "expiringLoadError": "Error loading items: {error}",
+  "@expiringLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expiringEmptyTitle": "All clear!",
+  "expiringEmptyMessage": "Nothing expiring soon.\nGreat job staying on top of\nyour inventory!",
+  "expiringReviewInventory": "Review Inventory",
+  "expiringBucketSemantics": "Expiring {bucketName} section",
+  "@expiringBucketSemantics": {
+    "placeholders": {
+      "bucketName": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardPrepared": "Prepared",
+  "itemCardWastedPercent": "Wasted {percent}%",
+  "@itemCardWastedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "itemCardUsed": "Used",
+  "itemCardWasted": "Wasted",
+  "itemCardAddedDate": "Added {date}",
+  "@itemCardAddedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardEditTooltip": "Edit item",
+  "itemCardDeleteTooltip": "Delete item",
+  "itemCardLocationFridge": "❄️ Fridge",
+  "itemCardLocationFreezer": "🧊 Freezer",
+  "itemCardLocationPantry": "🗄️ Pantry",
+  "itemCardLocationOther": "🏠 Other",
+  "itemCardLocationPrepared": "{locationLabel} • Prepared {date}",
+  "@itemCardLocationPrepared": {
+    "placeholders": {
+      "locationLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardNoExpirySet": "No expiry set",
+  "itemCardExpired": "Expired",
+  "itemCardExpiresToday": "Expires today ⚠️",
+  "itemCardExpiresTomorrow": "Expires tomorrow",
+  "itemCardExpiresInDays": "Expires in {days} days",
+  "@itemCardExpiresInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "noData": "No data",
   "loading": "Loading...",
   "retry": "Retry"

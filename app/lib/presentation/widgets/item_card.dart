@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart';
 import 'quantity_toggle.dart';
 import 'item_icon.dart';
@@ -31,6 +33,7 @@ class ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final textTheme = theme.textTheme;
     final daysLeft = item.daysUntilExpiry;
     final isExpired = daysLeft != null && daysLeft < 0;
@@ -168,7 +171,7 @@ class ItemCard extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          'Prepared',
+                                          l10n.itemCardPrepared,
                                           style: AppTextStyles.caption.copyWith(
                                             color: AppColors.primary,
                                             fontWeight: FontWeight.w600,
@@ -190,7 +193,9 @@ class ItemCard extends StatelessWidget {
                                           ),
                                         ),
                                         child: Text(
-                                          'Wasted ${item.wastePercentage}%',
+                                          l10n.itemCardWastedPercent(
+                                            item.wastePercentage ?? 0,
+                                          ),
                                           style: AppTextStyles.caption.copyWith(
                                             color: AppColors.danger,
                                             fontWeight: FontWeight.w600,
@@ -217,8 +222,8 @@ class ItemCard extends StatelessWidget {
                                         ),
                                         child: Text(
                                           item.status == ItemStatus.consumed
-                                              ? 'Used'
-                                              : 'Wasted',
+                                              ? l10n.itemCardUsed
+                                              : l10n.itemCardWasted,
                                           style: AppTextStyles.caption.copyWith(
                                             color:
                                                 item.status ==
@@ -262,7 +267,7 @@ class ItemCard extends StatelessWidget {
                       Opacity(
                         opacity: isConsumedOrWasted ? 0.5 : 1.0,
                         child: Text(
-                          _getLocationDisplay(item.location),
+                          _getLocationDisplay(item.location, l10n),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.bodySmall?.copyWith(
@@ -276,7 +281,7 @@ class ItemCard extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                _getExpiryDisplay(),
+                                _getExpiryDisplay(l10n),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: textTheme.bodyMedium?.copyWith(
@@ -296,7 +301,9 @@ class ItemCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Added ${DateFormat('MMM d').format(item.createdAt)}',
+                          l10n.itemCardAddedDate(
+                            DateFormat('MMM d').format(item.createdAt),
+                          ),
                           style: textTheme.bodySmall?.copyWith(
                             color: secondaryTextColor,
                           ),
@@ -336,14 +343,14 @@ class ItemCard extends StatelessWidget {
                   if (onEdit != null && !isConsumedOrWasted)
                     IconButton(
                       key: Key('item_card_edit_${item.id}'),
-                      tooltip: 'Edit item',
+                      tooltip: l10n.itemCardEditTooltip,
                       icon: const Icon(Icons.edit_outlined),
                       onPressed: onEdit,
                     ),
                   if (onDelete != null && !isConsumedOrWasted)
                     IconButton(
                       key: Key('item_card_delete_${item.id}'),
-                      tooltip: 'Delete item',
+                      tooltip: l10n.itemCardDeleteTooltip,
                       icon: const Icon(Icons.delete_outline),
                       color: AppColors.danger,
                       onPressed: onDelete,
@@ -386,40 +393,40 @@ class ItemCard extends StatelessWidget {
     );
   }
 
-  String _getLocationDisplay(StorageLocation location) {
+  String _getLocationDisplay(StorageLocation location, AppLocalizations l10n) {
     String locationLabel;
     switch (location) {
       case StorageLocation.fridge:
-        locationLabel = '❄️ Fridge';
+        locationLabel = l10n.itemCardLocationFridge;
         break;
       case StorageLocation.freezer:
-        locationLabel = '🧊 Freezer';
+        locationLabel = l10n.itemCardLocationFreezer;
         break;
       case StorageLocation.pantry:
-        locationLabel = '🗄️ Pantry';
+        locationLabel = l10n.itemCardLocationPantry;
         break;
       case StorageLocation.other:
-        locationLabel = '🏠 Other';
+        locationLabel = l10n.itemCardLocationOther;
         break;
     }
 
     if (item.type == ItemType.prepared && item.preparedDate != null) {
       final formatted = DateFormat('MMM d').format(item.preparedDate!);
-      return '$locationLabel • Prepared $formatted';
+      return l10n.itemCardLocationPrepared(locationLabel, formatted);
     }
 
     return locationLabel;
   }
 
-  String _getExpiryDisplay() {
-    if (item.expiryDate == null) return 'No expiry set';
+  String _getExpiryDisplay(AppLocalizations l10n) {
+    if (item.expiryDate == null) return l10n.itemCardNoExpirySet;
 
     final days = item.daysUntilExpiry;
-    if (days == null) return 'Expired';
+    if (days == null) return l10n.itemCardExpired;
 
-    if (days < 0) return 'Expired';
-    if (days == 0) return 'Expires today ⚠️';
-    if (days == 1) return 'Expires tomorrow';
-    return 'Expires in $days days';
+    if (days < 0) return l10n.itemCardExpired;
+    if (days == 0) return l10n.itemCardExpiresToday;
+    if (days == 1) return l10n.itemCardExpiresTomorrow;
+    return l10n.itemCardExpiresInDays(days);
   }
 }

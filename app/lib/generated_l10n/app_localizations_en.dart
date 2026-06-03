@@ -922,6 +922,398 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get inventoryFiltersTitle => 'Filters';
+
+  @override
+  String get inventoryFilterAddedDate => 'Added date';
+
+  @override
+  String get inventoryFilterFrom => 'From';
+
+  @override
+  String get inventoryFilterTo => 'To';
+
+  @override
+  String get inventoryFilterPreparedOnly => 'Prepared only';
+
+  @override
+  String get inventoryFilterPreparedOnlyHint => 'Show prepared items only';
+
+  @override
+  String get inventoryFilterExpiringSoonOnly => 'Expiring soon only';
+
+  @override
+  String get inventoryFilterExpiringSoonOnlyHint =>
+      'Show items expiring within the next 3 days';
+
+  @override
+  String get inventoryFilterBatchLinkedOnly => 'Batch-linked only';
+
+  @override
+  String get inventoryFilterBatchLinkedOnlyHint =>
+      'Show only items linked to shopping batches';
+
+  @override
+  String get inventoryFilterHideConsumedItems => 'Hide consumed items';
+
+  @override
+  String get inventoryFilterHideConsumedItemsHint =>
+      'Hide items marked as consumed or wasted';
+
+  @override
+  String get inventoryFilterReset => 'Reset';
+
+  @override
+  String get inventoryFilterApply => 'Apply';
+
+  @override
+  String get inventoryBatchReceiptButton => 'Batch receipt';
+
+  @override
+  String get inventoryDemoModeHint =>
+      'Showing sample items. Turn off in Settings to use real data.';
+
+  @override
+  String inventoryStreakDays(int days) {
+    return '🔥 $days-day streak';
+  }
+
+  @override
+  String get inventoryLevelUp => 'Level up';
+
+  @override
+  String get inventoryNoWasteWeek => 'No Waste Week';
+
+  @override
+  String get inventoryStreakCompleted => 'You made it! Keep the streak alive.';
+
+  @override
+  String inventoryStreakRemaining(int daysRemaining) {
+    return 'Log $daysRemaining more saves to level up';
+  }
+
+  @override
+  String get inventoryStreakFootnote =>
+      'Judgement-free: compare with friends only when you opt in.';
+
+  @override
+  String get inventoryViewList => 'List view';
+
+  @override
+  String get inventoryViewTable => 'Table view';
+
+  @override
+  String get inventoryViewGrid => 'Grid view';
+
+  @override
+  String get inventoryTableName => 'Name';
+
+  @override
+  String get inventoryTableCategory => 'Category';
+
+  @override
+  String get inventoryTableLocation => 'Location';
+
+  @override
+  String get inventoryTableExpiry => 'Expiry';
+
+  @override
+  String get inventoryTableQuantity => 'Qty';
+
+  @override
+  String get inventoryTableStatus => 'Status';
+
+  @override
+  String get inventoryNoExpiry => 'No expiry';
+
+  @override
+  String inventoryExpiryShort(String date) {
+    return 'Exp $date';
+  }
+
+  @override
+  String get inventoryDeleteItemTitle => 'Delete Item?';
+
+  @override
+  String inventoryDeleteItemPrompt(String itemName) {
+    return 'Are you sure you want to delete \"$itemName\" from your inventory?';
+  }
+
+  @override
+  String get inventoryActiveFilters => 'Active filters:';
+
+  @override
+  String inventoryAddedFrom(String date) {
+    return 'Added from $date';
+  }
+
+  @override
+  String inventoryAddedTo(String date) {
+    return 'Added to $date';
+  }
+
+  @override
+  String get inventoryClearAll => 'Clear all';
+
+  @override
+  String get messageEmptyInventoryTitle => 'Your inventory is empty';
+
+  @override
+  String get inventoryAddFirstItem => 'Add your first item';
+
+  @override
+  String get shoppingUnableToLoadList => 'Unable to load shopping list';
+
+  @override
+  String get shoppingNextShop => 'Next Shop';
+
+  @override
+  String get shoppingPurchased => 'Purchased';
+
+  @override
+  String shoppingConvertPurchased(int count) {
+    return 'Convert Purchased ($count)';
+  }
+
+  @override
+  String get shoppingSourceFromShoppingList => 'From Shopping List';
+
+  @override
+  String shoppingAddedToInventory(String itemName) {
+    return '$itemName added to inventory';
+  }
+
+  @override
+  String get shoppingDeleteItem => 'Delete item';
+
+  @override
+  String get shoppingEmptyTitle => 'Your shopping list is empty';
+
+  @override
+  String get shoppingStartList => 'Start your shopping list';
+
+  @override
+  String get shoppingUnableToLoadHistory => 'Unable to load shopping history';
+
+  @override
+  String get shoppingNoHistory => 'No shopping trips recorded yet';
+
+  @override
+  String progressUnableToLoad(String error) {
+    return 'Unable to load progress: $error';
+  }
+
+  @override
+  String get progressSectionSummary => 'Summary';
+
+  @override
+  String get progressStatTotalItems => 'Total Items';
+
+  @override
+  String get progressStatAvailable => 'Available';
+
+  @override
+  String get progressStatConsumed => 'Consumed';
+
+  @override
+  String get progressStatWasted => 'Wasted';
+
+  @override
+  String get progressSectionExpiryHealth => 'Expiry Health';
+
+  @override
+  String get progressStatExpiringToday => 'Expiring Today';
+
+  @override
+  String get progressStatThisWeek => 'This Week';
+
+  @override
+  String get progressStatExpiringSoon => 'Expiring Soon';
+
+  @override
+  String get progressStatExpired => 'Expired';
+
+  @override
+  String get progressStatNoExpiry => 'No Expiry';
+
+  @override
+  String get progressSectionValueImpact => 'Value Impact';
+
+  @override
+  String get progressStatTotalValue => 'Total Value';
+
+  @override
+  String get progressStatConsumedValue => 'Consumed Value';
+
+  @override
+  String get progressStatWastedValue => 'Wasted Value';
+
+  @override
+  String get progressStatSavedEstimate => 'Saved (est.)';
+
+  @override
+  String get progressSectionActivity => 'Activity';
+
+  @override
+  String get progressStatAdded7d => 'Added (7d)';
+
+  @override
+  String get progressStatAdded30d => 'Added (30d)';
+
+  @override
+  String get progressStatUpdated7d => 'Updated (7d)';
+
+  @override
+  String get progressStatUpdated30d => 'Updated (30d)';
+
+  @override
+  String get progressSectionCategories => 'Categories';
+
+  @override
+  String get progressSectionLocations => 'Locations';
+
+  @override
+  String get progressSectionTypes => 'Types';
+
+  @override
+  String get progressSectionBadges => 'Badges & Achievements';
+
+  @override
+  String get progressSectionTelemetry => 'Telemetry (Local Aggregation)';
+
+  @override
+  String get progressSectionRecentBatch => 'Recent Receipt Batch';
+
+  @override
+  String get progressRecentBatchLoadError => 'Unable to load recent batch';
+
+  @override
+  String get progressNoRecentBatches => 'No recent receipt batches yet.';
+
+  @override
+  String progressRecentBatchItemsTotal(int count, String total) {
+    return '$count items · $total total';
+  }
+
+  @override
+  String progressRecentBatchSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get progressLocalInsightsTitle => 'Local Insights';
+
+  @override
+  String get progressLocalInsightsSubtitle =>
+      'These insights are computed on-device from your activity.';
+
+  @override
+  String get progressStatTotalEvents => 'Total Events';
+
+  @override
+  String get progressStatItemsAdded => 'Items Added';
+
+  @override
+  String get progressStatItemsWasted => 'Items Wasted';
+
+  @override
+  String get progressStatRemindersOpened => 'Reminders Opened';
+
+  @override
+  String get progressTopAddSources => 'Top Add Sources';
+
+  @override
+  String get progressTopWasteReasons => 'Top Waste Reasons';
+
+  @override
+  String get progressMostViewedScreens => 'Most Viewed Screens';
+
+  @override
+  String get progressTabSwitches => 'Tab Switches';
+
+  @override
+  String get progressNoDataYet => 'No data yet';
+
+  @override
+  String expiringLoadError(String error) {
+    return 'Error loading items: $error';
+  }
+
+  @override
+  String get expiringEmptyTitle => 'All clear!';
+
+  @override
+  String get expiringEmptyMessage =>
+      'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!';
+
+  @override
+  String get expiringReviewInventory => 'Review Inventory';
+
+  @override
+  String expiringBucketSemantics(String bucketName) {
+    return 'Expiring $bucketName section';
+  }
+
+  @override
+  String get itemCardPrepared => 'Prepared';
+
+  @override
+  String itemCardWastedPercent(int percent) {
+    return 'Wasted $percent%';
+  }
+
+  @override
+  String get itemCardUsed => 'Used';
+
+  @override
+  String get itemCardWasted => 'Wasted';
+
+  @override
+  String itemCardAddedDate(String date) {
+    return 'Added $date';
+  }
+
+  @override
+  String get itemCardEditTooltip => 'Edit item';
+
+  @override
+  String get itemCardDeleteTooltip => 'Delete item';
+
+  @override
+  String get itemCardLocationFridge => '❄️ Fridge';
+
+  @override
+  String get itemCardLocationFreezer => '🧊 Freezer';
+
+  @override
+  String get itemCardLocationPantry => '🗄️ Pantry';
+
+  @override
+  String get itemCardLocationOther => '🏠 Other';
+
+  @override
+  String itemCardLocationPrepared(String locationLabel, String date) {
+    return '$locationLabel • Prepared $date';
+  }
+
+  @override
+  String get itemCardNoExpirySet => 'No expiry set';
+
+  @override
+  String get itemCardExpired => 'Expired';
+
+  @override
+  String get itemCardExpiresToday => 'Expires today ⚠️';
+
+  @override
+  String get itemCardExpiresTomorrow => 'Expires tomorrow';
+
+  @override
+  String itemCardExpiresInDays(int days) {
+    return 'Expires in $days days';
+  }
+
+  @override
   String get noData => 'No data';
 
   @override
