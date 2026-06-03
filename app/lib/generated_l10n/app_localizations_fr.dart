@@ -932,109 +932,112 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get inventoryFiltersTitle => 'Filters';
+  String get inventoryFiltersTitle => 'Filtres';
 
   @override
-  String get inventoryFilterAddedDate => 'Added date';
+  String get inventoryFilterAddedDate => 'Date d\'ajout';
 
   @override
-  String get inventoryFilterFrom => 'From';
+  String get inventoryFilterFrom => 'Du';
 
   @override
-  String get inventoryFilterTo => 'To';
+  String get inventoryFilterTo => 'Au';
 
   @override
-  String get inventoryFilterPreparedOnly => 'Prepared only';
+  String get inventoryFilterPreparedOnly => 'Préparés seulement';
 
   @override
-  String get inventoryFilterPreparedOnlyHint => 'Show prepared items only';
+  String get inventoryFilterPreparedOnlyHint =>
+      'Afficher uniquement les articles préparés';
 
   @override
-  String get inventoryFilterExpiringSoonOnly => 'Expiring soon only';
+  String get inventoryFilterExpiringSoonOnly => 'Bientôt expirés seulement';
 
   @override
   String get inventoryFilterExpiringSoonOnlyHint =>
-      'Show items expiring within the next 3 days';
+      'Afficher les articles expirant dans les 3 prochains jours';
 
   @override
-  String get inventoryFilterBatchLinkedOnly => 'Batch-linked only';
+  String get inventoryFilterBatchLinkedOnly => 'Liés à un lot seulement';
 
   @override
   String get inventoryFilterBatchLinkedOnlyHint =>
-      'Show only items linked to shopping batches';
+      'Afficher seulement les articles liés à des lots d\'achat';
 
   @override
-  String get inventoryFilterHideConsumedItems => 'Hide consumed items';
+  String get inventoryFilterHideConsumedItems =>
+      'Masquer les articles consommés';
 
   @override
   String get inventoryFilterHideConsumedItemsHint =>
-      'Hide items marked as consumed or wasted';
+      'Masquer les articles marqués comme consommés ou gaspillés';
 
   @override
-  String get inventoryFilterReset => 'Reset';
+  String get inventoryFilterReset => 'Réinitialiser';
 
   @override
-  String get inventoryFilterApply => 'Apply';
+  String get inventoryFilterApply => 'Appliquer';
 
   @override
-  String get inventoryBatchReceiptButton => 'Batch receipt';
+  String get inventoryBatchReceiptButton => 'Lot de reçus';
 
   @override
   String get inventoryDemoModeHint =>
-      'Showing sample items. Turn off in Settings to use real data.';
+      'Affichage des articles d\'exemple. Désactivez ce mode dans Réglages pour utiliser les vraies données.';
 
   @override
   String inventoryStreakDays(int days) {
-    return '🔥 $days-day streak';
+    return '🔥 Série de $days jours';
   }
 
   @override
-  String get inventoryLevelUp => 'Level up';
+  String get inventoryLevelUp => 'Monter de niveau';
 
   @override
-  String get inventoryNoWasteWeek => 'No Waste Week';
+  String get inventoryNoWasteWeek => 'Semaine zéro gaspillage';
 
   @override
-  String get inventoryStreakCompleted => 'You made it! Keep the streak alive.';
+  String get inventoryStreakCompleted =>
+      'Vous l\'avez fait! Continuez la série.';
 
   @override
   String inventoryStreakRemaining(int daysRemaining) {
-    return 'Log $daysRemaining more saves to level up';
+    return 'Enregistrez encore $daysRemaining sauvetages pour monter de niveau';
   }
 
   @override
   String get inventoryStreakFootnote =>
-      'Judgement-free: compare with friends only when you opt in.';
+      'Sans jugement: comparez avec vos amis seulement si vous l\'activez.';
 
   @override
-  String get inventoryViewList => 'List view';
+  String get inventoryViewList => 'Vue liste';
 
   @override
-  String get inventoryViewTable => 'Table view';
+  String get inventoryViewTable => 'Vue tableau';
 
   @override
-  String get inventoryViewGrid => 'Grid view';
+  String get inventoryViewGrid => 'Vue grille';
 
   @override
-  String get inventoryTableName => 'Name';
+  String get inventoryTableName => 'Nom';
 
   @override
-  String get inventoryTableCategory => 'Category';
+  String get inventoryTableCategory => 'Catégorie';
 
   @override
-  String get inventoryTableLocation => 'Location';
+  String get inventoryTableLocation => 'Emplacement';
 
   @override
-  String get inventoryTableExpiry => 'Expiry';
+  String get inventoryTableExpiry => 'Expiration';
 
   @override
-  String get inventoryTableQuantity => 'Qty';
+  String get inventoryTableQuantity => 'Qté';
 
   @override
-  String get inventoryTableStatus => 'Status';
+  String get inventoryTableStatus => 'Statut';
 
   @override
-  String get inventoryNoExpiry => 'No expiry';
+  String get inventoryNoExpiry => 'Aucune expiration';
 
   @override
   String inventoryExpiryShort(String date) {
@@ -1042,167 +1045,170 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get inventoryDeleteItemTitle => 'Delete Item?';
+  String get inventoryDeleteItemTitle => 'Supprimer l\'article?';
 
   @override
   String inventoryDeleteItemPrompt(String itemName) {
-    return 'Are you sure you want to delete \"$itemName\" from your inventory?';
+    return 'Voulez-vous vraiment supprimer \"$itemName\" de votre inventaire?';
   }
 
   @override
-  String get inventoryActiveFilters => 'Active filters:';
+  String get inventoryActiveFilters => 'Filtres actifs:';
 
   @override
   String inventoryAddedFrom(String date) {
-    return 'Added from $date';
+    return 'Ajouté depuis $date';
   }
 
   @override
   String inventoryAddedTo(String date) {
-    return 'Added to $date';
+    return 'Ajouté jusqu\'à $date';
   }
 
   @override
-  String get inventoryClearAll => 'Clear all';
+  String get inventoryClearAll => 'Tout effacer';
 
   @override
-  String get messageEmptyInventoryTitle => 'Your inventory is empty';
+  String get messageEmptyInventoryTitle => 'Votre inventaire est vide';
 
   @override
-  String get inventoryAddFirstItem => 'Add your first item';
+  String get inventoryAddFirstItem => 'Ajouter votre premier article';
 
   @override
-  String get shoppingUnableToLoadList => 'Unable to load shopping list';
+  String get shoppingUnableToLoadList =>
+      'Impossible de charger la liste de courses';
 
   @override
-  String get shoppingNextShop => 'Next Shop';
+  String get shoppingNextShop => 'Prochaines courses';
 
   @override
-  String get shoppingPurchased => 'Purchased';
+  String get shoppingPurchased => 'Acheté';
 
   @override
   String shoppingConvertPurchased(int count) {
-    return 'Convert Purchased ($count)';
+    return 'Convertir les achetés ($count)';
   }
 
   @override
-  String get shoppingSourceFromShoppingList => 'From Shopping List';
+  String get shoppingSourceFromShoppingList => 'Depuis la liste de courses';
 
   @override
   String shoppingAddedToInventory(String itemName) {
-    return '$itemName added to inventory';
+    return '$itemName ajouté à l\'inventaire';
   }
 
   @override
-  String get shoppingDeleteItem => 'Delete item';
+  String get shoppingDeleteItem => 'Supprimer l\'article';
 
   @override
-  String get shoppingEmptyTitle => 'Your shopping list is empty';
+  String get shoppingEmptyTitle => 'Votre liste de courses est vide';
 
   @override
-  String get shoppingStartList => 'Start your shopping list';
+  String get shoppingStartList => 'Commencer votre liste de courses';
 
   @override
-  String get shoppingUnableToLoadHistory => 'Unable to load shopping history';
+  String get shoppingUnableToLoadHistory =>
+      'Impossible de charger l\'historique des courses';
 
   @override
-  String get shoppingNoHistory => 'No shopping trips recorded yet';
+  String get shoppingNoHistory => 'Aucune sortie de courses enregistrée';
 
   @override
   String progressUnableToLoad(String error) {
-    return 'Unable to load progress: $error';
+    return 'Impossible de charger la progression: $error';
   }
 
   @override
-  String get progressSectionSummary => 'Summary';
+  String get progressSectionSummary => 'Résumé';
 
   @override
-  String get progressStatTotalItems => 'Total Items';
+  String get progressStatTotalItems => 'Articles totaux';
 
   @override
-  String get progressStatAvailable => 'Available';
+  String get progressStatAvailable => 'Disponibles';
 
   @override
-  String get progressStatConsumed => 'Consumed';
+  String get progressStatConsumed => 'Consommés';
 
   @override
-  String get progressStatWasted => 'Wasted';
+  String get progressStatWasted => 'Gaspillés';
 
   @override
-  String get progressSectionExpiryHealth => 'Expiry Health';
+  String get progressSectionExpiryHealth => 'Santé des expirations';
 
   @override
-  String get progressStatExpiringToday => 'Expiring Today';
+  String get progressStatExpiringToday => 'Expirent aujourd\'hui';
 
   @override
-  String get progressStatThisWeek => 'This Week';
+  String get progressStatThisWeek => 'Cette semaine';
 
   @override
-  String get progressStatExpiringSoon => 'Expiring Soon';
+  String get progressStatExpiringSoon => 'Bientôt expirés';
 
   @override
-  String get progressStatExpired => 'Expired';
+  String get progressStatExpired => 'Expirés';
 
   @override
-  String get progressStatNoExpiry => 'No Expiry';
+  String get progressStatNoExpiry => 'Sans expiration';
 
   @override
-  String get progressSectionValueImpact => 'Value Impact';
+  String get progressSectionValueImpact => 'Impact de la valeur';
 
   @override
-  String get progressStatTotalValue => 'Total Value';
+  String get progressStatTotalValue => 'Valeur totale';
 
   @override
-  String get progressStatConsumedValue => 'Consumed Value';
+  String get progressStatConsumedValue => 'Valeur consommée';
 
   @override
-  String get progressStatWastedValue => 'Wasted Value';
+  String get progressStatWastedValue => 'Valeur gaspillée';
 
   @override
-  String get progressStatSavedEstimate => 'Saved (est.)';
+  String get progressStatSavedEstimate => 'Économisé (est.)';
 
   @override
-  String get progressSectionActivity => 'Activity';
+  String get progressSectionActivity => 'Activité';
 
   @override
-  String get progressStatAdded7d => 'Added (7d)';
+  String get progressStatAdded7d => 'Ajoutés (7 j)';
 
   @override
-  String get progressStatAdded30d => 'Added (30d)';
+  String get progressStatAdded30d => 'Ajoutés (30 j)';
 
   @override
-  String get progressStatUpdated7d => 'Updated (7d)';
+  String get progressStatUpdated7d => 'Mis à jour (7 j)';
 
   @override
-  String get progressStatUpdated30d => 'Updated (30d)';
+  String get progressStatUpdated30d => 'Mis à jour (30 j)';
 
   @override
-  String get progressSectionCategories => 'Categories';
+  String get progressSectionCategories => 'Catégories';
 
   @override
-  String get progressSectionLocations => 'Locations';
+  String get progressSectionLocations => 'Emplacements';
 
   @override
   String get progressSectionTypes => 'Types';
 
   @override
-  String get progressSectionBadges => 'Badges & Achievements';
+  String get progressSectionBadges => 'Badges et réalisations';
 
   @override
-  String get progressSectionTelemetry => 'Telemetry (Local Aggregation)';
+  String get progressSectionTelemetry => 'Télémétrie (agrégation locale)';
 
   @override
-  String get progressSectionRecentBatch => 'Recent Receipt Batch';
+  String get progressSectionRecentBatch => 'Lot de reçus récent';
 
   @override
-  String get progressRecentBatchLoadError => 'Unable to load recent batch';
+  String get progressRecentBatchLoadError =>
+      'Impossible de charger le lot récent';
 
   @override
-  String get progressNoRecentBatches => 'No recent receipt batches yet.';
+  String get progressNoRecentBatches => 'Aucun lot de reçus récent.';
 
   @override
   String progressRecentBatchItemsTotal(int count, String total) {
-    return '$count items · $total total';
+    return '$count articles · $total au total';
   }
 
   @override
@@ -1211,116 +1217,116 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get progressLocalInsightsTitle => 'Local Insights';
+  String get progressLocalInsightsTitle => 'Informations locales';
 
   @override
   String get progressLocalInsightsSubtitle =>
-      'These insights are computed on-device from your activity.';
+      'Ces informations sont calculées sur l\'appareil à partir de votre activité.';
 
   @override
-  String get progressStatTotalEvents => 'Total Events';
+  String get progressStatTotalEvents => 'Événements totaux';
 
   @override
-  String get progressStatItemsAdded => 'Items Added';
+  String get progressStatItemsAdded => 'Articles ajoutés';
 
   @override
-  String get progressStatItemsWasted => 'Items Wasted';
+  String get progressStatItemsWasted => 'Articles gaspillés';
 
   @override
-  String get progressStatRemindersOpened => 'Reminders Opened';
+  String get progressStatRemindersOpened => 'Rappels ouverts';
 
   @override
-  String get progressTopAddSources => 'Top Add Sources';
+  String get progressTopAddSources => 'Principales sources d\'ajout';
 
   @override
-  String get progressTopWasteReasons => 'Top Waste Reasons';
+  String get progressTopWasteReasons => 'Principales raisons de gaspillage';
 
   @override
-  String get progressMostViewedScreens => 'Most Viewed Screens';
+  String get progressMostViewedScreens => 'Écrans les plus consultés';
 
   @override
-  String get progressTabSwitches => 'Tab Switches';
+  String get progressTabSwitches => 'Changements d\'onglets';
 
   @override
-  String get progressNoDataYet => 'No data yet';
+  String get progressNoDataYet => 'Pas encore de données';
 
   @override
   String expiringLoadError(String error) {
-    return 'Error loading items: $error';
+    return 'Erreur de chargement des articles: $error';
   }
 
   @override
-  String get expiringEmptyTitle => 'All clear!';
+  String get expiringEmptyTitle => 'Tout est clair!';
 
   @override
   String get expiringEmptyMessage =>
-      'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!';
+      'Rien n\'expire bientôt.\nBravo pour votre bonne gestion\nde l\'inventaire!';
 
   @override
-  String get expiringReviewInventory => 'Review Inventory';
+  String get expiringReviewInventory => 'Revoir l\'inventaire';
 
   @override
   String expiringBucketSemantics(String bucketName) {
-    return 'Expiring $bucketName section';
+    return 'Section expiration $bucketName';
   }
 
   @override
-  String get itemCardPrepared => 'Prepared';
+  String get itemCardPrepared => 'Préparé';
 
   @override
   String itemCardWastedPercent(int percent) {
-    return 'Wasted $percent%';
+    return 'Gaspillé $percent%';
   }
 
   @override
-  String get itemCardUsed => 'Used';
+  String get itemCardUsed => 'Utilisé';
 
   @override
-  String get itemCardWasted => 'Wasted';
+  String get itemCardWasted => 'Gaspillé';
 
   @override
   String itemCardAddedDate(String date) {
-    return 'Added $date';
+    return 'Ajouté $date';
   }
 
   @override
-  String get itemCardEditTooltip => 'Edit item';
+  String get itemCardEditTooltip => 'Modifier l\'article';
 
   @override
-  String get itemCardDeleteTooltip => 'Delete item';
+  String get itemCardDeleteTooltip => 'Supprimer l\'article';
 
   @override
-  String get itemCardLocationFridge => '❄️ Fridge';
+  String get itemCardLocationFridge => '❄️ Frigo';
 
   @override
-  String get itemCardLocationFreezer => '🧊 Freezer';
+  String get itemCardLocationFreezer => '🧊 Congélateur';
 
   @override
-  String get itemCardLocationPantry => '🗄️ Pantry';
+  String get itemCardLocationPantry => '🗄️ Garde-manger';
 
   @override
-  String get itemCardLocationOther => '🏠 Other';
+  String get itemCardLocationOther => '🏠 Autre';
 
   @override
   String itemCardLocationPrepared(String locationLabel, String date) {
-    return '$locationLabel • Prepared $date';
+    return '$locationLabel • Préparé le $date';
   }
 
   @override
-  String get itemCardNoExpirySet => 'No expiry set';
+  String get itemCardNoExpirySet => 'Aucune expiration définie';
 
   @override
-  String get itemCardExpired => 'Expired';
+  String get itemCardExpired => 'Expiré';
 
   @override
-  String get itemCardExpiresToday => 'Expires today ⚠️';
+  String get itemCardExpiresToday => 'Expire aujourd\'hui ⚠️';
 
   @override
-  String get itemCardExpiresTomorrow => 'Expires tomorrow';
+  String get itemCardExpiresTomorrow => 'Expire demain';
 
   @override
   String itemCardExpiresInDays(int days) {
-    return 'Expires in $days days';
+    return 'Expire dans $days jours';
   }
 
   @override
@@ -2258,6 +2264,404 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
   @override
   String formattedPrice(String currency, double amount) {
     return '$currency$amount';
+  }
+
+  @override
+  String get inventoryFiltersTitle => 'Filtres';
+
+  @override
+  String get inventoryFilterAddedDate => 'Date d\'ajout';
+
+  @override
+  String get inventoryFilterFrom => 'Du';
+
+  @override
+  String get inventoryFilterTo => 'Au';
+
+  @override
+  String get inventoryFilterPreparedOnly => 'Préparés seulement';
+
+  @override
+  String get inventoryFilterPreparedOnlyHint =>
+      'Afficher uniquement les articles préparés';
+
+  @override
+  String get inventoryFilterExpiringSoonOnly => 'Bientôt expirés seulement';
+
+  @override
+  String get inventoryFilterExpiringSoonOnlyHint =>
+      'Afficher les articles expirant dans les 3 prochains jours';
+
+  @override
+  String get inventoryFilterBatchLinkedOnly => 'Liés à un lot seulement';
+
+  @override
+  String get inventoryFilterBatchLinkedOnlyHint =>
+      'Afficher seulement les articles liés à des lots de magasinage';
+
+  @override
+  String get inventoryFilterHideConsumedItems =>
+      'Masquer les articles consommés';
+
+  @override
+  String get inventoryFilterHideConsumedItemsHint =>
+      'Masquer les articles marqués comme consommés ou gaspillés';
+
+  @override
+  String get inventoryFilterReset => 'Réinitialiser';
+
+  @override
+  String get inventoryFilterApply => 'Appliquer';
+
+  @override
+  String get inventoryBatchReceiptButton => 'Lot de reçus';
+
+  @override
+  String get inventoryDemoModeHint =>
+      'Affichage des articles d\'exemple. Désactivez ce mode dans Réglages pour utiliser les vraies données.';
+
+  @override
+  String inventoryStreakDays(int days) {
+    return '🔥 Série de $days jours';
+  }
+
+  @override
+  String get inventoryLevelUp => 'Monter de niveau';
+
+  @override
+  String get inventoryNoWasteWeek => 'Semaine zéro gaspillage';
+
+  @override
+  String get inventoryStreakCompleted =>
+      'Vous l\'avez fait! Continuez la série.';
+
+  @override
+  String inventoryStreakRemaining(int daysRemaining) {
+    return 'Enregistrez encore $daysRemaining sauvetages pour monter de niveau';
+  }
+
+  @override
+  String get inventoryStreakFootnote =>
+      'Sans jugement: comparez avec vos amis seulement si vous l\'activez.';
+
+  @override
+  String get inventoryViewList => 'Vue liste';
+
+  @override
+  String get inventoryViewTable => 'Vue tableau';
+
+  @override
+  String get inventoryViewGrid => 'Vue grille';
+
+  @override
+  String get inventoryTableName => 'Nom';
+
+  @override
+  String get inventoryTableCategory => 'Catégorie';
+
+  @override
+  String get inventoryTableLocation => 'Emplacement';
+
+  @override
+  String get inventoryTableExpiry => 'Expiration';
+
+  @override
+  String get inventoryTableQuantity => 'Qté';
+
+  @override
+  String get inventoryTableStatus => 'Statut';
+
+  @override
+  String get inventoryNoExpiry => 'Aucune expiration';
+
+  @override
+  String inventoryExpiryShort(String date) {
+    return 'Exp $date';
+  }
+
+  @override
+  String get inventoryDeleteItemTitle => 'Supprimer l\'article?';
+
+  @override
+  String inventoryDeleteItemPrompt(String itemName) {
+    return 'Voulez-vous vraiment supprimer \"$itemName\" de votre inventaire?';
+  }
+
+  @override
+  String get inventoryActiveFilters => 'Filtres actifs:';
+
+  @override
+  String inventoryAddedFrom(String date) {
+    return 'Ajouté depuis $date';
+  }
+
+  @override
+  String inventoryAddedTo(String date) {
+    return 'Ajouté jusqu\'à $date';
+  }
+
+  @override
+  String get inventoryClearAll => 'Tout effacer';
+
+  @override
+  String get messageEmptyInventoryTitle => 'Votre inventaire est vide';
+
+  @override
+  String get inventoryAddFirstItem => 'Ajouter votre premier article';
+
+  @override
+  String get shoppingUnableToLoadList =>
+      'Impossible de charger la liste d\'épicerie';
+
+  @override
+  String get shoppingNextShop => 'Prochain magasinage';
+
+  @override
+  String get shoppingPurchased => 'Acheté';
+
+  @override
+  String shoppingConvertPurchased(int count) {
+    return 'Convertir les achetés ($count)';
+  }
+
+  @override
+  String get shoppingSourceFromShoppingList => 'Depuis la liste d\'épicerie';
+
+  @override
+  String shoppingAddedToInventory(String itemName) {
+    return '$itemName ajouté à l\'inventaire';
+  }
+
+  @override
+  String get shoppingDeleteItem => 'Supprimer l\'article';
+
+  @override
+  String get shoppingEmptyTitle => 'Votre liste d\'épicerie est vide';
+
+  @override
+  String get shoppingStartList => 'Commencer votre liste d\'épicerie';
+
+  @override
+  String get shoppingUnableToLoadHistory =>
+      'Impossible de charger l\'historique de magasinage';
+
+  @override
+  String get shoppingNoHistory => 'Aucune sortie de magasinage enregistrée';
+
+  @override
+  String progressUnableToLoad(String error) {
+    return 'Impossible de charger la progression: $error';
+  }
+
+  @override
+  String get progressSectionSummary => 'Résumé';
+
+  @override
+  String get progressStatTotalItems => 'Articles totaux';
+
+  @override
+  String get progressStatAvailable => 'Disponibles';
+
+  @override
+  String get progressStatConsumed => 'Consommés';
+
+  @override
+  String get progressStatWasted => 'Gaspillés';
+
+  @override
+  String get progressSectionExpiryHealth => 'Santé des expirations';
+
+  @override
+  String get progressStatExpiringToday => 'Expirent aujourd\'hui';
+
+  @override
+  String get progressStatThisWeek => 'Cette semaine';
+
+  @override
+  String get progressStatExpiringSoon => 'Bientôt expirés';
+
+  @override
+  String get progressStatExpired => 'Expirés';
+
+  @override
+  String get progressStatNoExpiry => 'Sans expiration';
+
+  @override
+  String get progressSectionValueImpact => 'Impact de la valeur';
+
+  @override
+  String get progressStatTotalValue => 'Valeur totale';
+
+  @override
+  String get progressStatConsumedValue => 'Valeur consommée';
+
+  @override
+  String get progressStatWastedValue => 'Valeur gaspillée';
+
+  @override
+  String get progressStatSavedEstimate => 'Économisé (est.)';
+
+  @override
+  String get progressSectionActivity => 'Activité';
+
+  @override
+  String get progressStatAdded7d => 'Ajoutés (7 j)';
+
+  @override
+  String get progressStatAdded30d => 'Ajoutés (30 j)';
+
+  @override
+  String get progressStatUpdated7d => 'Mis à jour (7 j)';
+
+  @override
+  String get progressStatUpdated30d => 'Mis à jour (30 j)';
+
+  @override
+  String get progressSectionCategories => 'Catégories';
+
+  @override
+  String get progressSectionLocations => 'Emplacements';
+
+  @override
+  String get progressSectionTypes => 'Types';
+
+  @override
+  String get progressSectionBadges => 'Badges et réalisations';
+
+  @override
+  String get progressSectionTelemetry => 'Télémétrie (agrégation locale)';
+
+  @override
+  String get progressSectionRecentBatch => 'Lot de reçus récent';
+
+  @override
+  String get progressRecentBatchLoadError =>
+      'Impossible de charger le lot récent';
+
+  @override
+  String get progressNoRecentBatches => 'Aucun lot de reçus récent.';
+
+  @override
+  String progressRecentBatchItemsTotal(int count, String total) {
+    return '$count articles · $total au total';
+  }
+
+  @override
+  String progressRecentBatchSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get progressLocalInsightsTitle => 'Informations locales';
+
+  @override
+  String get progressLocalInsightsSubtitle =>
+      'Ces informations sont calculées sur l\'appareil à partir de votre activité.';
+
+  @override
+  String get progressStatTotalEvents => 'Événements totaux';
+
+  @override
+  String get progressStatItemsAdded => 'Articles ajoutés';
+
+  @override
+  String get progressStatItemsWasted => 'Articles gaspillés';
+
+  @override
+  String get progressStatRemindersOpened => 'Rappels ouverts';
+
+  @override
+  String get progressTopAddSources => 'Principales sources d\'ajout';
+
+  @override
+  String get progressTopWasteReasons => 'Principales raisons de gaspillage';
+
+  @override
+  String get progressMostViewedScreens => 'Écrans les plus consultés';
+
+  @override
+  String get progressTabSwitches => 'Changements d\'onglets';
+
+  @override
+  String get progressNoDataYet => 'Pas encore de données';
+
+  @override
+  String expiringLoadError(String error) {
+    return 'Erreur de chargement des articles: $error';
+  }
+
+  @override
+  String get expiringEmptyTitle => 'Tout est clair!';
+
+  @override
+  String get expiringEmptyMessage =>
+      'Rien n\'expire bientôt.\nBravo pour votre bonne gestion\nde l\'inventaire!';
+
+  @override
+  String get expiringReviewInventory => 'Revoir l\'inventaire';
+
+  @override
+  String expiringBucketSemantics(String bucketName) {
+    return 'Section expiration $bucketName';
+  }
+
+  @override
+  String get itemCardPrepared => 'Préparé';
+
+  @override
+  String itemCardWastedPercent(int percent) {
+    return 'Gaspillé $percent%';
+  }
+
+  @override
+  String get itemCardUsed => 'Utilisé';
+
+  @override
+  String get itemCardWasted => 'Gaspillé';
+
+  @override
+  String itemCardAddedDate(String date) {
+    return 'Ajouté $date';
+  }
+
+  @override
+  String get itemCardEditTooltip => 'Modifier l\'article';
+
+  @override
+  String get itemCardDeleteTooltip => 'Supprimer l\'article';
+
+  @override
+  String get itemCardLocationFridge => '❄️ Frigo';
+
+  @override
+  String get itemCardLocationFreezer => '🧊 Congélateur';
+
+  @override
+  String get itemCardLocationPantry => '🗄️ Garde-manger';
+
+  @override
+  String get itemCardLocationOther => '🏠 Autre';
+
+  @override
+  String itemCardLocationPrepared(String locationLabel, String date) {
+    return '$locationLabel • Préparé le $date';
+  }
+
+  @override
+  String get itemCardNoExpirySet => 'Aucune expiration définie';
+
+  @override
+  String get itemCardExpired => 'Expiré';
+
+  @override
+  String get itemCardExpiresToday => 'Expire aujourd\'hui ⚠️';
+
+  @override
+  String get itemCardExpiresTomorrow => 'Expire demain';
+
+  @override
+  String itemCardExpiresInDays(int days) {
+    return 'Expire dans $days jours';
   }
 
   @override

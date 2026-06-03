@@ -456,6 +456,248 @@
     }
   },
   
+  "inventoryFiltersTitle": "Filtros",
+  "inventoryFilterAddedDate": "Fecha de agregado",
+  "inventoryFilterFrom": "Desde",
+  "inventoryFilterTo": "Hasta",
+  "inventoryFilterPreparedOnly": "Solo preparados",
+  "inventoryFilterPreparedOnlyHint": "Mostrar solo artículos preparados",
+  "inventoryFilterExpiringSoonOnly": "Solo por vencer pronto",
+  "inventoryFilterExpiringSoonOnlyHint": "Mostrar artículos que vencen en los próximos 3 días",
+  "inventoryFilterBatchLinkedOnly": "Solo vinculados a lotes",
+  "inventoryFilterBatchLinkedOnlyHint": "Mostrar solo artículos vinculados a lotes de compra",
+  "inventoryFilterHideConsumedItems": "Ocultar artículos consumidos",
+  "inventoryFilterHideConsumedItemsHint": "Ocultar artículos marcados como consumidos o desperdiciados",
+  "inventoryFilterReset": "Restablecer",
+  "inventoryFilterApply": "Aplicar",
+  "inventoryBatchReceiptButton": "Lote de recibos",
+  "inventoryDemoModeHint": "Mostrando artículos de ejemplo. Desactívalo en Ajustes para usar datos reales.",
+  "inventoryStreakDays": "🔥 Racha de {days} días",
+  "@inventoryStreakDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryLevelUp": "Subir de nivel",
+  "inventoryNoWasteWeek": "Semana sin desperdicio",
+  "inventoryStreakCompleted": "¡Lo lograste! Mantén viva la racha.",
+  "inventoryStreakRemaining": "Registra {daysRemaining} rescates más para subir de nivel",
+  "@inventoryStreakRemaining": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStreakFootnote": "Sin juicios: compárate con amistades solo si lo activas.",
+  "inventoryViewList": "Vista de lista",
+  "inventoryViewTable": "Vista de tabla",
+  "inventoryViewGrid": "Vista de cuadrícula",
+  "inventoryTableName": "Nombre",
+  "inventoryTableCategory": "Categoría",
+  "inventoryTableLocation": "Ubicación",
+  "inventoryTableExpiry": "Vencimiento",
+  "inventoryTableQuantity": "Cant.",
+  "inventoryTableStatus": "Estado",
+  "inventoryNoExpiry": "Sin vencimiento",
+  "inventoryExpiryShort": "Vence {date}",
+  "@inventoryExpiryShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryDeleteItemTitle": "¿Eliminar artículo?",
+  "inventoryDeleteItemPrompt": "¿Seguro que deseas eliminar \"{itemName}\" de tu inventario?",
+  "@inventoryDeleteItemPrompt": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryActiveFilters": "Filtros activos:",
+  "inventoryAddedFrom": "Agregado desde {date}",
+  "@inventoryAddedFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddedTo": "Agregado hasta {date}",
+  "@inventoryAddedTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryClearAll": "Limpiar todo",
+  "messageEmptyInventoryTitle": "Tu inventario está vacío",
+  "inventoryAddFirstItem": "Agregar tu primer artículo",
+  "shoppingUnableToLoadList": "No se pudo cargar la lista de compras",
+  "shoppingNextShop": "Próxima compra",
+  "shoppingPurchased": "Comprado",
+  "shoppingConvertPurchased": "Convertir comprados ({count})",
+  "@shoppingConvertPurchased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingSourceFromShoppingList": "Desde la lista de compras",
+  "shoppingAddedToInventory": "{itemName} agregado al inventario",
+  "@shoppingAddedToInventory": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingDeleteItem": "Eliminar artículo",
+  "shoppingEmptyTitle": "Tu lista de compras está vacía",
+  "shoppingStartList": "Comienza tu lista de compras",
+  "shoppingUnableToLoadHistory": "No se pudo cargar el historial de compras",
+  "shoppingNoHistory": "Aún no hay compras registradas",
+  "progressUnableToLoad": "No se pudo cargar el progreso: {error}",
+  "@progressUnableToLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "progressSectionSummary": "Resumen",
+  "progressStatTotalItems": "Total de artículos",
+  "progressStatAvailable": "Disponibles",
+  "progressStatConsumed": "Consumidos",
+  "progressStatWasted": "Desperdiciados",
+  "progressSectionExpiryHealth": "Estado de vencimiento",
+  "progressStatExpiringToday": "Vencen hoy",
+  "progressStatThisWeek": "Esta semana",
+  "progressStatExpiringSoon": "Vencen pronto",
+  "progressStatExpired": "Vencidos",
+  "progressStatNoExpiry": "Sin vencimiento",
+  "progressSectionValueImpact": "Impacto de valor",
+  "progressStatTotalValue": "Valor total",
+  "progressStatConsumedValue": "Valor consumido",
+  "progressStatWastedValue": "Valor desperdiciado",
+  "progressStatSavedEstimate": "Ahorrado (est.)",
+  "progressSectionActivity": "Actividad",
+  "progressStatAdded7d": "Agregados (7d)",
+  "progressStatAdded30d": "Agregados (30d)",
+  "progressStatUpdated7d": "Actualizados (7d)",
+  "progressStatUpdated30d": "Actualizados (30d)",
+  "progressSectionCategories": "Categorías",
+  "progressSectionLocations": "Ubicaciones",
+  "progressSectionTypes": "Tipos",
+  "progressSectionBadges": "Insignias y logros",
+  "progressSectionTelemetry": "Telemetría (agregación local)",
+  "progressSectionRecentBatch": "Lote de recibos reciente",
+  "progressRecentBatchLoadError": "No se pudo cargar el lote reciente",
+  "progressNoRecentBatches": "Aún no hay lotes de recibos recientes.",
+  "progressRecentBatchItemsTotal": "{count} artículos · {total} total",
+  "@progressRecentBatchItemsTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "progressRecentBatchSource": "Origen: {source}",
+  "@progressRecentBatchSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLocalInsightsTitle": "Información local",
+  "progressLocalInsightsSubtitle": "Estos datos se calculan en el dispositivo a partir de tu actividad.",
+  "progressStatTotalEvents": "Eventos totales",
+  "progressStatItemsAdded": "Artículos agregados",
+  "progressStatItemsWasted": "Artículos desperdiciados",
+  "progressStatRemindersOpened": "Recordatorios abiertos",
+  "progressTopAddSources": "Fuentes principales de agregado",
+  "progressTopWasteReasons": "Motivos principales de desperdicio",
+  "progressMostViewedScreens": "Pantallas más vistas",
+  "progressTabSwitches": "Cambios de pestaña",
+  "progressNoDataYet": "Aún no hay datos",
+  "expiringLoadError": "Error al cargar artículos: {error}",
+  "@expiringLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expiringEmptyTitle": "¡Todo bien!",
+  "expiringEmptyMessage": "Nada vence pronto.\n¡Buen trabajo manteniendo\ntu inventario al día!",
+  "expiringReviewInventory": "Revisar inventario",
+  "expiringBucketSemantics": "Sección de vencimiento {bucketName}",
+  "@expiringBucketSemantics": {
+    "placeholders": {
+      "bucketName": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardPrepared": "Preparado",
+  "itemCardWastedPercent": "Desperdiciado {percent}%",
+  "@itemCardWastedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "itemCardUsed": "Usado",
+  "itemCardWasted": "Desperdiciado",
+  "itemCardAddedDate": "Agregado {date}",
+  "@itemCardAddedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardEditTooltip": "Editar artículo",
+  "itemCardDeleteTooltip": "Eliminar artículo",
+  "itemCardLocationFridge": "❄️ Nevera",
+  "itemCardLocationFreezer": "🧊 Congelador",
+  "itemCardLocationPantry": "🗄️ Despensa",
+  "itemCardLocationOther": "🏠 Otro",
+  "itemCardLocationPrepared": "{locationLabel} • Preparado el {date}",
+  "@itemCardLocationPrepared": {
+    "placeholders": {
+      "locationLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardNoExpirySet": "Sin vencimiento definido",
+  "itemCardExpired": "Vencido",
+  "itemCardExpiresToday": "Vence hoy ⚠️",
+  "itemCardExpiresTomorrow": "Vence mañana",
+  "itemCardExpiresInDays": "Vence en {days} días",
+  "@itemCardExpiresInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "noData": "Sin datos",
   "loading": "Cargando...",
   "retry": "Reintentar"
