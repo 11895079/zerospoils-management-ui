@@ -1,5 +1,7 @@
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -50,7 +52,7 @@ class _BarcodeCaptureScreenState extends State<BarcodeCaptureScreen> {
 
       _isCompleting = true;
       await _controller.stop();
-      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess);
+      unawaited(FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess));
       if (!mounted) {
         return;
       }
