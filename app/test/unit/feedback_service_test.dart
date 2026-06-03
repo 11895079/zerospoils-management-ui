@@ -18,13 +18,22 @@ void main() {
   group('FeedbackService', () {
     late FeedbackService feedbackService;
     late _RecordingAudioFeedbackPlayer audioPlayer;
+    late List<Map<String, dynamic>> telemetryEvents;
 
     setUp(() async {
       // Initialize SharedPreferences for testing
       SharedPreferences.setMockInitialValues({});
       audioPlayer = _RecordingAudioFeedbackPlayer();
+      telemetryEvents = <Map<String, dynamic>>[];
+      FeedbackService.setTelemetryLogger((name, properties) {
+        telemetryEvents.add({'name': name, 'properties': properties});
+      });
       feedbackService = FeedbackService(audioPlayer: audioPlayer);
       await feedbackService.initialize();
+    });
+
+    tearDown(() {
+      FeedbackService.setTelemetryLogger(null);
     });
 
     test('preview beep uses slider volume when audio is enabled', () async {
@@ -33,6 +42,14 @@ void main() {
 
       expect(audioPlayer.playedVolumes, hasLength(1));
       expect(audioPlayer.playedVolumes.single, closeTo(0.42, 0.001));
+      expect(
+        telemetryEvents.where((event) => event['name'] == 'feedback_beep_preview_attempted'),
+        hasLength(1),
+      );
+      expect(
+        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_preview_attempted')['properties']['outcome'],
+        'attempted',
+      );
     });
 
     test('preview beep is skipped when audio is disabled', () async {
@@ -40,6 +57,10 @@ void main() {
       await feedbackService.previewBeepVolume(0.9);
 
       expect(audioPlayer.playedVolumes, isEmpty);
+      expect(
+        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_preview_attempted')['properties']['outcome'],
+        'skipped_audio_disabled',
+      );
     });
 
     test('ocr success beep uses persisted beep volume', () async {
@@ -51,6 +72,10 @@ void main() {
 
       expect(audioPlayer.playedVolumes, hasLength(1));
       expect(audioPlayer.playedVolumes.single, closeTo(0.61, 0.001));
+      expect(
+        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_scan_attempted')['properties']['outcome'],
+        'attempted',
+      );
     });
 
     test('initializes with default settings', () {

@@ -4,10 +4,15 @@ library;
 /// Exposes haptic/audio feedback configuration and triggers
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../presentation/di/service_locator.dart' show telemetryClientProvider;
 import 'feedback_service.dart';
 
 // Initialize feedback service once on app start
 final feedbackServiceProvider = FutureProvider<FeedbackService>((ref) async {
+  final telemetry = ref.watch(telemetryClientProvider);
+  FeedbackService.setTelemetryLogger((eventName, properties) {
+    telemetry.enqueue({'name': eventName, 'properties': properties});
+  });
   final service = FeedbackService();
   await service.initialize();
   return service;
