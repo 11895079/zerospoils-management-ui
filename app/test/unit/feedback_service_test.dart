@@ -43,11 +43,15 @@ void main() {
       expect(audioPlayer.playedVolumes, hasLength(1));
       expect(audioPlayer.playedVolumes.single, closeTo(0.42, 0.001));
       expect(
-        telemetryEvents.where((event) => event['name'] == 'feedback_beep_preview_attempted'),
+        telemetryEvents.where(
+          (event) => event['name'] == 'feedback_beep_preview_attempted',
+        ),
         hasLength(1),
       );
       expect(
-        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_preview_attempted')['properties']['outcome'],
+        telemetryEvents.firstWhere(
+          (event) => event['name'] == 'feedback_beep_preview_attempted',
+        )['properties']['outcome'],
         'attempted',
       );
     });
@@ -58,7 +62,9 @@ void main() {
 
       expect(audioPlayer.playedVolumes, isEmpty);
       expect(
-        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_preview_attempted')['properties']['outcome'],
+        telemetryEvents.firstWhere(
+          (event) => event['name'] == 'feedback_beep_preview_attempted',
+        )['properties']['outcome'],
         'skipped_audio_disabled',
       );
     });
@@ -73,7 +79,9 @@ void main() {
       expect(audioPlayer.playedVolumes, hasLength(1));
       expect(audioPlayer.playedVolumes.single, closeTo(0.61, 0.001));
       expect(
-        telemetryEvents.firstWhere((event) => event['name'] == 'feedback_beep_scan_attempted')['properties']['outcome'],
+        telemetryEvents.firstWhere(
+          (event) => event['name'] == 'feedback_beep_scan_attempted',
+        )['properties']['outcome'],
         'attempted',
       );
     });
