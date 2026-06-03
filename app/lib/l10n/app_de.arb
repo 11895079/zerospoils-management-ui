@@ -69,10 +69,13 @@
   "categoryProduce": "Frisches",
   "categoryDairy": "Milchprodukte",
   "categoryMeat": "Fleisch",
+  "categoryGrains": "Getreide",
   "categoryFrozen": "Tiefgekühlt",
   "categoryPantry": "Vorrat",
   "categoryBeverages": "Getränke",
   "categoryOther": "Sonstiges",
+  "itemTypeRaw": "Roh",
+  "itemTypePrepared": "Zubereitet",
 
   "locationFridge": "Kühlschrank",
   "locationFreezer": "Gefrierschrank",

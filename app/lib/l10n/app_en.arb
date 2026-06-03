@@ -69,10 +69,13 @@
   "categoryProduce": "Produce",
   "categoryDairy": "Dairy",
   "categoryMeat": "Meat",
+  "categoryGrains": "Grains",
   "categoryFrozen": "Frozen",
   "categoryPantry": "Pantry",
   "categoryBeverages": "Beverages",
   "categoryOther": "Other",
+  "itemTypeRaw": "Raw",
+  "itemTypePrepared": "Prepared",
   
   "locationFridge": "Fridge",
   "locationFreezer": "Freezer",

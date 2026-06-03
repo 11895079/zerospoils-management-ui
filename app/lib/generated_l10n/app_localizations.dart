@@ -477,6 +477,12 @@ abstract class AppLocalizations {
   /// **'Meat'**
   String get categoryMeat;
 
+  /// No description provided for @categoryGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains'**
+  String get categoryGrains;
+
   /// No description provided for @categoryFrozen.
   ///
   /// In en, this message translates to:
@@ -500,6 +506,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get categoryOther;
+
+  /// No description provided for @itemTypeRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get itemTypeRaw;
+
+  /// No description provided for @itemTypePrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepared'**
+  String get itemTypePrepared;
 
   /// No description provided for @locationFridge.
   ///

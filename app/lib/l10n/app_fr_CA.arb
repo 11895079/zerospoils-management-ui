@@ -69,10 +69,13 @@
   "categoryProduce": "Produits frais",
   "categoryDairy": "Produits laitiers",
   "categoryMeat": "Viande",
+  "categoryGrains": "Céréales",
   "categoryFrozen": "Surgelés",
   "categoryPantry": "Garde-manger",
   "categoryBeverages": "Boissons",
   "categoryOther": "Autre",
+  "itemTypeRaw": "Brut",
+  "itemTypePrepared": "Préparé",
   
   "locationFridge": "Réfrigérateur",
   "locationFreezer": "Congélateur",

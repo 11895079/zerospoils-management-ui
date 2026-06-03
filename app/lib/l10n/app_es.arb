@@ -69,10 +69,13 @@
   "categoryProduce": "Productos Frescos",
   "categoryDairy": "Lácteos",
   "categoryMeat": "Carnes",
+  "categoryGrains": "Granos",
   "categoryFrozen": "Congelados",
   "categoryPantry": "Despensa",
   "categoryBeverages": "Bebidas",
   "categoryOther": "Otro",
+  "itemTypeRaw": "Crudo",
+  "itemTypePrepared": "Preparado",
   
   "locationFridge": "Refrigerador",
   "locationFreezer": "Congelador",

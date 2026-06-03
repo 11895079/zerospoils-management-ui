@@ -196,6 +196,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get categoryMeat => 'Fleisch';
 
   @override
+  String get categoryGrains => 'Getreide';
+
+  @override
   String get categoryFrozen => 'Tiefgekühlt';
 
   @override
@@ -206,6 +209,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get categoryOther => 'Sonstiges';
+
+  @override
+  String get itemTypeRaw => 'Roh';
+
+  @override
+  String get itemTypePrepared => 'Zubereitet';
 
   @override
   String get locationFridge => 'Kühlschrank';

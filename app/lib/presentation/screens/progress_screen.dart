@@ -179,7 +179,7 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.categoryCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(_localizedCategoryLabel(l10n, key), value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -188,7 +188,7 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.locationCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(_localizedLocationLabel(l10n, key), value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -197,7 +197,7 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.typeCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(_localizedTypeLabel(l10n, key), value),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -720,6 +720,48 @@ class ProgressScreen extends ConsumerWidget {
       ..sort((a, b) => b.value.compareTo(a.value));
     final trimmed = entries.take(limit);
     return {for (final entry in trimmed) entry.key: entry.value};
+  }
+
+  String _localizedCategoryLabel(AppLocalizations l10n, ItemCategory category) {
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(
+    AppLocalizations l10n,
+    StorageLocation location,
+  ) {
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
+  }
+
+  String _localizedTypeLabel(AppLocalizations l10n, ItemType type) {
+    switch (type) {
+      case ItemType.raw:
+        return l10n.itemTypeRaw;
+      case ItemType.prepared:
+        return l10n.itemTypePrepared;
+    }
   }
 
   String _currency(double value) {

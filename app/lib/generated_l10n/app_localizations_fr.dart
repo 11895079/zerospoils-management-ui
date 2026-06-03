@@ -195,6 +195,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get categoryMeat => 'Viande';
 
   @override
+  String get categoryGrains => 'Céréales';
+
+  @override
   String get categoryFrozen => 'Surgelés';
 
   @override
@@ -205,6 +208,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get categoryOther => 'Autre';
+
+  @override
+  String get itemTypeRaw => 'Brut';
+
+  @override
+  String get itemTypePrepared => 'Préparé';
 
   @override
   String get locationFridge => 'Réfrigérateur';
@@ -1530,6 +1539,9 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
   String get categoryMeat => 'Viande';
 
   @override
+  String get categoryGrains => 'Céréales';
+
+  @override
   String get categoryFrozen => 'Surgelés';
 
   @override
@@ -1540,6 +1552,12 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
 
   @override
   String get categoryOther => 'Autre';
+
+  @override
+  String get itemTypeRaw => 'Brut';
+
+  @override
+  String get itemTypePrepared => 'Préparé';
 
   @override
   String get locationFridge => 'Réfrigérateur';

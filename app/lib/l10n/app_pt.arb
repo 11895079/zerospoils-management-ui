@@ -69,10 +69,13 @@
   "categoryProduce": "Frescos",
   "categoryDairy": "Laticínios",
   "categoryMeat": "Carne",
+  "categoryGrains": "Grãos",
   "categoryFrozen": "Congelados",
   "categoryPantry": "Despensa",
   "categoryBeverages": "Bebidas",
   "categoryOther": "Outro",
+  "itemTypeRaw": "Cru",
+  "itemTypePrepared": "Preparado",
 
   "locationFridge": "Frigorífico",
   "locationFreezer": "Congelador",
