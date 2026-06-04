@@ -36,17 +36,49 @@ off the field; the shield ring/check are bolder for small-size legibility.
 
 ## Regenerate all launcher icons
 
+Use the wrapper script — it runs the generator and heals a tooling bug (below):
+
+```bash
+cd app
+./scripts/regen-icons.sh
+```
+
+<details>
+<summary>Equivalent manual steps</summary>
+
 ```bash
 cd app
 flutter pub get
 dart run flutter_launcher_icons
+# Then revert the pbxproj corruption — see the next section.
 ```
+</details>
 
 Config lives in `pubspec.yaml` under `flutter_launcher_icons:`
 - `adaptive_icon_background: "#2F9E44"` (brand green — fallback behind the fg)
 - `adaptive_icon_foreground` / `adaptive_icon_monochrome`
 - `adaptive_icon_foreground_inset: 0` (foreground bleeds full; safe zone is baked into the art)
 - `remove_alpha_ios: true` (Apple rejects icons with an alpha channel)
+
+## ⚠️ flutter_launcher_icons corrupts an Xcode build setting
+
+`dart run flutter_launcher_icons` (≤ 0.14.4, the latest, and also upstream
+`master`) rewrites `ios/Runner.xcodeproj/project.pbxproj` on every run, changing
+
+```
+ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;   ->   = AppIcon;
+```
+
+The tool only means to set `ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon`, but its
+matcher is an over-broad `line.contains('ASSETCATALOG')`, so it clobbers this
+unrelated boolean too (Xcode 15 "asset symbol framework extensions"; a string
+where a `YES`/`NO` belongs). Harmless for a Flutter Runner, but it is unintended,
+invalid, and recurs on every regen.
+
+`scripts/regen-icons.sh` heals it automatically. If you run the generator by
+hand, restore the line yourself (or just `git checkout -- ios/Runner.xcodeproj/project.pbxproj`
+when no flavour/app-icon-name change was intended). **Do not commit the
+`= AppIcon;` value.**
 
 ## Rasterising the SVGs ⚠️ alpha gotcha
 
