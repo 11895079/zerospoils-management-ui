@@ -1,5 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="-27 22.5 1180 1180">
- <defs><linearGradient id="bag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FFF3E0"/></linearGradient><mask id="h"><rect x="-300" y="-300" width="1700" height="1700" fill="#fff"/><rect x="446" y="432" width="132" height="46" rx="23" fill="#000"/></mask></defs>
- <g mask="url(#h)"><rect x="316" y="398" width="392" height="376" rx="48" fill="url(#bag)"/><rect x="316" y="398" width="392" height="88" rx="24" fill="#EFE2C6"/></g>
- <g transform="translate(702,708) scale(1.1) translate(-702,-708)"><path d="M604 624 Q604 600 628 600 L776 600 Q800 600 800 624 L800 703 C800 775 754 806 702 816 C650 806 604 775 604 703 Z" fill="#1F6F30" stroke="#FFFFFF" stroke-width="18"/><path d="M666 700 l22 24 l54 -62" fill="none" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/></g>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <!--
+  Android adaptive-icon FOREGROUND.
+  Self-contained: the brand-green field is baked into the foreground itself, so
+  the approved "Fb" motif (cream grocery bag + die-cut handle + tan fold band +
+  dark-green shield/check) keeps green-then-cream contrast no matter what the
+  launcher does — masks to a circle/squircle, drops the background layer, or
+  sits the icon on a light/dark/coloured home screen. A soft drop shadow lifts
+  the bag + shield off the field for separation, and the shield ring/check are
+  bolder for legibility at small sizes. Motif is centred + scaled (0.90) to stay
+  inside the 66dp adaptive safe circle. Mirrors app_icon.svg (iOS master).
+ -->
+ <defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#51CF66"/><stop offset="1" stop-color="#2F9E44"/></linearGradient>
+  <linearGradient id="bag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#FCEACB"/></linearGradient>
+  <mask id="h"><rect width="1024" height="1024" fill="#fff"/><rect x="446" y="432" width="132" height="46" rx="23" fill="#000"/></mask>
+  <filter id="ds" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="16" stdDeviation="20" flood-color="#0B3F19" flood-opacity="0.38"/></filter>
+ </defs>
+ <rect width="1024" height="1024" fill="url(#bg)"/>
+ <g transform="translate(512,512) scale(0.90) translate(-562.5,-611.5)" filter="url(#ds)">
+  <g mask="url(#h)">
+   <rect x="316" y="398" width="392" height="376" rx="48" fill="url(#bag)"/>
+   <rect x="316" y="398" width="392" height="88" rx="24" fill="#EAD8AE"/>
+   <rect x="316" y="478" width="392" height="8" fill="#DBC288"/>
+  </g>
+  <path d="M604 624 Q604 600 628 600 L776 600 Q800 600 800 624 L800 703 C800 775 754 806 702 816 C650 806 604 775 604 703 Z" fill="#1F6F30" stroke="#FFFFFF" stroke-width="22"/>
+  <path d="M666 700 l22 24 l54 -62" fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+ </g>
 </svg>
