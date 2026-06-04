@@ -213,7 +213,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get itemTypeRaw => 'Brut';
 
   @override
-  String get itemTypePrepared => 'Préparé';
+  String get itemTypePrepared => 'Cuit';
+
+  @override
+  String get itemTypePackaged => 'Emballé';
 
   @override
   String get locationFridge => 'Réfrigérateur';
@@ -1557,7 +1560,10 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
   String get itemTypeRaw => 'Brut';
 
   @override
-  String get itemTypePrepared => 'Préparé';
+  String get itemTypePrepared => 'Cuit';
+
+  @override
+  String get itemTypePackaged => 'Emballé';
 
   @override
   String get locationFridge => 'Réfrigérateur';

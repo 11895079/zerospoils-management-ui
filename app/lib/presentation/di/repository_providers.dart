@@ -10,6 +10,7 @@ import 'package:zerospoils/presentation/di/localization_providers.dart';
 import '../../core/barcode/learned_barcode_mapping_store.dart';
 import '../../core/barcode/local_barcode_catalog.dart';
 import '../../core/barcode/open_food_facts_client.dart';
+import '../../core/reference/reference_pack_service.dart';
 import '../../data/repositories/hive_item_repository.dart';
 import '../../data/repositories/hive_shopping_list_repository.dart';
 import '../../data/repositories/receipt_batch_repository.dart';
@@ -76,6 +77,36 @@ final localBarcodeCatalogProvider = FutureProvider<LocalBarcodeCatalog>((ref) {
   return LocalBarcodeCatalog.fromAsset();
 });
 
+class ReferencePackLabelSnapshot {
+  const ReferencePackLabelSnapshot({
+    required this.categoryLabels,
+    required this.locationLabels,
+    required this.typeLabels,
+  });
+
+  final Map<ItemCategory, String> categoryLabels;
+  final Map<StorageLocation, String> locationLabels;
+  final Map<ItemType, String> typeLabels;
+}
+
+final referencePackLabelSnapshotProvider =
+    FutureProvider<ReferencePackLabelSnapshot>((ref) async {
+      final prefs = await SharedPreferences.getInstance();
+      final categories = ReferencePackService.activeCategoryRecords(prefs);
+      final locations = ReferencePackService.activeLocationRecords(prefs);
+      final types = ReferencePackService.activeTypeRecords(prefs);
+
+      return ReferencePackLabelSnapshot(
+        categoryLabels: {
+          for (final record in categories) record.appCategory: record.label,
+        },
+        locationLabels: {
+          for (final record in locations) record.appLocation: record.label,
+        },
+        typeLabels: {for (final record in types) record.appType: record.label},
+      );
+    });
+
 /// OpenFoodFacts client for real-time barcode resolution when local lookup misses.
 final openFoodFactsClientProvider = Provider<OpenFoodFactsClient>((ref) {
   final client = OpenFoodFactsClient();
@@ -104,10 +135,15 @@ final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
   // In persisted mode, react to Hive writes/deletes in near real-time.
   if (repository is HiveItemRepository && Hive.isBoxOpen('items')) {
     final box = Hive.box<Item>('items');
-    await for (final _ in box.watch()) {
-      yield await buildSnapshot();
+    try {
+      await for (final _ in box.watch()) {
+        yield await buildSnapshot();
+      }
+      return;
+    } catch (_) {
+      // Some web storage backends can fail to provide watch events reliably.
+      // Fall through to the polling stream so Progress never crashes.
     }
-    return;
   }
 
   // Fallback (e.g., demo/in-memory): lightweight polling while screen is open.

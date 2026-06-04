@@ -185,6 +185,7 @@ String effectiveReferencePackLanguage({
       : languageTag;
 
   switch (resolvedTag.replaceAll('_', '-')) {
+    case 'fr':
     case 'fr-CA':
       return 'fr-CA';
     case 'es':

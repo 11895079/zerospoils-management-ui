@@ -60,6 +60,9 @@ class ProgressScreen extends ConsumerWidget {
     ProgressStats stats,
   ) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
@@ -179,7 +182,14 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.categoryCounts.map(
-            (key, value) => MapEntry(_localizedCategoryLabel(l10n, key), value),
+            (key, value) => MapEntry(
+              _localizedCategoryLabel(
+                l10n,
+                key,
+                referenceLabels?.categoryLabels,
+              ),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -188,7 +198,14 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.locationCounts.map(
-            (key, value) => MapEntry(_localizedLocationLabel(l10n, key), value),
+            (key, value) => MapEntry(
+              _localizedLocationLabel(
+                l10n,
+                key,
+                referenceLabels?.locationLabels,
+              ),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -197,7 +214,10 @@ class ProgressScreen extends ConsumerWidget {
         _buildChipWrap(
           context,
           stats.typeCounts.map(
-            (key, value) => MapEntry(_localizedTypeLabel(l10n, key), value),
+            (key, value) => MapEntry(
+              _localizedTypeLabel(l10n, key, referenceLabels?.typeLabels),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
@@ -722,7 +742,16 @@ class ProgressScreen extends ConsumerWidget {
     return {for (final entry in trimmed) entry.key: entry.value};
   }
 
-  String _localizedCategoryLabel(AppLocalizations l10n, ItemCategory category) {
+  String _localizedCategoryLabel(
+    AppLocalizations l10n,
+    ItemCategory category,
+    Map<ItemCategory, String>? referenceLabels,
+  ) {
+    final referenceLabel = referenceLabels?[category];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
     switch (category) {
       case ItemCategory.produce:
         return l10n.categoryProduce;
@@ -742,7 +771,13 @@ class ProgressScreen extends ConsumerWidget {
   String _localizedLocationLabel(
     AppLocalizations l10n,
     StorageLocation location,
+    Map<StorageLocation, String>? referenceLabels,
   ) {
+    final referenceLabel = referenceLabels?[location];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
     switch (location) {
       case StorageLocation.fridge:
         return l10n.locationFridge;
@@ -755,12 +790,23 @@ class ProgressScreen extends ConsumerWidget {
     }
   }
 
-  String _localizedTypeLabel(AppLocalizations l10n, ItemType type) {
+  String _localizedTypeLabel(
+    AppLocalizations l10n,
+    ItemType type,
+    Map<ItemType, String>? referenceLabels,
+  ) {
+    final referenceLabel = referenceLabels?[type];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
     switch (type) {
       case ItemType.raw:
         return l10n.itemTypeRaw;
       case ItemType.prepared:
         return l10n.itemTypePrepared;
+      case ItemType.packaged:
+        return l10n.itemTypePackaged;
     }
   }
 

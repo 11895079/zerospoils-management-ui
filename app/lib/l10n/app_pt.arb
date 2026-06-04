@@ -75,7 +75,8 @@
   "categoryBeverages": "Bebidas",
   "categoryOther": "Outro",
   "itemTypeRaw": "Cru",
-  "itemTypePrepared": "Preparado",
+  "itemTypePrepared": "Cozido",
+  "itemTypePackaged": "Embalado",
 
   "locationFridge": "Frigorífico",
   "locationFreezer": "Congelador",

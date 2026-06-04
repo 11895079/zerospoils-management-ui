@@ -15,6 +15,8 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/models/receipt_batch.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../core/notifications/reminder_attribution_store.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' hide itemRepositoryProvider;
@@ -609,13 +611,13 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             const Divider(height: 1),
                             _buildInfoRow(
                               'Category',
-                              '${_item!.customCategoryName != null ? '🏷️' : _item!.category.emoji} ${_item!.categoryLabel}',
+                              '${_item!.customCategoryName != null ? '🏷️' : _item!.category.emoji} ${_item!.customCategoryName ?? _localizedCategoryLabel(_item!.category)}',
                               valueKey: const Key('item_detail_category'),
                             ),
                             const Divider(height: 1),
                             _buildInfoRow(
                               'Type',
-                              _item!.type.displayName,
+                              _localizedTypeLabel(_item!.type),
                               valueKey: const Key('item_detail_type'),
                             ),
                             const Divider(height: 1),
@@ -644,7 +646,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                             ],
                             _buildInfoRow(
                               'Location',
-                              '${_item!.location.emoji} ${_item!.location.displayName}',
+                              '${_item!.location.emoji} ${_localizedLocationLabel(_item!.location)}',
                               valueKey: const Key('item_detail_location'),
                             ),
                             const Divider(height: 1),
@@ -790,6 +792,77 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
               ),
             ),
     );
+  }
+
+  String _localizedCategoryLabel(ItemCategory category) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.categoryLabels;
+    final reference = referenceLabels?[category];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(StorageLocation location) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.locationLabels;
+    final reference = referenceLabels?[location];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
+  }
+
+  String _localizedTypeLabel(ItemType type) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.typeLabels;
+    final reference = referenceLabels?[type];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (type) {
+      case ItemType.raw:
+        return l10n.itemTypeRaw;
+      case ItemType.prepared:
+        return l10n.itemTypePrepared;
+      case ItemType.packaged:
+        return l10n.itemTypePackaged;
+    }
   }
 
   Widget _buildInfoRow(

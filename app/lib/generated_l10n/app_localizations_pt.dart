@@ -213,7 +213,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get itemTypeRaw => 'Cru';
 
   @override
-  String get itemTypePrepared => 'Preparado';
+  String get itemTypePrepared => 'Cozido';
+
+  @override
+  String get itemTypePackaged => 'Embalado';
 
   @override
   String get locationFridge => 'Frigorífico';

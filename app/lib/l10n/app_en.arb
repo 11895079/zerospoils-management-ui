@@ -75,7 +75,8 @@
   "categoryBeverages": "Beverages",
   "categoryOther": "Other",
   "itemTypeRaw": "Raw",
-  "itemTypePrepared": "Prepared",
+  "itemTypePrepared": "Cooked",
+  "itemTypePackaged": "Packaged",
   
   "locationFridge": "Fridge",
   "locationFreezer": "Freezer",

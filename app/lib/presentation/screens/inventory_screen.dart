@@ -486,7 +486,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'inventory_filter_category_${category?.name ?? 'all'}',
                                 ),
                                 label: Text(
-                                  category?.displayName ?? l10n.labelAll,
+                                  category == null
+                                      ? l10n.labelAll
+                                      : _localizedCategoryLabel(category),
                                 ),
                                 selected: isSelected,
                                 onSelected: (_) {
@@ -522,7 +524,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                   'inventory_filter_location_${location?.name ?? 'all'}',
                                 ),
                                 label: Text(
-                                  location?.displayName ?? l10n.labelAll,
+                                  location == null
+                                      ? l10n.labelAll
+                                      : _localizedLocationLabel(location),
                                 ),
                                 selected: isSelected,
                                 onSelected: (_) {
@@ -1277,8 +1281,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   onSelectChanged: (_) => _openItemDetail(item),
                   cells: [
                     DataCell(Text(item.name)),
-                    DataCell(Text(item.categoryLabel)),
-                    DataCell(Text(item.location.displayName)),
+                    DataCell(
+                      Text(
+                        item.customCategoryName ??
+                            _localizedCategoryLabel(item.category),
+                      ),
+                    ),
+                    DataCell(Text(_localizedLocationLabel(item.location))),
                     DataCell(
                       Text(
                         item.expiryDate == null
@@ -1423,7 +1432,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Text(
-        item.location.displayName,
+        _localizedLocationLabel(item.location),
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
@@ -1561,7 +1570,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               children: [
                 if (filterState.category != null)
                   _buildFilterChip(
-                    label: filterState.category!.displayName,
+                    label: _localizedCategoryLabel(filterState.category!),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(category: null);
@@ -1580,7 +1589,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 if (filterState.location != null)
                   _buildFilterChip(
-                    label: filterState.location!.displayName,
+                    label: _localizedLocationLabel(filterState.location!),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(location: null);
@@ -1659,6 +1668,56 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         ],
       ),
     );
+  }
+
+  String _localizedCategoryLabel(ItemCategory category) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.categoryLabels;
+    final reference = referenceLabels?[category];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(StorageLocation location) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.locationLabels;
+    final reference = referenceLabels?[location];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
   }
 
   Widget _buildFilterChip({

@@ -214,7 +214,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get itemTypeRaw => 'Roh';
 
   @override
-  String get itemTypePrepared => 'Zubereitet';
+  String get itemTypePrepared => 'Gekocht';
+
+  @override
+  String get itemTypePackaged => 'Verpackt';
 
   @override
   String get locationFridge => 'Kühlschrank';

@@ -516,8 +516,14 @@ abstract class AppLocalizations {
   /// No description provided for @itemTypePrepared.
   ///
   /// In en, this message translates to:
-  /// **'Prepared'**
+  /// **'Cooked'**
   String get itemTypePrepared;
+
+  /// No description provided for @itemTypePackaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Packaged'**
+  String get itemTypePackaged;
 
   /// No description provided for @locationFridge.
   ///

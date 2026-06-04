@@ -75,7 +75,8 @@
   "categoryBeverages": "Boissons",
   "categoryOther": "Autre",
   "itemTypeRaw": "Brut",
-  "itemTypePrepared": "Préparé",
+  "itemTypePrepared": "Cuit",
+  "itemTypePackaged": "Emballé",
   
   "locationFridge": "Réfrigérateur",
   "locationFreezer": "Congélateur",

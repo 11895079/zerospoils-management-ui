@@ -75,7 +75,8 @@
   "categoryBeverages": "Getränke",
   "categoryOther": "Sonstiges",
   "itemTypeRaw": "Roh",
-  "itemTypePrepared": "Zubereitet",
+  "itemTypePrepared": "Gekocht",
+  "itemTypePackaged": "Verpackt",
 
   "locationFridge": "Kühlschrank",
   "locationFreezer": "Gefrierschrank",
