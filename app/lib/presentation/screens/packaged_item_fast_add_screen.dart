@@ -119,6 +119,8 @@ class _PackagedItemFastAddScreenState
   // Expiry state
   ExpiryDateParseResult? _lockedExpiry;
   FreshProduceOcrParseResult? _freshProduceParseResult;
+  String? _appliedOcrNameBaseline;
+  ItemCategory? _appliedOcrCategoryBaseline;
 
   // Confirmation form state
   late TextEditingController _nameController;
@@ -221,8 +223,12 @@ class _PackagedItemFastAddScreenState
       if (suggestion != null) {
         _nameController.text = suggestion.name;
         _selectedCategory = suggestion.category;
+        _appliedOcrNameBaseline = null;
+        _appliedOcrCategoryBaseline = null;
         _stage = _FastAddStage.barcodeResult;
       } else {
+        _appliedOcrNameBaseline = null;
+        _appliedOcrCategoryBaseline = null;
         _stage = _FastAddStage.barcodeMiss;
       }
     });
@@ -258,9 +264,17 @@ class _PackagedItemFastAddScreenState
         extractedName != null &&
         currentName.isNotEmpty &&
         currentName.toLowerCase() != extractedName.toLowerCase();
+    final appliedName =
+        !hasNameConflict && extractedName != null && extractedName.isNotEmpty
+        ? extractedName
+        : null;
+    final appliedCategory =
+        parsed.classification != FreshProduceClassification.other
+        ? parsed.suggestedCategory
+        : null;
 
-    if (!hasNameConflict && extractedName != null) {
-      _nameController.text = extractedName;
+    if (appliedName != null) {
+      _nameController.text = appliedName;
     }
 
     setState(() {
@@ -268,9 +282,11 @@ class _PackagedItemFastAddScreenState
       _detectedPurchasePrice = parsed.totalPrice;
       _detectedWeightValue = parsed.netWeightValue;
       _detectedWeightUnit = parsed.netWeightUnit;
+      _appliedOcrNameBaseline = appliedName;
+      _appliedOcrCategoryBaseline = appliedCategory;
 
-      if (parsed.classification != FreshProduceClassification.other) {
-        _selectedCategory = parsed.suggestedCategory;
+      if (appliedCategory != null) {
+        _selectedCategory = appliedCategory;
       }
 
       if (parsed.bestBeforeDate != null) {
@@ -334,6 +350,8 @@ class _PackagedItemFastAddScreenState
       _rawBarcode = null;
       _suggestion = null;
       _freshProduceParseResult = null;
+      _appliedOcrNameBaseline = null;
+      _appliedOcrCategoryBaseline = null;
       _stage = _FastAddStage.barcodeScanning;
     });
   }
@@ -390,10 +408,10 @@ class _PackagedItemFastAddScreenState
 
     final freshProduceResult = _freshProduceParseResult;
     if (freshProduceResult != null) {
-      final extractedName = freshProduceResult.productDescription?.trim();
-      if (extractedName != null &&
-          extractedName.isNotEmpty &&
-          extractedName.toLowerCase() != name.toLowerCase()) {
+      final nameBaseline = _appliedOcrNameBaseline;
+      if (nameBaseline != null &&
+          nameBaseline.isNotEmpty &&
+          nameBaseline.toLowerCase() != name.toLowerCase()) {
         ref.read(telemetryClientProvider).enqueue({
           'name': 'package_ocr_field_edited',
           'properties': {
@@ -403,7 +421,8 @@ class _PackagedItemFastAddScreenState
         });
       }
 
-      if (freshProduceResult.suggestedCategory != _selectedCategory) {
+      final categoryBaseline = _appliedOcrCategoryBaseline;
+      if (categoryBaseline != null && categoryBaseline != _selectedCategory) {
         ref.read(telemetryClientProvider).enqueue({
           'name': 'package_ocr_field_edited',
           'properties': {

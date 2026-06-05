@@ -501,20 +501,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(savedResult, isNotNull);
-      expect(
-        telemetry.events.any(
-          (event) =>
-              event['name'] == 'package_ocr_attempted' &&
-              event['properties']['label_type'] == 'fresh_produce',
-        ),
-        isTrue,
+      final attemptedEvent = telemetry.events.firstWhere(
+        (event) => event['name'] == 'package_ocr_attempted',
       );
+      final successEvent = telemetry.events.firstWhere(
+        (event) => event['name'] == 'package_ocr_success',
+      );
+
+      expect(attemptedEvent['properties']['label_type'], 'fresh_produce');
+      expect(attemptedEvent['properties']['tier'], 'm3');
+
+      expect(successEvent['properties']['label_type'], 'fresh_produce');
+      expect(successEvent['properties']['fields_extracted'], greaterThan(0));
+
       expect(
-        telemetry.events.any(
-          (event) =>
-              event['name'] == 'package_ocr_success' &&
-              event['properties']['label_type'] == 'fresh_produce',
-        ),
+        telemetry.events.any((event) => event['name'] == 'package_ocr_success'),
         isTrue,
       );
       expect(
