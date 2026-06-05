@@ -10,6 +10,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/zesto_model.dart';
 import '../../generated_l10n/app_localizations.dart';
 import '../di/repository_providers.dart';
+import 'zesto_character.dart';
 
 /// Lightweight visible mascot overlay for Phase 1 triggers.
 class ZestoOverlay extends ConsumerStatefulWidget {
@@ -117,28 +118,25 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
     }
   }
 
-  String _avatarForType(MascotMessageType? type) {
+  ZestoExpression _expressionForType(MascotMessageType? type) {
     switch (type) {
       case MascotMessageType.wasted:
-        return '🥑💡';
+        return ZestoExpression.tip;
       case MascotMessageType.badgeUnlocked:
       case MascotMessageType.streakMilestone:
       case MascotMessageType.savingsMilestone:
       case MascotMessageType.zeroWaste:
-        return '🥑🎉';
+      case MascotMessageType.firstItem:
+        return ZestoExpression.celebrate;
+      case MascotMessageType.dailyWelcome:
+        return ZestoExpression.wave;
       case MascotMessageType.itemAdded:
-        return '🥑📦';
       case MascotMessageType.quickSave:
       case MascotMessageType.expiryAlert:
-        return '🥑⏰';
-      case MascotMessageType.dailyWelcome:
-        return '🥑👋';
-      case MascotMessageType.firstItem:
-        return '🥑✨';
       case MascotMessageType.consumed:
       case MascotMessageType.celebration:
       case null:
-        return '🥑';
+        return ZestoExpression.idle;
     }
   }
 
@@ -196,7 +194,7 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
     final disableAnimations =
         MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     final accent = _accentForType(_state.currentMessageType);
-    final avatar = _avatarForType(_state.currentMessageType);
+    final expression = _expressionForType(_state.currentMessageType);
 
     return Align(
       alignment: Alignment.bottomRight,
@@ -270,10 +268,11 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                 // Decorative emoji; the Semantics wrapper above
                                 // already announces the full message.
                                 child: ExcludeSemantics(
-                                  child: Text(
-                                    avatar,
+                                  child: ZestoCharacter(
                                     key: const Key('zesto_avatar'),
-                                    style: const TextStyle(fontSize: 28),
+                                    expression: expression,
+                                    size: 46,
+                                    animate: !disableAnimations,
                                   ),
                                 ),
                               ),
