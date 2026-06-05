@@ -56,7 +56,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   int _barcodePackRecordCount = 0;
   bool _feedbackHapticEnabled = true;
   bool _feedbackAudioEnabled = true;
-  double _feedbackBeepVolume = 0.8;
+  double _feedbackBeepVolume = 0.6;
   HapticIntensity _feedbackHapticIntensity = HapticIntensity.medium;
   bool _feedbackBarcodeEnabled = true;
   bool _feedbackExpiryEnabled = true;
@@ -589,6 +589,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               label: l10n.feedbackBeepVolume,
               subtitle: l10n.feedbackBeepVolumeDescription,
               value: _feedbackBeepVolume,
+              enabled: _feedbackAudioEnabled,
               // Update local state on every tick for smooth UI; persist only
               // when the drag ends to avoid dozens of disk writes per second.
               onChanged: (value) {
@@ -1093,6 +1094,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     required String label,
     String? subtitle,
     required double value,
+    bool enabled = true,
     required ValueChanged<double> onChanged,
     ValueChanged<double>? onChangeEnd,
   }) {
@@ -1110,8 +1112,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         width: 164,
         child: Slider(
           value: value.clamp(0.0, 1.0),
-          onChanged: onChanged,
-          onChangeEnd: onChangeEnd,
+          onChanged: enabled ? onChanged : null,
+          onChangeEnd: enabled ? onChangeEnd : null,
         ),
       ),
     );

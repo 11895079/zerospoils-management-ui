@@ -815,6 +815,28 @@ void main() {
       );
     });
 
+    testWidgets('Beep volume slider is disabled when audio is off', (
+      WidgetTester tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({'feedback_audio_enabled': false});
+
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        tileForKey(const Key('feedback_beep_volume_slider')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      final slider = tester.widget<Slider>(
+        sliderForKey(const Key('feedback_beep_volume_slider')),
+      );
+      expect(slider.onChanged, isNull);
+      expect(slider.onChangeEnd, isNull);
+    });
+
     testWidgets('Scanner toggle persists and emits telemetry', (
       WidgetTester tester,
     ) async {
