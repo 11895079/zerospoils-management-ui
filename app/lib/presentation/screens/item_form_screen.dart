@@ -1849,6 +1849,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final expiryOcrEnabledAsync = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
     );
@@ -1989,7 +1990,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
             // Category dropdown (required)
             _buildFormGroup(
-              label: 'Category *',
+              label: '${l10n.labelCategory} *',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1998,7 +1999,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     child: InputDecorator(
                       decoration: _buildInputDecoration(
-                        hintText: 'Select category',
+                        hintText: l10n.itemFormSelectCategory,
                       ),
                       child: Row(
                         children: [
@@ -2045,7 +2046,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
             // Type toggle (Raw vs Prepared)
             _buildFormGroup(
-              label: 'Type *',
+              label: '${l10n.labelType} *',
               child: SegmentedButton<ItemType>(
                 segments: [
                   ButtonSegment(

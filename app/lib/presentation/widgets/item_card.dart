@@ -14,6 +14,18 @@ import '../../domain/models/item_model.dart';
 import 'quantity_toggle.dart';
 import 'item_icon.dart';
 
+/// Formats a date as "MMM d" in the app's locale. Falls back to the default
+/// locale if that locale's date symbols have not been initialized (e.g. in
+/// widget tests that don't load GlobalMaterialLocalizations, which would
+/// otherwise throw LocaleDataException).
+String _formatMonthDay(DateTime date, String localeName) {
+  try {
+    return DateFormat('MMM d', localeName).format(date);
+  } catch (_) {
+    return DateFormat('MMM d').format(date);
+  }
+}
+
 class ItemCard extends StatelessWidget {
   final Item item;
   final VoidCallback? onTap;
@@ -302,7 +314,7 @@ class ItemCard extends StatelessWidget {
                         const SizedBox(height: 2),
                         Text(
                           l10n.itemCardAddedDate(
-                            DateFormat('MMM d').format(item.createdAt),
+                            _formatMonthDay(item.createdAt, l10n.localeName),
                           ),
                           style: textTheme.bodySmall?.copyWith(
                             color: secondaryTextColor,
@@ -411,7 +423,7 @@ class ItemCard extends StatelessWidget {
     }
 
     if (item.type == ItemType.prepared && item.preparedDate != null) {
-      final formatted = DateFormat('MMM d').format(item.preparedDate!);
+      final formatted = _formatMonthDay(item.preparedDate!, l10n.localeName);
       return l10n.itemCardLocationPrepared(locationLabel, formatted);
     }
 

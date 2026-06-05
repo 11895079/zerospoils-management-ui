@@ -38,7 +38,10 @@ class AppDrawer extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text('Navigation', style: TextStyle(color: Colors.white70)),
+                  Text(
+                    l10n.drawerHeaderSubtitle,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             ),

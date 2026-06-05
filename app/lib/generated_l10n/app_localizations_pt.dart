@@ -362,6 +362,23 @@ class AppLocalizationsPt extends AppLocalizations {
   String get settingsLanguage => 'Idioma';
 
   @override
+  String get labelType => 'Tipo';
+
+  @override
+  String get itemFormSelectCategory => 'Selecionar categoria';
+
+  @override
+  String get drawerHeaderSubtitle => 'Navegação';
+
+  @override
+  String get zestoDismissLabel => 'Dispensar Zesto';
+
+  @override
+  String zestoSaysLabel(String message) {
+    return 'Zesto diz: $message';
+  }
+
+  @override
   String get settingsReferenceDataRegion => 'Região dos dados de referência';
 
   @override

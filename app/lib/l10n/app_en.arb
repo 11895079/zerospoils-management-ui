@@ -130,6 +130,16 @@
   "settingsPrivacy": "Privacy & Data",
   "settingsDarkMode": "Dark Mode",
   "settingsLanguage": "Language",
+  "labelType": "Type",
+  "itemFormSelectCategory": "Select category",
+  "drawerHeaderSubtitle": "Navigation",
+  "zestoDismissLabel": "Dismiss Zesto",
+  "zestoSaysLabel": "Zesto says: {message}",
+  "@zestoSaysLabel": {
+    "placeholders": {
+      "message": { "type": "String" }
+    }
+  },
   "settingsReferenceDataRegion": "Reference Data Region",
   "settingsReferenceDataLanguage": "Reference Data Language",
   "settingsDateFormat": "Date Format",

@@ -795,6 +795,36 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @labelType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get labelType;
+
+  /// No description provided for @itemFormSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get itemFormSelectCategory;
+
+  /// No description provided for @drawerHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get drawerHeaderSubtitle;
+
+  /// No description provided for @zestoDismissLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss Zesto'**
+  String get zestoDismissLabel;
+
+  /// No description provided for @zestoSaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zesto says: {message}'**
+  String zestoSaysLabel(String message);
+
   /// No description provided for @settingsReferenceDataRegion.
   ///
   /// In en, this message translates to:

@@ -362,6 +362,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguage => 'Langue';
 
   @override
+  String get labelType => 'Type';
+
+  @override
+  String get itemFormSelectCategory => 'Sélectionner une catégorie';
+
+  @override
+  String get drawerHeaderSubtitle => 'Navigation';
+
+  @override
+  String get zestoDismissLabel => 'Fermer Zesto';
+
+  @override
+  String zestoSaysLabel(String message) {
+    return 'Zesto dit : $message';
+  }
+
+  @override
   String get settingsReferenceDataRegion => 'Région des données de référence';
 
   @override
@@ -1707,6 +1724,23 @@ class AppLocalizationsFrCa extends AppLocalizationsFr {
 
   @override
   String get settingsLanguage => 'Langue';
+
+  @override
+  String get labelType => 'Type';
+
+  @override
+  String get itemFormSelectCategory => 'Sélectionner une catégorie';
+
+  @override
+  String get drawerHeaderSubtitle => 'Navigation';
+
+  @override
+  String get zestoDismissLabel => 'Fermer Zesto';
+
+  @override
+  String zestoSaysLabel(String message) {
+    return 'Zesto dit : $message';
+  }
 
   @override
   String get settingsReferenceDataRegion => 'Région des données de référence';

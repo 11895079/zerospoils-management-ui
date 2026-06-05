@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/zesto_model.dart';
+import '../../generated_l10n/app_localizations.dart';
 import '../di/repository_providers.dart';
 
 /// Lightweight visible mascot overlay for Phase 1 triggers.
@@ -174,35 +175,13 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
   }
 
   String _zestoSaysLabel(BuildContext context, String message) {
-    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
-    switch (lang) {
-      case 'fr':
-        return 'Zesto dit: $message';
-      case 'es':
-        return 'Zesto dice: $message';
-      case 'de':
-        return 'Zesto sagt: $message';
-      case 'pt':
-        return 'Zesto diz: $message';
-      default:
-        return 'Zesto says: $message';
-    }
+    final l10n = AppLocalizations.of(context);
+    return l10n != null ? l10n.zestoSaysLabel(message) : 'Zesto says: $message';
   }
 
   String _dismissZestoLabel(BuildContext context) {
-    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
-    switch (lang) {
-      case 'fr':
-        return 'Fermer Zesto';
-      case 'es':
-        return 'Cerrar Zesto';
-      case 'de':
-        return 'Zesto schliessen';
-      case 'pt':
-        return 'Dispensar Zesto';
-      default:
-        return 'Dismiss Zesto';
-    }
+    final l10n = AppLocalizations.of(context);
+    return l10n != null ? l10n.zestoDismissLabel : 'Dismiss Zesto';
   }
 
   @override
