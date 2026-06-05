@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# ZeroSpoils pre-commit hook — enforce Dart formatting before committing.
+# Mirrors the CI "Format check" exactly so formatting never fails on CI.
+# Bypass in rare cases with: git commit --no-verify
+set -e
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT/app" || exit 0
+
+echo "🔍 pre-commit: checking Dart formatting..."
+if ! dart format --output=none --set-exit-if-changed lib test tool integration_test scripts; then
+  echo ""
+  echo "❌ Formatting check failed. Fix with:"
+  echo "     (cd app && dart format lib test tool integration_test scripts)"
+  echo "   then 'git add' the changes and commit again."
+  echo "   (bypass: git commit --no-verify)"
+  exit 1
+fi
+echo "✅ Formatting OK"
