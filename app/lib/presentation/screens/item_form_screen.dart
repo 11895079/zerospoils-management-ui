@@ -770,6 +770,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   Future<void> _openCategoryPicker() async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final searchController = TextEditingController();
     final newCategoryController = TextEditingController();
     final iconController = TextEditingController();
@@ -867,7 +868,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Select category', style: AppTextStyles.h3),
+                      Text(
+                        l10n.itemFormSelectCategory,
+                        style: AppTextStyles.h3,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       TextField(
                         controller: searchController,
