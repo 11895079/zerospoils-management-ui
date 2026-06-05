@@ -107,7 +107,7 @@ final audioEnabledProvider = Provider<bool>((ref) {
 final beepVolumeProvider = Provider<double>((ref) {
   return ref
       .watch(feedbackSettingsProvider)
-      .maybeWhen(data: (settings) => settings.beepVolume, orElse: () => 0.8);
+      .maybeWhen(data: (settings) => settings.beepVolume, orElse: () => 0.6);
 });
 
 final hapticIntensityProvider = Provider<HapticIntensity>((ref) {
