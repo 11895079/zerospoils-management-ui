@@ -7,6 +7,7 @@ import 'generated_l10n/app_localizations.dart';
 import 'domain/models/item_model.dart';
 import 'presentation/routing/router.dart';
 import 'presentation/themes/app_theme.dart';
+import 'core/feedback/feedback_service.dart';
 import 'presentation/di/localization_providers.dart';
 import 'presentation/di/service_locator.dart' hide itemRepositoryProvider;
 import 'presentation/di/repository_providers.dart';
@@ -126,6 +127,9 @@ class _ZeroSpoilsAppState extends ConsumerState<ZeroSpoilsApp> {
 
       await _runInitStep('telemetry_wireup', () async {
         final telemetry = ref.read(telemetryClientProvider);
+        FeedbackService.setTelemetryLogger((eventName, properties) {
+          telemetry.enqueue({'name': eventName, 'properties': properties});
+        });
         NotificationService().setTelemetryCallback((eventName, properties) {
           telemetry.enqueue({'name': eventName, 'properties': properties});
         });

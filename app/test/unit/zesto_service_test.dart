@@ -64,6 +64,39 @@ void main() {
       expect(shownMessages.toSet().length, 4);
     });
 
+    test(
+      'uses locale-specific message pool when locale is not English',
+      () async {
+        final service = ZestoService(
+          getSettings: () => const MascotSettings(
+            enabled: true,
+            frequency: MascotFrequency.always,
+          ),
+          localeTagResolver: () => 'es',
+          now: () => now,
+          random: Random(1),
+          displayDuration: Duration.zero,
+          telemetryLogger: (name, properties) {
+            telemetry.add({'name': name, ...properties});
+          },
+        );
+
+        await service.showMascot(MascotMessageType.consumed);
+
+        final shownMessage =
+            telemetry.firstWhere(
+                  (event) => event['name'] == 'mascot_shown',
+                )['message']
+                as String;
+
+        expect(
+          ZestoService.localizedMessagePools['es']![MascotMessageType
+              .consumed]!,
+          contains(shownMessage),
+        );
+      },
+    );
+
     test('first item trigger only fires for truly first item', () async {
       final service = buildService();
 

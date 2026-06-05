@@ -3,6 +3,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../di/repository_providers.dart';
 import '../screens/onboarding_screen.dart';
 import '../screens/settings_screen.dart';
@@ -14,6 +16,7 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentIndex = ref.watch(homeTabIndexProvider);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return Drawer(
       child: SafeArea(
@@ -25,8 +28,8 @@ class AppDrawer extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'ZeroSpoils',
                     style: TextStyle(
                       color: Colors.white,
@@ -34,8 +37,11 @@ class AppDrawer extends ConsumerWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 6),
-                  Text('Navigation', style: TextStyle(color: Colors.white70)),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.drawerHeaderSubtitle,
+                    style: const TextStyle(color: Colors.white70),
+                  ),
                 ],
               ),
             ),
@@ -44,7 +50,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.school,
               iconColor: const Color(0xFF00897B),
-              label: 'Onboarding',
+              label: l10n.navigationOnboarding,
               onTap: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
@@ -57,7 +63,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.inventory_2,
               iconColor: const Color(0xFF2E7D32),
-              label: 'Inventory',
+              label: l10n.navigationInventory,
               selected: currentIndex == 0,
               onTap: () => _switchTab(context, ref, 0),
             ),
@@ -66,7 +72,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.schedule,
               iconColor: const Color(0xFFEF6C00),
-              label: 'Expiring Soon',
+              label: l10n.expiringSoonLabel,
               selected: currentIndex == 1,
               onTap: () => _switchTab(context, ref, 1),
             ),
@@ -75,7 +81,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.shopping_cart,
               iconColor: const Color(0xFF1565C0),
-              label: 'Shopping List',
+              label: l10n.navigationShoppingList,
               selected: currentIndex == 2,
               onTap: () => _switchTab(context, ref, 2),
             ),
@@ -84,7 +90,7 @@ class AppDrawer extends ConsumerWidget {
               ref,
               icon: Icons.insights,
               iconColor: const Color(0xFF6A1B9A),
-              label: 'Progress',
+              label: l10n.screenTitleProgress,
               selected: currentIndex == 3,
               onTap: () => _switchTab(context, ref, 3),
             ),
@@ -93,7 +99,7 @@ class AppDrawer extends ConsumerWidget {
               context,
               ref,
               icon: Icons.feedback_outlined,
-              label: 'Send Feedback',
+              label: l10n.settingsSendFeedback,
               tileKey: const Key('drawer_feedback_item'),
               onTap: () {
                 final rootContext = Navigator.of(
@@ -108,7 +114,7 @@ class AppDrawer extends ConsumerWidget {
               context,
               ref,
               icon: Icons.settings,
-              label: 'Settings',
+              label: l10n.navigationSettings,
               tileKey: const Key('drawer_settings_item'),
               onTap: () {
                 Navigator.of(context).pop();

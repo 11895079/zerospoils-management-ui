@@ -8,6 +8,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/utils/date_formatter.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
@@ -409,6 +411,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   void _showFilterOptions() {
     final currentState = ref.read(inventoryFilterProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -458,10 +461,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           ),
                         ),
                       ),
-                      Text('Filters', style: theme.textTheme.titleLarge),
+                      Text(
+                        l10n.inventoryFiltersTitle,
+                        style: theme.textTheme.titleLarge,
+                      ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
-                        'Category',
+                        l10n.labelCategory,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -479,7 +485,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 key: Key(
                                   'inventory_filter_category_${category?.name ?? 'all'}',
                                 ),
-                                label: Text(category?.displayName ?? 'All'),
+                                label: Text(
+                                  category == null
+                                      ? l10n.labelAll
+                                      : _localizedCategoryLabel(category),
+                                ),
                                 selected: isSelected,
                                 onSelected: (_) {
                                   setSheetState(() {
@@ -492,7 +502,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Location',
+                        l10n.labelLocation,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -513,7 +523,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 key: Key(
                                   'inventory_filter_location_${location?.name ?? 'all'}',
                                 ),
-                                label: Text(location?.displayName ?? 'All'),
+                                label: Text(
+                                  location == null
+                                      ? l10n.labelAll
+                                      : _localizedLocationLabel(location),
+                                ),
                                 selected: isSelected,
                                 onSelected: (_) {
                                   setSheetState(() {
@@ -525,7 +539,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       Text(
-                        'Added date',
+                        l10n.inventoryFilterAddedDate,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -551,7 +565,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                               },
                               child: Text(
                                 tempCreatedAfter == null
-                                    ? 'From'
+                                    ? l10n.inventoryFilterFrom
                                     : _formatShortDate(tempCreatedAfter!),
                               ),
                             ),
@@ -575,7 +589,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                               },
                               child: Text(
                                 tempCreatedBefore == null
-                                    ? 'To'
+                                    ? l10n.inventoryFilterTo
                                     : _formatShortDate(tempCreatedBefore!),
                               ),
                             ),
@@ -592,8 +606,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           });
                         },
                         activeTrackColor: AppColors.primary,
-                        title: const Text('Prepared only'),
-                        subtitle: const Text('Show prepared items only'),
+                        title: Text(l10n.inventoryFilterPreparedOnly),
+                        subtitle: Text(l10n.inventoryFilterPreparedOnlyHint),
                         contentPadding: EdgeInsets.zero,
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -606,9 +620,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           });
                         },
                         activeTrackColor: AppColors.primary,
-                        title: const Text('Expiring soon only'),
-                        subtitle: const Text(
-                          'Show items expiring within the next 3 days',
+                        title: Text(l10n.inventoryFilterExpiringSoonOnly),
+                        subtitle: Text(
+                          l10n.inventoryFilterExpiringSoonOnlyHint,
                         ),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -622,10 +636,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           });
                         },
                         activeTrackColor: AppColors.primary,
-                        title: const Text('Batch-linked only'),
-                        subtitle: const Text(
-                          'Show only items linked to shopping batches',
-                        ),
+                        title: Text(l10n.inventoryFilterBatchLinkedOnly),
+                        subtitle: Text(l10n.inventoryFilterBatchLinkedOnlyHint),
                         contentPadding: EdgeInsets.zero,
                       ),
                       const SizedBox(height: AppSpacing.sm),
@@ -638,9 +650,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                           });
                         },
                         activeTrackColor: AppColors.primary,
-                        title: const Text('Hide consumed items'),
-                        subtitle: const Text(
-                          'Hide items marked as consumed or wasted',
+                        title: Text(l10n.inventoryFilterHideConsumedItems),
+                        subtitle: Text(
+                          l10n.inventoryFilterHideConsumedItemsHint,
                         ),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -660,7 +672,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                                 tempCreatedBefore = null;
                               });
                             },
-                            child: const Text('Reset'),
+                            child: Text(l10n.inventoryFilterReset),
                           ),
                           const Spacer(),
                           ElevatedButton(
@@ -711,7 +723,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                               Navigator.of(ctx).pop();
                               setState(() {}); // Trigger rebuild
                             },
-                            child: const Text('Apply'),
+                            child: Text(l10n.inventoryFilterApply),
                           ),
                         ],
                       ),
@@ -729,6 +741,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final itemsAsync = ref.watch(itemsFutureProvider);
     final filterState = ref.watch(inventoryFilterProvider);
     final progressStatsAsync = ref.watch(progressStatsProvider);
@@ -743,7 +756,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('Inventory'),
+        title: Text(l10n.navigationInventory),
         elevation: 1,
         actions: [
           _buildViewModeToggle(viewMode, filterState, filteredCount),
@@ -823,7 +836,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 const Text('⚠️', style: TextStyle(fontSize: 40)),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'Unable to load items',
+                  l10n.errorUnableToLoadItems,
                   style: theme.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
@@ -881,7 +894,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 foregroundColor: theme.colorScheme.onSecondaryContainer,
                 elevation: 2,
                 icon: const Icon(Icons.receipt_long),
-                label: const Text('Batch receipt'),
+                label: Text(l10n.inventoryBatchReceiptButton),
               ),
               const SizedBox(height: AppSpacing.md),
               FloatingActionButton(
@@ -908,6 +921,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildDemoModeWarning() {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: const BoxDecoration(
@@ -922,8 +936,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Demo Mode',
+                Text(
+                  l10n.settingsDemoMode,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -932,7 +946,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Showing sample items. Turn off in Settings to use real data.',
+                  l10n.inventoryDemoModeHint,
                   style: TextStyle(
                     fontSize: 11,
                     color: Color(0xFF856404).withValues(alpha: 0.8),
@@ -947,6 +961,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildStreakBadge(ProgressStats stats) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final streak = stats.noWasteStreak;
     final daysRemaining = streak.daysRemaining;
     final progress = streak.streakDays / 7;
@@ -980,7 +995,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),
                 child: Text(
-                  '🔥 ${streak.streakDays}-day streak',
+                  l10n.inventoryStreakDays(streak.streakDays),
                   style: AppTextStyles.body.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.primary,
@@ -991,7 +1006,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               TextButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.auto_awesome, size: 16),
-                label: const Text('Level up'),
+                label: Text(l10n.inventoryLevelUp),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   backgroundColor: Colors.white,
@@ -1007,8 +1022,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
-            'No Waste Week',
+          Text(
+            l10n.inventoryNoWasteWeek,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -1018,8 +1033,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           const SizedBox(height: AppSpacing.xs),
           Text(
             daysRemaining == 0
-                ? 'You made it! Keep the streak alive.'
-                : 'Log $daysRemaining more saves to level up',
+                ? l10n.inventoryStreakCompleted
+                : l10n.inventoryStreakRemaining(daysRemaining),
             style: AppTextStyles.body.copyWith(color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -1034,7 +1049,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Judgement-free: compare with friends only when you opt in.',
+            l10n.inventoryStreakFootnote,
             style: AppTextStyles.body.copyWith(color: Colors.white70),
           ),
         ],
@@ -1052,6 +1067,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     int resultCount,
   ) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final secondaryTextColor =
         theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurfaceVariant;
 
@@ -1067,7 +1083,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         children: [
           IconButton(
             key: const Key('inventory_view_mode_list_button'),
-            tooltip: 'List view',
+            tooltip: l10n.inventoryViewList,
             icon: Icon(
               Icons.view_list,
               color: current == InventoryViewMode.list
@@ -1079,7 +1095,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
           IconButton(
             key: const Key('inventory_view_mode_table_button'),
-            tooltip: 'Table view',
+            tooltip: l10n.inventoryViewTable,
             icon: Icon(
               Icons.table_chart,
               color: current == InventoryViewMode.table
@@ -1091,7 +1107,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           ),
           IconButton(
             key: const Key('inventory_view_mode_grid_button'),
-            tooltip: 'Grid view',
+            tooltip: l10n.inventoryViewGrid,
             icon: Icon(
               Icons.grid_view,
               color: current == InventoryViewMode.grid
@@ -1196,6 +1212,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   }
 
   Widget _buildInventoryTableView(List<Item> items) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return SingleChildScrollView(
       key: const Key('inventory_view_mode_table'),
       padding: const EdgeInsets.only(
@@ -1210,48 +1227,48 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           sortAscending: _sortAscending,
           columns: [
             DataColumn(
-              label: const Text(
-                'Name',
+              label: Text(
+                l10n.inventoryTableName,
                 key: Key('inventory_table_header_name'),
               ),
               onSort: (columnIndex, _) =>
                   _onSort(InventorySortKey.name, columnIndex),
             ),
             DataColumn(
-              label: const Text(
-                'Category',
+              label: Text(
+                l10n.inventoryTableCategory,
                 key: Key('inventory_table_header_category'),
               ),
               onSort: (columnIndex, _) =>
                   _onSort(InventorySortKey.category, columnIndex),
             ),
             DataColumn(
-              label: const Text(
-                'Location',
+              label: Text(
+                l10n.inventoryTableLocation,
                 key: Key('inventory_table_header_location'),
               ),
               onSort: (columnIndex, _) =>
                   _onSort(InventorySortKey.location, columnIndex),
             ),
             DataColumn(
-              label: const Text(
-                'Expiry',
+              label: Text(
+                l10n.inventoryTableExpiry,
                 key: Key('inventory_table_header_expiry'),
               ),
               onSort: (columnIndex, _) =>
                   _onSort(InventorySortKey.expiry, columnIndex),
             ),
             DataColumn(
-              label: const Text(
-                'Qty',
+              label: Text(
+                l10n.inventoryTableQuantity,
                 key: Key('inventory_table_header_quantity'),
               ),
               onSort: (columnIndex, _) =>
                   _onSort(InventorySortKey.quantity, columnIndex),
             ),
             DataColumn(
-              label: const Text(
-                'Status',
+              label: Text(
+                l10n.inventoryTableStatus,
                 key: Key('inventory_table_header_status'),
               ),
               onSort: (columnIndex, _) =>
@@ -1264,8 +1281,13 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   onSelectChanged: (_) => _openItemDetail(item),
                   cells: [
                     DataCell(Text(item.name)),
-                    DataCell(Text(item.categoryLabel)),
-                    DataCell(Text(item.location.displayName)),
+                    DataCell(
+                      Text(
+                        item.customCategoryName ??
+                            _localizedCategoryLabel(item.category),
+                      ),
+                    ),
+                    DataCell(Text(_localizedLocationLabel(item.location))),
                     DataCell(
                       Text(
                         item.expiryDate == null
@@ -1372,8 +1394,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     final theme = Theme.of(context);
 
     final label = item.expiryDate == null
-        ? 'No expiry'
-        : 'Exp ${DateFormat('MMM d').format(item.expiryDate!)}';
+        ? (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .inventoryNoExpiry
+        : (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .inventoryExpiryShort(
+                DateFormat('MMM d').format(item.expiryDate!),
+              );
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
@@ -1406,7 +1432,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
       ),
       child: Text(
-        item.location.displayName,
+        _localizedLocationLabel(item.location),
         style: theme.textTheme.bodySmall?.copyWith(
           color: theme.textTheme.bodySmall?.color,
           fontWeight: FontWeight.w600,
@@ -1447,21 +1473,29 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       builder: (ctx) {
         return AlertDialog(
           key: const Key('inventory_delete_dialog'),
-          title: const Text('Delete Item?'),
+          title: Text(
+            (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .inventoryDeleteItemTitle,
+          ),
           content: Text(
-            'Are you sure you want to delete "${item.name}" from your inventory?',
+            (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .inventoryDeleteItemPrompt(item.name),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
               key: const Key('inventory_delete_cancel'),
-              child: const Text('Cancel'),
+              child: Text(
+                (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                    .buttonCancel,
+              ),
             ),
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(true),
               key: const Key('inventory_delete_confirm'),
-              child: const Text(
-                'Delete',
+              child: Text(
+                (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                    .buttonDelete,
                 style: TextStyle(color: AppColors.danger),
               ),
             ),
@@ -1521,7 +1555,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       child: Row(
         children: [
           Text(
-            'Active filters:',
+            (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .inventoryActiveFilters,
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -1535,7 +1570,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               children: [
                 if (filterState.category != null)
                   _buildFilterChip(
-                    label: filterState.category!.displayName,
+                    label: _localizedCategoryLabel(filterState.category!),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(category: null);
@@ -1544,7 +1579,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 if (filterState.status != null)
                   _buildFilterChip(
-                    label: 'Status: ${filterState.status!.displayName}',
+                    label:
+                        '${(AppLocalizations.of(context) ?? AppLocalizationsEn()).labelStatus}: ${filterState.status!.displayName}',
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(status: null);
@@ -1553,7 +1589,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 if (filterState.location != null)
                   _buildFilterChip(
-                    label: filterState.location!.displayName,
+                    label: _localizedLocationLabel(filterState.location!),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(location: null);
@@ -1562,7 +1598,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 if (filterState.expiringSoonOnly)
                   _buildFilterChip(
-                    label: 'Expiring Soon',
+                    label:
+                        (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                            .inventoryFilterExpiringSoonOnly,
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(expiringSoonOnly: false);
@@ -1571,7 +1609,9 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   ),
                 if (filterState.preparedOnly)
                   _buildFilterChip(
-                    label: 'Prepared',
+                    label:
+                        (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                            .inventoryFilterPreparedOnly,
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(preparedOnly: false);
@@ -1581,7 +1621,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 if (filterState.createdAfter != null)
                   _buildFilterChip(
                     label:
-                        'Added from ${_formatShortDate(filterState.createdAfter!)}',
+                        (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                            .inventoryAddedFrom(
+                              _formatShortDate(filterState.createdAfter!),
+                            ),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(createdAfter: null);
@@ -1591,7 +1634,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 if (filterState.createdBefore != null)
                   _buildFilterChip(
                     label:
-                        'Added to ${_formatShortDate(filterState.createdBefore!)}',
+                        (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                            .inventoryAddedTo(
+                              _formatShortDate(filterState.createdBefore!),
+                            ),
                     onRemove: () {
                       ref.read(inventoryFilterProvider.notifier).state =
                           filterState.copyWith(createdBefore: null);
@@ -1614,13 +1660,64 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Clear all',
+              (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                  .inventoryClearAll,
               style: theme.textTheme.bodySmall?.copyWith(fontSize: 12),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _localizedCategoryLabel(ItemCategory category) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.categoryLabels;
+    final reference = referenceLabels?[category];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(StorageLocation location) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.locationLabels;
+    final reference = referenceLabels?[location];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
   }
 
   Widget _buildFilterChip({
@@ -1687,7 +1784,8 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
           setState(() {});
         },
         decoration: InputDecoration(
-          hintText: 'Search items...',
+          hintText: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .hintSearchItems,
           hintStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.textTheme.bodySmall?.color,
           ),
@@ -1720,13 +1818,15 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             const Text('🛒', style: TextStyle(fontSize: 64)),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'Your inventory is empty',
+              (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                  .messageEmptyInventoryTitle,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Start tracking your food to reduce waste and save money',
+              (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                  .messageEmptyInventory,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).textTheme.bodySmall?.color,
               ),
@@ -1750,7 +1850,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 });
                 _openAddItemForm(emitOpenedTelemetry: false);
               },
-              child: const Text('Add your first item'),
+              child: Text(
+                (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                    .inventoryAddFirstItem,
+              ),
             ),
           ],
         ),

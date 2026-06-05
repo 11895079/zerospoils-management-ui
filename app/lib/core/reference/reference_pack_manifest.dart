@@ -6,6 +6,7 @@ enum ReferencePackType {
   barcodeCatalog('barcode_catalog'),
   categories('categories'),
   locations('locations'),
+  types('types'),
   referenceList('reference_list');
 
   const ReferencePackType(this.wireName);

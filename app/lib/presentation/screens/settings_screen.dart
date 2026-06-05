@@ -176,6 +176,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         region: region,
         locale: locale,
       );
+      await service.syncTypesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
+
+      ref.invalidate(localBarcodeCatalogProvider);
+      ref.invalidate(referencePackLabelSnapshotProvider);
 
       final updatedStatus = await service.barcodeCatalogStatus();
       if (!mounted) {

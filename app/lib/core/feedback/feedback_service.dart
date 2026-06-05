@@ -22,6 +22,15 @@ class FeedbackService {
   FeedbackService({AudioFeedbackPlayer? audioPlayer})
     : _audioPlayer = audioPlayer ?? DefaultAudioFeedbackPlayer();
 
+  static void Function(String eventName, Map<String, dynamic> properties)?
+  _telemetryLogger;
+
+  static void setTelemetryLogger(
+    void Function(String eventName, Map<String, dynamic> properties)? logger,
+  ) {
+    _telemetryLogger = logger;
+  }
+
   static const _hapticEnabledKey = 'feedback_haptic_enabled';
   static const _audioEnabledKey = 'feedback_audio_enabled';
   static const _beepVolumeKey = 'feedback_beep_volume';
@@ -113,6 +122,17 @@ class FeedbackService {
 
   Future<void> previewBeepVolume(double volume) async {
     final previewVolume = volume.clamp(0.0, 1.0);
+    _logBeepDiagnostic('feedback_beep_preview_attempted', {
+      'source': 'settings_preview',
+      'audio_enabled': _audioEnabledValue,
+      'volume': previewVolume,
+      'outcome': !_audioEnabledValue
+          ? 'skipped_audio_disabled'
+          : previewVolume <= 0
+          ? 'skipped_zero_volume'
+          : 'attempted',
+    });
+
     if (!_audioEnabledValue || previewVolume <= 0) {
       return;
     }
@@ -148,10 +168,33 @@ class FeedbackService {
   /// Trigger feedback for an OCR success event
   Future<void> triggerOcrSuccess(FeedbackType type) async {
     if (!scannerEnabled(type)) {
+      _logBeepDiagnostic('feedback_beep_scan_attempted', {
+        'source': 'scan',
+        'feedback_type': type.name,
+        'scanner_enabled': false,
+        'audio_enabled': _audioEnabledValue,
+        'beep_count': 0,
+        'volume': _beepVolumeValue,
+        'outcome': 'skipped_scanner_disabled',
+      });
       return;
     }
 
     final feedbackPattern = _feedbackPatternFor(type);
+
+    _logBeepDiagnostic('feedback_beep_scan_attempted', {
+      'source': 'scan',
+      'feedback_type': type.name,
+      'scanner_enabled': true,
+      'audio_enabled': _audioEnabledValue,
+      'beep_count': feedbackPattern.beepCount,
+      'volume': _beepVolumeValue,
+      'outcome': !_audioEnabledValue
+          ? 'skipped_audio_disabled'
+          : feedbackPattern.beepCount > 0
+          ? 'attempted'
+          : 'skipped_no_beeps',
+    });
 
     if (_hapticEnabledValue) {
       for (var i = 0; i < feedbackPattern.hapticCount; i++) {
@@ -208,6 +251,15 @@ class FeedbackService {
     } catch (_) {
       // Silently fail if system audio feedback is not available
     }
+  }
+
+  void _logBeepDiagnostic(String eventName, Map<String, dynamic> properties) {
+    final logger = _telemetryLogger;
+    if (logger == null) {
+      return;
+    }
+
+    logger(eventName, properties);
   }
 
   /// Selection haptic feedback (selection wheel on iOS)

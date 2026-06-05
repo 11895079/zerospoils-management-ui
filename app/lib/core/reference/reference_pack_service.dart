@@ -68,6 +68,20 @@ class ReferenceLocationRecord {
   final List<String> synonyms;
 }
 
+class ReferenceTypeRecord {
+  const ReferenceTypeRecord({
+    required this.id,
+    required this.label,
+    required this.appType,
+    required this.synonyms,
+  });
+
+  final String id;
+  final String label;
+  final ItemType appType;
+  final List<String> synonyms;
+}
+
 class ReferencePackService {
   ReferencePackService({
     SharedPreferences? preferences,
@@ -379,6 +393,79 @@ class ReferencePackService {
     return activateLocationsPack(descriptor: descriptor, packJson: packJson);
   }
 
+  Future<ReferencePackActivationResult> syncTypesPack({
+    ReferencePackManifestUrlProvider? manifestUrlProvider,
+    ReferencePackDownloader? downloader,
+    String region = 'ca',
+    String locale = 'en',
+  }) async {
+    final resolvedManifestProvider =
+        manifestUrlProvider ?? FirebaseRemoteConfigManifestUrlProvider();
+    final resolvedDownloader = downloader ?? HttpReferencePackDownloader();
+
+    _telemetry?.call('reference_pack_check_started', {
+      'pack_type': ReferencePackType.types.wireName,
+      'region': region,
+      'locale': locale,
+    });
+
+    final manifestUrl = await resolvedManifestProvider.getManifestUrl();
+    if (manifestUrl == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_url_unset',
+      );
+    }
+
+    final String manifestJson;
+    try {
+      manifestJson = await resolvedDownloader.downloadJson(manifestUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_download_failed',
+      );
+    }
+
+    final ReferencePackManifest manifest;
+    try {
+      manifest = ReferencePackManifest.parse(manifestJson);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'manifest_invalid',
+      );
+    }
+
+    final currentVersion = await _appVersion();
+
+    final descriptor = _selectPackDescriptor(
+      manifest: manifest,
+      type: ReferencePackType.types,
+      region: region,
+      locale: locale,
+      appVersion: currentVersion,
+    );
+    if (descriptor == null) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_not_found_for_region',
+      );
+    }
+
+    final String packJson;
+    try {
+      packJson = await resolvedDownloader.downloadJson(descriptor.downloadUrl);
+    } catch (_) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'pack_download_failed',
+      );
+    }
+
+    return activateTypesPack(descriptor: descriptor, packJson: packJson);
+  }
+
   Future<ReferencePackActivationResult> activateBarcodeCatalogPack({
     required ReferencePackDescriptor descriptor,
     required String packJson,
@@ -640,6 +727,86 @@ class ReferencePackService {
     return const ReferencePackActivationResult(success: true);
   }
 
+  Future<ReferencePackActivationResult> activateTypesPack({
+    required ReferencePackDescriptor descriptor,
+    required String packJson,
+  }) async {
+    if (descriptor.type != ReferencePackType.types) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'unsupported_pack_type',
+      );
+    }
+
+    final currentVersion = await _appVersion();
+    if (_compareVersions(currentVersion, descriptor.minimumAppVersion) < 0) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'minimum_app_version_not_met',
+      );
+    }
+
+    final normalizedExpectedChecksum = descriptor.checksum.toLowerCase();
+    final normalizedActualChecksum = sha256
+        .convert(utf8.encode(packJson))
+        .toString();
+    if (normalizedActualChecksum != normalizedExpectedChecksum) {
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'checksum_mismatch',
+      );
+    }
+
+    final validation = _validateTypesPack(packJson);
+    if (validation != null) {
+      return ReferencePackActivationResult(
+        success: false,
+        failureReason: validation,
+      );
+    }
+
+    final prefs = await _prefs();
+    final snapshot = _snapshotTypesState(prefs);
+    try {
+      await prefs.setString(
+        ReferencePackKeys.activeTypesPackRecordsJson,
+        packJson,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeTypesPackVersion,
+        descriptor.version,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeTypesPackRegion,
+        descriptor.region,
+      );
+      if (descriptor.locale != null) {
+        await prefs.setString(
+          ReferencePackKeys.activeTypesPackLocale,
+          descriptor.locale!,
+        );
+      } else {
+        await prefs.remove(ReferencePackKeys.activeTypesPackLocale);
+      }
+      await prefs.setString(
+        ReferencePackKeys.activeTypesPackChecksum,
+        normalizedActualChecksum,
+      );
+      await prefs.setString(
+        ReferencePackKeys.activeTypesPackUpdatedAt,
+        DateTime.now().toUtc().toIso8601String(),
+      );
+    } catch (_) {
+      await _restoreTypesState(prefs, snapshot);
+      return const ReferencePackActivationResult(
+        success: false,
+        failureReason: 'activation_failed_rolled_back',
+      );
+    }
+
+    return const ReferencePackActivationResult(success: true);
+  }
+
   static List<Map<String, dynamic>> activeBarcodeCatalogRecords(
     SharedPreferences prefs,
   ) {
@@ -732,6 +899,46 @@ class ReferencePackService {
     return result;
   }
 
+  static List<ReferenceTypeRecord> activeTypeRecords(SharedPreferences prefs) {
+    final records = _extractPackRecords(
+      prefs.getString(ReferencePackKeys.activeTypesPackRecordsJson),
+    );
+
+    final result = <ReferenceTypeRecord>[];
+    for (final row in records) {
+      final id = row['id'] as String?;
+      final label = row['label'] as String?;
+      final appTypeRaw = row['app_type'] as String?;
+      if (id == null || id.isEmpty || label == null || label.isEmpty) {
+        continue;
+      }
+
+      final appType = _itemTypeFromPackValue(appTypeRaw);
+      if (appType == null) {
+        continue;
+      }
+
+      final synonymsRaw = row['synonyms'];
+      final synonyms = synonymsRaw is List
+          ? synonymsRaw
+                .whereType<String>()
+                .where((s) => s.trim().isNotEmpty)
+                .toList()
+          : const <String>[];
+
+      result.add(
+        ReferenceTypeRecord(
+          id: id,
+          label: label,
+          appType: appType,
+          synonyms: synonyms,
+        ),
+      );
+    }
+
+    return result;
+  }
+
   String? _validateBarcodePack(String packJson) {
     final records = _extractPackRecords(packJson);
     if (records.isEmpty) {
@@ -792,6 +999,26 @@ class ReferencePackService {
             (location) => location.name == appLocation,
           )) {
         return 'invalid_record_app_location';
+      }
+    }
+
+    return null;
+  }
+
+  String? _validateTypesPack(String packJson) {
+    final records = _extractPackRecords(packJson);
+    if (records.isEmpty) {
+      return 'records_missing';
+    }
+
+    for (final record in records) {
+      final label = record['label'];
+      final appType = record['app_type'];
+      if (label is! String || label.isEmpty) {
+        return 'invalid_record_label';
+      }
+      if (appType is! String || _itemTypeFromPackValue(appType) == null) {
+        return 'invalid_record_app_type';
       }
     }
 
@@ -864,6 +1091,29 @@ class ReferencePackService {
     };
   }
 
+  Map<String, String?> _snapshotTypesState(SharedPreferences prefs) {
+    return {
+      ReferencePackKeys.activeTypesPackRecordsJson: prefs.getString(
+        ReferencePackKeys.activeTypesPackRecordsJson,
+      ),
+      ReferencePackKeys.activeTypesPackVersion: prefs.getString(
+        ReferencePackKeys.activeTypesPackVersion,
+      ),
+      ReferencePackKeys.activeTypesPackRegion: prefs.getString(
+        ReferencePackKeys.activeTypesPackRegion,
+      ),
+      ReferencePackKeys.activeTypesPackLocale: prefs.getString(
+        ReferencePackKeys.activeTypesPackLocale,
+      ),
+      ReferencePackKeys.activeTypesPackChecksum: prefs.getString(
+        ReferencePackKeys.activeTypesPackChecksum,
+      ),
+      ReferencePackKeys.activeTypesPackUpdatedAt: prefs.getString(
+        ReferencePackKeys.activeTypesPackUpdatedAt,
+      ),
+    };
+  }
+
   Future<void> _restoreBarcodeState(
     SharedPreferences prefs,
     Map<String, String?> snapshot,
@@ -903,6 +1153,39 @@ class ReferencePackService {
       } else {
         await prefs.setString(entry.key, value);
       }
+    }
+  }
+
+  Future<void> _restoreTypesState(
+    SharedPreferences prefs,
+    Map<String, String?> snapshot,
+  ) async {
+    for (final entry in snapshot.entries) {
+      final value = entry.value;
+      if (value == null) {
+        await prefs.remove(entry.key);
+      } else {
+        await prefs.setString(entry.key, value);
+      }
+    }
+  }
+
+  static ItemType? _itemTypeFromPackValue(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    final normalized = value.trim().toLowerCase();
+    switch (normalized) {
+      case 'raw':
+        return ItemType.raw;
+      case 'prepared':
+      case 'cooked':
+        return ItemType.prepared;
+      case 'packaged':
+        return ItemType.packaged;
+      default:
+        return null;
     }
   }
 

@@ -127,6 +127,80 @@ class ZestoService {
     ],
   };
 
+  static final Map<String, Map<MascotMessageType, List<String>>>
+  localizedMessagePools = {
+    'fr': {
+      MascotMessageType.consumed: ['Sauvé! 🎉', 'Zéro gaspillage! 💚'],
+      MascotMessageType.quickSave: ['Juste à temps! ⏰', 'Beau sauvetage! 💚'],
+      MascotMessageType.badgeUnlocked: ['Nouveau badge! 🏆'],
+      MascotMessageType.streakMilestone: ['Super série! 🔥'],
+      MascotMessageType.savingsMilestone: ['Économies débloquées! 💰'],
+      MascotMessageType.zeroWaste: ['Semaine parfaite! 🌟'],
+      MascotMessageType.wasted: ['Conseil: on y arrive la prochaine fois! 💚'],
+      MascotMessageType.expiryAlert: ['Articles à consommer bientôt! ⏰'],
+      MascotMessageType.dailyWelcome: ['Bon retour! 👋'],
+      MascotMessageType.firstItem: ['Bienvenue! 🎉'],
+      MascotMessageType.itemAdded: ['Bien ajouté! ✅'],
+      MascotMessageType.celebration: ['Formidable! 🎉'],
+    },
+    'fr_ca': {
+      MascotMessageType.consumed: ['Sauvé! 🎉', 'Zéro gaspillage! 💚'],
+      MascotMessageType.quickSave: ['Juste à temps! ⏰', 'Beau sauvetage! 💚'],
+      MascotMessageType.badgeUnlocked: ['Nouveau badge! 🏆'],
+      MascotMessageType.streakMilestone: ['Super série! 🔥'],
+      MascotMessageType.savingsMilestone: ['Économies débloquées! 💰'],
+      MascotMessageType.zeroWaste: ['Semaine parfaite! 🌟'],
+      MascotMessageType.wasted: ['Conseil: on y arrive la prochaine fois! 💚'],
+      MascotMessageType.expiryAlert: ['Articles à consommer bientôt! ⏰'],
+      MascotMessageType.dailyWelcome: ['Bon retour! 👋'],
+      MascotMessageType.firstItem: ['Bienvenue! 🎉'],
+      MascotMessageType.itemAdded: ['Bien ajouté! ✅'],
+      MascotMessageType.celebration: ['Formidable! 🎉'],
+    },
+    'es': {
+      MascotMessageType.consumed: ['¡Guardado! 🎉', '¡Cero desperdicio! 💚'],
+      MascotMessageType.quickSave: ['¡Justo a tiempo! ⏰', '¡Buen rescate! 💚'],
+      MascotMessageType.badgeUnlocked: ['¡Insignia nueva! 🏆'],
+      MascotMessageType.streakMilestone: ['¡Racha increíble! 🔥'],
+      MascotMessageType.savingsMilestone: ['¡Ahorro desbloqueado! 💰'],
+      MascotMessageType.zeroWaste: ['¡Semana perfecta! 🌟'],
+      MascotMessageType.wasted: ['Consejo: la próxima saldrá mejor 💚'],
+      MascotMessageType.expiryAlert: ['¡Hay artículos por vencer! ⏰'],
+      MascotMessageType.dailyWelcome: ['¡Bienvenido de nuevo! 👋'],
+      MascotMessageType.firstItem: ['¡Bienvenido! 🎉'],
+      MascotMessageType.itemAdded: ['¡Añadido! ✅'],
+      MascotMessageType.celebration: ['¡Genial! 🎉'],
+    },
+    'de': {
+      MascotMessageType.consumed: ['Gerettet! 🎉', 'Null Verschwendung! 💚'],
+      MascotMessageType.quickSave: ['Gerade noch rechtzeitig! ⏰', 'Stark! 💚'],
+      MascotMessageType.badgeUnlocked: ['Neues Abzeichen! 🏆'],
+      MascotMessageType.streakMilestone: ['Starke Serie! 🔥'],
+      MascotMessageType.savingsMilestone: ['Sparziel erreicht! 💰'],
+      MascotMessageType.zeroWaste: ['Perfekte Woche! 🌟'],
+      MascotMessageType.wasted: ['Tipp: Nächstes Mal klappt es besser 💚'],
+      MascotMessageType.expiryAlert: ['Bald ablaufende Artikel! ⏰'],
+      MascotMessageType.dailyWelcome: ['Willkommen zurück! 👋'],
+      MascotMessageType.firstItem: ['Willkommen! 🎉'],
+      MascotMessageType.itemAdded: ['Hinzugefügt! ✅'],
+      MascotMessageType.celebration: ['Super! 🎉'],
+    },
+    'pt': {
+      MascotMessageType.consumed: ['Salvo! 🎉', 'Desperdício zero! 💚'],
+      MascotMessageType.quickSave: ['Mesmo a tempo! ⏰', 'Bom salvamento! 💚'],
+      MascotMessageType.badgeUnlocked: ['Novo distintivo! 🏆'],
+      MascotMessageType.streakMilestone: ['Sequência incrível! 🔥'],
+      MascotMessageType.savingsMilestone: ['Poupança desbloqueada! 💰'],
+      MascotMessageType.zeroWaste: ['Semana perfeita! 🌟'],
+      MascotMessageType.wasted: ['Dica: da próxima vai melhor 💚'],
+      MascotMessageType.expiryAlert: ['Itens a expirar em breve! ⏰'],
+      MascotMessageType.dailyWelcome: ['Bem-vindo de volta! 👋'],
+      MascotMessageType.firstItem: ['Bem-vindo! 🎉'],
+      MascotMessageType.itemAdded: ['Item adicionado! ✅'],
+      MascotMessageType.celebration: ['Fantástico! 🎉'],
+    },
+  };
+
   // Anti-spam configuration
   static const Duration antiSpamGap = Duration(seconds: 5);
   static const int messageHistorySize = 3;
@@ -155,6 +229,7 @@ class ZestoService {
   // Dependencies (injected)
   final MascotSettings Function() getSettings;
   final DateTime Function() _now;
+  final String Function()? _localeTagResolver;
   final Random _random;
   final ZestoTelemetryLogger? _telemetryLogger;
   final Duration _displayDuration;
@@ -172,12 +247,14 @@ class ZestoService {
   ZestoService({
     required this.getSettings,
     DateTime Function()? now,
+    String Function()? localeTagResolver,
     Random? random,
     ZestoTelemetryLogger? telemetryLogger,
     Duration displayDuration = const Duration(seconds: 3),
     AssetBundle? assetBundle,
     bool skipPersistence = false,
   }) : _now = now ?? DateTime.now,
+       _localeTagResolver = localeTagResolver,
        _random = random ?? Random(),
        _telemetryLogger = telemetryLogger,
        _displayDuration = displayDuration,
@@ -438,7 +515,11 @@ class ZestoService {
     MascotMessageType messageType,
     Map<String, dynamic>? context,
   ) {
-    List<String> messages = messagePool[messageType] ?? [];
+    final localeTag = _normalizedLocaleTag(_localeTagResolver?.call());
+    List<String> messages =
+        localizedMessagePools[localeTag]?[messageType] ??
+        messagePool[messageType] ??
+        [];
 
     // Handle wasted items with storage tips. Tips are loaded from the
     // bundled JSON during hydration; if hydration hasn't completed yet (or
@@ -477,6 +558,26 @@ class ZestoService {
     }
 
     return selected;
+  }
+
+  String _normalizedLocaleTag(String? rawTag) {
+    final tag = (rawTag ?? 'en').toLowerCase();
+    if (tag == 'system' || tag.isEmpty) {
+      return 'en';
+    }
+    if (tag.startsWith('fr')) {
+      return tag.contains('ca') ? 'fr_ca' : 'fr';
+    }
+    if (tag.startsWith('es')) {
+      return 'es';
+    }
+    if (tag.startsWith('de')) {
+      return 'de';
+    }
+    if (tag.startsWith('pt')) {
+      return 'pt';
+    }
+    return 'en';
   }
 
   /// Check if anti-spam allows mascot

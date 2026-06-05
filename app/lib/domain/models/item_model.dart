@@ -120,14 +120,20 @@ enum WasteReason {
 /// Item type enum (raw vs prepared)
 enum ItemType {
   raw('Raw'),
-  prepared('Prepared');
+  prepared('Cooked'),
+  packaged('Packaged');
 
   final String displayName;
   const ItemType(this.displayName);
 
   static ItemType fromString(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized == 'cooked') {
+      return ItemType.prepared;
+    }
+
     return ItemType.values.firstWhere(
-      (type) => type.name == value,
+      (type) => type.name == normalized,
       orElse: () => ItemType.raw,
     );
   }

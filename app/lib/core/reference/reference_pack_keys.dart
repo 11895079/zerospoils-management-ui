@@ -25,4 +25,11 @@ class ReferencePackKeys {
   static const activeLocationsPackUpdatedAt = 'refpack_locations_updated_at';
   static const activeLocationsPackRecordsJson =
       'refpack_locations_records_json';
+
+  static const activeTypesPackVersion = 'refpack_types_active_version';
+  static const activeTypesPackRegion = 'refpack_types_active_region';
+  static const activeTypesPackLocale = 'refpack_types_active_locale';
+  static const activeTypesPackChecksum = 'refpack_types_active_checksum';
+  static const activeTypesPackUpdatedAt = 'refpack_types_updated_at';
+  static const activeTypesPackRecordsJson = 'refpack_types_records_json';
 }

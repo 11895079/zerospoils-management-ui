@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../data/adapters/receipt_batch_adapter.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -25,13 +27,14 @@ class ProgressScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final statsAsync = ref.watch(progressStatsProvider);
 
     return Scaffold(
       key: const Key('screen_progress'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: const Text('Progress'), elevation: 1),
+      appBar: AppBar(title: Text(l10n.screenTitleProgress), elevation: 1),
       body: statsAsync.when(
         data: (stats) => _buildContent(context, ref, stats),
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -39,7 +42,7 @@ class ProgressScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.xl),
             child: Text(
-              'Unable to load progress: $error',
+              l10n.progressUnableToLoad(error.toString()),
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: AppColors.danger),
@@ -56,152 +59,173 @@ class ProgressScreen extends ConsumerWidget {
     WidgetRef ref,
     ProgressStats stats,
   ) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull;
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        _buildStreakCard(stats),
+        _buildStreakCard(context, stats),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Summary'),
+        _buildSectionTitle(context, l10n.progressSectionSummary),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
             id: 'total_items',
-            label: 'Total Items',
+            label: l10n.progressStatTotalItems,
             value: '${stats.totalItems}',
             onTap: () => _openInventoryWithStatus(ref, null),
           ),
           _StatTile(
             id: 'available',
-            label: 'Available',
+            label: l10n.progressStatAvailable,
             value: '${stats.availableItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.available),
           ),
           _StatTile(
             id: 'consumed',
-            label: 'Consumed',
+            label: l10n.progressStatConsumed,
             value: '${stats.consumedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.consumed),
           ),
           _StatTile(
             id: 'wasted',
-            label: 'Wasted',
+            label: l10n.progressStatWasted,
             value: '${stats.wastedItems}',
             onTap: () => _openInventoryWithStatus(ref, ItemStatus.wasted),
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Expiry Health'),
+        _buildSectionTitle(context, l10n.progressSectionExpiryHealth),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
             id: 'expiring_today',
-            label: 'Expiring Today',
+            label: l10n.progressStatExpiringToday,
             value: '${stats.expiringTodayCount}',
           ),
           _StatTile(
             id: 'this_week',
-            label: 'This Week',
+            label: l10n.progressStatThisWeek,
             value: '${stats.expiringThisWeekCount}',
           ),
           _StatTile(
             id: 'expiring_soon',
-            label: 'Expiring Soon',
+            label: l10n.progressStatExpiringSoon,
             value: '${stats.expiringSoonCount}',
           ),
           _StatTile(
             id: 'expired',
-            label: 'Expired',
+            label: l10n.progressStatExpired,
             value: '${stats.expiredCount}',
           ),
           _StatTile(
             id: 'no_expiry',
-            label: 'No Expiry',
+            label: l10n.progressStatNoExpiry,
             value: '${stats.noExpiryCount}',
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Value Impact'),
+        _buildSectionTitle(context, l10n.progressSectionValueImpact),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
             id: 'total_value',
-            label: 'Total Value',
+            label: l10n.progressStatTotalValue,
             value: _currency(stats.totalValue),
           ),
           _StatTile(
             id: 'consumed_value',
-            label: 'Consumed Value',
+            label: l10n.progressStatConsumedValue,
             value: _currency(stats.consumedValue),
           ),
           _StatTile(
             id: 'wasted_value',
-            label: 'Wasted Value',
+            label: l10n.progressStatWastedValue,
             value: _currency(stats.wastedValue),
           ),
           _StatTile(
             id: 'saved_est',
-            label: 'Saved (est.)',
+            label: l10n.progressStatSavedEstimate,
             value: _currency(stats.savedValue),
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Activity'),
+        _buildSectionTitle(context, l10n.progressSectionActivity),
         const SizedBox(height: AppSpacing.sm),
         _buildSummaryGrid([
           _StatTile(
             id: 'added_7d',
-            label: 'Added (7d)',
+            label: l10n.progressStatAdded7d,
             value: '${stats.addedLast7Days}',
           ),
           _StatTile(
             id: 'added_30d',
-            label: 'Added (30d)',
+            label: l10n.progressStatAdded30d,
             value: '${stats.addedLast30Days}',
           ),
           _StatTile(
             id: 'updated_7d',
-            label: 'Updated (7d)',
+            label: l10n.progressStatUpdated7d,
             value: '${stats.updatedLast7Days}',
           ),
           _StatTile(
             id: 'updated_30d',
-            label: 'Updated (30d)',
+            label: l10n.progressStatUpdated30d,
             value: '${stats.updatedLast30Days}',
           ),
         ]),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Categories'),
+        _buildSectionTitle(context, l10n.progressSectionCategories),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
           context,
           stats.categoryCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(
+              _localizedCategoryLabel(
+                l10n,
+                key,
+                referenceLabels?.categoryLabels,
+              ),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Locations'),
+        _buildSectionTitle(context, l10n.progressSectionLocations),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
           context,
           stats.locationCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(
+              _localizedLocationLabel(
+                l10n,
+                key,
+                referenceLabels?.locationLabels,
+              ),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Types'),
+        _buildSectionTitle(context, l10n.progressSectionTypes),
         const SizedBox(height: AppSpacing.sm),
         _buildChipWrap(
           context,
           stats.typeCounts.map(
-            (key, value) => MapEntry(key.displayName, value),
+            (key, value) => MapEntry(
+              _localizedTypeLabel(l10n, key, referenceLabels?.typeLabels),
+              value,
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Badges & Achievements'),
+        _buildSectionTitle(context, l10n.progressSectionBadges),
         const SizedBox(height: AppSpacing.sm),
         _buildBadgeProgressList(stats),
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Telemetry (Local Aggregation)'),
+        _buildSectionTitle(context, l10n.progressSectionTelemetry),
         const SizedBox(height: AppSpacing.sm),
         _buildTelemetrySection(context, stats),
         if (kDebugMode) ...[
@@ -211,7 +235,7 @@ class ProgressScreen extends ConsumerWidget {
           _buildZestoDebugPanel(context, ref),
         ],
         const SizedBox(height: AppSpacing.lg),
-        _buildSectionTitle(context, 'Recent Receipt Batch'),
+        _buildSectionTitle(context, l10n.progressSectionRecentBatch),
         const SizedBox(height: AppSpacing.sm),
         _buildRecentBatchSection(ref),
         const SizedBox(height: AppSpacing.xl),
@@ -243,7 +267,8 @@ class ProgressScreen extends ConsumerWidget {
         if (snapshot.hasError) {
           final theme = Theme.of(context);
           return Text(
-            'Unable to load recent batch',
+            (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressRecentBatchLoadError,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: AppColors.danger,
             ),
@@ -254,7 +279,8 @@ class ProgressScreen extends ConsumerWidget {
         if (batch == null) {
           final theme = Theme.of(context);
           return Text(
-            'No recent receipt batches yet.',
+            (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressNoRecentBatches,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.textTheme.bodySmall?.color,
             ),
@@ -277,14 +303,19 @@ class ProgressScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${batch.items.length} items · ${_currency(total)} total',
+                (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                    .progressRecentBatchItemsTotal(
+                      batch.items.length,
+                      _currency(total),
+                    ),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Source: ${batch.source.name}',
+                (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                    .progressRecentBatchSource(batch.source.name),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.textTheme.bodySmall?.color,
                 ),
@@ -384,10 +415,11 @@ class ProgressScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildStreakCard(ProgressStats stats) {
+  Widget _buildStreakCard(BuildContext context, ProgressStats stats) {
     final streak = stats.noWasteStreak;
     final daysRemaining = streak.daysRemaining;
     final progress = streak.streakDays / 7;
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -414,7 +446,7 @@ class ProgressScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 ),
                 child: Text(
-                  '🔥 ${streak.streakDays}-day streak',
+                  l10n.inventoryStreakDays(streak.streakDays),
                   style: AppTextStyles.body.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.primary,
@@ -425,7 +457,7 @@ class ProgressScreen extends ConsumerWidget {
               TextButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.auto_awesome, size: 16),
-                label: const Text('Level up'),
+                label: Text(l10n.inventoryLevelUp),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primary,
                   backgroundColor: Colors.white,
@@ -441,8 +473,8 @@ class ProgressScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          const Text(
-            'No Waste Week',
+          Text(
+            l10n.inventoryNoWasteWeek,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -452,8 +484,8 @@ class ProgressScreen extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(
             daysRemaining == 0
-                ? 'You made it! Keep the streak alive.'
-                : 'Log $daysRemaining more saves to level up',
+                ? l10n.inventoryStreakCompleted
+                : l10n.inventoryStreakRemaining(daysRemaining),
             style: AppTextStyles.body.copyWith(color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.md),
@@ -468,7 +500,7 @@ class ProgressScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Judgement-free: compare with friends only when you opt in.',
+            l10n.inventoryStreakFootnote,
             style: AppTextStyles.body.copyWith(color: Colors.white70),
           ),
         ],
@@ -504,55 +536,65 @@ class ProgressScreen extends ConsumerWidget {
       children: [
         _buildInsightCard(
           context: context,
-          title: 'Local Insights',
-          subtitle: 'These insights are computed on-device from your activity.',
+          title: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressLocalInsightsTitle,
+          subtitle: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressLocalInsightsSubtitle,
           icon: Icons.shield,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildSummaryGrid([
           _StatTile(
             id: 'total_events',
-            label: 'Total Events',
+            label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressStatTotalEvents,
             value: '$totalEvents',
           ),
           _StatTile(
             id: 'items_added',
-            label: 'Items Added',
+            label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressStatItemsAdded,
             value: '${telemetry.eventCounts['item_added'] ?? 0}',
           ),
           _StatTile(
             id: 'items_wasted',
-            label: 'Items Wasted',
+            label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressStatItemsWasted,
             value: '${telemetry.eventCounts['item_wasted'] ?? 0}',
           ),
           _StatTile(
             id: 'reminders_opened',
-            label: 'Reminders Opened',
+            label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                .progressStatRemindersOpened,
             value: '${telemetry.eventCounts['reminder_opened'] ?? 0}',
           ),
         ]),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
           context: context,
-          label: 'Top Add Sources',
+          label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressTopAddSources,
           values: telemetry.itemAddedBySource,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
           context: context,
-          label: 'Top Waste Reasons',
+          label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressTopWasteReasons,
           values: telemetry.itemWastedByReason,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
           context: context,
-          label: 'Most Viewed Screens',
+          label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressMostViewedScreens,
           values: telemetry.screenViewedByScreen,
         ),
         const SizedBox(height: AppSpacing.md),
         _buildTopInsights(
           context: context,
-          label: 'Tab Switches',
+          label: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .progressTabSwitches,
           values: telemetry.tabSwitchedByTab,
         ),
       ],
@@ -637,7 +679,8 @@ class ProgressScreen extends ConsumerWidget {
 
     if (values.isEmpty) {
       return Text(
-        'No data yet',
+        (AppLocalizations.of(context) ?? AppLocalizationsEn())
+            .progressNoDataYet,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.textTheme.bodySmall?.color,
         ),
@@ -697,6 +740,74 @@ class ProgressScreen extends ConsumerWidget {
       ..sort((a, b) => b.value.compareTo(a.value));
     final trimmed = entries.take(limit);
     return {for (final entry in trimmed) entry.key: entry.value};
+  }
+
+  String _localizedCategoryLabel(
+    AppLocalizations l10n,
+    ItemCategory category,
+    Map<ItemCategory, String>? referenceLabels,
+  ) {
+    final referenceLabel = referenceLabels?[category];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(
+    AppLocalizations l10n,
+    StorageLocation location,
+    Map<StorageLocation, String>? referenceLabels,
+  ) {
+    final referenceLabel = referenceLabels?[location];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
+  }
+
+  String _localizedTypeLabel(
+    AppLocalizations l10n,
+    ItemType type,
+    Map<ItemType, String>? referenceLabels,
+  ) {
+    final referenceLabel = referenceLabels?[type];
+    if (referenceLabel != null && referenceLabel.trim().isNotEmpty) {
+      return referenceLabel;
+    }
+
+    switch (type) {
+      case ItemType.raw:
+        return l10n.itemTypeRaw;
+      case ItemType.prepared:
+        return l10n.itemTypePrepared;
+      case ItemType.packaged:
+        return l10n.itemTypePackaged;
+    }
   }
 
   String _currency(double value) {

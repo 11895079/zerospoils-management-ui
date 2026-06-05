@@ -20,6 +20,8 @@ import '../../core/reference/reference_pack_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/receipt_batch.dart';
 import '../../core/vision/fresh_item_cv_service.dart';
 import '../../domain/models/item_model.dart';
@@ -149,6 +151,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   final Map<ItemCategory, String> _referenceCategoryLabels = {};
   final Map<ItemCategory, Set<String>> _referenceCategoryTerms = {};
   final Map<StorageLocation, String> _referenceLocationLabels = {};
+  final Map<ItemType, String> _referenceTypeLabels = {};
 
   bool get _isEditMode => widget.itemId != null;
 
@@ -236,9 +239,17 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         region: region,
         locale: locale,
       );
+      await service.syncTypesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: region,
+        locale: locale,
+      );
 
       // Re-apply with freshly synced records once the network catches up.
       _applyReferenceRecords(prefs);
+      ref.invalidate(localBarcodeCatalogProvider);
+      ref.invalidate(referencePackLabelSnapshotProvider);
     } catch (_) {
       // Network refresh is best-effort; cached data already populated the UI.
     }
@@ -247,6 +258,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   void _applyReferenceRecords(SharedPreferences prefs) {
     final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
     final locationRecords = ReferencePackService.activeLocationRecords(prefs);
+    final typeRecords = ReferencePackService.activeTypeRecords(prefs);
 
     if (!mounted) {
       return;
@@ -280,6 +292,12 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
           locationRecords.map(
             (record) => MapEntry(record.appLocation, record.label),
           ),
+        );
+
+      _referenceTypeLabels
+        ..clear()
+        ..addEntries(
+          typeRecords.map((record) => MapEntry(record.appType, record.label)),
         );
     });
   }
@@ -730,7 +748,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         .map(
           (category) => _CategoryOption(
             id: 'builtin_${category.name}',
-            label: _referenceCategoryLabels[category] ?? category.displayName,
+            label: _localizedCategoryLabel(category),
             isCustom: false,
             builtIn: category,
           ),
@@ -752,11 +770,14 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   }
 
   Future<void> _openCategoryPicker() async {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final searchController = TextEditingController();
     final newCategoryController = TextEditingController();
     final iconController = TextEditingController();
     final existingNames = {
-      ...ItemCategory.values.map((c) => c.displayName.toLowerCase()),
+      ...ItemCategory.values.map(
+        (c) => _localizedCategoryLabel(c).toLowerCase(),
+      ),
       ..._userCategories.map((c) => c.name.toLowerCase()),
     };
     var query = '';
@@ -847,7 +868,10 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Select category', style: AppTextStyles.h3),
+                      Text(
+                        l10n.itemFormSelectCategory,
+                        style: AppTextStyles.h3,
+                      ),
                       const SizedBox(height: AppSpacing.sm),
                       TextField(
                         controller: searchController,
@@ -1448,7 +1472,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                     contentPadding: EdgeInsets.zero,
                     title: Text(suggestions[index].name),
                     subtitle: Text(
-                      '${suggestions[index].category.displayName} • ${suggestions[index].location.displayName} • ${(suggestions[index].confidence * 100).round()}% match',
+                      '${_localizedCategoryLabel(suggestions[index].category)} • ${_localizedLocationLabel(suggestions[index].location)} • ${(suggestions[index].confidence * 100).round()}% match',
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () => Navigator.of(context).pop(suggestions[index]),
@@ -1503,6 +1527,8 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
       _cameraSuggestedName = suggestedName;
       _cameraSuggestionSource = result.source;
       _cameraAssistedStage = _CameraAssistedStage.barcodeLocked;
+      _selectedType = ItemType.packaged;
+      _selectedPreparedDate = null;
 
       if (recentDefaults != null) {
         _brandController.text = recentDefaults.brand ?? '';
@@ -1827,6 +1853,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final expiryOcrEnabledAsync = ref.watch(
       isFlagEnabledProvider(FeatureFlagKey.expiryDateOcr),
     );
@@ -1967,7 +1994,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
             // Category dropdown (required)
             _buildFormGroup(
-              label: 'Category *',
+              label: '${l10n.labelCategory} *',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1976,7 +2003,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     child: InputDecorator(
                       decoration: _buildInputDecoration(
-                        hintText: 'Select category',
+                        hintText: l10n.itemFormSelectCategory,
                       ),
                       child: Row(
                         children: [
@@ -1990,7 +2017,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                                   )
                                 : _CategoryOption(
                                     id: 'builtin_${_selectedCategory.name}',
-                                    label: _selectedCategory.displayName,
+                                    label: _localizedCategoryLabel(
+                                      _selectedCategory,
+                                    ),
                                     isCustom: false,
                                     builtIn: _selectedCategory,
                                   ),
@@ -2001,7 +2030,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                             child: Text(
                               key: const Key('item_form_category_value'),
                               _selectedUserCategory?.name ??
-                                  _selectedCategory.displayName,
+                                  _localizedCategoryLabel(_selectedCategory),
                               style: theme.textTheme.bodyMedium,
                             ),
                           ),
@@ -2021,18 +2050,28 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
 
             // Type toggle (Raw vs Prepared)
             _buildFormGroup(
-              label: 'Type *',
+              label: '${l10n.labelType} *',
               child: SegmentedButton<ItemType>(
-                segments: const [
+                segments: [
                   ButtonSegment(
                     value: ItemType.raw,
-                    label: Text('Raw', key: Key('item_type_raw_label')),
+                    label: Text(
+                      _localizedTypeLabel(ItemType.raw),
+                      key: const Key('item_type_raw_label'),
+                    ),
                   ),
                   ButtonSegment(
                     value: ItemType.prepared,
                     label: Text(
-                      'Prepared',
-                      key: Key('item_type_prepared_label'),
+                      _localizedTypeLabel(ItemType.prepared),
+                      key: const Key('item_type_prepared_label'),
+                    ),
+                  ),
+                  ButtonSegment(
+                    value: ItemType.packaged,
+                    label: Text(
+                      _localizedTypeLabel(ItemType.packaged),
+                      key: const Key('item_type_packaged_label'),
                     ),
                   ),
                 ],
@@ -2047,10 +2086,18 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 7),
                       );
+                      _selectedPreparedDate = null;
                       _cameraAcceptedExpiryFormat = null;
-                    } else {
+                    } else if (selected == ItemType.prepared) {
                       _selectedPreparedDate = DateTime.now();
                       _selectedLocation = StorageLocation.freezer;
+                      _selectedExpiryDate = DateTime.now().add(
+                        const Duration(days: 30),
+                      );
+                      _cameraAcceptedExpiryFormat = null;
+                    } else {
+                      _selectedPreparedDate = null;
+                      _selectedLocation = StorageLocation.pantry;
                       _selectedExpiryDate = DateTime.now().add(
                         const Duration(days: 30),
                       );
@@ -2129,9 +2176,7 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
                               style: const TextStyle(fontSize: 18),
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              _referenceLocationLabels[loc] ?? loc.displayName,
-                            ),
+                            Text(_localizedLocationLabel(loc)),
                           ],
                         ),
                       ),
@@ -2661,8 +2706,9 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         : name;
     final brand = _normalizedBrand();
     final subtitle = brand == null
-        ? (_selectedUserCategory?.name ?? _selectedCategory.displayName)
-        : '$brand • ${_selectedUserCategory?.name ?? _selectedCategory.displayName}';
+        ? (_selectedUserCategory?.name ??
+              _localizedCategoryLabel(_selectedCategory))
+        : '$brand • ${_selectedUserCategory?.name ?? _localizedCategoryLabel(_selectedCategory)}';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -2764,6 +2810,65 @@ class _ItemFormScreenState extends ConsumerState<ItemFormScreen> {
         vertical: AppSpacing.md,
       ),
     );
+  }
+
+  String _localizedCategoryLabel(ItemCategory category) {
+    final reference = _referenceCategoryLabels[category];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
+  }
+
+  String _localizedLocationLabel(StorageLocation location) {
+    final reference = _referenceLocationLabels[location];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (location) {
+      case StorageLocation.fridge:
+        return l10n.locationFridge;
+      case StorageLocation.pantry:
+        return l10n.locationPantry;
+      case StorageLocation.freezer:
+        return l10n.locationFreezer;
+      case StorageLocation.other:
+        return l10n.locationOther;
+    }
+  }
+
+  String _localizedTypeLabel(ItemType type) {
+    final reference = _referenceTypeLabels[type];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (type) {
+      case ItemType.raw:
+        return l10n.itemTypeRaw;
+      case ItemType.prepared:
+        return l10n.itemTypePrepared;
+      case ItemType.packaged:
+        return l10n.itemTypePackaged;
+    }
   }
 
   String _getCategoryEmoji(ItemCategory category) {

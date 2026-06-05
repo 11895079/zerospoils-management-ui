@@ -8,6 +8,7 @@
   "navigationShoppingList": "Einkauf",
   "navigationShoppingHistory": "Verlauf",
   "navigationSettings": "Einstellungen",
+  "navigationOnboarding": "Einstieg",
 
   "screenTitleInventory": "Inventar",
   "screenTitleShoppingList": "Einkaufsliste",
@@ -68,10 +69,14 @@
   "categoryProduce": "Frisches",
   "categoryDairy": "Milchprodukte",
   "categoryMeat": "Fleisch",
+  "categoryGrains": "Getreide",
   "categoryFrozen": "Tiefgekühlt",
   "categoryPantry": "Vorrat",
   "categoryBeverages": "Getränke",
   "categoryOther": "Sonstiges",
+  "itemTypeRaw": "Roh",
+  "itemTypePrepared": "Gekocht",
+  "itemTypePackaged": "Verpackt",
 
   "locationFridge": "Kühlschrank",
   "locationFreezer": "Gefrierschrank",
@@ -125,6 +130,11 @@
   "settingsPrivacy": "Datenschutz und Daten",
   "settingsDarkMode": "Dunkelmodus",
   "settingsLanguage": "Sprache",
+  "labelType": "Typ",
+  "itemFormSelectCategory": "Kategorie auswählen",
+  "drawerHeaderSubtitle": "Navigation",
+  "zestoDismissLabel": "Zesto schließen",
+  "zestoSaysLabel": "Zesto sagt: {message}",
   "settingsReferenceDataRegion": "Region der Referenzdaten",
   "settingsReferenceDataLanguage": "Sprache der Referenzdaten",
   "settingsDateFormat": "Datumsformat",
@@ -153,6 +163,36 @@
   "settingsHelpFaq": "Hilfe und FAQ",
   "settingsHelpCenterComingSoon": "Hilfecenter demnächst verfügbar",
   "settingsSendFeedback": "Feedback senden",
+  "feedbackDrawerBarrierLabel": "Feedback",
+  "feedbackDrawerTitle": "Feedback senden",
+  "feedbackDrawerCloseTooltip": "Feedback schließen",
+  "feedbackDrawerIntro": "Sag uns, was funktioniert oder kaputt ist. App-Metadaten werden automatisch hinzugefügt.",
+  "feedbackDrawerCategoryLabel": "Kategorie",
+  "feedbackCategoryBugReport": "Fehler melden",
+  "feedbackCategoryFeatureRequest": "Funktionswunsch",
+  "feedbackCategoryUxFeedback": "UX-Feedback",
+  "feedbackCategoryDarkModeReadability": "Lesbarkeit im Dunkelmodus",
+  "feedbackCategoryOther": "Sonstiges",
+  "feedbackDrawerMessageLabel": "Nachricht",
+  "feedbackDrawerMessageHint": "Was ist passiert? Was sollen wir verbessern?",
+  "feedbackDrawerMessageValidation": "Bitte gib vor dem Senden Feedback ein.",
+  "feedbackDrawerEmailLabel": "E-Mail (optional)",
+  "feedbackDrawerEmailHint": "du@beispiel.de",
+  "feedbackDrawerSourceLocale": "Quelle: {source} • Sprache: {locale}",
+  "@feedbackDrawerSourceLocale": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "locale": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackDrawerSubmitting": "Wird gesendet...",
+  "feedbackDrawerSubmit": "Senden",
+  "feedbackDrawerSent": "Feedback gesendet. Danke.",
+  "feedbackDrawerSignInRequired": "Bitte melde dich an, bevor du Feedback sendest.",
   "settingsRateApp": "App bewerten",
   "settingsThanksForSupport": "Danke für die Unterstützung!",
   "settingsViewTutorial": "Tutorial ansehen",
@@ -425,6 +465,248 @@
     }
   },
 
+  "inventoryFiltersTitle": "Filter",
+  "inventoryFilterAddedDate": "Hinzugefügt am",
+  "inventoryFilterFrom": "Von",
+  "inventoryFilterTo": "Bis",
+  "inventoryFilterPreparedOnly": "Nur vorbereitet",
+  "inventoryFilterPreparedOnlyHint": "Nur vorbereitete Artikel anzeigen",
+  "inventoryFilterExpiringSoonOnly": "Nur bald ablaufend",
+  "inventoryFilterExpiringSoonOnlyHint": "Artikel anzeigen, die in den nächsten 3 Tagen ablaufen",
+  "inventoryFilterBatchLinkedOnly": "Nur chargenverknüpft",
+  "inventoryFilterBatchLinkedOnlyHint": "Nur mit Einkaufschargen verknüpfte Artikel anzeigen",
+  "inventoryFilterHideConsumedItems": "Verbrauchte Artikel ausblenden",
+  "inventoryFilterHideConsumedItemsHint": "Als verbraucht oder verschwendet markierte Artikel ausblenden",
+  "inventoryFilterReset": "Zurücksetzen",
+  "inventoryFilterApply": "Anwenden",
+  "inventoryBatchReceiptButton": "Belegcharge",
+  "inventoryDemoModeHint": "Beispielartikel werden angezeigt. In den Einstellungen deaktivieren, um echte Daten zu nutzen.",
+  "inventoryStreakDays": "🔥 {days}-Tage-Serie",
+  "@inventoryStreakDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryLevelUp": "Level aufsteigen",
+  "inventoryNoWasteWeek": "No-Waste-Woche",
+  "inventoryStreakCompleted": "Geschafft! Halte die Serie am Leben.",
+  "inventoryStreakRemaining": "Erfasse noch {daysRemaining} Rettungen, um aufzusteigen",
+  "@inventoryStreakRemaining": {
+    "placeholders": {
+      "daysRemaining": {
+        "type": "int"
+      }
+    }
+  },
+  "inventoryStreakFootnote": "Ohne Bewertung: Vergleiche mit Freunden nur, wenn du es aktivierst.",
+  "inventoryViewList": "Listenansicht",
+  "inventoryViewTable": "Tabellenansicht",
+  "inventoryViewGrid": "Rasteransicht",
+  "inventoryTableName": "Name",
+  "inventoryTableCategory": "Kategorie",
+  "inventoryTableLocation": "Ort",
+  "inventoryTableExpiry": "Ablauf",
+  "inventoryTableQuantity": "Menge",
+  "inventoryTableStatus": "Status",
+  "inventoryNoExpiry": "Kein Ablauf",
+  "inventoryExpiryShort": "Abl {date}",
+  "@inventoryExpiryShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryDeleteItemTitle": "Artikel löschen?",
+  "inventoryDeleteItemPrompt": "Möchtest du \"{itemName}\" wirklich aus deinem Inventar löschen?",
+  "@inventoryDeleteItemPrompt": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryActiveFilters": "Aktive Filter:",
+  "inventoryAddedFrom": "Hinzugefügt ab {date}",
+  "@inventoryAddedFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryAddedTo": "Hinzugefügt bis {date}",
+  "@inventoryAddedTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryClearAll": "Alles löschen",
+  "messageEmptyInventoryTitle": "Dein Inventar ist leer",
+  "inventoryAddFirstItem": "Füge deinen ersten Artikel hinzu",
+  "shoppingUnableToLoadList": "Einkaufsliste konnte nicht geladen werden",
+  "shoppingNextShop": "Nächster Einkauf",
+  "shoppingPurchased": "Gekauft",
+  "shoppingConvertPurchased": "Gekaufte umwandeln ({count})",
+  "@shoppingConvertPurchased": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingSourceFromShoppingList": "Aus der Einkaufsliste",
+  "shoppingAddedToInventory": "{itemName} zum Inventar hinzugefügt",
+  "@shoppingAddedToInventory": {
+    "placeholders": {
+      "itemName": {
+        "type": "String"
+      }
+    }
+  },
+  "shoppingDeleteItem": "Artikel löschen",
+  "shoppingEmptyTitle": "Deine Einkaufsliste ist leer",
+  "shoppingStartList": "Starte deine Einkaufsliste",
+  "shoppingUnableToLoadHistory": "Einkaufshistorie konnte nicht geladen werden",
+  "shoppingNoHistory": "Noch keine Einkäufe erfasst",
+  "progressUnableToLoad": "Fortschritt konnte nicht geladen werden: {error}",
+  "@progressUnableToLoad": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "progressSectionSummary": "Zusammenfassung",
+  "progressStatTotalItems": "Gesamtartikel",
+  "progressStatAvailable": "Verfügbar",
+  "progressStatConsumed": "Verbraucht",
+  "progressStatWasted": "Verschwendet",
+  "progressSectionExpiryHealth": "Ablaufstatus",
+  "progressStatExpiringToday": "Laufen heute ab",
+  "progressStatThisWeek": "Diese Woche",
+  "progressStatExpiringSoon": "Laufen bald ab",
+  "progressStatExpired": "Abgelaufen",
+  "progressStatNoExpiry": "Ohne Ablauf",
+  "progressSectionValueImpact": "Wertauswirkung",
+  "progressStatTotalValue": "Gesamtwert",
+  "progressStatConsumedValue": "Verbrauchter Wert",
+  "progressStatWastedValue": "Verschwendeter Wert",
+  "progressStatSavedEstimate": "Gespart (geschätzt)",
+  "progressSectionActivity": "Aktivität",
+  "progressStatAdded7d": "Hinzugefügt (7 T)",
+  "progressStatAdded30d": "Hinzugefügt (30 T)",
+  "progressStatUpdated7d": "Aktualisiert (7 T)",
+  "progressStatUpdated30d": "Aktualisiert (30 T)",
+  "progressSectionCategories": "Kategorien",
+  "progressSectionLocations": "Orte",
+  "progressSectionTypes": "Typen",
+  "progressSectionBadges": "Abzeichen und Erfolge",
+  "progressSectionTelemetry": "Telemetrie (lokale Aggregation)",
+  "progressSectionRecentBatch": "Neueste Belegcharge",
+  "progressRecentBatchLoadError": "Neueste Charge konnte nicht geladen werden",
+  "progressNoRecentBatches": "Noch keine aktuellen Belegchargen.",
+  "progressRecentBatchItemsTotal": "{count} Artikel · {total} gesamt",
+  "@progressRecentBatchItemsTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "progressRecentBatchSource": "Quelle: {source}",
+  "@progressRecentBatchSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "progressLocalInsightsTitle": "Lokale Einblicke",
+  "progressLocalInsightsSubtitle": "Diese Einblicke werden auf dem Gerät aus deiner Aktivität berechnet.",
+  "progressStatTotalEvents": "Gesamtereignisse",
+  "progressStatItemsAdded": "Artikel hinzugefügt",
+  "progressStatItemsWasted": "Artikel verschwendet",
+  "progressStatRemindersOpened": "Erinnerungen geöffnet",
+  "progressTopAddSources": "Top-Hinzufügequellen",
+  "progressTopWasteReasons": "Top-Gründe für Verschwendung",
+  "progressMostViewedScreens": "Am meisten angesehene Seiten",
+  "progressTabSwitches": "Tab-Wechsel",
+  "progressNoDataYet": "Noch keine Daten",
+  "expiringLoadError": "Fehler beim Laden der Artikel: {error}",
+  "@expiringLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "expiringEmptyTitle": "Alles klar!",
+  "expiringEmptyMessage": "Nichts läuft bald ab.\nSuper, dass du dein Inventar\nso gut im Blick hast!",
+  "expiringReviewInventory": "Inventar prüfen",
+  "expiringBucketSemantics": "Abschnitt Ablauf {bucketName}",
+  "@expiringBucketSemantics": {
+    "placeholders": {
+      "bucketName": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardPrepared": "Vorbereitet",
+  "itemCardWastedPercent": "Verschwendet {percent}%",
+  "@itemCardWastedPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "itemCardUsed": "Verwendet",
+  "itemCardWasted": "Verschwendet",
+  "itemCardAddedDate": "Hinzugefügt {date}",
+  "@itemCardAddedDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardEditTooltip": "Artikel bearbeiten",
+  "itemCardDeleteTooltip": "Artikel löschen",
+  "itemCardLocationFridge": "❄️ Kühlschrank",
+  "itemCardLocationFreezer": "🧊 Gefrierschrank",
+  "itemCardLocationPantry": "🗄️ Vorratskammer",
+  "itemCardLocationOther": "🏠 Sonstiges",
+  "itemCardLocationPrepared": "{locationLabel} • Vorbereitet am {date}",
+  "@itemCardLocationPrepared": {
+    "placeholders": {
+      "locationLabel": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "itemCardNoExpirySet": "Kein Ablaufdatum gesetzt",
+  "itemCardExpired": "Abgelaufen",
+  "itemCardExpiresToday": "Läuft heute ab ⚠️",
+  "itemCardExpiresTomorrow": "Läuft morgen ab",
+  "itemCardExpiresInDays": "Läuft in {days} Tagen ab",
+  "@itemCardExpiresInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "noData": "Keine Daten",
   "loading": "Wird geladen...",
   "retry": "Erneut versuchen"

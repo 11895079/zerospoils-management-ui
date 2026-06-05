@@ -386,6 +386,7 @@ void main() {
       final saved = items.firstWhere((item) => item.id != 'existing-1');
       expect(saved.category, ItemCategory.pantry);
       expect(saved.location, StorageLocation.freezer);
+      expect(saved.type, ItemType.packaged);
     } finally {
       debugDefaultTargetPlatformOverride = null;
     }

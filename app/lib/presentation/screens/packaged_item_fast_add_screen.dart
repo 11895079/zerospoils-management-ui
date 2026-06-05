@@ -173,7 +173,7 @@ class _PackagedItemFastAddScreenState
 
       _barcodeIsCompleting = true;
       await _scannerController?.stop();
-      await FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess);
+      unawaited(FeedbackRuntime.triggerOcrSuccess(FeedbackType.barcodeSuccess));
       if (!mounted) {
         return;
       }

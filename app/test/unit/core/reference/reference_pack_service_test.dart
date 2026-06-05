@@ -330,18 +330,22 @@ void main() {
       expect(status.recordCount, 1);
     });
 
-    test('syncs locale-scoped categories and locations packs', () async {
+    test('syncs locale-scoped categories, locations, and types packs', () async {
       const manifestUrl =
           'https://firebase.storage.googleapis.com/manifests/reference-manifest.json';
       const categoriesUrl =
           'https://firebase.storage.googleapis.com/packs/categories-ca-fr.json';
       const locationsUrl =
           'https://firebase.storage.googleapis.com/packs/locations-ca-fr.json';
+      const typesUrl =
+          'https://firebase.storage.googleapis.com/packs/types-ca-fr.json';
 
       const categoriesPack =
           '{"metadata":{"schema_version":1,"type":"categories","region":"ca","locale":"fr-CA"},"records":[{"id":"produce","label":"Fruits et legumes","app_category":"produce","synonyms":["fruit"]}] }';
       const locationsPack =
           '{"metadata":{"schema_version":1,"type":"locations","region":"ca","locale":"fr-CA"},"records":[{"id":"fridge","label":"Frigo","app_location":"fridge","synonyms":["refrigerateur"]}] }';
+      const typesPack =
+          '{"metadata":{"schema_version":1,"type":"types","region":"ca","locale":"fr-CA"},"records":[{"id":"raw","label":"Brut","app_type":"raw","synonyms":["frais"]},{"id":"cooked","label":"Cuit","app_type":"cooked","synonyms":["prepare"]},{"id":"packaged","label":"Emballe","app_type":"packaged","synonyms":["code barre"]}] }';
 
       final categoriesChecksum = sha256
           .convert(utf8.encode(categoriesPack))
@@ -349,6 +353,7 @@ void main() {
       final locationsChecksum = sha256
           .convert(utf8.encode(locationsPack))
           .toString();
+      final typesChecksum = sha256.convert(utf8.encode(typesPack)).toString();
 
       final manifestJson =
           '''
@@ -372,6 +377,15 @@ void main() {
       "checksum": "$locationsChecksum",
       "minimum_app_version": "1.0.0",
       "download_url": "$locationsUrl"
+    },
+    {
+      "type": "types",
+      "region": "ca",
+      "locale": "fr-CA",
+      "version": "1.0.0",
+      "checksum": "$typesChecksum",
+      "minimum_app_version": "1.0.0",
+      "download_url": "$typesUrl"
     }
   ]
 }
@@ -386,6 +400,7 @@ void main() {
         manifestUrl: manifestJson,
         categoriesUrl: categoriesPack,
         locationsUrl: locationsPack,
+        typesUrl: typesPack,
       });
       final manifestProvider = _FakeManifestUrlProvider(Uri.parse(manifestUrl));
 
@@ -401,16 +416,46 @@ void main() {
         region: 'ca',
         locale: 'fr-CA',
       );
+      final typesResult = await service.syncTypesPack(
+        manifestUrlProvider: manifestProvider,
+        downloader: downloader,
+        region: 'ca',
+        locale: 'fr-CA',
+      );
 
       expect(categoriesResult.success, isTrue);
       expect(locationsResult.success, isTrue);
+      expect(typesResult.success, isTrue);
 
       final categoryRecords = ReferencePackService.activeCategoryRecords(prefs);
       final locationRecords = ReferencePackService.activeLocationRecords(prefs);
+      final typeRecords = ReferencePackService.activeTypeRecords(prefs);
       expect(categoryRecords, hasLength(1));
       expect(categoryRecords.single.label, 'Fruits et legumes');
       expect(locationRecords, hasLength(1));
       expect(locationRecords.single.label, 'Frigo');
+      expect(typeRecords, hasLength(3));
+      expect(
+        typeRecords
+            .where((record) => record.appType.name == 'raw')
+            .single
+            .label,
+        'Brut',
+      );
+      expect(
+        typeRecords
+            .where((record) => record.appType.name == 'prepared')
+            .single
+            .label,
+        'Cuit',
+      );
+      expect(
+        typeRecords
+            .where((record) => record.appType.name == 'packaged')
+            .single
+            .label,
+        'Emballe',
+      );
     });
 
     test('fails sync when manifest URL is unset', () async {

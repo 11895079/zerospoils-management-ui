@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/item_model.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../widgets/local_image_preview.dart';
 import '../../domain/models/receipt_batch.dart';
 import '../../domain/repositories/receipt_batch_stats_service.dart';
@@ -564,7 +566,7 @@ class _ReceiptBatchDetailScreenState
                               key: Key('batch_link_candidate_${item.id}'),
                               title: Text(item.name),
                               subtitle: Text(
-                                '${item.category.displayName} · qty ${item.quantity}',
+                                '${_localizedCategoryLabel(item.category)} · qty ${item.quantity}',
                               ),
                               onTap: () => Navigator.of(context).pop(item),
                             );
@@ -731,7 +733,7 @@ class _ReceiptBatchDetailScreenState
             return Chip(
               key: Key('category_spend_chip_${entry.key.name}'),
               label: Text(
-                '${entry.key.emoji} ${entry.key.displayName}  ${_currency(entry.value)}',
+                '${entry.key.emoji} ${_localizedCategoryLabel(entry.key)}  ${_currency(entry.value)}',
                 style: AppTextStyles.bodySmall,
               ),
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
@@ -741,6 +743,33 @@ class _ReceiptBatchDetailScreenState
         ),
       ],
     );
+  }
+
+  String _localizedCategoryLabel(ItemCategory category) {
+    final referenceLabels = ref
+        .watch(referencePackLabelSnapshotProvider)
+        .valueOrNull
+        ?.categoryLabels;
+    final reference = referenceLabels?[category];
+    if (reference != null && reference.trim().isNotEmpty) {
+      return reference;
+    }
+
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    switch (category) {
+      case ItemCategory.produce:
+        return l10n.categoryProduce;
+      case ItemCategory.dairy:
+        return l10n.categoryDairy;
+      case ItemCategory.meat:
+        return l10n.categoryMeat;
+      case ItemCategory.grains:
+        return l10n.categoryGrains;
+      case ItemCategory.pantry:
+        return l10n.categoryPantry;
+      case ItemCategory.other:
+        return l10n.categoryOther;
+    }
   }
 }
 

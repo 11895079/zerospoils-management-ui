@@ -25,6 +25,8 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
       return;
     }
 
+    await _configureForScannerBeep();
+
     _cachedTone ??= _generateWavTone(
       frequencyHz: 1380,
       durationMs: 85,
@@ -34,6 +36,36 @@ class DefaultAudioFeedbackPlayer implements AudioFeedbackPlayer {
 
     await _player.setVolume(safeVolume);
     await _player.play(BytesSource(_cachedTone!));
+  }
+
+  Future<void> _configureForScannerBeep() async {
+    try {
+      await _player.setPlayerMode(PlayerMode.lowLatency);
+    } catch (_) {}
+
+    try {
+      await _player.setReleaseMode(ReleaseMode.stop);
+    } catch (_) {}
+
+    try {
+      await _player.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.assistanceSonification,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: const {
+              AVAudioSessionOptions.mixWithOthers,
+              AVAudioSessionOptions.duckOthers,
+            },
+          ),
+        ),
+      );
+    } catch (_) {}
   }
 
   Uint8List _generateWavTone({

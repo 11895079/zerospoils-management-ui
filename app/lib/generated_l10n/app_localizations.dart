@@ -141,6 +141,12 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navigationSettings;
 
+  /// No description provided for @navigationOnboarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarding'**
+  String get navigationOnboarding;
+
   /// No description provided for @screenTitleInventory.
   ///
   /// In en, this message translates to:
@@ -471,6 +477,12 @@ abstract class AppLocalizations {
   /// **'Meat'**
   String get categoryMeat;
 
+  /// No description provided for @categoryGrains.
+  ///
+  /// In en, this message translates to:
+  /// **'Grains'**
+  String get categoryGrains;
+
   /// No description provided for @categoryFrozen.
   ///
   /// In en, this message translates to:
@@ -494,6 +506,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get categoryOther;
+
+  /// No description provided for @itemTypeRaw.
+  ///
+  /// In en, this message translates to:
+  /// **'Raw'**
+  String get itemTypeRaw;
+
+  /// No description provided for @itemTypePrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooked'**
+  String get itemTypePrepared;
+
+  /// No description provided for @itemTypePackaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Packaged'**
+  String get itemTypePackaged;
 
   /// No description provided for @locationFridge.
   ///
@@ -765,6 +795,36 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get settingsLanguage;
 
+  /// No description provided for @labelType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get labelType;
+
+  /// No description provided for @itemFormSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get itemFormSelectCategory;
+
+  /// No description provided for @drawerHeaderSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get drawerHeaderSubtitle;
+
+  /// No description provided for @zestoDismissLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss Zesto'**
+  String get zestoDismissLabel;
+
+  /// No description provided for @zestoSaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zesto says: {message}'**
+  String zestoSaysLabel(String message);
+
   /// No description provided for @settingsReferenceDataRegion.
   ///
   /// In en, this message translates to:
@@ -932,6 +992,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send Feedback'**
   String get settingsSendFeedback;
+
+  /// No description provided for @feedbackDrawerBarrierLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback'**
+  String get feedbackDrawerBarrierLabel;
+
+  /// No description provided for @feedbackDrawerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Feedback'**
+  String get feedbackDrawerTitle;
+
+  /// No description provided for @feedbackDrawerCloseTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Close feedback'**
+  String get feedbackDrawerCloseTooltip;
+
+  /// No description provided for @feedbackDrawerIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what is working or broken. We include app metadata automatically.'**
+  String get feedbackDrawerIntro;
+
+  /// No description provided for @feedbackDrawerCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get feedbackDrawerCategoryLabel;
+
+  /// No description provided for @feedbackCategoryBugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Bug report'**
+  String get feedbackCategoryBugReport;
+
+  /// No description provided for @feedbackCategoryFeatureRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature request'**
+  String get feedbackCategoryFeatureRequest;
+
+  /// No description provided for @feedbackCategoryUxFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'UX feedback'**
+  String get feedbackCategoryUxFeedback;
+
+  /// No description provided for @feedbackCategoryDarkModeReadability.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode readability'**
+  String get feedbackCategoryDarkModeReadability;
+
+  /// No description provided for @feedbackCategoryOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get feedbackCategoryOther;
+
+  /// No description provided for @feedbackDrawerMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get feedbackDrawerMessageLabel;
+
+  /// No description provided for @feedbackDrawerMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What happened? What should we improve?'**
+  String get feedbackDrawerMessageHint;
+
+  /// No description provided for @feedbackDrawerMessageValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter feedback before submitting.'**
+  String get feedbackDrawerMessageValidation;
+
+  /// No description provided for @feedbackDrawerEmailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get feedbackDrawerEmailLabel;
+
+  /// No description provided for @feedbackDrawerEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'you@example.com'**
+  String get feedbackDrawerEmailHint;
+
+  /// No description provided for @feedbackDrawerSourceLocale.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source} • Locale: {locale}'**
+  String feedbackDrawerSourceLocale(String source, String locale);
+
+  /// No description provided for @feedbackDrawerSubmitting.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitting...'**
+  String get feedbackDrawerSubmitting;
+
+  /// No description provided for @feedbackDrawerSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get feedbackDrawerSubmit;
+
+  /// No description provided for @feedbackDrawerSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback sent. Thank you.'**
+  String get feedbackDrawerSent;
+
+  /// No description provided for @feedbackDrawerSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in before sending feedback.'**
+  String get feedbackDrawerSignInRequired;
 
   /// No description provided for @settingsRateApp.
   ///
@@ -1645,6 +1825,708 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{currency}{amount}'**
   String formattedPrice(String currency, double amount);
+
+  /// No description provided for @inventoryFiltersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get inventoryFiltersTitle;
+
+  /// No description provided for @inventoryFilterAddedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Added date'**
+  String get inventoryFilterAddedDate;
+
+  /// No description provided for @inventoryFilterFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get inventoryFilterFrom;
+
+  /// No description provided for @inventoryFilterTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get inventoryFilterTo;
+
+  /// No description provided for @inventoryFilterPreparedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepared only'**
+  String get inventoryFilterPreparedOnly;
+
+  /// No description provided for @inventoryFilterPreparedOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show prepared items only'**
+  String get inventoryFilterPreparedOnlyHint;
+
+  /// No description provided for @inventoryFilterExpiringSoonOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring soon only'**
+  String get inventoryFilterExpiringSoonOnly;
+
+  /// No description provided for @inventoryFilterExpiringSoonOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show items expiring within the next 3 days'**
+  String get inventoryFilterExpiringSoonOnlyHint;
+
+  /// No description provided for @inventoryFilterBatchLinkedOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch-linked only'**
+  String get inventoryFilterBatchLinkedOnly;
+
+  /// No description provided for @inventoryFilterBatchLinkedOnlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only items linked to shopping batches'**
+  String get inventoryFilterBatchLinkedOnlyHint;
+
+  /// No description provided for @inventoryFilterHideConsumedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide consumed items'**
+  String get inventoryFilterHideConsumedItems;
+
+  /// No description provided for @inventoryFilterHideConsumedItemsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide items marked as consumed or wasted'**
+  String get inventoryFilterHideConsumedItemsHint;
+
+  /// No description provided for @inventoryFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get inventoryFilterReset;
+
+  /// No description provided for @inventoryFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get inventoryFilterApply;
+
+  /// No description provided for @inventoryBatchReceiptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch receipt'**
+  String get inventoryBatchReceiptButton;
+
+  /// No description provided for @inventoryDemoModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing sample items. Turn off in Settings to use real data.'**
+  String get inventoryDemoModeHint;
+
+  /// No description provided for @inventoryStreakDays.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {days}-day streak'**
+  String inventoryStreakDays(int days);
+
+  /// No description provided for @inventoryLevelUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Level up'**
+  String get inventoryLevelUp;
+
+  /// No description provided for @inventoryNoWasteWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'No Waste Week'**
+  String get inventoryNoWasteWeek;
+
+  /// No description provided for @inventoryStreakCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You made it! Keep the streak alive.'**
+  String get inventoryStreakCompleted;
+
+  /// No description provided for @inventoryStreakRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'Log {daysRemaining} more saves to level up'**
+  String inventoryStreakRemaining(int daysRemaining);
+
+  /// No description provided for @inventoryStreakFootnote.
+  ///
+  /// In en, this message translates to:
+  /// **'Judgement-free: compare with friends only when you opt in.'**
+  String get inventoryStreakFootnote;
+
+  /// No description provided for @inventoryViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get inventoryViewList;
+
+  /// No description provided for @inventoryViewTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table view'**
+  String get inventoryViewTable;
+
+  /// No description provided for @inventoryViewGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get inventoryViewGrid;
+
+  /// No description provided for @inventoryTableName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get inventoryTableName;
+
+  /// No description provided for @inventoryTableCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get inventoryTableCategory;
+
+  /// No description provided for @inventoryTableLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get inventoryTableLocation;
+
+  /// No description provided for @inventoryTableExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry'**
+  String get inventoryTableExpiry;
+
+  /// No description provided for @inventoryTableQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get inventoryTableQuantity;
+
+  /// No description provided for @inventoryTableStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get inventoryTableStatus;
+
+  /// No description provided for @inventoryNoExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry'**
+  String get inventoryNoExpiry;
+
+  /// No description provided for @inventoryExpiryShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Exp {date}'**
+  String inventoryExpiryShort(String date);
+
+  /// No description provided for @inventoryDeleteItemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Item?'**
+  String get inventoryDeleteItemTitle;
+
+  /// No description provided for @inventoryDeleteItemPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{itemName}\" from your inventory?'**
+  String inventoryDeleteItemPrompt(String itemName);
+
+  /// No description provided for @inventoryActiveFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Active filters:'**
+  String get inventoryActiveFilters;
+
+  /// No description provided for @inventoryAddedFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Added from {date}'**
+  String inventoryAddedFrom(String date);
+
+  /// No description provided for @inventoryAddedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Added to {date}'**
+  String inventoryAddedTo(String date);
+
+  /// No description provided for @inventoryClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get inventoryClearAll;
+
+  /// No description provided for @messageEmptyInventoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your inventory is empty'**
+  String get messageEmptyInventoryTitle;
+
+  /// No description provided for @inventoryAddFirstItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first item'**
+  String get inventoryAddFirstItem;
+
+  /// No description provided for @shoppingUnableToLoadList.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load shopping list'**
+  String get shoppingUnableToLoadList;
+
+  /// No description provided for @shoppingNextShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next Shop'**
+  String get shoppingNextShop;
+
+  /// No description provided for @shoppingPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased'**
+  String get shoppingPurchased;
+
+  /// No description provided for @shoppingConvertPurchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Convert Purchased ({count})'**
+  String shoppingConvertPurchased(int count);
+
+  /// No description provided for @shoppingSourceFromShoppingList.
+  ///
+  /// In en, this message translates to:
+  /// **'From Shopping List'**
+  String get shoppingSourceFromShoppingList;
+
+  /// No description provided for @shoppingAddedToInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'{itemName} added to inventory'**
+  String shoppingAddedToInventory(String itemName);
+
+  /// No description provided for @shoppingDeleteItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete item'**
+  String get shoppingDeleteItem;
+
+  /// No description provided for @shoppingEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your shopping list is empty'**
+  String get shoppingEmptyTitle;
+
+  /// No description provided for @shoppingStartList.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your shopping list'**
+  String get shoppingStartList;
+
+  /// No description provided for @shoppingUnableToLoadHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load shopping history'**
+  String get shoppingUnableToLoadHistory;
+
+  /// No description provided for @shoppingNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No shopping trips recorded yet'**
+  String get shoppingNoHistory;
+
+  /// No description provided for @progressUnableToLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load progress: {error}'**
+  String progressUnableToLoad(String error);
+
+  /// No description provided for @progressSectionSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get progressSectionSummary;
+
+  /// No description provided for @progressStatTotalItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Items'**
+  String get progressStatTotalItems;
+
+  /// No description provided for @progressStatAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get progressStatAvailable;
+
+  /// No description provided for @progressStatConsumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumed'**
+  String get progressStatConsumed;
+
+  /// No description provided for @progressStatWasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wasted'**
+  String get progressStatWasted;
+
+  /// No description provided for @progressSectionExpiryHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Health'**
+  String get progressSectionExpiryHealth;
+
+  /// No description provided for @progressStatExpiringToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring Today'**
+  String get progressStatExpiringToday;
+
+  /// No description provided for @progressStatThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get progressStatThisWeek;
+
+  /// No description provided for @progressStatExpiringSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring Soon'**
+  String get progressStatExpiringSoon;
+
+  /// No description provided for @progressStatExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get progressStatExpired;
+
+  /// No description provided for @progressStatNoExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'No Expiry'**
+  String get progressStatNoExpiry;
+
+  /// No description provided for @progressSectionValueImpact.
+  ///
+  /// In en, this message translates to:
+  /// **'Value Impact'**
+  String get progressSectionValueImpact;
+
+  /// No description provided for @progressStatTotalValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Value'**
+  String get progressStatTotalValue;
+
+  /// No description provided for @progressStatConsumedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Consumed Value'**
+  String get progressStatConsumedValue;
+
+  /// No description provided for @progressStatWastedValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Wasted Value'**
+  String get progressStatWastedValue;
+
+  /// No description provided for @progressStatSavedEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved (est.)'**
+  String get progressStatSavedEstimate;
+
+  /// No description provided for @progressSectionActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get progressSectionActivity;
+
+  /// No description provided for @progressStatAdded7d.
+  ///
+  /// In en, this message translates to:
+  /// **'Added (7d)'**
+  String get progressStatAdded7d;
+
+  /// No description provided for @progressStatAdded30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Added (30d)'**
+  String get progressStatAdded30d;
+
+  /// No description provided for @progressStatUpdated7d.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated (7d)'**
+  String get progressStatUpdated7d;
+
+  /// No description provided for @progressStatUpdated30d.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated (30d)'**
+  String get progressStatUpdated30d;
+
+  /// No description provided for @progressSectionCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get progressSectionCategories;
+
+  /// No description provided for @progressSectionLocations.
+  ///
+  /// In en, this message translates to:
+  /// **'Locations'**
+  String get progressSectionLocations;
+
+  /// No description provided for @progressSectionTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get progressSectionTypes;
+
+  /// No description provided for @progressSectionBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges & Achievements'**
+  String get progressSectionBadges;
+
+  /// No description provided for @progressSectionTelemetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Telemetry (Local Aggregation)'**
+  String get progressSectionTelemetry;
+
+  /// No description provided for @progressSectionRecentBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Receipt Batch'**
+  String get progressSectionRecentBatch;
+
+  /// No description provided for @progressRecentBatchLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load recent batch'**
+  String get progressRecentBatchLoadError;
+
+  /// No description provided for @progressNoRecentBatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No recent receipt batches yet.'**
+  String get progressNoRecentBatches;
+
+  /// No description provided for @progressRecentBatchItemsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items · {total} total'**
+  String progressRecentBatchItemsTotal(int count, String total);
+
+  /// No description provided for @progressRecentBatchSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String progressRecentBatchSource(String source);
+
+  /// No description provided for @progressLocalInsightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Insights'**
+  String get progressLocalInsightsTitle;
+
+  /// No description provided for @progressLocalInsightsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'These insights are computed on-device from your activity.'**
+  String get progressLocalInsightsSubtitle;
+
+  /// No description provided for @progressStatTotalEvents.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Events'**
+  String get progressStatTotalEvents;
+
+  /// No description provided for @progressStatItemsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Items Added'**
+  String get progressStatItemsAdded;
+
+  /// No description provided for @progressStatItemsWasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Items Wasted'**
+  String get progressStatItemsWasted;
+
+  /// No description provided for @progressStatRemindersOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders Opened'**
+  String get progressStatRemindersOpened;
+
+  /// No description provided for @progressTopAddSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Add Sources'**
+  String get progressTopAddSources;
+
+  /// No description provided for @progressTopWasteReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Top Waste Reasons'**
+  String get progressTopWasteReasons;
+
+  /// No description provided for @progressMostViewedScreens.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Viewed Screens'**
+  String get progressMostViewedScreens;
+
+  /// No description provided for @progressTabSwitches.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab Switches'**
+  String get progressTabSwitches;
+
+  /// No description provided for @progressNoDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get progressNoDataYet;
+
+  /// No description provided for @expiringLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading items: {error}'**
+  String expiringLoadError(String error);
+
+  /// No description provided for @expiringEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear!'**
+  String get expiringEmptyTitle;
+
+  /// No description provided for @expiringEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing expiring soon.\nGreat job staying on top of\nyour inventory!'**
+  String get expiringEmptyMessage;
+
+  /// No description provided for @expiringReviewInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Review Inventory'**
+  String get expiringReviewInventory;
+
+  /// No description provided for @expiringBucketSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiring {bucketName} section'**
+  String expiringBucketSemantics(String bucketName);
+
+  /// No description provided for @itemCardPrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepared'**
+  String get itemCardPrepared;
+
+  /// No description provided for @itemCardWastedPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Wasted {percent}%'**
+  String itemCardWastedPercent(int percent);
+
+  /// No description provided for @itemCardUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used'**
+  String get itemCardUsed;
+
+  /// No description provided for @itemCardWasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wasted'**
+  String get itemCardWasted;
+
+  /// No description provided for @itemCardAddedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {date}'**
+  String itemCardAddedDate(String date);
+
+  /// No description provided for @itemCardEditTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit item'**
+  String get itemCardEditTooltip;
+
+  /// No description provided for @itemCardDeleteTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete item'**
+  String get itemCardDeleteTooltip;
+
+  /// No description provided for @itemCardLocationFridge.
+  ///
+  /// In en, this message translates to:
+  /// **'❄️ Fridge'**
+  String get itemCardLocationFridge;
+
+  /// No description provided for @itemCardLocationFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'🧊 Freezer'**
+  String get itemCardLocationFreezer;
+
+  /// No description provided for @itemCardLocationPantry.
+  ///
+  /// In en, this message translates to:
+  /// **'🗄️ Pantry'**
+  String get itemCardLocationPantry;
+
+  /// No description provided for @itemCardLocationOther.
+  ///
+  /// In en, this message translates to:
+  /// **'🏠 Other'**
+  String get itemCardLocationOther;
+
+  /// No description provided for @itemCardLocationPrepared.
+  ///
+  /// In en, this message translates to:
+  /// **'{locationLabel} • Prepared {date}'**
+  String itemCardLocationPrepared(String locationLabel, String date);
+
+  /// No description provided for @itemCardNoExpirySet.
+  ///
+  /// In en, this message translates to:
+  /// **'No expiry set'**
+  String get itemCardNoExpirySet;
+
+  /// No description provided for @itemCardExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get itemCardExpired;
+
+  /// No description provided for @itemCardExpiresToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires today ⚠️'**
+  String get itemCardExpiresToday;
+
+  /// No description provided for @itemCardExpiresTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires tomorrow'**
+  String get itemCardExpiresTomorrow;
+
+  /// No description provided for @itemCardExpiresInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in {days} days'**
+  String itemCardExpiresInDays(int days);
 
   /// No description provided for @noData.
   ///

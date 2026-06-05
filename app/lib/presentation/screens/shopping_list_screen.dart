@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../generated_l10n/app_localizations.dart';
+import '../../generated_l10n/app_localizations_en.dart';
 import '../../domain/models/item_model.dart'
     show Item, ItemCategory, ItemStatus, Unit;
 import '../../domain/models/shopping_list_item.dart';
@@ -39,6 +41,7 @@ class ShoppingListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     // Track screen view
     _trackScreenViewed(ref);
 
@@ -50,16 +53,22 @@ class ShoppingListScreen extends ConsumerWidget {
         key: const Key('screen_shopping_list'),
         appBar: AppBar(
           title: Text(
-            'Shopping List',
+            l10n.screenTitleShoppingList,
             style: theme.appBarTheme.titleTextStyle?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
           elevation: 1,
-          bottom: const TabBar(
+          bottom: TabBar(
             tabs: [
-              Tab(key: Key('shopping_list_tab'), text: 'List'),
-              Tab(key: Key('shopping_history_tab'), text: 'History 🧾'),
+              Tab(
+                key: const Key('shopping_list_tab'),
+                text: l10n.navigationShoppingList,
+              ),
+              Tab(
+                key: const Key('shopping_history_tab'),
+                text: l10n.navigationShoppingHistory,
+              ),
             ],
           ),
         ),
@@ -72,7 +81,7 @@ class ShoppingListScreen extends ConsumerWidget {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) => Center(
                   child: Text(
-                    'Unable to load shopping list',
+                    l10n.shoppingUnableToLoadList,
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -97,7 +106,7 @@ class ShoppingListScreen extends ConsumerWidget {
                     children: [
                       _SectionHeader(
                         key: const Key('shopping_unpurchased_section'),
-                        title: 'Next Shop',
+                        title: l10n.shoppingNextShop,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ...unpurchased.map(
@@ -127,7 +136,7 @@ class ShoppingListScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.lg),
                       _SectionHeader(
                         key: const Key('shopping_purchased_section'),
-                        title: 'Purchased',
+                        title: l10n.shoppingPurchased,
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ...purchased.map(
@@ -166,7 +175,7 @@ class ShoppingListScreen extends ConsumerWidget {
                               items: List<ShoppingListItem>.from(purchased),
                             ),
                             child: Text(
-                              'Convert Purchased (${purchased.length})',
+                              l10n.shoppingConvertPurchased(purchased.length),
                             ),
                           ),
                         ),
@@ -178,7 +187,7 @@ class ShoppingListScreen extends ConsumerWidget {
                           key: const Key('shopping_add_item_button'),
                           onPressed: () => _showAddItemSheet(context, ref),
                           icon: const Icon(Icons.add),
-                          label: const Text('Add Item'),
+                          label: Text(l10n.buttonAdd),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
@@ -261,7 +270,8 @@ class ShoppingListScreen extends ConsumerWidget {
             unit: Unit.fromString(item.unit ?? 'count'),
             purchasePrice: item.estimatedCost,
           ),
-          sourceLabel: 'From Shopping List',
+          sourceLabel: (AppLocalizations.of(context) ?? AppLocalizationsEn())
+              .shoppingSourceFromShoppingList,
           showSkip: true,
         ),
       );
@@ -281,7 +291,10 @@ class ShoppingListScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${result.name} added to inventory'),
+            content: Text(
+              (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                  .shoppingAddedToInventory(result.name),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -327,7 +340,9 @@ class ShoppingListScreen extends ConsumerWidget {
                 type: batchDefaults?.type,
                 preparedDate: batchDefaults?.preparedDate,
               ),
-              sourceLabel: 'From Shopping List',
+              sourceLabel:
+                  (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                      .shoppingSourceFromShoppingList,
               showSkip: true,
               showApplyToAll: true,
             ),
@@ -358,7 +373,10 @@ class ShoppingListScreen extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${resolved.name} added to inventory'),
+            content: Text(
+              (AppLocalizations.of(context) ?? AppLocalizationsEn())
+                  .shoppingAddedToInventory(resolved.name),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -513,6 +531,7 @@ class _ShoppingItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     final onSurfaceColor = theme.colorScheme.onSurface;
     final secondaryTextColor =
         theme.textTheme.bodySmall?.color ?? theme.colorScheme.onSurfaceVariant;
@@ -554,7 +573,7 @@ class _ShoppingItemTile extends StatelessWidget {
             controlAffinity: ListTileControlAffinity.leading,
             secondary: IconButton(
               key: Key('shopping_item_delete_${item.id}'),
-              tooltip: 'Delete item',
+              tooltip: l10n.shoppingDeleteItem,
               onPressed: onDelete,
               icon: const Icon(Icons.delete_outline),
               color: AppColors.danger,
@@ -574,6 +593,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return Center(
       child: Padding(
@@ -586,14 +606,14 @@ class _EmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(
               key: const Key('shopping_empty_heading'),
-              'Your shopping list is empty',
+              l10n.shoppingEmptyTitle,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              'Add items you need to buy on your next grocery trip.',
+              l10n.messageEmptyShoppingList,
               style: AppTextStyles.body.copyWith(
                 color: theme.textTheme.bodySmall?.color,
               ),
@@ -607,7 +627,7 @@ class _EmptyState extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Start your shopping list'),
+              child: Text(l10n.shoppingStartList),
             ),
           ],
         ),
@@ -636,6 +656,7 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -647,12 +668,12 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
         key: const Key('shopping_add_sheet'),
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Add Item', style: AppTextStyles.h4),
+          Text(l10n.buttonAdd, style: AppTextStyles.h4),
           const SizedBox(height: AppSpacing.md),
           TextField(
             key: const Key('shopping_add_field'),
             controller: _controller,
-            decoration: const InputDecoration(labelText: 'Item name'),
+            decoration: InputDecoration(labelText: l10n.hintItemName),
             textInputAction: TextInputAction.done,
             onSubmitted: (value) {
               if (value.trim().isEmpty) return;
@@ -666,7 +687,7 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
                 child: OutlinedButton(
                   key: const Key('shopping_add_cancel'),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.buttonCancel),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
@@ -682,7 +703,7 @@ class _AddShoppingItemSheetState extends State<_AddShoppingItemSheet> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Add'),
+                  child: Text(l10n.buttonAdd),
                 ),
               ),
             ],
@@ -700,12 +721,13 @@ class _ShoppingHistoryTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final batchesAsync = ref.watch(_shoppingHistoryBatchesProvider);
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
 
     return batchesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stack) => Center(
         child: Text(
-          'Unable to load shopping history',
+          l10n.shoppingUnableToLoadHistory,
           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
         ),
       ),
@@ -723,7 +745,7 @@ class _ShoppingHistoryTab extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
-                  'No shopping trips recorded yet',
+                  l10n.shoppingNoHistory,
                   style: AppTextStyles.body.copyWith(
                     color: AppColors.textSecondary,
                   ),
