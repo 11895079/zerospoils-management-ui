@@ -437,7 +437,7 @@ void main() {
       );
     });
 
-    testWidgets('emits fresh produce telemetry on extract and save', (
+    testWidgets('emits package OCR telemetry on extract and save', (
       tester,
     ) async {
       final telemetry = TelemetryClient(consentEnabled: true);
@@ -503,7 +503,17 @@ void main() {
       expect(savedResult, isNotNull);
       expect(
         telemetry.events.any(
-          (event) => event['name'] == 'fresh_produce_label_parsed',
+          (event) =>
+              event['name'] == 'package_ocr_attempted' &&
+              event['properties']['label_type'] == 'fresh_produce',
+        ),
+        isTrue,
+      );
+      expect(
+        telemetry.events.any(
+          (event) =>
+              event['name'] == 'package_ocr_success' &&
+              event['properties']['label_type'] == 'fresh_produce',
         ),
         isTrue,
       );

@@ -282,8 +282,15 @@ class _PackagedItemFastAddScreenState
     });
 
     ref.read(telemetryClientProvider).enqueue({
-      'name': 'fresh_produce_label_parsed',
+      'name': 'package_ocr_attempted',
+      'properties': {'tier': 'm3', 'label_type': 'fresh_produce'},
+    });
+
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'package_ocr_success',
       'properties': {
+        'label_type': 'fresh_produce',
+        'fields_extracted': parsed.extractedFieldCount,
         'classification': parsed.classification.name,
         'is_likely_fresh_produce': parsed.isLikelyFreshProduce,
         'extracted_field_count': parsed.extractedFieldCount,
@@ -383,6 +390,29 @@ class _PackagedItemFastAddScreenState
 
     final freshProduceResult = _freshProduceParseResult;
     if (freshProduceResult != null) {
+      final extractedName = freshProduceResult.productDescription?.trim();
+      if (extractedName != null &&
+          extractedName.isNotEmpty &&
+          extractedName.toLowerCase() != name.toLowerCase()) {
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'package_ocr_field_edited',
+          'properties': {
+            'label_type': 'fresh_produce',
+            'field_name': 'product_description',
+          },
+        });
+      }
+
+      if (freshProduceResult.suggestedCategory != _selectedCategory) {
+        ref.read(telemetryClientProvider).enqueue({
+          'name': 'package_ocr_field_edited',
+          'properties': {
+            'label_type': 'fresh_produce',
+            'field_name': 'category',
+          },
+        });
+      }
+
       ref.read(telemetryClientProvider).enqueue({
         'name': 'fresh_produce_fast_add_saved',
         'properties': {
@@ -1167,12 +1197,27 @@ class _PackagedItemFastAddScreenState
     final text = confidence == null
         ? 'Not detected'
         : _confidenceLabel(confidence);
+    final statusIcon = switch (confidence) {
+      OcrFieldConfidence.high => Icons.check_circle_rounded,
+      OcrFieldConfidence.medium => Icons.warning_amber_rounded,
+      OcrFieldConfidence.low => Icons.warning_amber_rounded,
+      null => Icons.warning_amber_rounded,
+    };
+    final statusColor = switch (confidence) {
+      OcrFieldConfidence.high => const Color(0xFF2E7D32),
+      OcrFieldConfidence.medium => const Color(0xFFED6C02),
+      OcrFieldConfidence.low => const Color(0xFFB71C1C),
+      null => const Color(0xFF616161),
+    };
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
       child: Row(
         key: key,
         children: [
           Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
+          Icon(statusIcon, size: 16, color: statusColor),
+          const SizedBox(width: AppSpacing.xs),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
