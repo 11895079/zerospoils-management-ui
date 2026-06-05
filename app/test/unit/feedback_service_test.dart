@@ -89,7 +89,7 @@ void main() {
     test('initializes with default settings', () {
       expect(feedbackService.hapticEnabled, isTrue);
       expect(feedbackService.audioEnabled, isTrue);
-      expect(feedbackService.beepVolume, closeTo(0.8, 0.01));
+      expect(feedbackService.beepVolume, closeTo(0.6, 0.01));
       expect(feedbackService.hapticIntensity, HapticIntensity.medium);
       expect(
         feedbackService.scannerEnabled(FeedbackType.barcodeSuccess),

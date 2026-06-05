@@ -76,7 +76,7 @@ class FeedbackService {
   void _loadCachedValues() {
     _hapticEnabledValue = _prefs.getBool(_hapticEnabledKey) ?? true;
     _audioEnabledValue = _prefs.getBool(_audioEnabledKey) ?? true;
-    _beepVolumeValue = _prefs.getDouble(_beepVolumeKey) ?? 0.8;
+    _beepVolumeValue = _prefs.getDouble(_beepVolumeKey) ?? 0.6;
     final intensityStr = _prefs.getString(_hapticIntensityKey);
     _hapticIntensityValue = _parseHapticIntensity(intensityStr);
     _barcodeScannerEnabledValue =
