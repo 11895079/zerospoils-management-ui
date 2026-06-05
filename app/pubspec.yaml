@@ -189,5 +189,10 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   adaptive_icon_background: "#2F9E44"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon/app_icon_monochrome.png"
+  # Foreground/monochrome already bake the adaptive safe zone into the artwork
+  # (motif centred + scaled to ~0.90 on a full 1024 canvas), so the green field
+  # must bleed to the edge — disable the launcher-icons default 16% inset.
+  adaptive_icon_foreground_inset: 0
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

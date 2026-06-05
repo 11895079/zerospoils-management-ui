@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+ <!--
+  Android adaptive-icon MONOCHROME layer (Android 13+ themed icons).
+  A single flat-colour silhouette of the "Fb" motif on transparency — the system
+  re-tints it with the user's theme colours, so only the alpha shape matters.
+  Same centre + scale (0.90) as the foreground so themed mode stays aligned.
+  The handle hole and check are knocked out, and a gap ring separates the shield
+  from the bag, so the glyph reads as bag + shield/check after tinting.
+ -->
+ <defs>
+  <mask id="mono">
+   <rect width="1024" height="1024" fill="#000"/>
+   <!-- bag body -->
+   <rect x="316" y="398" width="392" height="376" rx="48" fill="#fff"/>
+   <!-- die-cut handle -->
+   <rect x="446" y="432" width="132" height="46" rx="23" fill="#000"/>
+   <!-- shield body -->
+   <path d="M604 624 Q604 600 628 600 L776 600 Q800 600 800 624 L800 703 C800 775 754 806 702 816 C650 806 604 775 604 703 Z" fill="#fff"/>
+   <!-- gap ring: separate shield from bag where they overlap -->
+   <path d="M604 624 Q604 600 628 600 L776 600 Q800 600 800 624 L800 703 C800 775 754 806 702 816 C650 806 604 775 604 703 Z" fill="none" stroke="#000" stroke-width="30"/>
+   <!-- check knocked out of the shield -->
+   <path d="M666 700 l22 24 l54 -62" fill="none" stroke="#000" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  </mask>
+ </defs>
+ <g transform="translate(512,512) scale(0.90) translate(-562.5,-611.5)">
+  <rect x="0" y="0" width="1024" height="1024" fill="#1F6F30" mask="url(#mono)"/>
+ </g>
+</svg>
