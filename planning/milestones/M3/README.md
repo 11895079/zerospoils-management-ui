@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** June 1, 2026 — **Progress:** 18/24 issues complete (75%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 remain partial; 206 reference-pack delivery implemented and documented
+**Last Updated:** June 5, 2026 — **Progress:** 19/24 issues complete (79%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 remain partial; 206 reference-pack delivery implemented and documented
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -50,7 +50,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **130** | Feature flags framework (prepare for Pro) | ✅ Complete | — | `FeatureFlagsService` + Riverpod providers + Remote Config integration + local overrides via SharedPreferences; tests present |
 | **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
 | **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
-| **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
+| **195** | Localization/i18n strategy | ✅ Complete | — | CI guard blocks new hardcoded UI strings in changed presentation files; i18n tooling and locale formatting docs already in place |
 | **196** | Live expiry OCR multi-angle capture | ✅ Complete | — | `ExpiryOcrCaptureScreen` with live camera stream, auto-capture, haptic debounce, 5-photo cap, torch toggle, status panel moved outside camera viewport; `ExpiryOcrCaptureSession` unit tests |
 | **197** | Hybrid packaged-item fast add (barcode + expiry OCR) | ✅ Complete | — | `PackagedItemFastAddScreen` with 7-stage flow (barcode → result/miss → pkg-label → expiry → locked → confirm); lookup precedence: learned→seed→manual; learned mapping saved on confirm; 9 widget tests + 7 barcode lookup unit tests |
 | **198** | Shopping batch receipt capture | ✅ Complete | [#105](https://github.com/11895079/zerospoils/pull/105), [#106](https://github.com/11895079/zerospoils/pull/106) | Batch capture + review flows, retroactive linking, batch history/detail, payment method metadata, and inventory/item batch associations shipped |
