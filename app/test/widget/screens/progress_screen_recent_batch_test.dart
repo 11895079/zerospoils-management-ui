@@ -366,4 +366,29 @@ void main() {
       '3',
     );
   });
+
+  testWidgets('Progress remains visible across periodic refresh in demo mode', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [zestoTestOverride()],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: const ProgressScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('screen_progress')), findsOneWidget);
+
+    // Allow fallback polling stream to emit at least once.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('screen_progress')), findsOneWidget);
+    expect(find.textContaining('Unable to load progress'), findsNothing);
+  });
 }

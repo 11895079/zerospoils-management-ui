@@ -147,8 +147,9 @@ final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
   }
 
   // Fallback (e.g., demo/in-memory): lightweight polling while screen is open.
-  yield* Stream<ProgressStats>.periodic(
+  yield* Stream<int>.periodic(
     const Duration(seconds: 2),
+    (tick) => tick,
   ).asyncMap((_) => buildSnapshot());
 });
 
