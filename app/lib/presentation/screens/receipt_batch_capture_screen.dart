@@ -201,6 +201,9 @@ class _ReceiptBatchCaptureScreenState
     try {
       final parsedItems = <ParsedReceiptItem>[];
       final excludedRows = <ReceiptClassifiedRow>[];
+      double? receiptTaxAmount;
+      double? receiptTotalAmount;
+      double? receiptSavingsAmount;
       for (
         var photoIndex = 0;
         photoIndex < _receiptPhotos.length;
@@ -252,6 +255,9 @@ class _ReceiptBatchCaptureScreenState
           );
         }
 
+        receiptTaxAmount ??= parseResult.taxAmount;
+        receiptTotalAmount ??= parseResult.totalAmount;
+        receiptSavingsAmount ??= parseResult.savingsAmount;
         excludedRows.addAll(parseResult.rejectedRows);
       }
 
@@ -300,6 +306,9 @@ class _ReceiptBatchCaptureScreenState
             storeName: _normalizedStoreName(),
             purchasedAt: _purchaseDate,
             totalAmount: _parsedBatchTotal(),
+            receiptTaxAmount: receiptTaxAmount,
+            receiptTotalAmount: receiptTotalAmount,
+            receiptSavingsAmount: receiptSavingsAmount,
             paymentMethod: _paymentMethod,
           ),
         ),

@@ -42,6 +42,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final String? storeName;
   final DateTime? purchasedAt;
   final double? totalAmount;
+  final double? receiptTaxAmount;
+  final double? receiptTotalAmount;
+  final double? receiptSavingsAmount;
   final PaymentMethod? paymentMethod;
 
   const ReceiptBatchReviewScreen({
@@ -56,6 +59,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
     this.storeName,
     this.purchasedAt,
     this.totalAmount,
+    this.receiptTaxAmount,
+    this.receiptTotalAmount,
+    this.receiptSavingsAmount,
     this.paymentMethod,
   });
 
@@ -369,6 +375,43 @@ class _ReceiptBatchReviewScreenState
                 subtitle: Text(_reviewMetadataSummary()),
               ),
             ),
+          if (_hasReceiptSummary)
+            Card(
+              key: const Key('receipt_summary_footer'),
+              child: ExpansionTile(
+                key: const Key('receipt_summary_toggle'),
+                title: const Text('Receipt summary'),
+                subtitle: const Text(
+                  'Tap to review tax, savings, and total amounts from OCR.',
+                ),
+                children: [
+                  if (_subtotalAmount != null)
+                    _SummaryAmountTile(
+                      label: 'Subtotal',
+                      value: _subtotalAmount!,
+                      key: const Key('receipt_summary_subtotal_row'),
+                    ),
+                  if (_summaryTaxAmount != null)
+                    _SummaryAmountTile(
+                      label: 'Tax',
+                      value: _summaryTaxAmount!,
+                      key: const Key('receipt_summary_tax_row'),
+                    ),
+                  if (_summarySavingsAmount != null)
+                    _SummaryAmountTile(
+                      label: 'Savings',
+                      value: _summarySavingsAmount!,
+                      key: const Key('receipt_summary_savings_row'),
+                    ),
+                  if (_summaryTotalAmount != null)
+                    _SummaryAmountTile(
+                      label: 'Total',
+                      value: _summaryTotalAmount!,
+                      key: const Key('receipt_summary_total_row'),
+                    ),
+                ],
+              ),
+            ),
           ...visibleEntries.map((entry) {
             final index = entry.key;
             final item = entry.value;
@@ -506,6 +549,27 @@ class _ReceiptBatchReviewScreenState
     return segments.join(' · ');
   }
 
+  bool get _hasReceiptSummary =>
+      _summaryTaxAmount != null ||
+      _summaryTotalAmount != null ||
+      _summarySavingsAmount != null;
+
+  double? get _summaryTaxAmount => widget.receiptTaxAmount;
+
+  double? get _summaryTotalAmount =>
+      widget.receiptTotalAmount ?? widget.totalAmount;
+
+  double? get _summarySavingsAmount => widget.receiptSavingsAmount;
+
+  double? get _subtotalAmount {
+    final total = _summaryTotalAmount;
+    final tax = _summaryTaxAmount;
+    if (total == null || tax == null) {
+      return null;
+    }
+    return total - tax;
+  }
+
   String _classificationLabel(ReceiptRowClassification classification) {
     switch (classification) {
       case ReceiptRowClassification.saleItem:
@@ -588,6 +652,40 @@ class _ReceiptBatchReviewScreenState
     }
 
     return widgets;
+  }
+}
+
+class _SummaryAmountTile extends StatelessWidget {
+  const _SummaryAmountTile({
+    super.key,
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final amount = r'$' + value.toStringAsFixed(2);
+
+    return ListTile(
+      title: Text(label),
+      trailing: Text(
+        amount,
+        key: switch (label) {
+          'Subtotal' => const Key('receipt_summary_subtotal_value'),
+          'Tax' => const Key('receipt_summary_tax_value'),
+          'Savings' => const Key('receipt_summary_savings_value'),
+          'Total' => const Key('receipt_summary_total_value'),
+          _ => Key('receipt_summary_${label.toLowerCase()}_value'),
+        },
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 }
 

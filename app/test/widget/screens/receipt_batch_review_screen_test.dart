@@ -163,4 +163,72 @@ void main() {
 
     expect(find.byKey(const Key('receipt_hidden_item_0')), findsOneWidget);
   });
+
+  testWidgets('review screen shows a collapsible receipt summary footer', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: ReceiptBatchReviewScreen(
+            source: ReceiptBatchSource.inventory,
+            photoPaths: const ['receipt-1.jpg'],
+            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 5.49)],
+            batchId: 'batch-4',
+            receiptTaxAmount: 0.58,
+            receiptTotalAmount: 31.61,
+            receiptSavingsAmount: 0.50,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('receipt_summary_footer')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_toggle')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('receipt_summary_toggle')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('receipt_summary_subtotal_value')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('receipt_summary_tax_value')), findsOneWidget);
+    expect(
+      find.byKey(const Key('receipt_summary_savings_value')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('receipt_summary_total_value')),
+      findsOneWidget,
+    );
+
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('receipt_summary_subtotal_value')))
+          .data,
+      r'$31.03',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('receipt_summary_tax_value')))
+          .data,
+      r'$0.58',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('receipt_summary_savings_value')))
+          .data,
+      r'$0.50',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('receipt_summary_total_value')))
+          .data,
+      r'$31.61',
+    );
+  });
 }

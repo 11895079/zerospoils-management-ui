@@ -106,6 +106,7 @@ class ReceiptParser {
   static final RegExp _modifierCodePattern = RegExp(r'^[A-Z]{1,4}$');
 
   static final RegExp _moneyPattern = RegExp(r'\d+[\.,]\d{2}');
+  static final RegExp _summaryMoneyPattern = RegExp(r'[-+]?\$?\d+[\.,]\d{2}-?');
 
   List<ReceiptLineItem> parse(String rawText) {
     return parseDetailed(rawText).items;
@@ -157,6 +158,9 @@ class ReceiptParser {
 
     final items = <ReceiptLineItem>[];
     final classifiedRows = <ReceiptClassifiedRow>[];
+    double? taxAmount;
+    double? totalAmount;
+    double? savingsAmount;
     _ReceiptOcrRow? pendingDescription;
     _ReceiptOcrRow? pendingPromoQuantityDescription;
     int? pendingPromoQuantity;
@@ -180,6 +184,29 @@ class ReceiptParser {
 
       final classification = _classifyRow(normalizedText);
       if (classification != ReceiptRowClassification.unknown) {
+        final summaryAmount = _extractSummaryAmount(
+          normalizedText,
+          classification,
+        );
+        switch (classification) {
+          case ReceiptRowClassification.tax:
+            taxAmount ??= summaryAmount;
+            break;
+          case ReceiptRowClassification.total:
+            totalAmount ??= summaryAmount;
+            break;
+          case ReceiptRowClassification.savings:
+            savingsAmount ??= summaryAmount;
+            break;
+          case ReceiptRowClassification.saleItem:
+          case ReceiptRowClassification.loyalty:
+          case ReceiptRowClassification.payment:
+          case ReceiptRowClassification.department:
+          case ReceiptRowClassification.storeInfo:
+          case ReceiptRowClassification.unknown:
+            break;
+        }
+
         final lower = normalizedText.toLowerCase();
         if (prices.length == 1 &&
             (lower.contains('tpd/') || lower.contains('eco fee')) &&
@@ -444,7 +471,13 @@ class ReceiptParser {
       }
     }
 
-    return ReceiptParseResult(items: items, rows: classifiedRows);
+    return ReceiptParseResult(
+      items: items,
+      rows: classifiedRows,
+      taxAmount: taxAmount,
+      totalAmount: totalAmount,
+      savingsAmount: savingsAmount,
+    );
   }
 
   List<_ReceiptOcrRow> _buildRows(List<ReceiptOcrLine> lines) {
@@ -746,6 +779,34 @@ class ReceiptParser {
         .map((match) => double.tryParse(match.group(0)!.replaceAll(',', '.')))
         .whereType<double>()
         .toList();
+  }
+
+  double? _extractSummaryAmount(
+    String line,
+    ReceiptRowClassification classification,
+  ) {
+    final matches = _summaryMoneyPattern.allMatches(line).toList();
+    if (matches.isEmpty) {
+      return null;
+    }
+
+    final token = matches.last.group(0)!.trim();
+    final negative = token.startsWith('-') || token.endsWith('-');
+    final normalized = token
+        .replaceAll(RegExp(r'^[+-]'), '')
+        .replaceAll(RegExp(r'-$'), '')
+        .replaceAll(r'$', '')
+        .replaceAll(',', '.');
+    final parsed = double.tryParse(normalized);
+    if (parsed == null) {
+      return null;
+    }
+
+    if (classification == ReceiptRowClassification.savings) {
+      return parsed.abs();
+    }
+
+    return negative ? parsed.abs() : parsed;
   }
 
   bool _hasNegativeAdjustmentAmount(String line) {
