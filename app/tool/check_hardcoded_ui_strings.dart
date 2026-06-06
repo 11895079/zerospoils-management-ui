@@ -4,9 +4,9 @@ import 'package:zerospoils/tooling/check_hardcoded_ui_strings.dart';
 
 Future<void> main(List<String> args) async {
   final baseRef = args.isNotEmpty ? args.first : 'origin/main';
-  final repoRoot = File.fromUri(Platform.script).parent.parent.path;
+  final appRoot = File.fromUri(Platform.script).parent.parent.path;
 
-  await _ensureBaseRefExists(baseRef, workingDirectory: repoRoot);
+  await _ensureBaseRefExists(baseRef, workingDirectory: appRoot);
 
   final changedFiles = await _gitLines([
     'diff',
@@ -15,7 +15,7 @@ Future<void> main(List<String> args) async {
     '$baseRef...HEAD',
     '--',
     'lib/presentation',
-  ], workingDirectory: repoRoot);
+  ], workingDirectory: appRoot);
 
   final violations = <HardcodedUiStringViolation>[];
   for (final filePath in changedFiles.where((path) => path.endsWith('.dart'))) {
@@ -25,7 +25,7 @@ Future<void> main(List<String> args) async {
       '$baseRef...HEAD',
       '--',
       filePath,
-    ], workingDirectory: repoRoot);
+    ], workingDirectory: appRoot);
     violations.addAll(findHardcodedUiStringViolationsFromDiff(diff, filePath));
   }
 
@@ -45,7 +45,7 @@ Future<void> main(List<String> args) async {
     );
   }
   stderr.writeln(
-    '\nMove these strings into app/l10n ARB files and use AppLocalizations instead.',
+    '\nMove these strings into app/lib/l10n ARB files and use AppLocalizations instead.',
   );
   exitCode = 1;
 }
