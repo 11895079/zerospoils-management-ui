@@ -161,6 +161,7 @@ class ReceiptParser {
 
     final items = <ReceiptLineItem>[];
     final classifiedRows = <ReceiptClassifiedRow>[];
+    double? subtotalAmount;
     double? taxAmount;
     double? totalAmount;
     double? savingsAmount;
@@ -198,7 +199,11 @@ class ReceiptParser {
               taxAmount = ((taxAmount ?? 0) + classifiedAmount);
               break;
             case ReceiptRowClassification.total:
-              totalAmount = classifiedAmount;
+              if (_isSubtotalRow(normalizedText)) {
+                subtotalAmount = classifiedAmount;
+              } else {
+                totalAmount = classifiedAmount;
+              }
               break;
             case ReceiptRowClassification.savings:
               savingsAmount = ((savingsAmount ?? 0) + classifiedAmount);
@@ -481,10 +486,16 @@ class ReceiptParser {
     return ReceiptParseResult(
       items: items,
       rows: classifiedRows,
+      subtotalAmount: subtotalAmount,
       taxAmount: taxAmount,
       totalAmount: totalAmount,
       savingsAmount: savingsAmount,
     );
+  }
+
+  bool _isSubtotalRow(String text) {
+    final normalized = text.toLowerCase().replaceAll(RegExp(r'[^a-z]+'), ' ');
+    return normalized.trim().startsWith('subtotal');
   }
 
   double? _extractClassifiedAmount(

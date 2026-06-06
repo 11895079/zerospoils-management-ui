@@ -155,6 +155,11 @@ TOTAL 32.19
           box: ReceiptOcrBox(left: 20, top: 500, right: 180, bottom: 520),
         ),
         ReceiptOcrLine(
+          text: 'TOTAL 32.19',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 515, right: 180, bottom: 535),
+        ),
+        ReceiptOcrLine(
           text: '4.49 HST (13.000)% 0.58',
           photoIndex: 0,
           box: ReceiptOcrBox(left: 20, top: 530, right: 180, bottom: 550),
@@ -166,7 +171,8 @@ TOTAL 32.19
         ),
       ]);
 
-      expect(detailed.totalAmount, 31.61);
+      expect(detailed.subtotalAmount, 31.61);
+      expect(detailed.totalAmount, 32.19);
       expect(detailed.taxAmount, 0.58);
       expect(detailed.savingsAmount, 0.50);
     });
