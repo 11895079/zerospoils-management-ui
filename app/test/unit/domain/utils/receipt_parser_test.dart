@@ -171,6 +171,48 @@ TOTAL 32.19
       expect(detailed.savingsAmount, 0.50);
     });
 
+    test('extracts tax, total, and savings amounts in parse result', () {
+      const raw = '''
+MILK 4.99
+SAVINGS -1.25
+HST 0.85
+TOTAL 4.59
+''';
+
+      final parser = ReceiptParser();
+      final result = parser.parseDetailed(raw);
+
+      expect(result.items.length, 1);
+      expect(result.taxAmount, closeTo(0.85, 0.001));
+      expect(result.totalAmount, closeTo(4.59, 0.001));
+      expect(result.savingsAmount, closeTo(1.25, 0.001));
+    });
+
+    test('stores extracted amount on classified excluded rows', () {
+      const raw = '''
+HST 1.10
+TOTAL 9.99
+SAVINGS -2.00
+''';
+
+      final parser = ReceiptParser();
+      final result = parser.parseDetailed(raw);
+
+      final taxRow = result.rows.firstWhere(
+        (row) => row.classification == ReceiptRowClassification.tax,
+      );
+      final totalRow = result.rows.firstWhere(
+        (row) => row.classification == ReceiptRowClassification.total,
+      );
+      final savingsRow = result.rows.firstWhere(
+        (row) => row.classification == ReceiptRowClassification.savings,
+      );
+
+      expect(taxRow.extractedPrice, closeTo(1.10, 0.001));
+      expect(totalRow.extractedPrice, closeTo(9.99, 0.001));
+      expect(savingsRow.extractedPrice, closeTo(2.00, 0.001));
+    });
+
     test('uses the previous description line for weighted produce entries', () {
       const raw = '''
 PRODUCE

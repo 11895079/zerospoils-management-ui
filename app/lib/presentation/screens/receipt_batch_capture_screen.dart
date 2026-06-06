@@ -201,9 +201,9 @@ class _ReceiptBatchCaptureScreenState
     try {
       final parsedItems = <ParsedReceiptItem>[];
       final excludedRows = <ReceiptClassifiedRow>[];
-      double? receiptTaxAmount;
-      double? receiptTotalAmount;
-      double? receiptSavingsAmount;
+      double? parsedTotalAmount;
+      double? parsedTaxAmount;
+      double? parsedSavingsAmount;
       for (
         var photoIndex = 0;
         photoIndex < _receiptPhotos.length;
@@ -255,10 +255,21 @@ class _ReceiptBatchCaptureScreenState
           );
         }
 
-        receiptTaxAmount ??= parseResult.taxAmount;
-        receiptTotalAmount ??= parseResult.totalAmount;
-        receiptSavingsAmount ??= parseResult.savingsAmount;
         excludedRows.addAll(parseResult.rejectedRows);
+
+        if (parseResult.totalAmount != null) {
+          final value = parseResult.totalAmount!;
+          if (parsedTotalAmount == null || value > parsedTotalAmount) {
+            parsedTotalAmount = value;
+          }
+        }
+        if (parseResult.taxAmount != null) {
+          parsedTaxAmount = (parsedTaxAmount ?? 0) + parseResult.taxAmount!;
+        }
+        if (parseResult.savingsAmount != null) {
+          parsedSavingsAmount =
+              (parsedSavingsAmount ?? 0) + parseResult.savingsAmount!;
+        }
       }
 
       final goodsPhotoSuggestions = _goodsPhotos.isEmpty
@@ -306,9 +317,9 @@ class _ReceiptBatchCaptureScreenState
             storeName: _normalizedStoreName(),
             purchasedAt: _purchaseDate,
             totalAmount: _parsedBatchTotal(),
-            receiptTaxAmount: receiptTaxAmount,
-            receiptTotalAmount: receiptTotalAmount,
-            receiptSavingsAmount: receiptSavingsAmount,
+            parsedTotalAmount: parsedTotalAmount,
+            parsedTaxAmount: parsedTaxAmount,
+            parsedSavingsAmount: parsedSavingsAmount,
             paymentMethod: _paymentMethod,
           ),
         ),

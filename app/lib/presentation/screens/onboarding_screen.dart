@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../routing/router.dart';
 import '../widgets/notification_permission_prompt.dart';
 import '../widgets/camera_permission_prompt.dart';
+import '../widgets/zesto_character.dart';
 import '../../presentation/di/service_locator.dart';
 
 /// Multi-step onboarding screen aligned with prototype flow.
@@ -19,6 +20,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const int _numPages = 6;
   static const String _onboardingPresetPrefsKey =
       'onboarding_preferred_food_presets';
+
+  /// Set once the animated Zesto debut has played, so re-opening onboarding
+  /// from the drawer shows a calm, static Zesto instead.
+  static const String _zestoIntroPrefsKey = 'zesto_intro_played';
   static const List<Map<String, String>> _presetOptions = [
     {'id': 'jollof_rice', 'label': '🍚 Jollof rice'},
     {'id': 'curry', 'label': '🍛 Curry'},
@@ -34,12 +39,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   bool _notificationPermissionGranted = false;
   bool _cameraPermissionGranted = false;
   Set<String> _selectedPresetIds = <String>{};
+  bool _zestoIntroAnimate = false;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
     _loadStoredPresetSelection();
+    _initZestoIntro();
     _emitTelemetry('onboarding_started', {});
   }
 
@@ -50,6 +57,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() {
       _selectedPresetIds = stored.toSet();
     });
+  }
+
+  /// Animate Zesto's debut only the very first time onboarding is shown.
+  Future<void> _initZestoIntro() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_zestoIntroPrefsKey) ?? false) return;
+    await prefs.setBool(_zestoIntroPrefsKey, true);
+    if (!mounted) return;
+    setState(() => _zestoIntroAnimate = true);
   }
 
   @override
@@ -230,9 +246,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24.0),
-            child: Icon(Icons.check_circle, size: 80),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Center(
+              child: Builder(
+                builder: (context) {
+                  final animate =
+                      _zestoIntroAnimate &&
+                      !MediaQuery.of(context).disableAnimations;
+                  final zesto = ZestoCharacter(
+                    key: const Key('onboarding_zesto'),
+                    expression: ZestoExpression.wave,
+                    size: 112,
+                    animate: animate,
+                    loop: false,
+                  );
+                  if (!animate) return zesto;
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.6, end: 1),
+                    duration: const Duration(milliseconds: 420),
+                    curve: Curves.easeOutBack,
+                    builder: (context, scale, child) =>
+                        Transform.scale(scale: scale, child: child),
+                    child: zesto,
+                  );
+                },
+              ),
+            ),
           ),
           Text(
             'Track inventory\nSmart reminders\nShopping flow + waste insights',

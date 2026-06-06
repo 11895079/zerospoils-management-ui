@@ -42,9 +42,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final String? storeName;
   final DateTime? purchasedAt;
   final double? totalAmount;
-  final double? receiptTaxAmount;
-  final double? receiptTotalAmount;
-  final double? receiptSavingsAmount;
+  final double? parsedTotalAmount;
+  final double? parsedTaxAmount;
+  final double? parsedSavingsAmount;
   final PaymentMethod? paymentMethod;
 
   const ReceiptBatchReviewScreen({
@@ -59,9 +59,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
     this.storeName,
     this.purchasedAt,
     this.totalAmount,
-    this.receiptTaxAmount,
-    this.receiptTotalAmount,
-    this.receiptSavingsAmount,
+    this.parsedTotalAmount,
+    this.parsedTaxAmount,
+    this.parsedSavingsAmount,
     this.paymentMethod,
   });
 
@@ -73,6 +73,8 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
 class _ReceiptBatchReviewScreenState
     extends ConsumerState<ReceiptBatchReviewScreen> {
   late List<_EditableReceiptItem> _items;
+  int _userPromotedCount = 0;
+  int _userDemotedCount = 0;
 
   @override
   void initState() {
@@ -120,6 +122,27 @@ class _ReceiptBatchReviewScreenState
       return;
     }
 
+    final batchRepo = ref.read(receiptBatchRepositoryProvider);
+    await batchRepo.init();
+    final existingBatch = widget.existingBatchId == null
+        ? null
+        : await batchRepo.getBatch(widget.existingBatchId!);
+    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
+
+    final keptCount = _items.where((item) => !item.hidden).length;
+    final excludedCount = _items.length - keptCount;
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'receipt_scan_lines_detected',
+      'properties': {
+        'batch_id': effectiveBatchId,
+        'total': _items.length,
+        'kept': keptCount,
+        'excluded': excludedCount,
+        'user_promoted': _userPromotedCount,
+        'user_demoted': _userDemotedCount,
+      },
+    });
+
     final now = DateTime.now();
     var itemCounter = 0;
     String buildItemId(String name) {
@@ -128,12 +151,6 @@ class _ReceiptBatchReviewScreenState
     }
 
     final batchItems = <ReceiptBatchItem>[];
-    final batchRepo = ref.read(receiptBatchRepositoryProvider);
-    await batchRepo.init();
-    final existingBatch = widget.existingBatchId == null
-        ? null
-        : await batchRepo.getBatch(widget.existingBatchId!);
-    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
 
     if (destination == ReceiptBatchDestination.shoppingList) {
       final shoppingRepo = ref.read(shoppingListRepositoryProvider);
@@ -329,6 +346,7 @@ class _ReceiptBatchReviewScreenState
         selected: true,
         sourceLabel: 'Receipt OCR (promoted)',
       );
+      _userPromotedCount += 1;
     });
   }
 
@@ -340,6 +358,7 @@ class _ReceiptBatchReviewScreenState
         selected: false,
         sourceLabel: 'Receipt OCR (excluded)',
       );
+      _userDemotedCount += 1;
     });
   }
 
@@ -373,43 +392,6 @@ class _ReceiptBatchReviewScreenState
                 key: const Key('receipt_batch_review_metadata'),
                 title: Text(widget.storeName ?? 'Shopping batch'),
                 subtitle: Text(_reviewMetadataSummary()),
-              ),
-            ),
-          if (_hasReceiptSummary)
-            Card(
-              key: const Key('receipt_summary_footer'),
-              child: ExpansionTile(
-                key: const Key('receipt_summary_toggle'),
-                title: const Text('Receipt summary'),
-                subtitle: const Text(
-                  'Tap to review tax, savings, and total amounts from OCR.',
-                ),
-                children: [
-                  if (_subtotalAmount != null)
-                    _SummaryAmountTile(
-                      label: 'Subtotal',
-                      value: _subtotalAmount!,
-                      key: const Key('receipt_summary_subtotal_row'),
-                    ),
-                  if (_summaryTaxAmount != null)
-                    _SummaryAmountTile(
-                      label: 'Tax',
-                      value: _summaryTaxAmount!,
-                      key: const Key('receipt_summary_tax_row'),
-                    ),
-                  if (_summarySavingsAmount != null)
-                    _SummaryAmountTile(
-                      label: 'Savings',
-                      value: _summarySavingsAmount!,
-                      key: const Key('receipt_summary_savings_row'),
-                    ),
-                  if (_summaryTotalAmount != null)
-                    _SummaryAmountTile(
-                      label: 'Total',
-                      value: _summaryTotalAmount!,
-                      key: const Key('receipt_summary_total_row'),
-                    ),
-                ],
               ),
             ),
           ...visibleEntries.map((entry) {
@@ -471,6 +453,7 @@ class _ReceiptBatchReviewScreenState
               ),
             );
           }),
+          _buildReceiptSummaryFooter(theme),
           _buildHiddenLinesSection(),
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
@@ -531,6 +514,72 @@ class _ReceiptBatchReviewScreenState
     );
   }
 
+  Widget _buildReceiptSummaryFooter(ThemeData theme) {
+    final parsedTotalAmount = widget.parsedTotalAmount;
+    final taxAmount = widget.parsedTaxAmount;
+    final savingsAmount = widget.parsedSavingsAmount;
+    final subtotal = (parsedTotalAmount != null && taxAmount != null)
+        ? (parsedTotalAmount - taxAmount)
+        : null;
+
+    if (parsedTotalAmount == null &&
+        taxAmount == null &&
+        savingsAmount == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      key: const Key('receipt_review_summary_footer'),
+      child: ExpansionTile(
+        title: const Text('Receipt summary'),
+        subtitle: const Text('Extracted totals and adjustments from OCR.'),
+        childrenPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        children: [
+          if (subtotal != null)
+            _summaryRow(
+              'Subtotal',
+              subtotal,
+              key: const Key('receipt_summary_subtotal'),
+            ),
+          if (taxAmount != null)
+            _summaryRow(
+              'Tax amount',
+              taxAmount,
+              key: const Key('receipt_summary_tax'),
+            ),
+          if (savingsAmount != null)
+            _summaryRow(
+              'Savings',
+              savingsAmount,
+              key: const Key('receipt_summary_savings'),
+            ),
+          if (parsedTotalAmount != null)
+            _summaryRow(
+              'Total amount paid',
+              parsedTotalAmount,
+              key: const Key('receipt_summary_total'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, double value, {required Key key}) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Text(r'$' + value.toStringAsFixed(2)),
+        ],
+      ),
+    );
+  }
+
   String _reviewMetadataSummary() {
     final segments = <String>[];
     if (widget.purchasedAt != null) {
@@ -547,27 +596,6 @@ class _ReceiptBatchReviewScreenState
       segments.add('${widget.goodsPhotoPaths.length} goods photos');
     }
     return segments.join(' · ');
-  }
-
-  bool get _hasReceiptSummary =>
-      _summaryTaxAmount != null ||
-      _summaryTotalAmount != null ||
-      _summarySavingsAmount != null;
-
-  double? get _summaryTaxAmount => widget.receiptTaxAmount;
-
-  double? get _summaryTotalAmount =>
-      widget.receiptTotalAmount ?? widget.totalAmount;
-
-  double? get _summarySavingsAmount => widget.receiptSavingsAmount;
-
-  double? get _subtotalAmount {
-    final total = _summaryTotalAmount;
-    final tax = _summaryTaxAmount;
-    if (total == null || tax == null) {
-      return null;
-    }
-    return total - tax;
   }
 
   String _classificationLabel(ReceiptRowClassification classification) {
@@ -652,40 +680,6 @@ class _ReceiptBatchReviewScreenState
     }
 
     return widgets;
-  }
-}
-
-class _SummaryAmountTile extends StatelessWidget {
-  const _SummaryAmountTile({
-    super.key,
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final double value;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final amount = r'$' + value.toStringAsFixed(2);
-
-    return ListTile(
-      title: Text(label),
-      trailing: Text(
-        amount,
-        key: switch (label) {
-          'Subtotal' => const Key('receipt_summary_subtotal_value'),
-          'Tax' => const Key('receipt_summary_tax_value'),
-          'Savings' => const Key('receipt_summary_savings_value'),
-          'Total' => const Key('receipt_summary_total_value'),
-          _ => Key('receipt_summary_${label.toLowerCase()}_value'),
-        },
-        style: theme.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
   }
 }
 

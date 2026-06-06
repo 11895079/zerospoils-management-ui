@@ -30,6 +30,8 @@ void main() {
   testWidgets(
     'renders in production-style host without overlay exceptions on narrow width',
     (WidgetTester tester) async {
+      final semanticsHandle = tester.ensureSemantics();
+
       tester.view.physicalSize = const Size(320, 700);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -85,6 +87,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
 
       expect(tester.takeException(), isNull);
+      semanticsHandle.dispose();
     },
   );
 }

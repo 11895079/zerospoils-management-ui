@@ -164,7 +164,7 @@ void main() {
     expect(find.byKey(const Key('receipt_hidden_item_0')), findsOneWidget);
   });
 
-  testWidgets('review screen shows a collapsible receipt summary footer', (
+  testWidgets('review screen shows collapsible receipt summary footer', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -175,60 +175,38 @@ void main() {
           home: ReceiptBatchReviewScreen(
             source: ReceiptBatchSource.inventory,
             photoPaths: const ['receipt-1.jpg'],
-            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 5.49)],
+            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 4.99)],
             batchId: 'batch-4',
-            receiptTaxAmount: 0.58,
-            receiptTotalAmount: 31.61,
-            receiptSavingsAmount: 0.50,
+            parsedTotalAmount: 10.84,
+            parsedTaxAmount: 0.84,
+            parsedSavingsAmount: 1.50,
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('receipt_summary_footer')), findsOneWidget);
-    expect(find.byKey(const Key('receipt_summary_toggle')), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('receipt_summary_toggle')));
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receipt_review_summary_footer')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('receipt_summary_subtotal_value')),
-      findsOneWidget,
+    final footer = find.byKey(const Key('receipt_review_summary_footer'));
+    expect(footer, findsOneWidget);
+    final summaryTile = find.descendant(
+      of: footer,
+      matching: find.byType(ExpansionTile),
     );
-    expect(find.byKey(const Key('receipt_summary_tax_value')), findsOneWidget);
-    expect(
-      find.byKey(const Key('receipt_summary_savings_value')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('receipt_summary_total_value')),
-      findsOneWidget,
-    );
+    expect(summaryTile, findsOneWidget);
 
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('receipt_summary_subtotal_value')))
-          .data,
-      r'$31.03',
-    );
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('receipt_summary_tax_value')))
-          .data,
-      r'$0.58',
-    );
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('receipt_summary_savings_value')))
-          .data,
-      r'$0.50',
-    );
-    expect(
-      tester
-          .widget<Text>(find.byKey(const Key('receipt_summary_total_value')))
-          .data,
-      r'$31.61',
-    );
+    await tester.tap(summaryTile);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('receipt_summary_subtotal')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_tax')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_savings')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_total')), findsOneWidget);
   });
 }

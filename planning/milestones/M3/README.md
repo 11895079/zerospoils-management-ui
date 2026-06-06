@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** June 1, 2026 — **Progress:** 18/24 issues complete (75%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 remain partial; 206 reference-pack delivery implemented and documented
+**Last Updated:** June 5, 2026 — **Progress:** 20/24 issues complete (83%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202 remain partial; 203 completed; 206 reference-pack delivery implemented and documented
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -50,7 +50,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **130** | Feature flags framework (prepare for Pro) | ✅ Complete | — | `FeatureFlagsService` + Riverpod providers + Remote Config integration + local overrides via SharedPreferences; tests present |
 | **180** | Reminder preferences UI | ✅ Complete | — | Master toggle + lead time (1/3/7 days) + sound/vibration; 10 tests (2 unit + 8 widget); telemetry integrated |
 | **190** | Notification scheduling integration | ✅ Complete | — | Startup restore from persisted items + bulk reschedule/cancel helpers + preference-aware scheduling + tests |
-| **195** | Localization/i18n strategy | ⏳ Not Started | — | Optional for M3 scope |
+| **195** | Localization/i18n strategy | ✅ Complete | — | CI guard blocks new hardcoded UI strings in changed presentation files; i18n tooling and locale formatting docs already in place |
 | **196** | Live expiry OCR multi-angle capture | ✅ Complete | — | `ExpiryOcrCaptureScreen` with live camera stream, auto-capture, haptic debounce, 5-photo cap, torch toggle, status panel moved outside camera viewport; `ExpiryOcrCaptureSession` unit tests |
 | **197** | Hybrid packaged-item fast add (barcode + expiry OCR) | ✅ Complete | — | `PackagedItemFastAddScreen` with 7-stage flow (barcode → result/miss → pkg-label → expiry → locked → confirm); lookup precedence: learned→seed→manual; learned mapping saved on confirm; 9 widget tests + 7 barcode lookup unit tests |
 | **198** | Shopping batch receipt capture | ✅ Complete | [#105](https://github.com/11895079/zerospoils/pull/105), [#106](https://github.com/11895079/zerospoils/pull/106) | Batch capture + review flows, retroactive linking, batch history/detail, payment method metadata, and inventory/item batch associations shipped |
@@ -58,7 +58,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **201** | Receipt line-item extraction with AR overlay | ⚠️ Partial | — | `ReceiptLiveScanScreen` with live AR overlay (green boxes only), `ReceiptRowClassification` pipeline (tax/total/payment/etc.), `ReceiptParseResult` with `.rows`/`.acceptedRows`/`.rejectedRows`. Missing: tri-color AR coding (amber/grey for excluded lines), hidden-lines section in review screen, promote/demote UI for excluded rows |
 | **202** | Fresh produce packaged item recognition | ⚠️ Partial | — | `FreshProduceOcrParser` fully implemented (fish/seafood/meat/deli, weight, price/kg, pack date, best-before), integrated in `PackagedItemFastAddScreen` (`packageLabelScan` stage). Missing: per-field confidence indicators on confirmation screen, fresh-produce-specific telemetry events |
-| **203** | Haptic and sound feedback settings | ⚠️ Partial | — | `FeedbackService` (prefs store + haptic/beep dispatch), `FeedbackRuntime` (static lazy-init accessor for non-Riverpod screens), and `FeedbackSettingsNotifier` Riverpod provider all implemented; all four scanner screens wired. Missing: "Feedback & Sounds" section in Settings UI, per-scanner individual toggles, and beep volume slider |
+| **203** | Haptic and sound feedback settings | ✅ Complete | — | `FeedbackService` + `FeedbackSettingsNotifier` persist master/per-scanner scan feedback prefs; Settings screen exposes "Feedback & Sounds" controls; barcode/expiry/receipt/produce scan success flows are gated and tested |
 | **204** | Onboarding polish with Zesto mascot intro | ➡️ Moved → M4 | — | Issue file moved to `planning/milestones/M4/`; promoted as user-activation/beta-retention work |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |
 | **206** | Downloadable reference-data update packs | ✅ Complete | [#136](https://github.com/11895079/zerospoils/pull/136) | Remote manifest-backed packs now support barcode catalogs, categories, and locations with checksum validation, atomic activation/rollback, region/locale selection, active-version diagnostics, and offline reuse of the activated pack |

@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -38,6 +40,9 @@ jobs:
 
       - name: Format check
         run: dart format --set-exit-if-changed lib test tool integration_test scripts
+
+      - name: Check hardcoded UI strings
+        run: dart run tool/check_hardcoded_ui_strings.dart origin/main
 
       - name: Analyze
         run: flutter analyze
