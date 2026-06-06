@@ -102,6 +102,7 @@ class ReceiptClassifiedRow extends Equatable {
 class ReceiptParseResult extends Equatable {
   final List<ReceiptLineItem> items;
   final List<ReceiptClassifiedRow> rows;
+  final double? subtotalAmount;
   final double? taxAmount;
   final double? totalAmount;
   final double? savingsAmount;
@@ -109,6 +110,7 @@ class ReceiptParseResult extends Equatable {
   const ReceiptParseResult({
     required this.items,
     required this.rows,
+    this.subtotalAmount,
     this.taxAmount,
     this.totalAmount,
     this.savingsAmount,
@@ -124,6 +126,7 @@ class ReceiptParseResult extends Equatable {
   List<Object?> get props => [
     items,
     rows,
+    subtotalAmount,
     taxAmount,
     totalAmount,
     savingsAmount,

@@ -145,6 +145,38 @@ TOTAL 32.19
       expect(items[5].price, 4.19);
     });
 
+    test('extracts summary amounts from tax, total, and savings lines', () {
+      final parser = ReceiptParser();
+
+      final detailed = parser.parseDetailedOcrLines(const [
+        ReceiptOcrLine(
+          text: 'SUBTOTAL 31.61',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 500, right: 180, bottom: 520),
+        ),
+        ReceiptOcrLine(
+          text: 'TOTAL 32.19',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 515, right: 180, bottom: 535),
+        ),
+        ReceiptOcrLine(
+          text: '4.49 HST (13.000)% 0.58',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 530, right: 180, bottom: 550),
+        ),
+        ReceiptOcrLine(
+          text: 'Saving 0.50',
+          photoIndex: 0,
+          box: ReceiptOcrBox(left: 20, top: 560, right: 180, bottom: 580),
+        ),
+      ]);
+
+      expect(detailed.subtotalAmount, 31.61);
+      expect(detailed.totalAmount, 32.19);
+      expect(detailed.taxAmount, 0.58);
+      expect(detailed.savingsAmount, 0.50);
+    });
+
     test('extracts tax, total, and savings amounts in parse result', () {
       const raw = '''
 MILK 4.99
