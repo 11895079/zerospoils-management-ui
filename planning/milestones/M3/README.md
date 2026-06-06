@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** June 5, 2026 — **Progress:** 22/24 issues complete (92%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 completed; 206 reference-pack delivery implemented and documented
+**Last Updated:** June 6, 2026 — **Progress:** 22/24 issues complete (92%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 completed; 206 reference-pack delivery implemented and documented
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 

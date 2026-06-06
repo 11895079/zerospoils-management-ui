@@ -1213,6 +1213,11 @@ class _PackagedItemFastAddScreenState
     required String label,
     required OcrFieldConfidence? confidence,
   }) {
+    final semanticsKey = key is ValueKey<Object?>
+        ? Key('${key.value}_semantics')
+        : Key(
+            '${label.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_')}_semantics',
+          );
     final text = confidence == null
         ? 'Not detected'
         : _confidenceLabel(confidence);
@@ -1230,7 +1235,7 @@ class _PackagedItemFastAddScreenState
     };
 
     return Semantics(
-      key: Key('${(key as ValueKey).value}_semantics'),
+      key: semanticsKey,
       container: true,
       label: '$label confidence',
       value: text,

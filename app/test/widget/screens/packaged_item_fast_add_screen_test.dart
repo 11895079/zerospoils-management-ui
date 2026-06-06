@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zerospoils/domain/models/item_model.dart';
 
 import 'package:zerospoils/presentation/di/service_locator.dart';
 import 'package:zerospoils/presentation/screens/packaged_item_fast_add_screen.dart';
@@ -385,8 +386,6 @@ void main() {
     testWidgets('confirm stage shows per-field confidence indicators', (
       tester,
     ) async {
-      final semanticsHandle = tester.ensureSemantics();
-
       await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
@@ -443,8 +442,6 @@ void main() {
       );
       expect(productNameSemantics.properties.label, 'Product name confidence');
       expect(productNameSemantics.properties.value, isNotEmpty);
-
-      semanticsHandle.dispose();
     });
 
     testWidgets('emits package OCR telemetry on extract and save', (
@@ -581,12 +578,19 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('fast_add_category_dropdown')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.textContaining('Other').last);
+      final categoryField = tester
+          .widget<DropdownButtonFormField<ItemCategory>>(
+            find.byKey(const Key('fast_add_category_dropdown')),
+          );
+      categoryField.onChanged?.call(ItemCategory.other);
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.byKey(const Key('fast_add_save_button')));
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('fast_add_save_button')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('fast_add_save_button')));
       await tester.pumpAndSettle();
 
