@@ -122,11 +122,19 @@ class _ReceiptBatchReviewScreenState
       return;
     }
 
+    final batchRepo = ref.read(receiptBatchRepositoryProvider);
+    await batchRepo.init();
+    final existingBatch = widget.existingBatchId == null
+        ? null
+        : await batchRepo.getBatch(widget.existingBatchId!);
+    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
+
     final keptCount = _items.where((item) => !item.hidden).length;
     final excludedCount = _items.length - keptCount;
     ref.read(telemetryClientProvider).enqueue({
       'name': 'receipt_scan_lines_detected',
       'properties': {
+        'batch_id': effectiveBatchId,
         'total': _items.length,
         'kept': keptCount,
         'excluded': excludedCount,
@@ -143,12 +151,6 @@ class _ReceiptBatchReviewScreenState
     }
 
     final batchItems = <ReceiptBatchItem>[];
-    final batchRepo = ref.read(receiptBatchRepositoryProvider);
-    await batchRepo.init();
-    final existingBatch = widget.existingBatchId == null
-        ? null
-        : await batchRepo.getBatch(widget.existingBatchId!);
-    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
 
     if (destination == ReceiptBatchDestination.shoppingList) {
       final shoppingRepo = ref.read(shoppingListRepositoryProvider);
@@ -513,14 +515,16 @@ class _ReceiptBatchReviewScreenState
   }
 
   Widget _buildReceiptSummaryFooter(ThemeData theme) {
-    final effectiveTotal = widget.parsedTotalAmount ?? widget.totalAmount;
+    final parsedTotalAmount = widget.parsedTotalAmount;
     final taxAmount = widget.parsedTaxAmount;
     final savingsAmount = widget.parsedSavingsAmount;
-    final subtotal = (effectiveTotal != null && taxAmount != null)
-        ? (effectiveTotal - taxAmount)
+    final subtotal = (parsedTotalAmount != null && taxAmount != null)
+        ? (parsedTotalAmount - taxAmount)
         : null;
 
-    if (effectiveTotal == null && taxAmount == null && savingsAmount == null) {
+    if (parsedTotalAmount == null &&
+        taxAmount == null &&
+        savingsAmount == null) {
       return const SizedBox.shrink();
     }
 
@@ -552,10 +556,10 @@ class _ReceiptBatchReviewScreenState
               savingsAmount,
               key: const Key('receipt_summary_savings'),
             ),
-          if (effectiveTotal != null)
+          if (parsedTotalAmount != null)
             _summaryRow(
               'Total amount paid',
-              effectiveTotal,
+              parsedTotalAmount,
               key: const Key('receipt_summary_total'),
             ),
         ],

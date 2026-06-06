@@ -107,7 +107,7 @@ class ReceiptParser {
 
   static final RegExp _moneyPattern = RegExp(r'\d+[\.,]\d{2}');
   static final RegExp _signedMoneyPattern = RegExp(
-    r'[-+]?\$?\d{1,4}[\.,]\d{2}',
+    r'[-+]?\$?\d+[\.,]\d{2}',
     caseSensitive: false,
   );
 

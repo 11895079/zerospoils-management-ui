@@ -193,12 +193,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.byKey(const Key('receipt_review_summary_footer')),
-      findsOneWidget,
+    final footer = find.byKey(const Key('receipt_review_summary_footer'));
+    expect(footer, findsOneWidget);
+    final summaryTile = find.descendant(
+      of: footer,
+      matching: find.byType(ExpansionTile),
     );
+    expect(summaryTile, findsOneWidget);
 
-    await tester.tap(find.text('Receipt summary'));
+    await tester.tap(summaryTile);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('receipt_summary_subtotal')), findsOneWidget);
