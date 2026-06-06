@@ -163,9 +163,17 @@ void main() {
       find.byKey(const Key('receipt_live_overlay_box_2')),
     );
 
-    final saleBox = salePositioned.child as Container;
-    final taxBox = taxPositioned.child as Container;
-    final unknownBox = unknownPositioned.child as Container;
+    final saleSemantics = salePositioned.child as Semantics;
+    final taxSemantics = taxPositioned.child as Semantics;
+    final unknownSemantics = unknownPositioned.child as Semantics;
+
+    final saleExcluded = saleSemantics.child! as ExcludeSemantics;
+    final taxExcluded = taxSemantics.child! as ExcludeSemantics;
+    final unknownExcluded = unknownSemantics.child! as ExcludeSemantics;
+
+    final saleBox = saleExcluded.child! as Container;
+    final taxBox = taxExcluded.child! as Container;
+    final unknownBox = unknownExcluded.child! as Container;
 
     final saleDecoration = saleBox.decoration! as BoxDecoration;
     final taxDecoration = taxBox.decoration! as BoxDecoration;
@@ -180,5 +188,61 @@ void main() {
       (unknownDecoration.border as Border).top.color,
       const Color(0xFFF9A825),
     );
+  });
+
+  testWidgets('live AR overlay exposes semantic labels per row status', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        home: const ReceiptLiveScanScreen(
+          skipCameraInitialization: true,
+          debugImageSize: Size(320, 640),
+          debugClassifiedRows: [
+            ReceiptClassifiedRow(
+              text: 'BANANA 2.99',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 80, right: 300, bottom: 120),
+              classification: ReceiptRowClassification.saleItem,
+              extractedName: 'BANANA',
+              extractedPrice: 2.99,
+            ),
+            ReceiptClassifiedRow(
+              text: 'HST 0.52',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 160, right: 300, bottom: 200),
+              classification: ReceiptRowClassification.tax,
+            ),
+            ReceiptClassifiedRow(
+              text: 'RANDOM CODE',
+              photoIndex: 0,
+              box: ReceiptOcrBox(left: 20, top: 240, right: 300, bottom: 280),
+              classification: ReceiptRowClassification.unknown,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final first = tester.widget<Semantics>(
+      find.byKey(const Key('receipt_live_overlay_semantics_0')),
+    );
+    final second = tester.widget<Semantics>(
+      find.byKey(const Key('receipt_live_overlay_semantics_1')),
+    );
+    final third = tester.widget<Semantics>(
+      find.byKey(const Key('receipt_live_overlay_semantics_2')),
+    );
+
+    expect(first.properties.label, contains('included item'));
+    expect(first.properties.label, contains('BANANA'));
+    expect(second.properties.label, contains('excluded line'));
+    expect(second.properties.label, contains('HST 0.52'));
+    expect(third.properties.label, contains('review line'));
+    expect(third.properties.label, contains('RANDOM CODE'));
   });
 }

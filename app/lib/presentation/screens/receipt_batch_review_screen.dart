@@ -394,6 +394,7 @@ class _ReceiptBatchReviewScreenState
                 subtitle: Text(_reviewMetadataSummary()),
               ),
             ),
+          _buildReviewCountsSummary(visibleEntries.length),
           ...visibleEntries.map((entry) {
             final index = entry.key;
             final item = entry.value;
@@ -484,32 +485,57 @@ class _ReceiptBatchReviewScreenState
       return const SizedBox.shrink();
     }
 
-    return Card(
-      key: const Key('receipt_hidden_lines_section'),
-      child: ExpansionTile(
-        title: Text('Hidden receipt lines (${hiddenEntries.length})'),
-        subtitle: const Text(
-          'Promote excluded lines when OCR filtered a true sale item.',
+    return Semantics(
+      key: const Key('receipt_hidden_lines_semantics'),
+      container: true,
+      label: 'Hidden receipt lines',
+      value: '${hiddenEntries.length} lines hidden',
+      child: Card(
+        key: const Key('receipt_hidden_lines_section'),
+        child: ExpansionTile(
+          title: Text('Hidden receipt lines (${hiddenEntries.length})'),
+          subtitle: const Text(
+            'Promote excluded lines when OCR filtered a true sale item.',
+          ),
+          children: hiddenEntries
+              .map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                return ListTile(
+                  key: Key('receipt_hidden_item_$index'),
+                  title: Text(item.name),
+                  subtitle: Text(
+                    '${_classificationLabel(item.classification)} · ${item.rawText ?? item.name}',
+                  ),
+                  trailing: TextButton.icon(
+                    key: Key('receipt_hidden_promote_$index'),
+                    onPressed: () => _promoteExcluded(index),
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Promote'),
+                  ),
+                );
+              })
+              .toList(growable: false),
         ),
-        children: hiddenEntries
-            .map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return ListTile(
-                key: Key('receipt_hidden_item_$index'),
-                title: Text(item.name),
-                subtitle: Text(
-                  '${_classificationLabel(item.classification)} · ${item.rawText ?? item.name}',
-                ),
-                trailing: TextButton.icon(
-                  key: Key('receipt_hidden_promote_$index'),
-                  onPressed: () => _promoteExcluded(index),
-                  icon: const Icon(Icons.visibility_outlined),
-                  label: const Text('Promote'),
-                ),
-              );
-            })
-            .toList(growable: false),
+      ),
+    );
+  }
+
+  Widget _buildReviewCountsSummary(int includedCount) {
+    final hiddenCount = _items.where((item) => item.hidden).length;
+    return Semantics(
+      key: const Key('receipt_review_counts_semantics'),
+      container: true,
+      liveRegion: true,
+      label: 'Review counts',
+      value: '$includedCount included lines, $hiddenCount hidden lines',
+      child: Padding(
+        key: const Key('receipt_review_counts_summary'),
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: Text(
+          'Included: $includedCount · Hidden: $hiddenCount',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
       ),
     );
   }

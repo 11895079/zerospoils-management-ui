@@ -597,22 +597,30 @@ class ReceiptLiveOcrOverlay extends StatelessWidget {
               top: box.top / sourceHeight * constraints.maxHeight,
               width: box.width / sourceWidth * constraints.maxWidth,
               height: box.height / sourceHeight * constraints.maxHeight,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: tone.border, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                  color: tone.fill,
-                ),
-                alignment: Alignment.topLeft,
-                padding: const EdgeInsets.all(4),
-                child: Text(
-                  label,
-                  key: Key('receipt_live_overlay_label_$index'),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.caption.copyWith(
-                    color: tone.text,
-                    backgroundColor: tone.labelBackground,
+              child: Semantics(
+                key: Key('receipt_live_overlay_semantics_$index'),
+                container: true,
+                label:
+                    'Receipt overlay line ${index + 1}, ${_semanticClassificationLabel(row.classification)}, $label',
+                child: ExcludeSemantics(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: tone.border, width: 2),
+                      borderRadius: BorderRadius.circular(8),
+                      color: tone.fill,
+                    ),
+                    alignment: Alignment.topLeft,
+                    padding: const EdgeInsets.all(4),
+                    child: Text(
+                      label,
+                      key: Key('receipt_live_overlay_label_$index'),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(
+                        color: tone.text,
+                        backgroundColor: tone.labelBackground,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -652,6 +660,23 @@ class ReceiptLiveOcrOverlay extends StatelessWidget {
           labelBackground: Color(0xCCB0BEC5),
           text: Colors.black,
         );
+    }
+  }
+
+  String _semanticClassificationLabel(ReceiptRowClassification classification) {
+    switch (classification) {
+      case ReceiptRowClassification.saleItem:
+        return 'included item';
+      case ReceiptRowClassification.unknown:
+        return 'review line';
+      case ReceiptRowClassification.tax:
+      case ReceiptRowClassification.total:
+      case ReceiptRowClassification.loyalty:
+      case ReceiptRowClassification.payment:
+      case ReceiptRowClassification.savings:
+      case ReceiptRowClassification.department:
+      case ReceiptRowClassification.storeInfo:
+        return 'excluded line';
     }
   }
 }

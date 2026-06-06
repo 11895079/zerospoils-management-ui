@@ -46,37 +46,26 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 
 ## Acceptance criteria (Definition of Done)
 
-- [ ] Live camera viewfinder renders AR bounding boxes on detected text regions with green (item), amber (review), and grey (excluded) colour coding
-  - **Partial**: `ReceiptLiveOcrOverlay` renders `lightGreenAccent` boxes for all detected regions; amber/grey distinction not implemented
+- [x] Live camera viewfinder renders AR bounding boxes on detected text regions with green (item), amber (review), and grey (excluded) colour coding
 - [x] All instructional and status text in the receipt capture flow appears in a panel below the camera surface, not overlaid on the viewfinder
   - `ReceiptLiveScanScreen` text panel is outside the camera viewport
-- [ ] Classification pipeline extracts tax amount (dollar value) from HST/GST/PST/QST lines and stores in `ReceiptParseResult.taxAmount`; tax lines are not shown in the purchase item list
-  - **Partial**: `ReceiptRowClassification.tax` classifies these lines but dollar amount is not extracted or stored
-- [ ] Classification pipeline extracts total/subtotal amount from matching lines and stores in `ReceiptParseResult.totalAmount`; these lines are not shown in the purchase item list
-  - **Partial**: `ReceiptRowClassification.total` classifies these lines but dollar amount is not extracted or stored
-- [ ] Classification pipeline extracts savings/price-reduction amount (MEMBER SAVINGS, YOU SAVED, loyalty discounts, negative-value lines) and stores in `ReceiptParseResult.savingsAmount`; savings lines are not shown in the purchase item list
-  - **Not done**: `ReceiptRowClassification.savings` exists but amount is not extracted or stored
+- [x] Classification pipeline extracts tax amount (dollar value) from HST/GST/PST/QST lines and stores in `ReceiptParseResult.taxAmount`; tax lines are not shown in the purchase item list
+- [x] Classification pipeline extracts total/subtotal amount from matching lines and stores in `ReceiptParseResult.totalAmount`; these lines are not shown in the purchase item list
+- [x] Classification pipeline extracts savings/price-reduction amount (MEMBER SAVINGS, YOU SAVED, loyalty discounts, negative-value lines) and stores in `ReceiptParseResult.savingsAmount`; savings lines are not shown in the purchase item list
 - [x] Classification pipeline excludes payment/card lines (card fragments, VISA/MASTERCARD/INTERAC/DEBIT/CREDIT labels, approval codes) from the review list
   - `ReceiptRowClassification.payment` handled in `_classifyRow()`
 - [x] Classification pipeline excludes store header/footer noise (address, phone, cashier ID, terminal ID, loyalty headers, timestamps) from the review list
   - `ReceiptRowClassification.storeInfo`, `.department`, `.loyalty` handled; exclusion patterns applied
-- [ ] Review screen shows only confirmed purchase items in receipt reading order; excluded lines visible in a collapsed "hidden lines" section with reason labels
-  - **Not done**: Review screen shows green overlay boxes on photos; no collapsed "hidden lines" section or reason labels
-- [ ] Review screen shows a collapsible receipt summary footer with extracted Savings, Tax, and Total amounts; fields omitted when not found with sufficient confidence
-  - **Not done**: no summary footer implemented
-- [ ] User can promote any excluded line to a purchase item and demote any purchase item to excluded in the review step
-  - **Not done**: `ReceiptParseResult` has `.rejectedRows` but no promote/demote UI built
+- [x] Review screen shows only confirmed purchase items in receipt reading order; excluded lines visible in a collapsed "hidden lines" section with reason labels
+- [x] Review screen shows a collapsible receipt summary footer with extracted Savings, Tax, and Total amounts; fields omitted when not found with sufficient confidence
+- [x] User can promote any excluded line to a purchase item and demote any purchase item to excluded in the review step
 - [x] Classification pipeline is fully on-device; no network dependency
-- [ ] Web platform shows "not available on web yet" and skips the AR overlay
-  - **Not verified**
-- [ ] Telemetry events: `receipt_scan_lines_detected {total, kept, excluded, user_promoted, user_demoted}` emitted on review confirm
-  - **Not verified**
-- [ ] Unit/widget/integration tests added or updated (see test plan)
-  - **Partial**: parser unit tests exist; overlay widget tests use `debugOverlayItems`/`debugImageSize`; no promote/demote tests
+- [x] Web platform shows "not available on web yet" and skips the AR overlay
+- [x] Telemetry events: `receipt_scan_lines_detected {total, kept, excluded, user_promoted, user_demoted}` emitted on review confirm
+- [x] Unit/widget/integration tests added or updated (see test plan)
 - [x] Offline-first behavior verified (no network dependency)
   - `offline_first_verification_test.dart` covers receipt parser (pure Dart)
-- [ ] Accessibility basics: bounding-box colour coding supplemented with labelled semantics; text panel readable by screen reader; review list announces item count and excluded count
-  - **Partial**: text panel below viewport is accessible; tri-color semantic labels not implemented
+- [x] Accessibility basics: bounding-box colour coding supplemented with labelled semantics; text panel readable by screen reader; review list announces item count and excluded count
 
 ---
 
@@ -93,11 +82,11 @@ Deliver receipt line-item extraction with automatic exclusion of tax, total, and
 
 ## Implementation notes
 
-**Status as of May 2026 (code audit):**
-- `ReceiptLiveScanScreen` (`receipt_live_scan_screen.dart`): live AR overlay implemented with `ReceiptLiveOcrOverlay` widget. Single-color (`Colors.lightGreenAccent`) only; tri-color (amber/grey) not yet implemented.
-- `receipt_parser.dart` (`ReceiptParser`): full `parseDetailedOcrLines()` pipeline with `ReceiptRowClassification` enum (`saleItem, tax, total, loyalty, payment, savings, department, storeInfo, unknown`). `ReceiptParseResult` exposes `.acceptedRows` and `.rejectedRows` — domain layer is ready. Dollar amounts from tax/total/savings lines are NOT extracted.
-- Review screen (`receipt_batch_review_screen.dart`): shows `_ReceiptOcrOverlayCard` with green boxes on static photos only. No collapsed "hidden lines" section; no promote/demote UI. `ReceiptParseResult.rejectedRows` is not surfaced to the user. No receipt summary footer.
-- Remaining work: (1) tri-color AR boxes using classification from live scan, (2) hidden-lines section in review + promote/demote, (3) extract `taxAmount` / `totalAmount` / `savingsAmount` from classified lines, (4) receipt summary footer in review screen, (5) telemetry, (6) semantic labels on bounding boxes.
+**Status as of June 2026 (reconciled with code):**
+- `ReceiptLiveScanScreen` renders tri-color AR boxes with classification-aware tones and semantics labels for item/review/excluded statuses.
+- `ReceiptParser` extracts `subtotalAmount`, `taxAmount`, `totalAmount`, and `savingsAmount` from classified lines and returns them in `ReceiptParseResult`.
+- `ReceiptBatchReviewScreen` ships hidden-lines promote/demote interactions, telemetry counters (`user_promoted`, `user_demoted`), and a receipt summary footer.
+- Accessibility coverage includes non-color semantic labels on overlay rows and review count announcements (included vs hidden lines).
 
 - AR overlay: use the camera preview stream already established in M3/196 (live expiry OCR); throttle bounding-box refresh to ~10 fps — this rate is sufficient for smooth visual feedback (human perception threshold ~8–12 fps for positional updates) while avoiding GPU overdraw on mid-range Android devices; validate with a widget performance test that the overlay does not drop the camera preview below 30 fps on a reference device; draw rectangles using a `CustomPainter` layered on top of the camera preview widget; pair each coloured rectangle with an accessibility label (`Semantics` widget) so screen readers and colour-blind users receive status information through text, not only colour
 - Move all text overlays (guidance copy, capture count, auto-capture toggle, status messages) into a `Column` widget placed below the camera widget rather than using a `Stack` with overlaid children; this frees the camera surface for AR content only

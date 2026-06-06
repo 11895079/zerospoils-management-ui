@@ -209,4 +209,66 @@ void main() {
     expect(find.byKey(const Key('receipt_summary_savings')), findsOneWidget);
     expect(find.byKey(const Key('receipt_summary_total')), findsOneWidget);
   });
+
+  testWidgets('review screen exposes included and hidden count semantics', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: ReceiptBatchReviewScreen(
+            source: ReceiptBatchSource.inventory,
+            photoPaths: const ['receipt-1.jpg'],
+            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 5.49)],
+            excludedRows: const [
+              ReceiptClassifiedRow(
+                text: 'HST 1.25',
+                photoIndex: 0,
+                box: ReceiptOcrBox(left: 24, top: 120, right: 200, bottom: 160),
+                classification: ReceiptRowClassification.tax,
+              ),
+            ],
+            batchId: 'batch-5',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receipt_review_counts_summary')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('receipt_review_counts_summary')),
+      findsOneWidget,
+    );
+
+    final countsSemantics = tester.widget<Semantics>(
+      find.byKey(const Key('receipt_review_counts_semantics')),
+    );
+    expect(countsSemantics.properties.label, 'Review counts');
+    expect(
+      countsSemantics.properties.value,
+      '1 included lines, 1 hidden lines',
+    );
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receipt_hidden_lines_section')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final hiddenSemantics = tester.widget<Semantics>(
+      find.byKey(const Key('receipt_hidden_lines_semantics')),
+    );
+    expect(hiddenSemantics.properties.label, 'Hidden receipt lines');
+    expect(hiddenSemantics.properties.value, '1 lines hidden');
+  });
 }
