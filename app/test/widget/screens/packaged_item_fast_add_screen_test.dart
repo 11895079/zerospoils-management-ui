@@ -385,6 +385,8 @@ void main() {
     testWidgets('confirm stage shows per-field confidence indicators', (
       tester,
     ) async {
+      final semanticsHandle = tester.ensureSemantics();
+
       await tester.pumpWidget(_wrapWithApp(const PackagedItemFastAddScreen()));
       await tester.pumpAndSettle();
 
@@ -435,6 +437,14 @@ void main() {
         find.byKey(const Key('fast_add_confidence_best_before')),
         findsOneWidget,
       );
+
+      final productNameSemantics = tester.widget<Semantics>(
+        find.byKey(const Key('fast_add_confidence_product_name_semantics')),
+      );
+      expect(productNameSemantics.properties.label, 'Product name confidence');
+      expect(productNameSemantics.properties.value, isNotEmpty);
+
+      semanticsHandle.dispose();
     });
 
     testWidgets('emits package OCR telemetry on extract and save', (
@@ -521,6 +531,85 @@ void main() {
       expect(
         telemetry.events.any(
           (event) => event['name'] == 'fresh_produce_fast_add_saved',
+        ),
+        isTrue,
+      );
+    });
+
+    testWidgets('emits field-edited telemetry when OCR values are overridden', (
+      tester,
+    ) async {
+      final telemetry = TelemetryClient(consentEnabled: true);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [telemetryClientProvider.overrideWithValue(telemetry)],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const PackagedItemFastAddScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('fast_add_package_label_button')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('fast_add_package_label_text_field')),
+        'ATLANTIC SALMON FILLET\n0.742 KG @ 24.99/KG\nTOTAL 18.54\nBEST BEFORE 03/31/2028',
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_extract_button')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('fast_add_package_name_field')),
+        'Custom Seafood Mix',
+      );
+
+      await tester.ensureVisible(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.tap(
+        find.byKey(const Key('fast_add_package_label_continue')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('fast_add_expiry_locked_continue')),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('fast_add_category_dropdown')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('Other').last);
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.byKey(const Key('fast_add_save_button')));
+      await tester.tap(find.byKey(const Key('fast_add_save_button')));
+      await tester.pumpAndSettle();
+
+      final editedEvents = telemetry.events
+          .where((event) => event['name'] == 'package_ocr_field_edited')
+          .toList(growable: false);
+
+      expect(editedEvents, isNotEmpty);
+      expect(
+        editedEvents.any(
+          (event) => event['properties']['field_name'] == 'product_description',
+        ),
+        isTrue,
+      );
+      expect(
+        editedEvents.any(
+          (event) => event['properties']['field_name'] == 'category',
+        ),
+        isTrue,
+      );
+      expect(
+        editedEvents.every(
+          (event) => event['properties']['label_type'] == 'fresh_produce',
         ),
         isTrue,
       );

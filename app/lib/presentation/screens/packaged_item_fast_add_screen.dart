@@ -1229,26 +1229,34 @@ class _PackagedItemFastAddScreenState
       null => const Color(0xFF616161),
     };
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Row(
-        key: key,
-        children: [
-          Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
-          Icon(statusIcon, size: 16, color: statusColor),
-          const SizedBox(width: AppSpacing.xs),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _confidenceColor(confidence),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            ),
-            child: Text(
-              text,
-              style: AppTextStyles.caption.copyWith(color: Colors.black),
-            ),
+    return Semantics(
+      key: Key('${(key as ValueKey).value}_semantics'),
+      container: true,
+      label: '$label confidence',
+      value: text,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+        child: ExcludeSemantics(
+          child: Row(
+            key: key,
+            children: [
+              Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
+              Icon(statusIcon, size: 16, color: statusColor),
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _confidenceColor(confidence),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  text,
+                  style: AppTextStyles.caption.copyWith(color: Colors.black),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
