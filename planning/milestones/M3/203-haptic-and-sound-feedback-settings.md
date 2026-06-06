@@ -48,20 +48,19 @@ Wire up the "Feedback & Sounds" section in Settings with persistent user prefere
 
 ## Acceptance criteria (Definition of Done)
 
-- [ ] "Feedback & Sounds" section appears in Settings screen using existing l10n strings
-- [ ] Haptic Feedback master toggle persists to `SharedPreferences` and suppresses all scan haptics when off
-- [ ] Sound Effects master toggle persists and suppresses all scan beeps when off
-- [ ] Beep Volume slider persists and scales beep amplitude 0–100%
-- [ ] Per-scanner toggles persist independently (barcode, expiry, receipt, produce)
-- [ ] Barcode capture fires medium haptic + beep on recognition, gated by preference
-- [ ] Expiry OCR fires medium haptic + beep on date capture, gated by preference
-- [ ] Receipt live scan fires heavy haptic + beep on manual or auto capture, gated by preference
-  - **Not done**: `receipt_live_scan_screen.dart` currently has zero haptic or sound calls
-- [ ] Fresh produce label recognition fires medium haptic + beep on sticker read, gated by preference
-- [ ] Toggling preferences from Settings takes effect on the next scan without restarting the app (Riverpod `StateProvider` / `AsyncNotifier` approach recommended)
-- [ ] Unit/widget tests added or updated (see test plan)
-- [ ] Offline-first behavior verified (no network dependency — all preferences are local)
-- [ ] Accessibility: sound and haptic toggles have semantic labels; beep is never the sole feedback channel (haptic and/or visual confirmation always present)
+- [x] "Feedback & Sounds" section appears in Settings screen using existing l10n strings
+- [x] Haptic Feedback master toggle persists to `SharedPreferences` and suppresses all scan haptics when off
+- [x] Sound Effects master toggle persists and suppresses all scan beeps when off
+- [x] Beep Volume slider persists and scales beep amplitude 0–100%
+- [x] Per-scanner toggles persist independently (barcode, expiry, receipt, produce)
+- [x] Barcode capture fires medium haptic + beep on recognition, gated by preference
+- [x] Expiry OCR fires medium haptic + beep on date capture, gated by preference
+- [x] Receipt live scan fires heavy haptic + beep on manual or auto capture, gated by preference
+- [x] Fresh produce label recognition fires medium haptic + beep on sticker read, gated by preference
+- [x] Toggling preferences from Settings takes effect on the next scan without restarting the app (Riverpod `StateProvider` / `AsyncNotifier` approach recommended)
+- [x] Unit/widget tests added or updated (see test plan)
+- [x] Offline-first behavior verified (no network dependency — all preferences are local)
+- [x] Accessibility: sound and haptic toggles have semantic labels; beep is never the sole feedback channel (haptic and/or visual confirmation always present)
 
 ---
 
@@ -89,6 +88,13 @@ Wire up the "Feedback & Sounds" section in Settings with persistent user prefere
 - **Riverpod integration**: expose a `scanFeedbackPreferencesProvider` that reads from `SharedPreferences` so any screen can call `ref.read(scanFeedbackPreferencesProvider)` to check current preferences before firing haptic/sound.
 - **Receipt scan**: `receipt_live_scan_screen.dart` `_capturePhoto()` method is the right place to add the haptic + beep call after a successful photo capture.
 - Existing unconditional `HapticFeedback` calls in barcode/expiry/packaged-item screens should be wrapped to check the preference before firing.
+
+## Implementation status update (2026-06-05)
+
+- Added `FeedbackService` persistence for master haptic/audio toggles, beep volume, haptic intensity, and per-scanner toggles.
+- Wired the Settings screen with the full "Feedback & Sounds" section and persisted controls.
+- Routed barcode, expiry, receipt, and produce scan success events through `FeedbackRuntime`.
+- Added widget coverage for the settings controls, persistence, and slider gating.
 
 ---
 
