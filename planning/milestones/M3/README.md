@@ -39,7 +39,7 @@
 
 ## M3 Implementation Status
 
-**Last Updated:** June 5, 2026 — **Progress:** 21/24 issues complete (88%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 202 remains partial; 201 and 203 completed; 206 reference-pack delivery implemented and documented
+**Last Updated:** June 6, 2026 — **Progress:** 22/24 issues complete (92%); 361 (App Distribution) promoted to complete — AppDistributionService implemented, pubspec dep added, both distribute CI workflows in place; 204 and 350 moved to M4; 201/202/203 completed; 206 reference-pack delivery implemented and documented
 
 Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202, 361); prior M3 work completed 13 issues; PR #96 added issue 360 (Firebase/FCM).
 
@@ -57,7 +57,7 @@ Note: M3 scope expanded by PR #97 to include three receipt/AR features (201, 202
 | **199** | Canada seed barcode catalog curation | ✅ Complete | — | 3-tier lookup chain wired (learned → local seed → OFx live); v2 artifact (141 records); GTIN validation; runtime ingestion via `LocalBarcodeCatalog.fromAsset()` + providers; 477 tests pass |
 | **200** | Reminder interaction logging (local) | ✅ Complete | [#82](https://github.com/11895079/zerospoils/pull/82) | Notification tap handler + attribution store + telemetry; 14 tests; merged to main |
 | **201** | Receipt line-item extraction with AR overlay | ✅ Complete | — | `ReceiptLiveScanScreen` tri-color AR overlay (item/review/excluded), parser summary extraction (`subtotalAmount`,`taxAmount`,`totalAmount`,`savingsAmount`), review hidden-line promote/demote workflow, summary footer, telemetry counters, and semantics coverage are implemented with tests |
-| **202** | Fresh produce packaged item recognition | ⚠️ Partial | — | `FreshProduceOcrParser` fully implemented (fish/seafood/meat/deli, weight, price/kg, pack date, best-before), integrated in `PackagedItemFastAddScreen` (`packageLabelScan` stage). Missing: per-field confidence indicators on confirmation screen, fresh-produce-specific telemetry events |
+| **202** | Fresh produce packaged item recognition | ✅ Complete | — | `FreshProduceOcrParser` integrated in `PackagedItemFastAddScreen` with confidence indicators on confirm stage, fresh-produce telemetry events (`package_ocr_attempted`, `package_ocr_success`, `package_ocr_field_edited`), and accessibility semantics coverage for confidence rows |
 | **203** | Haptic and sound feedback settings | ✅ Complete | — | `FeedbackService` + `FeedbackSettingsNotifier` persist master/per-scanner scan feedback prefs; Settings screen exposes "Feedback & Sounds" controls; barcode/expiry/receipt/produce scan success flows are gated and tested |
 | **204** | Onboarding polish with Zesto mascot intro | ➡️ Moved → M4 | — | Issue file moved to `planning/milestones/M4/`; promoted as user-activation/beta-retention work |
 | **205** | Settings date format preference | ✅ Complete | [#77](https://github.com/11895079/zerospoils/pull/77) | DateFormatter utility + FutureProvider + telemetry (8/8 unit tests) |

@@ -115,7 +115,9 @@ final openFoodFactsClientProvider = Provider<OpenFoodFactsClient>((ref) {
 });
 
 /// Progress stats provider (aggregates items + telemetry locally)
-final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
+final progressStatsProvider = StreamProvider.autoDispose<ProgressStats>((
+  ref,
+) async* {
   final repository = ref.watch(itemRepositoryProvider);
   final statsService = ref.watch(progressStatsServiceProvider);
   final telemetry = ref.watch(telemetryClientProvider);
@@ -146,10 +148,8 @@ final progressStatsProvider = StreamProvider<ProgressStats>((ref) async* {
     }
   }
 
-  // Fallback (e.g., demo/in-memory): lightweight polling while screen is open.
-  yield* Stream<ProgressStats>.periodic(
-    const Duration(seconds: 2),
-  ).asyncMap((_) => buildSnapshot());
+  // No fallback timer: we emit an initial snapshot above, and rely on Hive
+  // watch events for near real-time updates in persisted mode.
 });
 
 /// Date format preference provider (reads from SharedPreferences)

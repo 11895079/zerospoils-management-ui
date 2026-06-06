@@ -1213,6 +1213,11 @@ class _PackagedItemFastAddScreenState
     required String label,
     required OcrFieldConfidence? confidence,
   }) {
+    final semanticsKey = key is ValueKey<Object?>
+        ? Key('${key.value}_semantics')
+        : Key(
+            '${label.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '_')}_semantics',
+          );
     final text = confidence == null
         ? 'Not detected'
         : _confidenceLabel(confidence);
@@ -1229,26 +1234,34 @@ class _PackagedItemFastAddScreenState
       null => const Color(0xFF616161),
     };
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Row(
-        key: key,
-        children: [
-          Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
-          Icon(statusIcon, size: 16, color: statusColor),
-          const SizedBox(width: AppSpacing.xs),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _confidenceColor(confidence),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            ),
-            child: Text(
-              text,
-              style: AppTextStyles.caption.copyWith(color: Colors.black),
-            ),
+    return Semantics(
+      key: semanticsKey,
+      container: true,
+      label: '$label confidence',
+      value: text,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+        child: ExcludeSemantics(
+          child: Row(
+            key: key,
+            children: [
+              Expanded(child: Text(label, style: AppTextStyles.bodySmall)),
+              Icon(statusIcon, size: 16, color: statusColor),
+              const SizedBox(width: AppSpacing.xs),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _confidenceColor(confidence),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  text,
+                  style: AppTextStyles.caption.copyWith(color: Colors.black),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -44,18 +44,15 @@ Extend the on-device package recognition pipeline to correctly identify and extr
   - All fields extracted in `FreshProduceOcrParser.parseLabel()`; returns `FreshProduceOcrParseResult`
 - [x] Category inference maps extracted product description to `fish_seafood`, `meat_poultry`, or `deli_prepared`; falls back to `other` if uncertain
   - `FreshProduceClassification` enum: `fishSeafood, meatPoultry, deliPrepared, other`
-- [ ] Confirmation screen pre-fills all detected fresh-produce fields; confidence indicators shown per field (checkmark=high, warning=low)
-  - **Not verified**: `PackagedItemFastAddScreen` calls `_freshProduceParser.parseLabel()` and pre-fills fields; per-field confidence indicator UI not confirmed
+- [x] Confirmation screen pre-fills all detected fresh-produce fields; confidence indicators shown per field (checkmark=high, warning=low)
 - [x] If fewer than 2 fields extracted, pipeline falls back to generic package OCR (M3/195) with no additional error shown to user beyond the standard partial-extraction message
   - `FreshProduceOcrParseResult.shouldFallbackToGenericOcr` set when `extractedFieldCount < 2`
 - [x] Feature is gated behind the existing `package_ocr` feature flag — no separate flag required
 - [x] Fully offline — no network calls during or after extraction
-- [ ] Telemetry events: `package_ocr_attempted {tier, label_type: 'fresh_produce'}`, `package_ocr_success {fields_extracted, label_type: 'fresh_produce'}`, `package_ocr_field_edited {field_name}` emitted using the same schema as M3/195
-  - **Not verified**: fresh-produce-specific telemetry events not confirmed
+- [x] Telemetry events: `package_ocr_attempted {tier, label_type: 'fresh_produce'}`, `package_ocr_success {fields_extracted, label_type: 'fresh_produce'}`, `package_ocr_field_edited {field_name}` emitted using the same schema as M3/195
 - [x] Unit/widget/integration tests added or updated (see test plan)
   - `FreshProduceOcrParser` unit tests present; parser tested for all field types and fallback
-- [ ] Accessibility basics: confirmation form fields are labelled; confidence indicators announced for screen reader users
-  - **Not verified**
+- [x] Accessibility basics: confirmation form fields are labelled; confidence indicators announced for screen reader users
 
 ---
 
@@ -71,10 +68,11 @@ Extend the on-device package recognition pipeline to correctly identify and extr
 
 ## Implementation notes
 
-**Status as of May 2026 (code audit):**
+**Status as of June 2026 (reconciled with code):**
 - `FreshProduceOcrParser` (`fresh_produce_ocr_parser.dart`): fully implemented. `shouldUseFreshProduceMode()` uses price-per-weight heuristic + no-barcode check. `parseLabel()` extracts all 6 fields (productDescription, netWeight, pricePerWeight, totalPrice, packDate, bestBeforeDate). `FreshProduceClassification` enum: `fishSeafood, meatPoultry, deliPrepared, other`. Fallback when `extractedFieldCount < 2`. Unit tests present and passing.
-- `PackagedItemFastAddScreen` (`packaged_item_fast_add_screen.dart`): `packageLabelScan` stage exists in `_FastAddStage` enum. `_freshProduceParser.parseLabel()` called on scan result. Classification checked for category routing.
-- **Remaining work**: (1) verify per-field confidence indicator UI on the confirmation stage, (2) confirm fresh-produce-specific telemetry events (`label_type: 'fresh_produce'`) are being fired.
+- `PackagedItemFastAddScreen` (`packaged_item_fast_add_screen.dart`): `packageLabelScan` stage exists in `_FastAddStage` enum. `_freshProduceParser.parseLabel()` is called on scan result; confirmation stage shows per-field confidence rows with status badges and semantics labels for screen readers.
+- Fresh-produce telemetry is wired and verified in widget tests: `package_ocr_attempted`, `package_ocr_success`, `package_ocr_field_edited`, and `fresh_produce_fast_add_saved`.
+- No remaining implementation gaps for M3/202.
 
 - Fresh produce sticker detection heuristic (no network required):
   - Heuristic A (primary trigger): price-per-weight pattern present (e.g., `$X.XX/kg`, `X.XX $/KG`, `$X.XX/LB`) AND no UPC barcode detected in the same frame
