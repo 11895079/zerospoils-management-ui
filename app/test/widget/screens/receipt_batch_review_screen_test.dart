@@ -163,4 +163,50 @@ void main() {
 
     expect(find.byKey(const Key('receipt_hidden_item_0')), findsOneWidget);
   });
+
+  testWidgets('review screen shows collapsible receipt summary footer', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          home: ReceiptBatchReviewScreen(
+            source: ReceiptBatchSource.inventory,
+            photoPaths: const ['receipt-1.jpg'],
+            parsedItems: [ParsedReceiptItem(name: 'MILK', price: 4.99)],
+            batchId: 'batch-4',
+            parsedTotalAmount: 10.84,
+            parsedTaxAmount: 0.84,
+            parsedSavingsAmount: 1.50,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('receipt_review_summary_footer')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    final footer = find.byKey(const Key('receipt_review_summary_footer'));
+    expect(footer, findsOneWidget);
+    final summaryTile = find.descendant(
+      of: footer,
+      matching: find.byType(ExpansionTile),
+    );
+    expect(summaryTile, findsOneWidget);
+
+    await tester.tap(summaryTile);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('receipt_summary_subtotal')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_tax')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_savings')), findsOneWidget);
+    expect(find.byKey(const Key('receipt_summary_total')), findsOneWidget);
+  });
 }

@@ -42,6 +42,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
   final String? storeName;
   final DateTime? purchasedAt;
   final double? totalAmount;
+  final double? parsedTotalAmount;
+  final double? parsedTaxAmount;
+  final double? parsedSavingsAmount;
   final PaymentMethod? paymentMethod;
 
   const ReceiptBatchReviewScreen({
@@ -56,6 +59,9 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
     this.storeName,
     this.purchasedAt,
     this.totalAmount,
+    this.parsedTotalAmount,
+    this.parsedTaxAmount,
+    this.parsedSavingsAmount,
     this.paymentMethod,
   });
 
@@ -67,6 +73,8 @@ class ReceiptBatchReviewScreen extends ConsumerStatefulWidget {
 class _ReceiptBatchReviewScreenState
     extends ConsumerState<ReceiptBatchReviewScreen> {
   late List<_EditableReceiptItem> _items;
+  int _userPromotedCount = 0;
+  int _userDemotedCount = 0;
 
   @override
   void initState() {
@@ -114,6 +122,27 @@ class _ReceiptBatchReviewScreenState
       return;
     }
 
+    final batchRepo = ref.read(receiptBatchRepositoryProvider);
+    await batchRepo.init();
+    final existingBatch = widget.existingBatchId == null
+        ? null
+        : await batchRepo.getBatch(widget.existingBatchId!);
+    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
+
+    final keptCount = _items.where((item) => !item.hidden).length;
+    final excludedCount = _items.length - keptCount;
+    ref.read(telemetryClientProvider).enqueue({
+      'name': 'receipt_scan_lines_detected',
+      'properties': {
+        'batch_id': effectiveBatchId,
+        'total': _items.length,
+        'kept': keptCount,
+        'excluded': excludedCount,
+        'user_promoted': _userPromotedCount,
+        'user_demoted': _userDemotedCount,
+      },
+    });
+
     final now = DateTime.now();
     var itemCounter = 0;
     String buildItemId(String name) {
@@ -122,12 +151,6 @@ class _ReceiptBatchReviewScreenState
     }
 
     final batchItems = <ReceiptBatchItem>[];
-    final batchRepo = ref.read(receiptBatchRepositoryProvider);
-    await batchRepo.init();
-    final existingBatch = widget.existingBatchId == null
-        ? null
-        : await batchRepo.getBatch(widget.existingBatchId!);
-    final effectiveBatchId = existingBatch?.id ?? widget.batchId;
 
     if (destination == ReceiptBatchDestination.shoppingList) {
       final shoppingRepo = ref.read(shoppingListRepositoryProvider);
@@ -323,6 +346,7 @@ class _ReceiptBatchReviewScreenState
         selected: true,
         sourceLabel: 'Receipt OCR (promoted)',
       );
+      _userPromotedCount += 1;
     });
   }
 
@@ -334,6 +358,7 @@ class _ReceiptBatchReviewScreenState
         selected: false,
         sourceLabel: 'Receipt OCR (excluded)',
       );
+      _userDemotedCount += 1;
     });
   }
 
@@ -428,6 +453,7 @@ class _ReceiptBatchReviewScreenState
               ),
             );
           }),
+          _buildReceiptSummaryFooter(theme),
           _buildHiddenLinesSection(),
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
@@ -484,6 +510,72 @@ class _ReceiptBatchReviewScreenState
               );
             })
             .toList(growable: false),
+      ),
+    );
+  }
+
+  Widget _buildReceiptSummaryFooter(ThemeData theme) {
+    final parsedTotalAmount = widget.parsedTotalAmount;
+    final taxAmount = widget.parsedTaxAmount;
+    final savingsAmount = widget.parsedSavingsAmount;
+    final subtotal = (parsedTotalAmount != null && taxAmount != null)
+        ? (parsedTotalAmount - taxAmount)
+        : null;
+
+    if (parsedTotalAmount == null &&
+        taxAmount == null &&
+        savingsAmount == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Card(
+      key: const Key('receipt_review_summary_footer'),
+      child: ExpansionTile(
+        title: const Text('Receipt summary'),
+        subtitle: const Text('Extracted totals and adjustments from OCR.'),
+        childrenPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        children: [
+          if (subtotal != null)
+            _summaryRow(
+              'Subtotal',
+              subtotal,
+              key: const Key('receipt_summary_subtotal'),
+            ),
+          if (taxAmount != null)
+            _summaryRow(
+              'Tax amount',
+              taxAmount,
+              key: const Key('receipt_summary_tax'),
+            ),
+          if (savingsAmount != null)
+            _summaryRow(
+              'Savings',
+              savingsAmount,
+              key: const Key('receipt_summary_savings'),
+            ),
+          if (parsedTotalAmount != null)
+            _summaryRow(
+              'Total amount paid',
+              parsedTotalAmount,
+              key: const Key('receipt_summary_total'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryRow(String label, double value, {required Key key}) {
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Text(r'$' + value.toStringAsFixed(2)),
+        ],
       ),
     );
   }

@@ -102,8 +102,17 @@ class ReceiptClassifiedRow extends Equatable {
 class ReceiptParseResult extends Equatable {
   final List<ReceiptLineItem> items;
   final List<ReceiptClassifiedRow> rows;
+  final double? taxAmount;
+  final double? totalAmount;
+  final double? savingsAmount;
 
-  const ReceiptParseResult({required this.items, required this.rows});
+  const ReceiptParseResult({
+    required this.items,
+    required this.rows,
+    this.taxAmount,
+    this.totalAmount,
+    this.savingsAmount,
+  });
 
   List<ReceiptClassifiedRow> get acceptedRows =>
       rows.where((row) => row.isAccepted).toList(growable: false);
@@ -112,5 +121,11 @@ class ReceiptParseResult extends Equatable {
       rows.where((row) => !row.isAccepted).toList(growable: false);
 
   @override
-  List<Object?> get props => [items, rows];
+  List<Object?> get props => [
+    items,
+    rows,
+    taxAmount,
+    totalAmount,
+    savingsAmount,
+  ];
 }

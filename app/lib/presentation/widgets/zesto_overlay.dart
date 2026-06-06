@@ -267,8 +267,9 @@ class _ZestoOverlayState extends ConsumerState<ZestoOverlay>
                                     child: child,
                                   );
                                 },
-                                // Decorative emoji; the Semantics wrapper above
-                                // already announces the full message.
+                                // The avatar itself is decorative; the Semantics
+                                // wrapper above already announces the full
+                                // message.
                                 child: ExcludeSemantics(
                                   child: Text(
                                     avatar,

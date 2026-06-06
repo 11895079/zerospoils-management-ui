@@ -106,6 +106,10 @@ class ReceiptParser {
   static final RegExp _modifierCodePattern = RegExp(r'^[A-Z]{1,4}$');
 
   static final RegExp _moneyPattern = RegExp(r'\d+[\.,]\d{2}');
+  static final RegExp _signedMoneyPattern = RegExp(
+    r'[-+]?\$?\d+[\.,]\d{2}',
+    caseSensitive: false,
+  );
 
   List<ReceiptLineItem> parse(String rawText) {
     return parseDetailed(rawText).items;
@@ -167,6 +171,9 @@ class ReceiptParser {
     int? seededCodedPricePhoto;
     double? carryForwardCodedPrice;
     int? carryForwardCodedPricePhoto;
+    double? taxAmount;
+    double? totalAmount;
+    double? savingsAmount;
     var rowPosition = 0;
 
     for (final row in rows) {
@@ -180,6 +187,32 @@ class ReceiptParser {
 
       final classification = _classifyRow(normalizedText);
       if (classification != ReceiptRowClassification.unknown) {
+        final classifiedAmount = _extractClassifiedAmount(
+          normalizedText,
+          classification,
+        );
+
+        if (classifiedAmount != null) {
+          switch (classification) {
+            case ReceiptRowClassification.tax:
+              taxAmount = ((taxAmount ?? 0) + classifiedAmount);
+              break;
+            case ReceiptRowClassification.total:
+              totalAmount = classifiedAmount;
+              break;
+            case ReceiptRowClassification.savings:
+              savingsAmount = ((savingsAmount ?? 0) + classifiedAmount);
+              break;
+            case ReceiptRowClassification.saleItem:
+            case ReceiptRowClassification.loyalty:
+            case ReceiptRowClassification.payment:
+            case ReceiptRowClassification.department:
+            case ReceiptRowClassification.storeInfo:
+            case ReceiptRowClassification.unknown:
+              break;
+          }
+        }
+
         final lower = normalizedText.toLowerCase();
         if (prices.length == 1 &&
             (lower.contains('tpd/') || lower.contains('eco fee')) &&
@@ -195,6 +228,7 @@ class ReceiptParser {
             photoIndex: row.photoIndex,
             box: row.box,
             classification: classification,
+            extractedPrice: classifiedAmount,
           ),
         );
         continue;
@@ -444,7 +478,49 @@ class ReceiptParser {
       }
     }
 
-    return ReceiptParseResult(items: items, rows: classifiedRows);
+    return ReceiptParseResult(
+      items: items,
+      rows: classifiedRows,
+      taxAmount: taxAmount,
+      totalAmount: totalAmount,
+      savingsAmount: savingsAmount,
+    );
+  }
+
+  double? _extractClassifiedAmount(
+    String text,
+    ReceiptRowClassification classification,
+  ) {
+    if (classification != ReceiptRowClassification.tax &&
+        classification != ReceiptRowClassification.total &&
+        classification != ReceiptRowClassification.savings) {
+      return null;
+    }
+
+    final matches = _signedMoneyPattern
+        .allMatches(text)
+        .toList(growable: false);
+    if (matches.isEmpty) {
+      return null;
+    }
+
+    final raw = matches.last.group(0);
+    if (raw == null || raw.isEmpty) {
+      return null;
+    }
+
+    final parsed = double.tryParse(
+      raw.replaceAll(r'$', '').replaceAll(',', '.'),
+    );
+    if (parsed == null) {
+      return null;
+    }
+
+    if (classification == ReceiptRowClassification.savings) {
+      return parsed.abs();
+    }
+
+    return parsed;
   }
 
   List<_ReceiptOcrRow> _buildRows(List<ReceiptOcrLine> lines) {
