@@ -19,13 +19,48 @@ class _TestNavigatorObserver extends NavigatorObserver {
 }
 
 Future<void> _goToPermissionsPage(WidgetTester tester) async {
-  for (var i = 0; i < 5; i++) {
+  final target = find.byKey(const Key('onboarding_notifications_button'));
+  for (var i = 0; i < 8; i++) {
+    if (target.evaluate().isNotEmpty) {
+      return;
+    }
     await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+    await tester.pumpAndSettle();
+  }
+
+  throw StateError('Could not reach permissions page');
+}
+
+Future<void> _revealContinueButton(WidgetTester tester) async {
+  final continueFinder = find.byKey(const Key('onboarding_continue_button'));
+  for (var i = 0; i < 6; i++) {
+    if (continueFinder.evaluate().isNotEmpty) {
+      return;
+    }
+    await tester.drag(
+      find.byKey(const Key('onboarding_notifications_button')),
+      const Offset(0, -240),
+    );
     await tester.pumpAndSettle();
   }
 }
 
 void main() {
+  Future<void> goToWorkflowPage(WidgetTester tester) async {
+    final target = find.byKey(
+      const Key('onboarding_open_shared_guidance_button'),
+    );
+    for (var i = 0; i < 6; i++) {
+      if (target.evaluate().isNotEmpty) {
+        return;
+      }
+      await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+      await tester.pumpAndSettle();
+    }
+
+    throw StateError('Could not reach workflow page');
+  }
+
   group('OnboardingScreen', () {
     setUpAll(() {
       SharedPreferences.setMockInitialValues({});
@@ -35,13 +70,24 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
+    ThemeData noSplashTheme([Brightness brightness = Brightness.light]) {
+      return ThemeData(
+        brightness: brightness,
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      );
+    }
+
     testWidgets('Emits onboarding_started event on first load', (
       WidgetTester tester,
     ) async {
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
-        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        ProviderScope(
+          child: MaterialApp(theme: noSplashTheme(), home: OnboardingScreen()),
+        ),
       );
 
       // Verify welcome screen is shown
@@ -87,7 +133,9 @@ void main() {
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
-        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        ProviderScope(
+          child: MaterialApp(theme: noSplashTheme(), home: OnboardingScreen()),
+        ),
       );
 
       // Verify we're on page 1 with ZeroSpoils title
@@ -107,16 +155,20 @@ void main() {
       addTearDown(() => tester.view.resetPhysicalSize());
 
       await tester.pumpWidget(
-        ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+        ProviderScope(
+          child: MaterialApp(theme: noSplashTheme(), home: OnboardingScreen()),
+        ),
       );
 
       // Navigate to permissions page (page 6 of 6)
       await _goToPermissionsPage(tester);
 
       // Tap notification permission button
-      await tester.tap(
-        find.byKey(const Key('onboarding_notifications_button')),
-      );
+      tester
+          .widget<ElevatedButton>(
+            find.byKey(const Key('onboarding_notifications_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       // Verify notification permission dialog appears
@@ -130,18 +182,121 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(home: Scaffold(body: OnboardingScreen())),
+          child: MaterialApp(
+            theme: noSplashTheme(),
+            home: Scaffold(body: OnboardingScreen()),
+          ),
         ),
       );
 
       // Tap skip button
-      await tester.tap(find.byKey(const Key('onboarding_skip_button')));
+      tester
+          .widget<TextButton>(find.byKey(const Key('onboarding_skip_button')))
+          .onPressed!();
       await tester.pumpAndSettle();
 
       // Verify that onboarding screen persists onboarding_complete flag
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool('onboarding_complete'), true);
     });
+
+    testWidgets('Workflow page opens shared Zesto guidance screen', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        ProviderScope(
+          child: MaterialApp(theme: noSplashTheme(), home: OnboardingScreen()),
+        ),
+      );
+
+      await goToWorkflowPage(tester);
+
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('onboarding_open_shared_guidance_button')),
+          )
+          .onPressed!();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('screen_zesto_guidance')), findsOneWidget);
+      expect(find.byKey(const Key('zesto_guidance_character')), findsOneWidget);
+
+      final acknowledgeButton = find.byKey(
+        const Key('zesto_section_viewed_add_what_came_home'),
+      );
+      expect(acknowledgeButton, findsOneWidget);
+
+      tester.widget<ButtonStyleButton>(acknowledgeButton).onPressed!();
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('zesto_section_ack_icon_add_what_came_home')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('zesto_section_ack_message_add_what_came_home')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+      'Zesto companion appears across onboarding pages with contextual icons',
+      (WidgetTester tester) async {
+        addTearDown(() => tester.view.resetPhysicalSize());
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              theme: noSplashTheme(),
+              home: OnboardingScreen(),
+            ),
+          ),
+        );
+
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('onboarding_companion_problem')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('onboarding_problem_title')),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.qr_code_scanner), findsWidgets);
+
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('onboarding_companion_workflow')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('onboarding_workflow_title')),
+          findsOneWidget,
+        );
+
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+        await tester.fling(find.byType(PageView), const Offset(-300, 0), 1000);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('onboarding_companion_permissions')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('onboarding_permissions_title')),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('Continue to App button completes onboarding', (
       WidgetTester tester,
@@ -158,7 +313,12 @@ void main() {
       await _goToPermissionsPage(tester);
 
       // Tap Continue to App button
-      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await _revealContinueButton(tester);
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('onboarding_continue_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       // Verify SharedPreferences was updated
@@ -176,6 +336,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: noSplashTheme(),
             navigatorObservers: [observer],
             home: Builder(
               builder: (context) => Scaffold(
@@ -201,7 +362,9 @@ void main() {
       await tester.tap(find.byKey(openOnboardingButtonKey));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('onboarding_skip_button')));
+      tester
+          .widget<TextButton>(find.byKey(const Key('onboarding_skip_button')))
+          .onPressed!();
       await tester.pumpAndSettle();
 
       expect(observer.popCount, greaterThanOrEqualTo(1));
@@ -221,6 +384,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: noSplashTheme(),
             navigatorObservers: [observer],
             home: Builder(
               builder: (context) => Scaffold(
@@ -247,7 +411,12 @@ void main() {
       await tester.pumpAndSettle();
 
       await _goToPermissionsPage(tester);
-      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await _revealContinueButton(tester);
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('onboarding_continue_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       expect(observer.popCount, greaterThanOrEqualTo(1));
@@ -282,8 +451,13 @@ void main() {
       );
 
       await _goToPermissionsPage(tester);
+      await _revealContinueButton(tester);
 
-      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('onboarding_continue_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       expect(find.text('home-screen-marker'), findsOneWidget);
@@ -326,10 +500,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byKey(openNestedOnboardingKey));
+        tester
+            .widget<ElevatedButton>(find.byKey(openNestedOnboardingKey))
+            .onPressed!();
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byKey(const Key('onboarding_skip_button')));
+        tester
+            .widget<TextButton>(find.byKey(const Key('onboarding_skip_button')))
+            .onPressed!();
         await tester.pumpAndSettle();
 
         expect(find.byKey(openNestedOnboardingKey), findsOneWidget);
@@ -373,11 +551,18 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.tap(find.byKey(openNestedOnboardingKey));
+        tester
+            .widget<ElevatedButton>(find.byKey(openNestedOnboardingKey))
+            .onPressed!();
         await tester.pumpAndSettle();
 
         await _goToPermissionsPage(tester);
-        await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+        await _revealContinueButton(tester);
+        tester
+            .widget<OutlinedButton>(
+              find.byKey(const Key('onboarding_continue_button')),
+            )
+            .onPressed!();
         await tester.pumpAndSettle();
 
         expect(find.byKey(openNestedOnboardingKey), findsOneWidget);
@@ -426,14 +611,20 @@ void main() {
       await _goToPermissionsPage(tester);
 
       // Tap camera permission button
-      await tester.tap(find.byKey(const Key('onboarding_camera_button')));
+      tester
+          .widget<ElevatedButton>(
+            find.byKey(const Key('onboarding_camera_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       // Verify dialog appears
       expect(find.byKey(const Key('camera_prompt')), findsOneWidget);
 
       // Tap "Maybe Later"
-      await tester.tap(find.byKey(const Key('camera_prompt_defer')));
+      tester
+          .widget<TextButton>(find.byKey(const Key('camera_prompt_defer')))
+          .onPressed!();
       await tester.pumpAndSettle();
 
       // Dialog should be dismissed
@@ -446,18 +637,26 @@ void main() {
         addTearDown(() => tester.view.resetPhysicalSize());
 
         await tester.pumpWidget(
-          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+          ProviderScope(
+            child: MaterialApp(
+              theme: noSplashTheme(),
+              home: OnboardingScreen(),
+            ),
+          ),
         );
 
         await _goToPermissionsPage(tester);
 
-        await tester.tap(
-          find.byKey(const Key('onboarding_notifications_button')),
-        );
+        tester
+            .widget<ElevatedButton>(
+              find.byKey(const Key('onboarding_notifications_button')),
+            )
+            .onPressed!();
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const Key('notification_prompt_confirm')));
         await tester.pumpAndSettle();
+        await _revealContinueButton(tester);
 
         expect(find.byType(AlertDialog), findsNothing);
         expect(find.byType(PageView), findsOneWidget);
@@ -474,16 +673,26 @@ void main() {
         addTearDown(() => tester.view.resetPhysicalSize());
 
         await tester.pumpWidget(
-          ProviderScope(child: MaterialApp(home: OnboardingScreen())),
+          ProviderScope(
+            child: MaterialApp(
+              theme: noSplashTheme(),
+              home: OnboardingScreen(),
+            ),
+          ),
         );
 
         await _goToPermissionsPage(tester);
 
-        await tester.tap(find.byKey(const Key('onboarding_camera_button')));
+        tester
+            .widget<ElevatedButton>(
+              find.byKey(const Key('onboarding_camera_button')),
+            )
+            .onPressed!();
         await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const Key('camera_prompt_confirm')));
         await tester.pumpAndSettle();
+        await _revealContinueButton(tester);
 
         expect(find.byType(AlertDialog), findsNothing);
         expect(find.byType(PageView), findsOneWidget);
@@ -567,13 +776,13 @@ void main() {
       FilterChip chip = tester.widget<FilterChip>(jollofChipFinder);
       expect(chip.selected, isFalse);
 
-      await tester.tap(jollofChipFinder);
+      tester.widget<FilterChip>(jollofChipFinder).onSelected!(true);
       await tester.pumpAndSettle();
 
       chip = tester.widget<FilterChip>(jollofChipFinder);
       expect(chip.selected, isTrue);
 
-      await tester.tap(jollofChipFinder);
+      tester.widget<FilterChip>(jollofChipFinder).onSelected!(false);
       await tester.pumpAndSettle();
 
       chip = tester.widget<FilterChip>(jollofChipFinder);
@@ -591,14 +800,25 @@ void main() {
 
       await _goToPermissionsPage(tester);
 
-      await tester.tap(
-        find.byKey(const Key('onboarding_preset_chip_jollof_rice')),
-      );
+      tester
+          .widget<FilterChip>(
+            find.byKey(const Key('onboarding_preset_chip_jollof_rice')),
+          )
+          .onSelected!(true);
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('onboarding_preset_chip_curry')));
+      tester
+          .widget<FilterChip>(
+            find.byKey(const Key('onboarding_preset_chip_curry')),
+          )
+          .onSelected!(true);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('onboarding_continue_button')));
+      await _revealContinueButton(tester);
+      tester
+          .widget<OutlinedButton>(
+            find.byKey(const Key('onboarding_continue_button')),
+          )
+          .onPressed!();
       await tester.pumpAndSettle();
 
       final prefs = await SharedPreferences.getInstance();

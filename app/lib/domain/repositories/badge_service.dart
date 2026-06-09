@@ -41,12 +41,34 @@ class BadgeService {
     List<Item> items,
     List<Item> wastedItems,
   ) async {
-    if (wastedItems.isEmpty) {
-      // TODO: M3/300 - Verify 7 consecutive days with no waste recorded
-      // For now, assume if no wasted items found, check is positive
-      return true;
+    if (items.isEmpty) {
+      return false;
     }
-    return false;
+
+    final today = _startOfDay(DateTime.now());
+    final windowStart = today.subtract(
+      const Duration(days: BadgeRequirements.noWasteWeekDays - 1),
+    );
+
+    final hasWasteInWindow = wastedItems.any((item) {
+      final wasteDate = _startOfDay(item.updatedAt);
+      return !wasteDate.isBefore(windowStart) && !wasteDate.isAfter(today);
+    });
+
+    if (hasWasteInWindow) {
+      return false;
+    }
+
+    final earliestTrackedDate = items
+        .map((item) => _startOfDay(item.createdAt))
+        .reduce((a, b) => a.isBefore(b) ? a : b);
+
+    // Require at least 7 calendar days of tracked history.
+    return !earliestTrackedDate.isAfter(windowStart);
+  }
+
+  DateTime _startOfDay(DateTime value) {
+    return DateTime(value.year, value.month, value.day);
   }
 
   /// Check if user earned "Used Before Expiry" badge

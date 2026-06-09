@@ -28,6 +28,7 @@ import '../di/service_locator.dart'
     show telemetryClientProvider, analyticsConsentProvider;
 import '../di/repository_providers.dart';
 import '../di/theme_providers.dart';
+import 'zesto_guidance_screen.dart';
 import '../../data/services/backup_restore_service.dart';
 import '../../core/auth/auth_providers.dart';
 import '../../core/auth/firebase_auth_service.dart';
@@ -35,7 +36,9 @@ import 'onboarding_screen.dart';
 import '../widgets/feedback_drawer.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.openProfileOnLaunch = false});
+
+  final bool openProfileOnLaunch;
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -431,6 +434,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+
+    if (widget.openProfileOnLaunch) {
+      return _ProfileSettingsScreen(
+        accountSubtitle: _accountSubtitle(l10n),
+        onAccountTap: _showAccountDialog,
+      );
+    }
+
     final demoEnabled = ref.watch(demoModeProvider);
     final localeTag = ref.watch(appLocaleTagProvider);
     final referencePackRegionTag = ref.watch(referencePackRegionTagProvider);
@@ -452,14 +463,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         children: [
-          _buildSectionHeader(l10n.settingsSectionAccountData),
+          _buildSectionHeader('Profile'),
           _buildCard([
             _buildLinkTile(
-              icon: Icons.person,
-              label: l10n.settingsAccount,
+              key: const Key('settings_profile_page_item'),
+              icon: Icons.manage_accounts,
+              label: 'Profile',
               subtitle: _accountSubtitle(l10n),
-              onTap: () => _showAccountDialog(context),
+              onTap: _openProfilePage,
             ),
+          ]),
+          const SizedBox(height: AppSpacing.xl),
+          _buildSectionHeader(l10n.settingsSectionAccountData),
+          _buildCard([
             _buildToggleTile(
               icon: Icons.cloud_sync,
               label: l10n.settingsDataSync,
@@ -733,8 +749,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
           ]),
-          const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader(l10n.settingsReminders),
+          _buildSectionHeader(l10n.settingsSectionPreferences),
           _buildCard([
             _buildToggleTile(
               icon: Icons.notifications_active,
@@ -788,10 +803,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChange: () => _trackVibrationToggle(ref, value),
               ),
             ),
-          ]),
-          const SizedBox(height: AppSpacing.xl),
-          _buildSectionHeader(l10n.settingsSectionPreferences),
-          _buildCard([
             _buildToggleTile(
               icon: Icons.dark_mode,
               label: l10n.settingsDarkMode,
@@ -904,6 +915,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
+            _buildLinkTile(
+              key: const Key('settings_zesto_guide_item'),
+              icon: Icons.smart_toy_outlined,
+              label: 'Zesto guide',
+              subtitle: 'Tips and walkthrough from Zesto',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const ZestoGuidanceScreen(source: 'settings'),
+                  ),
+                );
+              },
+            ),
           ]),
           const SizedBox(height: AppSpacing.xl),
           _buildSectionHeader(l10n.settingsSectionLegal),
@@ -984,6 +1009,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildLinkTile({
+    Key? key,
     required IconData icon,
     required String label,
     String? subtitle,
@@ -992,6 +1018,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final theme = Theme.of(context);
 
     return ListTile(
+      key: key,
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: theme.colorScheme.onSurface),
       title: Text(label, style: theme.textTheme.bodyMedium),
@@ -1383,6 +1410,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() {});
   }
 
+  void _openProfilePage() {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _ProfileSettingsScreen(
+          accountSubtitle: _accountSubtitle(l10n),
+          onAccountTap: _showAccountDialog,
+        ),
+      ),
+    );
+  }
+
   /// Reschedule all notifications when notification preferences change.
   /// Called after master toggle or lead time changes are persisted.
   Future<void> _rescheduleNotifications() async {
@@ -1552,6 +1591,88 @@ class _AccountDialogState extends State<_AccountDialog> {
                   child: Text(l10n.settingsForgotPassword),
                 ),
               ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      key: const Key('account_create_button'),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => _performAuthAction(
+                              action: () =>
+                                  authService.createEmailPasswordAccount(
+                                    email: _emailController.text,
+                                    password: _passwordController.text,
+                                  ),
+                              successMessage: l10n.settingsCreateAccountSuccess,
+                              closeDialogAfterSuccess: true,
+                              requiresCredentials: true,
+                            ),
+                      icon: const Icon(Icons.person_add_alt_1),
+                      label: Text(l10n.settingsCreateAccount),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: FilledButton.icon(
+                      key: const Key('account_signin_button'),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => _performAuthAction(
+                              action: () => authService.signInWithEmailPassword(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              ),
+                              successMessage: l10n.settingsSignInSuccess,
+                              closeDialogAfterSuccess: true,
+                              requiresCredentials: true,
+                            ),
+                      icon: const Icon(Icons.login),
+                      label: Text(l10n.settingsSignIn),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('account_google_signin_button'),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () => _performAuthAction(
+                              action: () => authService.signInWithGoogle(),
+                              successMessage:
+                                  l10n.settingsSignInWithGoogleSuccess,
+                              closeDialogAfterSuccess: true,
+                            ),
+                      icon: const Icon(Icons.g_mobiledata),
+                      label: Text(l10n.settingsContinueWithGoogle),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const Key('account_apple_signin_button'),
+                      onPressed: _isSubmitting
+                          ? null
+                          : () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    l10n.settingsAppleSignInSoonMessage,
+                                  ),
+                                ),
+                              );
+                            },
+                      icon: const Icon(Icons.apple),
+                      label: Text(l10n.settingsContinueWithAppleSoon),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ],
         ),
@@ -1583,80 +1704,8 @@ class _AccountDialogState extends State<_AccountDialog> {
                   )
                 : Text(l10n.settingsSignOut),
           )
-        else ...[
-          FilledButton.tonal(
-            key: const Key('account_create_button'),
-            onPressed: _isSubmitting
-                ? null
-                : () => _performAuthAction(
-                    action: () => authService.createEmailPasswordAccount(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    ),
-                    successMessage: l10n.settingsCreateAccountSuccess,
-                    closeDialogAfterSuccess: true,
-                    requiresCredentials: true,
-                  ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.settingsCreateAccount),
-          ),
-          FilledButton(
-            key: const Key('account_signin_button'),
-            onPressed: _isSubmitting
-                ? null
-                : () => _performAuthAction(
-                    action: () => authService.signInWithEmailPassword(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    ),
-                    successMessage: l10n.settingsSignInSuccess,
-                    closeDialogAfterSuccess: true,
-                    requiresCredentials: true,
-                  ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.settingsSignIn),
-          ),
-          FilledButton.tonal(
-            key: const Key('account_google_signin_button'),
-            onPressed: _isSubmitting
-                ? null
-                : () => _performAuthAction(
-                    action: () => authService.signInWithGoogle(),
-                    successMessage: l10n.settingsSignInWithGoogleSuccess,
-                    closeDialogAfterSuccess: true,
-                  ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.settingsContinueWithGoogle),
-          ),
-          FilledButton.tonal(
-            key: const Key('account_apple_signin_button'),
-            onPressed: _isSubmitting
-                ? null
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(l10n.settingsAppleSignInSoonMessage),
-                      ),
-                    );
-                  },
-            child: Text(l10n.settingsContinueWithAppleSoon),
-          ),
-        ],
+        else
+          const SizedBox.shrink(),
       ],
     );
   }
@@ -1779,5 +1828,392 @@ class _AccountDialogState extends State<_AccountDialog> {
       default:
         return l10n.settingsAuthErrorUnknown(code);
     }
+  }
+}
+
+class _ProfileSettingsScreen extends ConsumerStatefulWidget {
+  const _ProfileSettingsScreen({
+    required this.accountSubtitle,
+    required this.onAccountTap,
+  });
+
+  final String accountSubtitle;
+  final Future<void> Function(BuildContext context) onAccountTap;
+
+  @override
+  ConsumerState<_ProfileSettingsScreen> createState() =>
+      _ProfileSettingsScreenState();
+}
+
+class _ProfileSettingsScreenState
+    extends ConsumerState<_ProfileSettingsScreen> {
+  bool _notificationsEnabled = true;
+  bool _soundEnabled = true;
+  bool _vibrationEnabled = true;
+  bool _darkModeEnabled = false;
+  int _leadTimeDays = 3;
+  String _dateFormat = 'MM/DD/YYYY';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfilePreferences();
+  }
+
+  Future<void> _loadProfilePreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _notificationsEnabled =
+          prefs.getBool(NotificationPreferencesStore.notificationsEnabledKey) ??
+          true;
+      _soundEnabled =
+          prefs.getBool(NotificationPreferencesStore.soundEnabledKey) ?? true;
+      _vibrationEnabled =
+          prefs.getBool(NotificationPreferencesStore.vibrationEnabledKey) ??
+          true;
+      _darkModeEnabled = prefs.getBool('dark_mode_enabled') ?? false;
+      _leadTimeDays =
+          prefs.getInt(NotificationPreferencesStore.leadTimeDaysKey) ?? 3;
+      _dateFormat = prefs.getString('date_format') ?? 'MM/DD/YYYY';
+    });
+  }
+
+  Future<void> _setBool({
+    required String key,
+    required bool value,
+    required VoidCallback onUpdate,
+    VoidCallback? onChange,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+    onChange?.call();
+    if (!mounted) return;
+    setState(onUpdate);
+  }
+
+  Future<void> _setInt({
+    required String key,
+    required int value,
+    required VoidCallback onUpdate,
+    VoidCallback? onChange,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(key, value);
+    onChange?.call();
+    if (!mounted) return;
+    setState(onUpdate);
+  }
+
+  Future<void> _setString({
+    required String key,
+    required String value,
+    required VoidCallback onUpdate,
+    VoidCallback? onChange,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, value);
+    onChange?.call();
+    if (!mounted) return;
+    setState(onUpdate);
+  }
+
+  Future<void> _rescheduleNotifications() async {
+    try {
+      final repo = ref.read(itemRepositoryProvider);
+      await repo.init();
+      final items = await repo.getAllItems();
+
+      final notificationService = NotificationService();
+      await notificationService.rescheduleAllNotifications(items);
+    } catch (_) {
+      // Best effort only; scheduling is retried on next app launch.
+    }
+  }
+
+  void _track(String name, Map<String, dynamic> properties) {
+    ref.read(telemetryClientProvider).enqueue({
+      'name': name,
+      'properties': properties,
+    });
+  }
+
+  Widget _buildProfileAvatarHeader(ThemeData theme) {
+    FirebaseAuthService? authService;
+    try {
+      authService = ref.read(firebaseAuthServiceProvider);
+    } catch (_) {
+      authService = null;
+    }
+
+    Widget buildAvatar(User? user) {
+      final photoUrl = user?.photoURL;
+      final hasPhoto = photoUrl != null && photoUrl.isNotEmpty;
+
+      return CircleAvatar(
+        key: const Key('profile_header_avatar'),
+        radius: 40,
+        backgroundColor: hasPhoto
+            ? theme.colorScheme.surfaceContainerHighest
+            : theme.colorScheme.primaryContainer,
+        backgroundImage: hasPhoto ? NetworkImage(photoUrl) : null,
+        child: hasPhoto
+            ? null
+            : Icon(
+                Icons.person,
+                size: 38,
+                color: theme.colorScheme.onPrimaryContainer,
+              ),
+      );
+    }
+
+    if (authService == null) {
+      return Center(child: buildAvatar(null));
+    }
+
+    return Center(
+      child: StreamBuilder<User?>(
+        stream: authService.authStateChangesSafe,
+        initialData: authService.currentUser,
+        builder: (context, snapshot) {
+          final user = snapshot.data ?? authService?.currentUser;
+          return buildAvatar(user);
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context) ?? AppLocalizationsEn();
+    final localeTag = ref.watch(appLocaleTagProvider);
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      key: const Key('screen_profile_settings'),
+      appBar: AppBar(title: const Text('Profile')),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        children: [
+          _buildProfileAvatarHeader(theme),
+          const SizedBox(height: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(
+              'Profile',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: ListTile(
+                key: const Key('profile_account_item'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.person),
+                title: Text(l10n.settingsAccount),
+                subtitle: Text(widget.accountSubtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => widget.onAccountTap(context),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+            child: Text(
+              l10n.settingsSectionPreferences,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Column(
+              children: [
+                ListTile(
+                  key: const Key('profile_notifications_toggle'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.notifications_active),
+                  title: Text(l10n.settingsNotifications),
+                  trailing: Switch(
+                    value: _notificationsEnabled,
+                    onChanged: (value) => _setBool(
+                      key: NotificationPreferencesStore.notificationsEnabledKey,
+                      value: value,
+                      onUpdate: () => _notificationsEnabled = value,
+                      onChange: () {
+                        _track('notification_toggle_changed', {
+                          'notifications_enabled': value,
+                        });
+                        unawaited(_rescheduleNotifications());
+                      },
+                    ),
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_lead_time_dropdown'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.timer),
+                  title: Text(l10n.remindersLeadTime),
+                  trailing: DropdownButton<int>(
+                    value: _leadTimeDays,
+                    underline: const SizedBox.shrink(),
+                    items: const [1, 3, 7]
+                        .map(
+                          (days) => DropdownMenuItem<int>(
+                            value: days,
+                            child: Text(l10n.settingsLeadTimeDays(days)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      _setInt(
+                        key: NotificationPreferencesStore.leadTimeDaysKey,
+                        value: value,
+                        onUpdate: () => _leadTimeDays = value,
+                        onChange: () {
+                          _track('expiry_warning_changed', {
+                            'lead_time_days': value,
+                          });
+                          unawaited(_rescheduleNotifications());
+                        },
+                      );
+                    },
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_sound_toggle'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.music_note),
+                  title: Text(l10n.remindersSound),
+                  trailing: Switch(
+                    value: _soundEnabled,
+                    onChanged: (value) => _setBool(
+                      key: NotificationPreferencesStore.soundEnabledKey,
+                      value: value,
+                      onUpdate: () => _soundEnabled = value,
+                      onChange: () => _track('sound_toggle_changed', {
+                        'sound_enabled': value,
+                      }),
+                    ),
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_vibration_toggle'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.vibration),
+                  title: Text(l10n.remindersVibration),
+                  trailing: Switch(
+                    value: _vibrationEnabled,
+                    onChanged: (value) => _setBool(
+                      key: NotificationPreferencesStore.vibrationEnabledKey,
+                      value: value,
+                      onUpdate: () => _vibrationEnabled = value,
+                      onChange: () => _track('vibration_toggle_changed', {
+                        'vibration_enabled': value,
+                      }),
+                    ),
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_dark_mode_toggle'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.dark_mode),
+                  title: Text(l10n.settingsDarkMode),
+                  trailing: Switch(
+                    value: _darkModeEnabled,
+                    onChanged: (value) => _setBool(
+                      key: 'dark_mode_enabled',
+                      value: value,
+                      onUpdate: () => _darkModeEnabled = value,
+                      onChange: () {
+                        ref.read(themeModeProvider.notifier).state = value
+                            ? ThemeMode.dark
+                            : ThemeMode.light;
+                        _track('theme_changed', {
+                          'theme': value ? 'dark' : 'light',
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_date_format_dropdown'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.date_range),
+                  title: Text(l10n.settingsDateFormat),
+                  trailing: DropdownButton<String>(
+                    value: _dateFormat,
+                    underline: const SizedBox.shrink(),
+                    items: const ['MM/DD/YYYY', 'DD/MM/YYYY', 'YYYY-MM-DD']
+                        .map(
+                          (format) => DropdownMenuItem<String>(
+                            value: format,
+                            child: Text(format),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      _setString(
+                        key: 'date_format',
+                        value: value,
+                        onUpdate: () => _dateFormat = value,
+                        onChange: () =>
+                            _track('date_format_changed', {'format': value}),
+                      );
+                    },
+                  ),
+                ),
+                const Divider(height: AppSpacing.lg),
+                ListTile(
+                  key: const Key('profile_language_dropdown_tile'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.language),
+                  title: Text(l10n.settingsLanguage),
+                  trailing: DropdownButton<String>(
+                    value: localeTag,
+                    underline: const SizedBox.shrink(),
+                    items: appLocaleOptions
+                        .map(
+                          (option) => DropdownMenuItem<String>(
+                            value: option.tag,
+                            child: Text(appLocaleLabelForTag(option.tag)),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value == null) return;
+                      unawaited(setAppLocalePreference(ref, value));
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

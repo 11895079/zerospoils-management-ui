@@ -19,7 +19,9 @@ import '../../domain/models/zesto_model.dart';
 import '../../domain/repositories/progress_stats_service.dart';
 import '../di/repository_providers.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/profile_avatar_button.dart';
 import 'inventory_screen.dart';
+import 'settings_screen.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -34,7 +36,24 @@ class ProgressScreen extends ConsumerWidget {
       key: const Key('screen_progress'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: Text(l10n.screenTitleProgress), elevation: 1),
+      appBar: AppBar(
+        title: Text(l10n.screenTitleProgress),
+        elevation: 1,
+        actions: [
+          ProfileAvatarButton(
+            key: const Key('progress_profile_button'),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const SettingsScreen(openProfileOnLaunch: true),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: statsAsync.when(
         data: (stats) => _buildContent(context, ref, stats),
         loading: () => const Center(child: CircularProgressIndicator()),

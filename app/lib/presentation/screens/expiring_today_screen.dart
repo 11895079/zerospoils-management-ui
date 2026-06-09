@@ -18,6 +18,8 @@ import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/app_button.dart';
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/profile_avatar_button.dart';
+import 'settings_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class ExpiringTodayScreen extends ConsumerStatefulWidget {
@@ -108,7 +110,23 @@ class _ExpiringTodayScreenState extends ConsumerState<ExpiringTodayScreen> {
       key: const Key('screen_expiring_today'),
       drawer: const AppDrawer(),
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(title: Text(l10n.expiringSoonLabel)),
+      appBar: AppBar(
+        title: Text(l10n.expiringSoonLabel),
+        actions: [
+          ProfileAvatarButton(
+            key: const Key('expiring_profile_button'),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const SettingsScreen(openProfileOnLaunch: true),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null

@@ -14,6 +14,8 @@ import '../../domain/utils/local_id_generator.dart';
 import '../di/repository_providers.dart';
 import '../di/service_locator.dart' show telemetryClientProvider;
 import '../widgets/app_drawer.dart';
+import '../widgets/profile_avatar_button.dart';
+import 'settings_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../domain/models/receipt_batch.dart';
@@ -71,6 +73,20 @@ class ShoppingListScreen extends ConsumerWidget {
               ),
             ],
           ),
+          actions: [
+            ProfileAvatarButton(
+              key: const Key('shopping_profile_button'),
+              tooltip: 'Profile',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const SettingsScreen(openProfileOnLaunch: true),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         drawer: const AppDrawer(),
         body: TabBarView(

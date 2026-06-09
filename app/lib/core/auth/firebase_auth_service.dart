@@ -16,6 +16,19 @@ class FirebaseAuthService {
   /// to be set server-side (e.g., Pro tier verification via Firebase Console).
   Future<void> signInAnonymously() async {
     try {
+      // On web, persisted auth state may restore asynchronously right after
+      // startup. Wait for the first auth emission to avoid replacing an
+      // existing signed-in session with a new anonymous user.
+      if (kIsWeb) {
+        try {
+          await _auth.authStateChanges().first.timeout(
+            const Duration(seconds: 2),
+          );
+        } catch (_) {
+          // If restoration times out, continue with fallback behavior.
+        }
+      }
+
       if (_auth.currentUser == null) {
         await _auth.signInAnonymously();
         debugPrint('[FirebaseAuth] Signed in anonymously');
@@ -109,6 +122,28 @@ class FirebaseAuthService {
     final provider = GoogleAuthProvider();
     final user = _auth.currentUser;
 
+    if (kIsWeb) {
+      if (user != null && user.isAnonymous) {
+        try {
+          await user.linkWithProvider(provider);
+          debugPrint('[FirebaseAuth] Linked anonymous user to Google auth');
+          return;
+        } on FirebaseAuthException catch (e) {
+          if (e.code != 'credential-already-in-use' &&
+              e.code != 'operation-not-supported-in-this-environment') {
+            rethrow;
+          }
+          // Fall through to sign-in when account already exists or provider
+          // flow requires popup handling on web.
+        }
+      }
+
+      final authDynamic = _auth as dynamic;
+      await authDynamic.signInWithPopup(provider);
+      debugPrint('[FirebaseAuth] Signed in with Google (web popup)');
+      return;
+    }
+
     if (user != null && user.isAnonymous) {
       try {
         await user.linkWithProvider(provider);
@@ -171,4 +206,17 @@ class FirebaseAuthService {
   ///
   /// Returns a stream of [User?] that emits when user logs in/out.
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  /// Safe auth-state stream for UI contexts where Firebase may be unavailable.
+  ///
+  /// Some widget tests run without Firebase initialization. In that case,
+  /// return a single-value stream instead of throwing.
+  Stream<User?> get authStateChangesSafe {
+    try {
+      return _auth.authStateChanges();
+    } catch (e) {
+      debugPrint('[FirebaseAuth] authStateChanges unavailable: $e');
+      return Stream<User?>.value(_auth.currentUser);
+    }
+  }
 }

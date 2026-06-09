@@ -6,6 +6,7 @@ import '../routing/router.dart';
 import '../widgets/notification_permission_prompt.dart';
 import '../widgets/camera_permission_prompt.dart';
 import '../widgets/zesto_character.dart';
+import 'zesto_guidance_screen.dart';
 import '../../presentation/di/service_locator.dart';
 
 /// Multi-step onboarding screen aligned with prototype flow.
@@ -175,6 +176,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
+  Future<void> _openSharedGuidance() async {
+    _emitTelemetry('zesto_guidance_reopened', {'source': 'onboarding'});
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const ZestoGuidanceScreen(source: 'onboarding'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -233,14 +243,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '🥬 ZeroSpoils',
+            'Welcome to ZeroSpoils.',
             key: const Key('onboarding_title'),
             style: Theme.of(context).textTheme.headlineLarge,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 24),
           Text(
-            'Reduce food waste, save money, and organize your kitchen.',
+            'Everything you buy, remembered — so good food doesn\'t get forgotten.',
             key: const Key('onboarding_welcome_body'),
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
@@ -275,7 +285,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
           Text(
-            'Track inventory\nSmart reminders\nShopping flow + waste insights',
+            'Track what you have\nKnow what needs using\nSave more of what you buy',
             key: const Key('onboarding_feature_list'),
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
@@ -284,7 +294,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ElevatedButton(
             key: const Key('onboarding_next_button_0'),
             onPressed: _goNext,
-            child: const Text('Let\'s Get Started'),
+            child: const Text('Get started'),
           ),
         ],
       ),
@@ -297,33 +307,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: ListView(
         children: [
           const SizedBox(height: 12),
-          Text(
-            'Did you know?',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          _buildZestoCompanionBanner(
+            key: const Key('onboarding_companion_problem'),
+            icon: Icons.qr_code_scanner,
+            message:
+                'I can help you capture it once and keep the details handy.',
+            expression: ZestoExpression.wave,
+          ),
+          const SizedBox(height: 16),
+          _buildPageTitle(
+            key: const Key('onboarding_problem_title'),
+            icon: Icons.qr_code_scanner,
+            title: 'Scan once. We\'ll remember.',
           ),
           const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                '~30% of groceries end up in the trash.\nThat is money, time, and resources wasted.',
+                'Point your camera at a barcode or a whole receipt. We handle the rest — expiry dates, names, the lot.',
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
             ),
           ),
           const SizedBox(height: 12),
-          Text(
-            'Ever forgotten what is in the fridge? Bought duplicates? Or lost leftovers in the back? We have all been there.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.qr_code_scanner_outlined),
+              title: const Text('Scan a barcode'),
+              subtitle: const Text(
+                'Quick for single items when you are unpacking.',
+              ),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: const Text('Or scan a whole receipt'),
+              subtitle: const Text(
+                'Bring a full grocery trip in at once, then review it.',
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             key: const Key('onboarding_next_button_1'),
             onPressed: _goNext,
-            child: const Text('Next'),
+            child: const Text('Show me how'),
           ),
         ],
       ),
@@ -345,27 +376,39 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          Text(
-            'ZeroSpoils helps you',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          _buildZestoCompanionBanner(
+            key: const Key('onboarding_companion_solution'),
+            icon: Icons.auto_awesome,
+            message:
+                'I\'ll keep the running list in view so you can focus on real life.',
+            expression: ZestoExpression.celebrate,
+          ),
+          const SizedBox(height: 16),
+          _buildPageTitle(
+            key: const Key('onboarding_solution_title'),
+            icon: Icons.inventory_2_outlined,
+            title: 'We remember, so you don\'t have to.',
           ),
           const SizedBox(height: 16),
           benefit(
             '✓',
-            'Track all your food',
-            'What you have and when it expires',
-          ),
-          benefit('✓', 'Plan shopping smarter', 'Avoid duplicate purchases'),
-          benefit(
-            '✓',
-            'Reduce waste proactively',
-            'Use items before they spoil',
+            'Keep the fridge in view',
+            'See what you have without having to remember it all yourself',
           ),
           benefit(
             '✓',
-            'Save money on takeout',
-            'Cook with what you already have',
+            'Plan shopping smarter',
+            'Avoid buying the same thing twice',
+          ),
+          benefit(
+            '✓',
+            'Get a gentle nudge',
+            'Use food before it slips out of sight and out of mind',
+          ),
+          benefit(
+            '✓',
+            'Save more of what you buy',
+            'Less food wasted, less money in the bin',
           ),
           const SizedBox(height: 8),
           Card(
@@ -373,7 +416,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: const Padding(
               padding: EdgeInsets.all(12),
               child: Text(
-                'Result: Save money, reduce waste, better organized kitchen.',
+                'A gentle nudge before things expire — less food wasted, less money in the bin.',
               ),
             ),
           ),
@@ -381,7 +424,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ElevatedButton(
             key: const Key('onboarding_next_button_2'),
             onPressed: _goNext,
-            child: const Text('Next'),
+            child: const Text('Start saving'),
           ),
         ],
       ),
@@ -393,38 +436,53 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          Text(
-            'Inventory + Shopping Workflow',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          _buildZestoCompanionBanner(
+            key: const Key('onboarding_companion_workflow'),
+            icon: Icons.route_outlined,
+            message:
+                'Here\'s the simple rhythm I\'ll use to guide you day to day.',
+            expression: ZestoExpression.idle,
+          ),
+          const SizedBox(height: 16),
+          _buildPageTitle(
+            key: const Key('onboarding_workflow_title'),
+            icon: Icons.route_outlined,
+            title: 'How it fits together',
           ),
           const SizedBox(height: 16),
           Card(
             child: ListTile(
               leading: const Icon(Icons.add_circle_outline),
-              title: const Text('Add items you buy or prepare'),
+              title: const Text('Add what you buy or cook'),
               subtitle: const Text(
-                'Use the + action to add individual items or shopping batches.',
+                'Use quick entry, barcode scan, or batch capture to get started fast.',
               ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.shopping_cart_outlined),
-              title: const Text('Use shopping list before store trips'),
+              title: const Text('Check the shopping list before the store'),
               subtitle: const Text(
-                'Mark purchased items and move them into inventory.',
+                'A quick look helps you avoid duplicates and buy with a plan.',
               ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text('Capture receipt batches with OCR'),
+              title: const Text('Let receipt scan do the heavy lifting'),
               subtitle: const Text(
-                'Automatically detect line items for review and save.',
+                'Review what was found, save it, and keep moving.',
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            key: const Key('onboarding_open_shared_guidance_button'),
+            onPressed: _openSharedGuidance,
+            icon: const Icon(Icons.smart_toy_outlined),
+            label: const Text('Ask Zesto to show me'),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -442,34 +500,44 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          Text(
-            'Reduce Waste',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          _buildZestoCompanionBanner(
+            key: const Key('onboarding_companion_waste'),
+            icon: Icons.insights_outlined,
+            message:
+                'I\'ll help you notice what\'s getting used and what still needs attention.',
+            expression: ZestoExpression.tip,
+          ),
+          const SizedBox(height: 16),
+          _buildPageTitle(
+            key: const Key('onboarding_waste_title'),
+            icon: Icons.eco_outlined,
+            title: 'Keep good food in play',
           ),
           const SizedBox(height: 16),
           Card(
             child: ListTile(
               leading: const Icon(Icons.check_circle_outline),
-              title: const Text('When you use an item'),
-              subtitle: const Text('Tap it and mark it consumed.'),
+              title: const Text('When you use something'),
+              subtitle: const Text(
+                'Mark it consumed so your list stays honest.',
+              ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.delete_outline),
-              title: const Text('When something goes bad'),
+              title: const Text('When something does not make it'),
               subtitle: const Text(
-                'Mark wasted and capture reason + percentage.',
+                'Mark it wasted so the pattern is visible next time.',
               ),
             ),
           ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.insights_outlined),
-              title: const Text('Track improvement over time'),
+              title: const Text('Use progress to spot the pattern'),
               subtitle: const Text(
-                'Use progress insights to reduce future waste.',
+                'See what you are saving and where food may still be slipping through.',
               ),
             ),
           ),
@@ -489,14 +557,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24.0),
       child: ListView(
         children: [
-          Text(
-            'Permissions + Presets',
-            style: Theme.of(context).textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          _buildZestoCompanionBanner(
+            key: const Key('onboarding_companion_permissions'),
+            icon: Icons.tune,
+            message:
+                'A couple of permissions now makes the rest of the experience smoother.',
+            expression: ZestoExpression.wave,
+          ),
+          const SizedBox(height: 16),
+          _buildPageTitle(
+            key: const Key('onboarding_permissions_title'),
+            icon: Icons.notifications_active_outlined,
+            title: 'Set up the helpful bits',
           ),
           const SizedBox(height: 12),
           Text(
-            'Enable notifications and camera for reminders + faster entry. Pick prepared food presets to speed up expiry defaults.',
+            'Turn on reminders and camera access for faster entry. Pick a few prepared-food presets if you want quicker defaults.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -511,7 +587,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             label: Text(
               _notificationPermissionGranted
                   ? 'Notifications Enabled'
-                  : 'Enable Notifications',
+                  : 'Turn on reminders',
             ),
             onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
@@ -538,7 +614,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               _cameraPermissionGranted ? Icons.check_circle : Icons.camera_alt,
             ),
             label: Text(
-              _cameraPermissionGranted ? 'Camera Enabled' : 'Enable Camera',
+              _cameraPermissionGranted ? 'Camera Enabled' : 'Turn on camera',
             ),
             onPressed: () async {
               _emitTelemetry('permission_prompt_shown', {
@@ -578,7 +654,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           OutlinedButton(
             key: const Key('onboarding_continue_button'),
             onPressed: _isCompletingOnboarding ? null : _completeOnboarding,
-            child: const Text('Continue to App'),
+            child: const Text('Start saving'),
           ),
         ],
       ),
@@ -613,6 +689,85 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPageTitle({
+    required Key key,
+    required IconData icon,
+    required String title,
+  }) {
+    final theme = Theme.of(context);
+
+    return Row(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(icon, color: theme.colorScheme.primary),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            title,
+            style: theme.textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildZestoCompanionBanner({
+    required Key key,
+    required IconData icon,
+    required String message,
+    required ZestoExpression expression,
+  }) {
+    final theme = Theme.of(context);
+
+    return Container(
+      key: key,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ZestoCharacter(
+            key: Key('onboarding_companion_zesto'),
+            expression: expression,
+            size: 48,
+            animate: false,
+            semanticLabel: 'Zesto companion',
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 16, color: theme.colorScheme.primary),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Zesto says',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(message, style: theme.textTheme.bodyMedium),
+              ],
             ),
           ),
         ],

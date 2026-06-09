@@ -17,7 +17,9 @@ import '../di/service_locator.dart' hide itemRepositoryProvider;
 import '../widgets/item_card.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/item_icon.dart';
+import '../widgets/profile_avatar_button.dart';
 import 'item_form_screen.dart';
+import 'settings_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -759,6 +761,18 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         title: Text(l10n.navigationInventory),
         elevation: 1,
         actions: [
+          ProfileAvatarButton(
+            key: const Key('inventory_profile_button'),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      const SettingsScreen(openProfileOnLaunch: true),
+                ),
+              );
+            },
+          ),
           _buildViewModeToggle(viewMode, filterState, filteredCount),
           Stack(
             alignment: Alignment.center,

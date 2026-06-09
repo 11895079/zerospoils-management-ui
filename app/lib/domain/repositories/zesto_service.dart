@@ -92,11 +92,11 @@ class ZestoService {
 
     // Welcome
     MascotMessageType.dailyWelcome: [
-      'Good morning! ☀️',
-      'Welcome back! 👋',
-      'Let\'s check in! 📱',
-      'Ready to save? 🌟',
-      'New day! 🌅',
+      'Got something to add today? 🥑',
+      'Have 60 seconds for a quick update? ⏱️',
+      'Welcome back. Want to check Expiring Today? 👀',
+      'Before shopping, let\'s do a quick audit. 🛒',
+      'Progress, not perfection. Ready? 🌱',
     ],
 
     // First-time

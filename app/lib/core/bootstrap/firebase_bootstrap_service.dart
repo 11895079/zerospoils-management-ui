@@ -9,6 +9,7 @@ import '../auth/firebase_auth_service.dart';
 import '../auth/secure_token_service.dart';
 import '../distribution/app_distribution_service.dart';
 import '../reference/reference_pack_fetchers.dart';
+import '../../firebase_options.dart';
 
 /// Handle FCM background messages. Must be a top-level function.
 @pragma('vm:entry-point')
@@ -62,7 +63,9 @@ class FirebaseBootstrapService {
     try {
       // Initialize Firebase Core
       if (Firebase.apps.isEmpty) {
-        await Firebase.initializeApp();
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
       }
 
       // Initialize App Check as early as possible so Firestore/Auth requests

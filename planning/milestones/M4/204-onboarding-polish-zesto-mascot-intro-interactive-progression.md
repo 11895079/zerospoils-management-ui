@@ -4,7 +4,7 @@
 **Milestone:** M3 (MVP Quality & Shopping)  
 **Priority:** P2  
 **Size:** M  
-**Dependencies:** 145 (onboarding first-run flow), 300 (badge system foundation), 350 (Zesto Phase 1 triggers)
+**Dependencies:** 145 (onboarding first-run flow), 300 (badge system foundation), 350 (Zesto Phase 1 triggers), 375 (app-wide UX baseline + in-context guidance model)
 
 ---
 

@@ -66,6 +66,14 @@ void main() {
   late MockItemRepository mockRepo;
   late MockShoppingListRepository mockShoppingRepo;
 
+  ThemeData noSplashTheme() {
+    return ThemeData(
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+    );
+  }
+
   setUp(() {
     mockRepo = MockItemRepository();
     mockRepo.init();
@@ -73,6 +81,22 @@ void main() {
     mockShoppingRepo.init();
     SharedPreferences.setMockInitialValues({});
   });
+
+  Future<void> tapDrawerItem(WidgetTester tester, Key key) async {
+    final drawerScrollable = find.descendant(
+      of: find.byType(Drawer),
+      matching: find.byType(Scrollable),
+    );
+    if (find.byKey(key).evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        find.byKey(key),
+        120,
+        scrollable: drawerScrollable,
+      );
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(key));
+  }
 
   testWidgets('Tab navigation switches between screens', (
     WidgetTester tester,
@@ -84,7 +108,7 @@ void main() {
           itemRepositoryProvider.overrideWithValue(mockRepo),
           shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
         ],
-        child: const MaterialApp(home: HomeShell()),
+        child: MaterialApp(theme: noSplashTheme(), home: const HomeShell()),
       ),
     );
 
@@ -129,7 +153,7 @@ void main() {
           itemRepositoryProvider.overrideWithValue(mockRepo),
           shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
         ],
-        child: const MaterialApp(home: HomeShell()),
+        child: MaterialApp(theme: noSplashTheme(), home: const HomeShell()),
       ),
     );
 
@@ -150,7 +174,7 @@ void main() {
     // Open drawer and navigate to Settings
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('drawer_settings_item')));
+    await tapDrawerItem(tester, const Key('drawer_settings_item'));
     await tester.pumpAndSettle();
 
     // Verify Settings screen is shown
@@ -176,7 +200,7 @@ void main() {
           itemRepositoryProvider.overrideWithValue(mockRepo),
           shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
         ],
-        child: const MaterialApp(home: HomeShell()),
+        child: MaterialApp(theme: noSplashTheme(), home: const HomeShell()),
       ),
     );
 
@@ -185,9 +209,74 @@ void main() {
     await tester.tap(find.byTooltip('Open navigation menu'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('drawer_feedback_item')));
+    await tapDrawerItem(tester, const Key('drawer_feedback_item'));
     await tester.pumpAndSettle();
 
     expect(find.byKey(feedbackDrawerKey), findsOneWidget);
+  });
+
+  testWidgets('Zesto guide is available in settings, not drawer', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        ],
+        child: MaterialApp(theme: noSplashTheme(), home: const HomeShell()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('drawer_zesto_guide_item')), findsNothing);
+
+    await tapDrawerItem(tester, const Key('drawer_settings_item'));
+    await tester.pumpAndSettle();
+
+    final zestoGuideItem = find.byKey(const Key('settings_zesto_guide_item'));
+    await tester.scrollUntilVisible(
+      zestoGuideItem,
+      200,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('screen_settings')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(zestoGuideItem, findsOneWidget);
+  });
+
+  testWidgets('Top-right profile button opens profile screen directly', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          itemRepositoryProvider.overrideWithValue(mockRepo),
+          shoppingListRepositoryProvider.overrideWithValue(mockShoppingRepo),
+        ],
+        child: MaterialApp(theme: noSplashTheme(), home: const HomeShell()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('inventory_profile_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('inventory_profile_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('screen_profile_settings')), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('screen_inventory')), findsOneWidget);
+    expect(find.byKey(const Key('screen_settings')), findsNothing);
   });
 }

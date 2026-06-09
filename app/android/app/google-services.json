@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "737649709599-u8djpvi0g68217cf0bksmnimnbqnk9m8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerospoils.zerospoils",
+            "certificate_hash": "875ef0a0ba187150040b8e512a48fab293b808de"
+          }
+        },
+        {
           "client_id": "737649709599-vjabprhev7f4rjvrhp7rj64m3la8m52j.apps.googleusercontent.com",
           "client_type": 3
         }

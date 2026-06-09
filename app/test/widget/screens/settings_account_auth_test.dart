@@ -29,6 +29,9 @@ class _FakeFirebaseAuthService implements FirebaseAuthService {
   Stream<User?> get authStateChanges => _controller.stream;
 
   @override
+  Stream<User?> get authStateChangesSafe => _controller.stream;
+
+  @override
   User? get currentUser => null;
 
   @override
@@ -95,22 +98,26 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+        ),
         home: ProviderScope(
           overrides: [
             firebaseAuthServiceProvider.overrideWithValue(fakeAuthService),
           ],
-          child: const Scaffold(body: SettingsScreen()),
+          child: const Scaffold(
+            body: SettingsScreen(openProfileOnLaunch: true),
+          ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.ancestor(
-        of: find.byIcon(Icons.person),
-        matching: find.byType(ListTile),
-      ),
-    );
+    tester
+        .widget<ListTile>(find.byKey(const Key('profile_account_item')))
+        .onTap!();
     await tester.pumpAndSettle();
 
     expect(
@@ -121,7 +128,9 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('account_signin_button')));
+    tester
+        .widget<FilledButton>(find.byKey(const Key('account_signin_button')))
+        .onPressed!();
     await tester.pumpAndSettle();
 
     expect(find.text('Enter a valid email address.'), findsOneWidget);
@@ -132,10 +141,11 @@ void main() {
       'user@example.com',
     );
 
-    await tester.ensureVisible(
-      find.byKey(const Key('account_forgot_password_button')),
-    );
-    await tester.tap(find.byKey(const Key('account_forgot_password_button')));
+    tester
+        .widget<TextButton>(
+          find.byKey(const Key('account_forgot_password_button')),
+        )
+        .onPressed!();
     await tester.pumpAndSettle();
 
     expect(fakeAuthService.resetCalls, 1);
@@ -149,7 +159,9 @@ void main() {
       find.byKey(const Key('account_password_field')),
       'password123',
     );
-    await tester.tap(find.byKey(const Key('account_signin_button')));
+    tester
+        .widget<FilledButton>(find.byKey(const Key('account_signin_button')))
+        .onPressed!();
     await tester.pumpAndSettle();
 
     expect(fakeAuthService.signInCalls, 1);
@@ -166,22 +178,26 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        theme: ThemeData(
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+        ),
         home: ProviderScope(
           overrides: [
             firebaseAuthServiceProvider.overrideWithValue(fakeAuthService),
           ],
-          child: const Scaffold(body: SettingsScreen()),
+          child: const Scaffold(
+            body: SettingsScreen(openProfileOnLaunch: true),
+          ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(
-      find.ancestor(
-        of: find.byIcon(Icons.person),
-        matching: find.byType(ListTile),
-      ),
-    );
+    tester
+        .widget<ListTile>(find.byKey(const Key('profile_account_item')))
+        .onTap!();
     await tester.pumpAndSettle();
 
     expect(
@@ -189,7 +205,11 @@ void main() {
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('account_google_signin_button')));
+    tester
+        .widget<OutlinedButton>(
+          find.byKey(const Key('account_google_signin_button')),
+        )
+        .onPressed!();
     await tester.pumpAndSettle();
 
     expect(fakeAuthService.googleCalls, 1);

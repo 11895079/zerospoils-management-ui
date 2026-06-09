@@ -8,6 +8,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
     // Firebase integration for cloud telemetry and remote config
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 // Load keystore properties from key.properties file (if it exists)

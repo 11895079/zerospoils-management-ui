@@ -15,6 +15,15 @@ import 'package:zerospoils/presentation/themes/app_theme.dart';
 import 'package:zerospoils/presentation/widgets/feedback_drawer.dart';
 
 void main() {
+  ThemeData noSplashTheme([Brightness brightness = Brightness.light]) {
+    return ThemeData(
+      brightness: brightness,
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
+      splashColor: Colors.transparent,
+    );
+  }
+
   Widget buildTestHarness() {
     return ProviderScope(
       child: Consumer(
@@ -23,6 +32,7 @@ void main() {
               resolveAppLocale(ref.watch(appLocaleTagProvider)) ??
               const Locale('en');
           return MaterialApp(
+            theme: noSplashTheme(),
             locale: locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
@@ -35,6 +45,7 @@ void main() {
 
   Widget buildTestHarnessWithTelemetry(TelemetryClient client) {
     return MaterialApp(
+      theme: noSplashTheme(),
       home: ProviderScope(
         overrides: [telemetryClientProvider.overrideWithValue(client)],
         child: Scaffold(body: SettingsScreen()),
@@ -49,8 +60,16 @@ void main() {
         builder: (context, ref, _) {
           final themeMode = ref.watch(themeModeProvider);
           return MaterialApp(
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.lightTheme.copyWith(
+              splashFactory: NoSplash.splashFactory,
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+            ),
+            darkTheme: AppTheme.darkTheme.copyWith(
+              splashFactory: NoSplash.splashFactory,
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
+            ),
             themeMode: themeMode,
             home: Scaffold(body: SettingsScreen()),
           );
@@ -61,8 +80,16 @@ void main() {
 
   Widget buildDarkThemeHarness() {
     return MaterialApp(
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme.copyWith(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      ),
+      darkTheme: AppTheme.darkTheme.copyWith(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      ),
       themeMode: ThemeMode.dark,
       home: ProviderScope(child: Scaffold(body: SettingsScreen())),
     );
@@ -118,6 +145,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> openProfilePage(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      tileForKey(const Key('settings_profile_page_item')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(tileForKey(const Key('settings_profile_page_item')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('screen_profile_settings')), findsOneWidget);
+  }
+
   group('SettingsScreen - Notification Preferences & Telemetry', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({
@@ -141,6 +182,36 @@ void main() {
       expect(dropdownForIcon(Icons.timer), findsOneWidget);
       expect(switchForIcon(Icons.music_note), findsOneWidget);
       expect(switchForIcon(Icons.vibration), findsOneWidget);
+    });
+
+    testWidgets('Profile page renders and persists user controls', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(buildTestHarness());
+      await tester.pumpAndSettle();
+
+      await openProfilePage(tester);
+
+      expect(tileForKey(const Key('profile_account_item')), findsOneWidget);
+      expect(
+        tileForKey(const Key('profile_notifications_toggle')),
+        findsOneWidget,
+      );
+      expect(
+        tileForKey(const Key('profile_lead_time_dropdown')),
+        findsOneWidget,
+      );
+      expect(tileForKey(const Key('profile_dark_mode_toggle')), findsOneWidget);
+      expect(
+        tileForKey(const Key('profile_language_dropdown_tile')),
+        findsOneWidget,
+      );
+
+      await tester.tap(switchForKey(const Key('profile_notifications_toggle')));
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('notifications_enabled'), false);
     });
 
     testWidgets('Toggling notifications persists to SharedPreferences', (
