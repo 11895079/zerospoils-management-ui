@@ -40,7 +40,6 @@ services:
       retries: 3
     volumes:
       - ./api/src:/app/src
-    command: npm run dev
 
   # Background Worker
   worker:
@@ -65,7 +64,6 @@ services:
       retries: 3
     volumes:
       - ./worker/src:/app/src
-    command: npm run dev
 
   # Frontend (development server)
   frontend:

@@ -13,4 +13,5 @@ RUN npm run build
 
 EXPOSE 3001
 
-CMD ["npm", "run", "dev"]
+# Use node to run compiled JavaScript, not tsx
+CMD ["node", "dist/server.js"]
