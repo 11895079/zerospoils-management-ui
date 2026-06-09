@@ -1,15 +1,16 @@
-# 625 — Launch: First-48h Metrics Dashboard and Post-Launch Health Monitoring
+# 625 — Launch + Operations Metrics Dashboard (First 48h and Ongoing)
 
 ## Context
 The 48 hours after launch are the highest-signal, highest-stakes window of the product lifecycle. App store algorithms form early signals about install velocity, crash rate, and retention. Without a defined set of metrics, thresholds, and a dashboard pre-built before launch, the team is flying blind and reacting to anecdote rather than data. This issue builds the monitoring setup that turns launch day from chaotic to measured.
 
 ## Goal
-Define the key launch health metrics, configure dashboards in Firebase + App Store Connect + Play Console, and set alert thresholds that allow the team to distinguish a healthy launch from one requiring urgent action — all before launch day.
+Define the launch and ongoing operations metric model, wire a unified dashboard surface, and configure thresholds so the team can distinguish healthy behavior from urgent regressions during launch and day-2 operations.
 
 ## Expected behavior
 - Dashboard is live and showing data within 1 hour of first installs
 - Alerts fire to Slack/email within 15 minutes of a threshold breach
 - Team can answer the following questions at any point in the first 48h: new installs (iOS + Android), crash-free rate, D1 retention rate, avg session length, top error types
+- Team can answer ongoing ops questions post-launch: telemetry freshness, schema reject trends, feedback backlog health
 - Weekly health report template defined and sent after week 1
 
 ## Acceptance criteria (Definition of Done)
@@ -18,14 +19,18 @@ Define the key launch health metrics, configure dashboards in Firebase + App Sto
 - [ ] App Store Connect Analytics and Play Console Acquisition reports bookmarked and verified showing real data in staging
 - [ ] Alert thresholds set in Firebase Crashlytics: crash-free rate alert if <98% over 1-hour rolling window
 - [ ] Slack/email webhook configured for Crashlytics alerts
+- [ ] Operational metrics added to dashboard: `telemetry_ingestion_lag_seconds_p95`, `telemetry_schema_reject_rate`, `feedback_untriaged_count`, `feedback_time_to_triage_p95`
+- [ ] Data freshness SLO documented and monitored: dashboard tiles include source timestamp and staleness indicator
 - [ ] Post-launch metrics report template created: `docs/launch-metrics-template.md`
 - [ ] Week-1 metrics report produced and committed after launch: `docs/launch-metrics-week1.md`
 - [ ] Telemetry: key events instrumented in app — `app_open`, `item_added`, `notification_opt_in`, `onboarding_complete` (verify in telemetry schema)
+- [ ] Launch dashboard and ongoing ops dashboard share a single metric definition file to prevent calculation drift
 
 ## Out of scope
 - Advanced product analytics tooling (Mixpanel, Amplitude) — Firebase is sufficient for M5
 - Paid monitoring tools
 - Long-term retention cohort analysis (Month 1+ — post-launch)
+- Executive BI warehouse replacement
 
 ## Implementation notes
 - Firebase Analytics retention: set user property `install_date` at first launch for D1/D7/D30 cohort queries
@@ -33,11 +38,15 @@ Define the key launch health metrics, configure dashboards in Firebase + App Sto
 - App Store Connect "Metrics" tab: check Impressions, Product Page Views, Conversion Rate, Sessions, Active Devices
 - Set up a single bookmarked dashboard page or Notion doc with links to all consoles so the team doesn't waste time finding them on launch day
 - Weekly health report should be <1 page: installs, retention, top crashes, notable feedback themes, one action item
+- Define one semantic metrics contract (names, formulas, dimensions, freshness expectations) and reuse in dashboard + report templates.
+- Include filter dimensions at minimum: platform, app_version, locale, release_channel.
 
 ## Test plan
 **Automated:**
 - Firebase DebugView: run `flutter run --dart-define=FIREBASE_DEBUG=true` — verify all key events appear in real-time DebugView before launch
 - Unit test: telemetry event schemas validated against `telemetry/events/*.json` schema files
+- Unit test: metric formulas return expected values from fixed fixture datasets.
+- Integration test: freshness badge turns stale when source timestamps exceed SLO.
 
 **Manual:**
 1. Pre-launch: open Firebase Analytics → Events — verify `app_open` and `item_added` events appear for a test device
@@ -45,6 +54,7 @@ Define the key launch health metrics, configure dashboards in Firebase + App Sto
 3. Launch +1h: confirm install events are incrementing in App Store Connect and Play Console
 4. Launch +24h: pull first data export — verify D0 retention definition is correct (session on install day)
 5. Day 7: produce week-1 report from template — verify all metric fields are populated
+6. Temporarily pause telemetry ingestion path and verify operations dashboard surfaces staleness/lag warning.
 
 ## Dependencies
 - 360 (Firebase Crashlytics + Analytics integrated)
@@ -52,3 +62,4 @@ Define the key launch health metrics, configure dashboards in Firebase + App Sto
 - 605 (App Store Connect account active)
 - 610 (Play Console active)
 - Telemetry schema files in `telemetry/` must include all key events above
+- 690 (telemetry ETL and DuckDB analytics marts)

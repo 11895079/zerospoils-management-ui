@@ -31,6 +31,8 @@ Pro tier includes "household management" features (shared inventory, shopping li
 ## Goal
 Enable Pro-tier households to assign role-based permissions to members, providing granular control over inventory actions, spending visibility, and data management.
 
+Additionally, define operator RBAC for the management backend UI so support and analytics operations can be performed without granting full admin rights.
+
 ---
 
 ## Expected behavior
@@ -91,6 +93,20 @@ Role:
 | Manage members          | ✓     | ✗      | ✗      | ✗     |
 | Export data             | ✓     | ✗      | ✗      | ✗     |
 
+### Management Backend Operator Roles
+
+| Action                                         | Admin | Analyst | Support |
+|------------------------------------------------|-------|---------|---------|
+| View household/member records                  | ✓     | ✓       | ✓       |
+| Change household member roles                  | ✓     | ✗       | ✗       |
+| Remove household members                       | ✓     | ✗       | ✗       |
+| View analytics aggregates                      | ✓     | ✓       | ✓       |
+| Export analytics datasets                      | ✓     | ✓       | ✗       |
+| Change feature flags / remote config           | ✓     | ✗       | ✗       |
+| Transition feedback queue state                | ✓     | ✓       | ✓       |
+| Resolve security policy overrides              | ✓     | ✗       | ✗       |
+| View immutable audit logs                      | ✓     | ✓       | ✓       |
+
 ### Audit Log (Admin Only)
 ```
 📜 Activity Log (Last 30 Days)
@@ -131,12 +147,16 @@ When user logs in with "Child" role:
 - [ ] API endpoints return 403 Forbidden if user lacks permission
 - [ ] Audit log immutable (no delete, only append)
 - [ ] Invites expire after 7 days if not accepted
+- [ ] Management API enforces operator role permissions (`admin`, `analyst`, `support`) for all privileged endpoints
+- [ ] Every privileged management mutation writes immutable audit row with actor, resource, before/after summary
 
 ### Data Model
 - [ ] `household` table: household_id, created_by, name
 - [ ] `household_members` table: household_id, user_id, role, invited_at, accepted_at
 - [ ] `activity_log` table: household_id, user_id, action, item_id, timestamp
 - [ ] Roles enum: `admin`, `member`, `viewer`, `child`
+- [ ] Operator roles enum: `admin`, `analyst`, `support`
+- [ ] `management_audit_log` table: actor_id, actor_role, action, resource_type, resource_id, before_json, after_json, created_at
 
 ### UX
 - [ ] Settings → Household Members shows all members + roles
@@ -149,6 +169,7 @@ When user logs in with "Child" role:
 - [ ] Log `household_member_invited`, `household_member_joined`, `household_member_removed`, `role_changed`
 - [ ] Track role distribution (how many households use Viewer/Child roles)
 - [ ] Log permission denials (user attempted action they lack permission for)
+- [ ] Log management permission denials and privileged action outcomes for operator workflows
 
 ### Offline-First
 - [ ] Role cached locally (works offline for 7 days)
@@ -196,6 +217,11 @@ When user logs in with "Child" role:
    - Every mutation (add/edit/delete) writes to `activity_log`
    - Exposed via `/api/households/:id/activity` (admin only)
 
+4. **Management Policy Engine:**
+   - Central permission map for operator actions (not scattered per endpoint)
+   - Default deny; explicit allow per role/action
+   - Denials include reason code for audit and UI messaging
+
 ### Frontend UI
 1. **Settings → Household Members:**
    - List of members with role badges
@@ -216,6 +242,7 @@ When user logs in with "Child" role:
 - User tries to delete item while offline + lacks permission → allow optimistic delete, revert on sync if permission denied
 - Invite email already in household → show error: "User already a member"
 - Child role user taps Settings → redirect to simplified settings (name, profile pic only)
+- Support operator attempts to change role in management UI → return 403 + explain required admin role
 
 ---
 
@@ -229,6 +256,8 @@ When user logs in with "Child" role:
 - Integration test: invite flow (send invite → accept → verify role)
 - Widget test: Settings household members list renders roles correctly
 - Widget test: Child-safe mode hides restricted UI elements
+- API test: management endpoint rejects unauthorized operator role for privileged mutation
+- API test: privileged mutation creates immutable `management_audit_log` entry
 
 ### Manual
 1. **Invite Flow (Admin):**
@@ -273,6 +302,7 @@ When user logs in with "Child" role:
 
 - **Blocks:**
    - None (this is a future enhancement)
+   - 710 (management audit and policy engine)
 
 ---
 

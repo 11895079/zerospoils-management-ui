@@ -62,3 +62,17 @@
 - **350 (Zesto Phase 1)** merged in PR #119. The service is feature-complete (all 10 triggers, anti-spam, message history, persistence, telemetry, storage-tips asset). Six of ten triggers are wired into app screens (item add/edit, item detail consume/waste, home-shell daily welcome, expiry alert). The remaining four (badge / streak / savings / zero-waste) are implemented in the service but await their respective subsystems before they can be invoked end-to-end.
 - **375 (App-wide UX Baseline)** should be completed before starting implementation-heavy onboarding polish in 204 so onboarding reflects the finalized “how the app works” model.
 - **204 (Zesto Onboarding)** can proceed after 375 baseline alignment is signed off. Animation calibration target: 200–400 ms durations, 60 fps, `disableAnimations`-aware.
+
+### Related Cross-Milestone Planning (Management Backend UI)
+
+The following cross-milestone issues define the local-first management backend UI track and should be used when grooming operations/telemetry/security work in M4:
+
+- **680** — Local runtime bootstrap for management UI/API/worker
+- **690** — Telemetry ETL + DuckDB analytics marts (OLAP)
+- **700** — Feature flags + Remote Config control plane
+- **710** — Management audit + policy engine (operator RBAC)
+
+Dependency notes:
+- **370** should not be considered complete until management mutation audit and RBAC enforcement requirements are satisfied.
+- **275/280/285** triage and feedback operations should align to 710 audit model.
+- **300/625/390** metrics and observability deliverables should consume 690 metric contracts to avoid dashboard/report drift.

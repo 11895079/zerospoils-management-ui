@@ -2,7 +2,7 @@
 Android beta distribution can run through Firebase App Distribution, but the roadmap does not yet define how tester feedback, screenshots, and build metadata should be retrieved and turned into actionable triage artifacts. Firebase App Distribution supports tester feedback workflows that can reduce manual console copying and preserve context from real-device reports.
 
 ## Goal
-Define and implement a repeatable workflow for collecting Firebase App Distribution tester feedback, normalizing it into actionable triage records, and linking it to ZeroSpoils beta-release operations.
+Define and implement a repeatable workflow for collecting Firebase App Distribution tester feedback, normalizing it into actionable triage records, and managing triage state in the management backend UI.
 
 ## Expected behavior
 - Testers on Firebase App Distribution can submit feedback with screenshots from installed beta builds
@@ -10,6 +10,7 @@ Define and implement a repeatable workflow for collecting Firebase App Distribut
 - Retrieved feedback is normalized into a lightweight triage format that includes app version, platform, build identifier, tester message, screenshot reference, and triage state
 - Android beta instructions tell testers how to submit useful feedback during closed testing
 - Feedback review does not depend on ad hoc console scraping or copy/paste from multiple places
+- Operators can assign feedback, add notes, and transition status (`new`, `triaged`, `investigating`, `resolved`) in one queue.
 
 ## Acceptance criteria (Definition of Done)
 - [x] Document the Firebase App Distribution tester-feedback workflow in `docs/beta-android-feedback.md`, including supported Firebase capabilities and any API limitations
@@ -20,14 +21,18 @@ Define and implement a repeatable workflow for collecting Firebase App Distribut
 - [x] Tester instructions for Firebase-distributed builds include feedback-submission guidance and what details to include
 - [x] Security and privacy guidance covers access control, retention, and removal of unnecessary personal identifiers
 - [x] Unit or script-level tests added where transformation logic exists — `scripts/test_normalize_firebase_feedback.py`
-- [ ] Operational logging or telemetry added only where needed to confirm retrieval or transformation success — not applicable to offline script
-- [ ] Offline-first behavior verified where applicable for the in-app side of the feedback path — in-app feedback entry not in scope for this issue (M4/280)
+- [ ] Operational logging added for retrieval and transformation runs (success/failure counts, run_id, duration)
+- [ ] Queue schema includes `assignee`, `triage_status`, `severity`, `last_updated_at`, `linked_issue_ref`
+- [ ] Dedupe rules documented and enforced using stable key (`feedback_id` + `build_number`)
+- [ ] Management queue supports status transitions with audit trail for each transition
+- [ ] Telemetry added for moderation actions: `feedback_triaged`, `feedback_escalated`, `feedback_resolved`
 
 ## Out of scope
 - Replacing the in-app feedback entry point defined in M4/280 and M4/285
 - iOS TestFlight feedback automation
 - Full CRM or helpdesk integration
 - Public-launch support tooling
+- Full NLP sentiment classification
 
 ## Implementation notes
 - Treat this as an operations and tooling issue first; product UX changes should stay minimal
@@ -35,11 +40,15 @@ Define and implement a repeatable workflow for collecting Firebase App Distribut
 - Keep the normalized schema simple enough to map into GitHub issues or a spreadsheet without additional backend work
 - Prefer idempotent retrieval so repeated runs do not duplicate the same tester submission in triage output
 - Reuse build identifiers defined in the Android beta process so feedback ties back to a specific release candidate cleanly
+- Preserve screenshot references as immutable pointers; avoid copying large media into local triage store unless required.
+- Surface a correlation panel in triage view: last 20 related telemetry events around submission timestamp (if available).
 
 ## Test plan
 **Automated:**
 - Script test: sample Firebase feedback payload or export row converts into the normalized feedback schema correctly
 - Script test: duplicate feedback records do not produce duplicate normalized entries on re-run
+- Integration test: status transitions append audit entries with actor, old/new status, timestamp.
+- Integration test: queue filters (status/platform/version) return deterministic results for fixture data.
 
 **Manual:**
 1. Distribute an Android beta build through Firebase App Distribution and verify tester instructions mention how to submit feedback
@@ -47,9 +56,12 @@ Define and implement a repeatable workflow for collecting Firebase App Distribut
 3. Run the documented retrieval or export workflow and verify the normalized output includes message, build metadata, and screenshot reference
 4. Convert one feedback item into a GitHub issue or triage artifact and verify the mapping is documented and repeatable
 5. Review the workflow for privacy exposure and verify no unnecessary tester identifiers are retained in the triage output
+6. Assign and resolve a feedback item from management queue; verify linked issue reference and audit row are saved.
 
 ## Dependencies
 - M4/270 Android beta distribution setup
 - M4/280 in-app feedback entry point
 - M4/285 settings feedback entry
 - M4/370 closed-testing backend security hardening where Firebase permissions or configuration are involved
+- 680 (management UI local runtime bootstrap)
+- 710 (management audit and policy engine)

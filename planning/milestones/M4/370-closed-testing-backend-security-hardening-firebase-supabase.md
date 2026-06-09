@@ -6,12 +6,14 @@ Deliver a launch-ready foundation that combines:
 - Firebase (Crashlytics, Remote Config, Auth, Custom Claims for Pro tier)
 - Supabase (relational data storage with RLS, read-only for app)
 - Play Store hardening requirements (obfuscation, minification, integrity checks)
+- Management backend safety controls (operator RBAC + immutable audit + guarded config mutations)
 
 ## Expected behavior
 - Closed-test builds can be distributed with crash visibility and controlled rollouts.
 - Feature flags can consume remote, server-trusted entitlements.
 - Pro feature access is enforced server-side (not bypassable by local flag tampering).
 - Android release artifacts are hardened for launch.
+- Management operations are role-restricted and auditable before public launch.
 
 ## Acceptance criteria (Definition of Done)
 - [x] Step 1: Add Firebase SDK integration for Android + iOS with Crashlytics enabled for non-debug builds.
@@ -21,11 +23,15 @@ Deliver a launch-ready foundation that combines:
 - [x] Step 5: Add Play Integrity check gate + secure token storage (flutter_secure_storage) for JWTs.
 - [x] Step 6: Add kill-switch behavior via Remote Config; validate fallback + closed-testing checklist.
 - [ ] Server-side endpoint gating (Post-Step-6): OCR/export endpoints check Firebase ID token + custom claims before processing.
+- [ ] Management RBAC baseline: privileged operations require `admin` operator role; `analyst`/`support` denied by policy where applicable.
+- [ ] Immutable management audit trail for flag changes, entitlement updates, and moderation state transitions.
+- [ ] Remote Config mutations from management UI include dry-run validation and rollback path.
 
 ## Out of scope
 - Full growth analytics/dashboard work beyond launch-critical telemetry.
 - Advanced anti-tamper/anti-debug countermeasures beyond integrity + server validation.
 - Multi-region backend architecture and scale optimization.
+- Enterprise SSO integration for operator accounts.
 
 ## Implementation notes
 - Keep `FeatureFlagsService` precedence unchanged: `local_override > remote_override > default`.
@@ -36,6 +42,8 @@ Deliver a launch-ready foundation that combines:
 - Pro gating: Check Firebase Auth custom claims `pro_tier == true` at client (UX layer); server-side validation on first call to gated endpoint.
 - **Step 5 (Secure Token Storage)**: `SecureTokenService` caches Firebase ID tokens in platform-native secure storage (Android KeyStore, iOS Keychain). Tokens persist across app restarts, reducing auth latency. Play Integrity implementation deferred to M6 (requires Google Play Console setup + server-side verification).
 - **Step 6 (Kill-Switch + Checklist)**: Remote Config parameters control feature availability. Master kill-switch (`feature_flags_enabled`) disables all non-essential features for emergency rollback. Integration tests validate bootstrap flow (Auth → Token → Entitlements → Flags). Closed-testing checklist documents release prerequisites (Firebase setup, Play Console config, tester communication).
+- Management mutation endpoints should route through a single policy engine with default-deny behavior and audited allow rules.
+- Audit records must include actor id, actor role, action, target resource, before/after summary, and correlation/request id.
 
 ## Test plan
 **Automated:**
@@ -70,6 +78,11 @@ Deliver a launch-ready foundation that combines:
 - Integration test: Remote Config kill-switch parameters accessible after bootstrap.
 - Integration test: Token persistence across app restart (simulates cold start).
 
+**Automated (Management Security):**
+- API test: unauthorized operator role receives 403 for Remote Config mutation endpoint.
+- API test: successful flag mutation writes immutable management audit record.
+- Integration test: dry-run validation fails unsafe flag payloads and blocks publish.
+
 **Manual (Step 5+6):**
 1. Launch app → verify Firebase bootstrap completes (check logcat).
 2. Close app → reopen → verify user session restored (no re-login).
@@ -81,3 +94,4 @@ Deliver a launch-ready foundation that combines:
 **Dependencies:**
 - Existing M4 beta distribution items (260, 270, 290) available for closed-test track usage.
 - M6 subscription strategy/gating alignment for entitlement schema (410).
+- 710 (management audit and policy engine)
