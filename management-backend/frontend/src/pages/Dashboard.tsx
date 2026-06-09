@@ -12,7 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { RefreshOutlined } from '@ant-design/icons';
+import { ReloadOutlined } from '@ant-design/icons';
 import { useMetrics } from '../hooks/useMetrics';
 import { MetricCard } from '../components/MetricCard';
 
@@ -46,7 +46,7 @@ export const Dashboard: React.FC = () => {
       >
         <h1>Launch & Operations Dashboard</h1>
         <Button
-          icon={<RefreshOutlined />}
+          icon={<ReloadOutlined />}
           onClick={refetch}
           loading={loading}
         >
