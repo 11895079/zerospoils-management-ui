@@ -6,7 +6,7 @@ import {
   LineChartOutlined,
   SettingOutlined,
   LogoutOutlined,
-  HealthCheckOutlined,
+  HeartOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -175,7 +175,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               >
                 <Button
                   type="text"
-                  icon={<HealthCheckOutlined />}
+                  icon={<HeartOutlined />}
                   style={{ color: healthColor, fontSize: '16px' }}
                   title={`Status: ${health.status}`}
                 />
