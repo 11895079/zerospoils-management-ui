@@ -3,6 +3,8 @@ import { Card, Form, Input, Button, Select, Alert, Row, Col } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 
+console.log('Login component rendering');
+
 const MOCK_CREDENTIALS = [
   {
     email: 'admin@zerospoils.local',

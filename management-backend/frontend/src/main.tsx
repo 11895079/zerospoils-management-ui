@@ -6,11 +6,17 @@ import './index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  console.error('Root element not found');
+  console.error('Root element not found!');
+  document.body.innerHTML = '<h1>Error: Root element not found</h1>';
 } else {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-  );
+  try {
+    ReactDOM.createRoot(rootElement).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>,
+    );
+  } catch (error) {
+    console.error('React render error:', error);
+    rootElement.innerHTML = '<h1>Error rendering app</h1><p>' + String(error) + '</p>';
+  }
 }
