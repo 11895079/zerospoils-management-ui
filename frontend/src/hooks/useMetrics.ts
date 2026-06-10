@@ -35,7 +35,8 @@ export function useMetrics(): UseMetricsReturn {
 
   useEffect(() => {
     fetchMetrics();
-    const interval = setInterval(fetchMetrics, 30000); // Refresh every 30s
+    // Refresh every 10 minutes (600000ms) as per ops SLA
+    const interval = setInterval(fetchMetrics, 600000);
     return () => clearInterval(interval);
   }, []);
 
