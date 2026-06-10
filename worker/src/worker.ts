@@ -4,6 +4,14 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: '../api/.env.local' });
 
+// Validate required environment variables
+const requiredEnvVars = ['APP_PROFILE', 'WORKER_PORT'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar] && envVar !== 'WORKER_PORT') {
+    console.warn(`⚠️  Environment variable ${envVar} not set, using default`);
+  }
+}
+
 const app = express();
 const port = parseInt(process.env.WORKER_PORT || '3002');
 const startTime = Date.now();
@@ -114,12 +122,13 @@ app.get('/jobs', (req, res) => {
 
 // Start worker
 app.listen(port, () => {
-  console.log(`\n🔄 Background Worker running on http://localhost:${port}`);
-  console.log(`📝 Profile: ${process.env.APP_PROFILE || 'local'}`);
+  console.log(`\n✅ Background Worker initialized`);
+  console.log(`   Port: ${port}`);
+  console.log(`   Profile: ${process.env.APP_PROFILE || 'local'}`);
   console.log(`\n📚 Available endpoints:`);
-  console.log(`  GET /health  - Worker health status`);
-  console.log(`  GET /queues  - Job queue status`);
-  console.log(`  GET /jobs    - Job history\n`);
+  console.log(`   GET /health  - Worker health status`);
+  console.log(`   GET /queues  - Job queue status`);
+  console.log(`   GET /jobs    - Job history\n`);
 });
 
 export default app;

@@ -15,6 +15,14 @@ import telemetryRoutes from './routes/telemetry.js';
 // Load environment variables
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['APP_PROFILE', 'CORS_ORIGIN'];
+for (const envVar of requiredEnvVars) {
+  if (!process.env[envVar]) {
+    console.warn(`⚠️  Environment variable ${envVar} not set, using default`);
+  }
+}
+
 const app = express();
 const port = parseInt(process.env.API_PORT || '3001');
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
@@ -65,25 +73,17 @@ app.use(
 
 // Start server
 app.listen(port, () => {
-  console.log(`\n🚀 Management API running on http://localhost:${port}`);
-  console.log(`📝 Profile: ${process.env.APP_PROFILE || 'local'}`);
-  console.log(`🔐 CORS Origin: ${corsOrigin}`);
+  console.log(`\n✅ Management API initialized`);
+  console.log(`   Port: ${port}`);
+  console.log(`   Profile: ${process.env.APP_PROFILE || 'local'}`);
+  console.log(`   CORS Origin: ${corsOrigin}`);
+  console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`\n📚 Available endpoints:`);
-  console.log(`  GET  /health           - Service health check`);
-  console.log(`  GET  /status           - Service status & config`);
-  console.log(`\n  Auth required (Bearer token):`);
-  console.log(`  GET  /api/metrics/current`);
-  console.log(`  GET  /api/metrics/history`);
-  console.log(`  GET  /api/metrics/summary`);
-  console.log(`  GET  /api/feedback`);
-  console.log(`  POST /api/feedback/:id/triage`);
-  console.log(`  GET  /api/telemetry/events`);
-  console.log(`  GET  /api/telemetry/summary`);
-  console.log(`\n🔑 Mock tokens for testing:`);
-  console.log(`  admin:    Bearer token_admin_abc123`);
-  console.log(`  analyst:  Bearer token_analyst_xyz789`);
-  console.log(`  support:  Bearer token_support_def456`);
-  console.log(`\n💡 Test with: curl -H "Authorization: Bearer token_admin_abc123" http://localhost:${port}/api/metrics/current\n`);
+  console.log(`   GET  /health           - Service health check`);
+  console.log(`   GET  /status           - Service status & config`);
+  console.log(`   GET  /api/metrics/*    - Metrics endpoints (auth required)`);
+  console.log(`   GET  /api/feedback/*   - Feedback endpoints (auth required)`);
+  console.log(`   GET  /api/telemetry/*  - Telemetry endpoints (auth required)\n`);
 });
 
 export default app;
