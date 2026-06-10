@@ -11,6 +11,7 @@ import healthRoutes from './routes/health.js';
 import metricsRoutes from './routes/metrics.js';
 import feedbackRoutes from './routes/feedback.js';
 import telemetryRoutes from './routes/telemetry.js';
+import telemetryAnalyticsRoutes from './routes/telemetry-analytics.js';
 
 // Load environment variables
 dotenv.config();
@@ -35,6 +36,7 @@ app.use(authMiddleware);
 app.use('/api', metricsRoutes);
 app.use('/api', feedbackRoutes);
 app.use('/api', telemetryRoutes);
+app.use('/api', telemetryAnalyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -71,14 +73,23 @@ app.listen(port, () => {
   console.log(`\n📚 Available endpoints:`);
   console.log(`  GET  /health           - Service health check`);
   console.log(`  GET  /status           - Service status & config`);
-  console.log(`\n  Auth required (Bearer token):`);
-  console.log(`  GET  /api/metrics/current`);
-  console.log(`  GET  /api/metrics/history`);
-  console.log(`  GET  /api/metrics/summary`);
-  console.log(`  GET  /api/feedback`);
-  console.log(`  POST /api/feedback/:id/triage`);
-  console.log(`  GET  /api/telemetry/events`);
-  console.log(`  GET  /api/telemetry/summary`);
+  console.log(`\n  Metrics (require admin/analyst role):`);
+  console.log(`  GET  /api/metrics/current           - Current 24h metrics (from DuckDB)`);
+  console.log(`  GET  /api/metrics/history           - Historical metrics (7-30 days)`);
+  console.log(`  GET  /api/metrics/summary           - Key metrics with trends`);
+  console.log(`  GET  /api/metrics/etl-status        - ETL pipeline status`);
+  console.log(`  GET  /api/metrics/health            - DuckDB readiness check`);
+  console.log(`\n  Telemetry Analytics (require admin/analyst role):`);
+  console.log(`  GET  /api/telemetry/camera-adoption - Camera adoption & quality`);
+  console.log(`  GET  /api/telemetry/waste-analysis  - Waste by category & cost`);
+  console.log(`  GET  /api/telemetry/entry-sources   - Item entry method distribution`);
+  console.log(`  GET  /api/telemetry/retention-cohorts - User retention by cohort`);
+  console.log(`  GET  /api/telemetry/categories      - Category performance metrics`);
+  console.log(`  GET  /api/telemetry/barcode-quality - Barcode recognition quality`);
+  console.log(`  GET  /api/telemetry/etl-status      - ETL execution history`);
+  console.log(`\n  Feedback (require support/analyst/admin role):`);
+  console.log(`  GET  /api/feedback           - List feedback items`);
+  console.log(`  POST /api/feedback/:id/triage - Triage feedback item`);
   console.log(`\n🔑 Mock tokens for testing:`);
   console.log(`  admin:    Bearer token_admin_abc123`);
   console.log(`  analyst:  Bearer token_analyst_xyz789`);
