@@ -44,7 +44,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     res.status(401).json({
       error: 'Unauthorized',
       message: 'Missing or invalid Authorization header',
-      hint: 'Use: Authorization: Bearer token_admin_abc123',
+      hint: 'Use: Authorization: Bearer <token>',
     });
     return;
   }
@@ -67,7 +67,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     res.status(401).json({
       error: 'Unauthorized',
       message: 'Invalid token',
-      hint: 'Valid tokens: token_admin_abc123, token_analyst_xyz789, token_support_def456',
+      hint: 'Use a valid token from your authenticated session.',
     });
     return;
   }

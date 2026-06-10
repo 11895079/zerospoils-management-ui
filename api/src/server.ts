@@ -79,11 +79,7 @@ app.listen(port, () => {
   console.log(`  POST /api/feedback/:id/triage`);
   console.log(`  GET  /api/telemetry/events`);
   console.log(`  GET  /api/telemetry/summary`);
-  console.log(`\n🔑 Mock tokens for testing:`);
-  console.log(`  admin:    Bearer token_admin_abc123`);
-  console.log(`  analyst:  Bearer token_analyst_xyz789`);
-  console.log(`  support:  Bearer token_support_def456`);
-  console.log(`\n💡 Test with: curl -H "Authorization: Bearer token_admin_abc123" http://localhost:${port}/api/metrics/current\n`);
+  console.log(`\n💡 Test with: curl -H "Authorization: Bearer <token>" http://localhost:${port}/api/metrics/current\n`);
 });
 
 export default app;

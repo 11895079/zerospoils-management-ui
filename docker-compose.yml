@@ -1,10 +1,7 @@
-version: '3.8'
-
 services:
   # Redis - for job queue and caching
   redis:
     image: redis:7-alpine
-    container_name: zerospoils-mgmt-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -20,7 +17,6 @@ services:
     build:
       context: ./api
       dockerfile: Dockerfile
-    container_name: zerospoils-mgmt-api
     ports:
       - "3001:3001"
     environment:
@@ -29,7 +25,7 @@ services:
       APP_PROFILE: local
       NODE_ENV: development
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-secret-key-do-not-use-in-production
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret-change-me}
     depends_on:
       redis:
         condition: service_healthy
@@ -46,7 +42,6 @@ services:
     build:
       context: ./worker
       dockerfile: Dockerfile
-    container_name: zerospoils-mgmt-worker
     ports:
       - "3002:3002"
     environment:
@@ -70,7 +65,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: zerospoils-mgmt-ui
     ports:
       - "3000:3000"
     environment:
@@ -84,7 +78,3 @@ services:
 
 volumes:
   redis_data:
-
-networks:
-  default:
-    name: zerospoils-mgmt-network
