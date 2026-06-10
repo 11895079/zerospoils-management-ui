@@ -8,6 +8,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:smoke": "vitest src/__tests__/*.smoke.test.tsx",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:coverage": "vitest --coverage",
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
@@ -27,6 +30,8 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/user-event": "^14.0.0",
+    "@playwright/test": "^1.40.0",
+    "@vitest/coverage-v8": "^0.34.0",
     "vitest": "^0.34.0",
     "@vitest/ui": "^0.34.0",
     "typescript": "^5.1.6",

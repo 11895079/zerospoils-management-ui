@@ -11,6 +11,8 @@
     "test": "jest",
     "test:smoke": "jest src/__tests__/smoke.test.ts",
     "test:integration": "jest src/__tests__/integration.test.ts",
+    "test:unit": "jest src/__tests__/middleware.test.ts src/__tests__/routes.test.ts",
+    "test:coverage": "jest --coverage",
     "health": "curl http://localhost:3001/health || echo 'API not healthy'"
   },
   "dependencies": {
