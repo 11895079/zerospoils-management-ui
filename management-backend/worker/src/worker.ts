@@ -1,20 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { Queue, Worker, QueueEvents } from 'bullmq';
 import IORedis from 'ioredis';
 import { Database } from 'duckdb';
-import path from 'path';
 import {
   initializeDuckDB,
-  getDatabase,
   closeDuckDB,
   testConnection,
   getCurrentMetrics,
   getHistoricalMetrics,
   getETLHistory,
 } from './services/duckdb.service';
-import { processETLJob, ETLJobData } from './jobs/etlJob';
+import ETLScheduler from './scheduler/etl-scheduler';
 
 dotenv.config({ path: '../api/.env.local' });
 
@@ -23,6 +20,7 @@ const port = parseInt(process.env.WORKER_PORT || '3002');
 const startTime = Date.now();
 const redisURL = process.env.REDIS_URL || 'redis://redis:6379';
 const dbPath = process.env.DUCKDB_PATH || './data/zerospoils_analytics.db';
+const etlIntervalMinutes = parseInt(process.env.ETL_INTERVAL_MINUTES || '10', 10);
 
 // Middleware
 app.use(express.json());
@@ -30,11 +28,8 @@ app.use(cors());
 
 // Global state
 let db: Database | null = null;
-let etlQueue: Queue<ETLJobData> | null = null;
-let etlWorker: Worker<ETLJobData> | null = null;
-let queueEvents: QueueEvents | null = null;
+let scheduler: ETLScheduler | null = null;
 let isHealthy = false;
-let lastETLRun: { timestamp: Date; success: boolean; result?: any } | null = null;
 
 // Initialize Redis connection
 const redis = new IORedis(redisURL, {
@@ -66,70 +61,15 @@ async function initializeServices() {
 
     console.log('[Services] DuckDB initialized successfully');
 
-    // Initialize BullMQ queue
-    console.log('[Services] Initializing BullMQ queue...');
-    etlQueue = new Queue<ETLJobData>('etl-pipeline', {
-      connection: redis,
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
-        removeOnComplete: false,
-      },
+    // Initialize ETL scheduler
+    console.log('[Services] Initializing ETL scheduler...');
+    scheduler = new ETLScheduler({
+      redis,
+      queueName: 'etl-pipeline',
+      intervalMinutes: etlIntervalMinutes,
     });
 
-    // Set up queue events for monitoring
-    queueEvents = new QueueEvents('etl-pipeline', {
-      connection: redis,
-    });
-
-    queueEvents.on('completed', ({ jobId, returnvalue }) => {
-      console.log(`[ETL] Job ${jobId} completed:`, returnvalue);
-      lastETLRun = {
-        timestamp: new Date(),
-        success: true,
-        result: returnvalue,
-      };
-    });
-
-    queueEvents.on('failed', ({ jobId, failedReason }) => {
-      console.error(`[ETL] Job ${jobId} failed:`, failedReason);
-      lastETLRun = {
-        timestamp: new Date(),
-        success: false,
-      };
-    });
-
-    // Register ETL job processor
-    console.log('[Services] Registering ETL job processor...');
-    etlWorker = new Worker<ETLJobData>(
-      'etl-pipeline',
-      async (job) => {
-        try {
-          if (!db) {
-            throw new Error('DuckDB not initialized');
-          }
-          return await processETLJob(job, db);
-        } catch (error) {
-          console.error('[ETL Worker] Error processing job:', error);
-          throw error;
-        }
-      },
-      {
-        connection: redis,
-        concurrency: 1, // Process one job at a time
-      }
-    );
-
-    etlWorker.on('progress', (job, progress) => {
-      console.log(`[ETL Worker] Job ${job.id} progress: ${progress}%`);
-    });
-
-    // Schedule ETL to run every 10 minutes
-    console.log('[Services] Scheduling ETL pipeline...');
-    await scheduleETLPipeline();
+    await scheduler.initialize(db);
 
     isHealthy = true;
     console.log('[Services] All services initialized successfully');
@@ -141,46 +81,13 @@ async function initializeServices() {
 }
 
 /**
- * Schedule ETL pipeline to run every 10 minutes
- */
-async function scheduleETLPipeline() {
-  if (!etlQueue) {
-    throw new Error('ETL queue not initialized');
-  }
-
-  // Add recurring job (every 10 minutes)
-  // In production, would use BullMQ's repeat options or a cron scheduler
-  const scheduleETL = async () => {
-    try {
-      await etlQueue!.add(
-        'run',
-        {
-          source: process.env.TELEMETRY_SOURCE === 'zerospoils' ? 'zerospoils' : 'mock',
-          force_refresh: false,
-        },
-        {
-          jobId: `etl-${Date.now()}`,
-          repeat: {
-            every: 10 * 60 * 1000, // 10 minutes
-          },
-        }
-      );
-    } catch (error) {
-      console.error('[ETL] Failed to schedule:', error);
-    }
-  };
-
-  // Initial schedule
-  await scheduleETL();
-}
-
-/**
  * Health check endpoint
  */
 app.get('/health', async (req, res) => {
   try {
     const duckdbHealth = db ? await testConnection(db) : false;
     const redisHealth = redis.status === 'ready';
+    const schedulerStatus = scheduler ? await scheduler.getStatus() : null;
 
     const health = {
       service: 'zerospoils-mgmt-worker',
@@ -191,15 +98,9 @@ app.get('/health', async (req, res) => {
         duckdb: { status: duckdbHealth ? 'healthy' : 'unhealthy' },
         redis: { status: redisHealth ? 'healthy' : 'unhealthy' },
         etl: {
-          status: etlQueue ? 'running' : 'stopped',
-          lastRun: lastETLRun?.timestamp || null,
-          lastSuccess: lastETLRun?.success || null,
-        },
-      },
-      jobs: {
-        telemetry_etl: {
-          status: 'scheduled',
-          interval: '10 minutes',
+          status: schedulerStatus?.isRunning ? 'running' : 'stopped',
+          intervalMinutes: etlIntervalMinutes,
+          nextRun: schedulerStatus?.nextScheduledRun || null,
         },
       },
     };
@@ -215,23 +116,40 @@ app.get('/health', async (req, res) => {
 });
 
 /**
+ * Scheduler status endpoint
+ */
+app.get('/scheduler/status', async (req, res) => {
+  try {
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
+    }
+
+    const status = await scheduler.getStatus();
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({
+      error: String(error),
+    });
+  }
+});
+
+/**
  * Queue status endpoint
  */
 app.get('/queues', async (req, res) => {
   try {
-    if (!etlQueue) {
-      return res.status(503).json({ error: 'ETL queue not initialized' });
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
     }
 
-    const counts = await etlQueue.getCountsPerStatus();
+    const status = await scheduler.getStatus();
 
     res.json({
       queues: {
-        etl_pipeline: {
-          ...counts,
-          timestamp: new Date().toISOString(),
-        },
+        etl_pipeline: status.jobCounts,
       },
+      nextScheduledRun: status.nextScheduledRun,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
@@ -245,29 +163,17 @@ app.get('/queues', async (req, res) => {
  */
 app.get('/jobs', async (req, res) => {
   try {
-    if (!etlQueue) {
-      return res.status(503).json({ error: 'ETL queue not initialized' });
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
     }
 
-    const status = (req.query.status as string) || 'completed';
+    const status = await scheduler.getStatus();
     const limit = parseInt((req.query.limit as string) || '20', 10);
 
-    const jobs = await etlQueue.getJobs([status as any], 0, limit - 1);
-
     res.json({
-      data: jobs.map(job => ({
-        id: job.id,
-        name: job.name,
-        status: job._status,
-        progress: job.progress(),
-        data: job.data,
-        result: (job as any).returnvalue,
-        failedReason: job.failedReason,
-        attempts: job.attemptsMade,
-        maxAttempts: job.opts.attempts,
-        timestamp: new Date(job.timestamp).toISOString(),
-      })),
-      count: jobs.length,
+      data: status.recentJobs.slice(0, limit),
+      count: status.recentJobs.length,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
@@ -339,19 +245,87 @@ app.get('/etl/history', async (req, res) => {
  */
 app.post('/etl/run', async (req, res) => {
   try {
-    if (!etlQueue) {
-      return res.status(503).json({ error: 'ETL queue not initialized' });
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
     }
 
-    const job = await etlQueue.add('run', {
-      source: req.body.source || 'mock',
-      force_refresh: req.body.force_refresh || false,
-    });
+    const jobId = await scheduler.triggerManual(
+      (req.body.source as 'mock' | 'zerospoils') || 'mock'
+    );
 
     res.json({
-      job_id: job.id,
+      job_id: jobId,
       status: 'queued',
       message: 'ETL job queued for processing',
+    });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * Pause scheduler
+ */
+app.post('/scheduler/pause', async (req, res) => {
+  try {
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
+    }
+
+    await scheduler.pause();
+
+    res.json({
+      status: 'paused',
+      message: 'ETL scheduler paused',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * Resume scheduler
+ */
+app.post('/scheduler/resume', async (req, res) => {
+  try {
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
+    }
+
+    await scheduler.resume();
+
+    res.json({
+      status: 'running',
+      message: 'ETL scheduler resumed',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: String(error) });
+  }
+});
+
+/**
+ * Clear queue (admin only)
+ */
+app.post('/scheduler/clear', async (req, res) => {
+  try {
+    if (!scheduler) {
+      return res.status(503).json({ error: 'Scheduler not initialized' });
+    }
+
+    // Require authorization header with admin token
+    const auth = req.headers.authorization;
+    if (auth !== 'Bearer admin-secret-token') {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    await scheduler.clearQueue();
+
+    res.json({
+      status: 'cleared',
+      message: 'ETL queue cleared',
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({ error: String(error) });
@@ -364,16 +338,8 @@ app.post('/etl/run', async (req, res) => {
 async function shutdown() {
   console.log('[Services] Shutting down...');
 
-  if (etlWorker) {
-    await etlWorker.close();
-  }
-
-  if (queueEvents) {
-    await queueEvents.close();
-  }
-
-  if (etlQueue) {
-    await etlQueue.close();
+  if (scheduler) {
+    await scheduler.close();
   }
 
   if (db) {
@@ -400,14 +366,23 @@ async function startWorker() {
       console.log(`📝 Profile: ${process.env.APP_PROFILE || 'local'}`);
       console.log(`📊 Database: ${dbPath}`);
       console.log(`🗳️  Redis: ${redisURL}`);
+      console.log(`⏱️  ETL Interval: ${etlIntervalMinutes} minutes`);
       console.log(`\n📚 Available endpoints:`);
-      console.log(`  GET /health                    - Worker health status`);
-      console.log(`  GET /queues                    - Job queue status`);
-      console.log(`  GET /jobs?status=completed     - Job history`);
-      console.log(`  GET /etl/history               - ETL execution history`);
+      console.log(`\n  Health & Status:`);
+      console.log(`  GET  /health                   - Worker health status`);
+      console.log(`  GET  /scheduler/status         - Detailed scheduler status`);
+      console.log(`\n  Queue Management:`);
+      console.log(`  GET  /queues                   - Job queue counts`);
+      console.log(`  GET  /jobs?limit=20            - Job history`);
+      console.log(`\n  ETL Control:`);
       console.log(`  POST /etl/run                  - Manually trigger ETL`);
-      console.log(`  GET /metrics/current           - Current 24h metrics`);
-      console.log(`  GET /metrics/history?days=7    - Historical metrics\n`);
+      console.log(`  POST /scheduler/pause          - Pause scheduler`);
+      console.log(`  POST /scheduler/resume         - Resume scheduler`);
+      console.log(`  POST /scheduler/clear          - Clear queue (admin)`);
+      console.log(`\n  Metrics:`);
+      console.log(`  GET  /metrics/current          - Current 24h metrics`);
+      console.log(`  GET  /metrics/history?days=7   - Historical metrics`);
+      console.log(`  GET  /etl/history?limit=20     - ETL execution history\n`);
     });
   } catch (error) {
     console.error('[Worker] Failed to start:', error);
