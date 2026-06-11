@@ -5,43 +5,54 @@
 
 describe('Routes - Metrics Endpoints', () => {
   it('GET /metrics/current should return current metrics snapshot', () => {
-    const mockMetrics = {
-      timestamp: new Date().toISOString(),
-      newInstalls: 150,
-      activeUsers: 1250,
-      crashFreeRate: 0.985,
-      d1Retention: 0.52,
-      avgSessionLength: 245,
-      itemsAdded: 5620,
-      notificationOptInRate: 0.68,
+    const mockResponse = {
+      data: {
+        timestamp: new Date().toISOString(),
+        newInstalls: 150,
+        activeUsers: 1250,
+        crashFreeRate: 0.985,
+        d1Retention: 0.52,
+        avgSessionLength: 245,
+        itemsAdded: 5620,
+        notificationOptInRate: 0.68,
+      },
+      source: 'duckdb',
+      fallbackReason: null,
     };
 
     // This test validates endpoint structure
-    expect(mockMetrics).toHaveProperty('newInstalls');
-    expect(mockMetrics).toHaveProperty('activeUsers');
-    expect(mockMetrics).toHaveProperty('crashFreeRate');
-    expect(typeof mockMetrics.crashFreeRate).toBe('number');
-    expect(mockMetrics.crashFreeRate).toBeGreaterThanOrEqual(0);
-    expect(mockMetrics.crashFreeRate).toBeLessThanOrEqual(1);
+    expect(mockResponse).toHaveProperty('source');
+    expect(['duckdb', 'mock-fallback']).toContain(mockResponse.source);
+    expect(mockResponse).toHaveProperty('data.newInstalls');
+    expect(mockResponse).toHaveProperty('data.activeUsers');
+    expect(mockResponse).toHaveProperty('data.crashFreeRate');
+    expect(typeof mockResponse.data.crashFreeRate).toBe('number');
+    expect(mockResponse.data.crashFreeRate).toBeGreaterThanOrEqual(0);
+    expect(mockResponse.data.crashFreeRate).toBeLessThanOrEqual(1);
   });
 
   it('GET /metrics/history should return time-series data', () => {
-    const mockHistory = [
-      {
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        newInstalls: 120,
-        activeUsers: 980,
-      },
-      {
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        newInstalls: 110,
-        activeUsers: 950,
-      },
-    ];
+    const mockHistoryResponse = {
+      data: [
+        {
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          newInstalls: 120,
+          activeUsers: 980,
+        },
+        {
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          newInstalls: 110,
+          activeUsers: 950,
+        },
+      ],
+      source: 'duckdb',
+      fallbackReason: null,
+    };
 
-    expect(Array.isArray(mockHistory)).toBe(true);
-    expect(mockHistory.length).toBeGreaterThan(0);
-    mockHistory.forEach((entry) => {
+    expect(Array.isArray(mockHistoryResponse.data)).toBe(true);
+    expect(mockHistoryResponse.data.length).toBeGreaterThan(0);
+    expect(['duckdb', 'mock-fallback']).toContain(mockHistoryResponse.source);
+    mockHistoryResponse.data.forEach((entry) => {
       expect(entry).toHaveProperty('timestamp');
       expect(entry).toHaveProperty('newInstalls');
       expect(entry).toHaveProperty('activeUsers');
@@ -50,23 +61,23 @@ describe('Routes - Metrics Endpoints', () => {
 
   it('GET /metrics/summary should aggregate key metrics', () => {
     const mockSummary = {
-      period: '24h',
-      totalInstalls: 3600,
-      totalSessions: 18500,
-      avgCrashFreeRate: 0.981,
-      avgRetention: 0.498,
-      topCountries: ['US', 'UK', 'CA'],
+      source: 'duckdb',
+      current: {
+        newInstalls: 3600,
+        crashFreeRate: 0.981,
+        d1Retention: 0.498,
+      },
       trends: {
-        installs: 'up',
-        activeUsers: 'stable',
-        crashFreeRate: 'up',
+        installs24h: 4.2,
+        retention7d: 49.8,
+        crashFreeRate: 98.1,
       },
     };
 
-    expect(mockSummary.period).toBe('24h');
-    expect(Array.isArray(mockSummary.topCountries)).toBe(true);
-    expect(mockSummary.trends).toHaveProperty('installs');
-    expect(['up', 'down', 'stable']).toContain(mockSummary.trends.installs);
+    expect(['duckdb', 'mock-fallback']).toContain(mockSummary.source);
+    expect(mockSummary).toHaveProperty('current.newInstalls');
+    expect(mockSummary).toHaveProperty('trends.installs24h');
+    expect(typeof mockSummary.trends.installs24h).toBe('number');
   });
 });
 
