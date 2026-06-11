@@ -15,15 +15,36 @@
     "json",
     "node"
   ],
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.test.ts",
-    "!src/server.ts"
+    "!src/server.ts",
+    "!src/mocks/**"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",
-    "/dist/"
+    "/dist/",
+    "/src/mocks/"
   ],
+  "coverageReporters": [
+    "text",
+    "text-summary",
+    "html",
+    "lcov",
+    "json"
+  ],
+  "coverageDirectory": "coverage",
+  "coverageThreshold": {
+    "global": {
+      "branches": 50,
+      "functions": 50,
+      "lines": 50,
+      "statements": 50
+    }
+  },
   "testTimeout": 10000,
   "verbose": true
 }
