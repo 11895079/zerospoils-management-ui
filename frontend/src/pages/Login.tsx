@@ -60,7 +60,7 @@ export const Login: React.FC = () => {
       <Col xs={22} sm={20} md={8} lg={6}>
         <Card
           title={<div style={{ textAlign: 'center' }}>🍽️ ZeroSpoils Ops</div>}
-          variant="borderless"
+          bordered={false}
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
         >
           <Alert

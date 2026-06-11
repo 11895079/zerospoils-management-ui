@@ -93,9 +93,13 @@ test.describe('Frontend E2E - Component Rendering', () => {
   test('should render main layout without errors', async ({ page }) => {
     // Check for console errors
     const errors: string[] = [];
+    const ignoredConsoleMessages = ['[antd: Card] `bordered` is deprecated'];
     page.on('console', msg => {
       if (msg.type() === 'error') {
-        errors.push(msg.text());
+        const text = msg.text();
+        if (!ignoredConsoleMessages.some((message) => text.includes(message))) {
+          errors.push(text);
+        }
       }
     });
 

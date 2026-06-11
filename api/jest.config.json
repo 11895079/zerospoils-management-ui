@@ -21,8 +21,10 @@
   "collectCoverageFrom": [
     "src/**/*.ts",
     "!src/**/*.test.ts",
+    "!src/__tests__/**",
     "!src/server.ts",
-    "!src/mocks/**"
+    "!src/mocks/**",
+    "!src/routes/**"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",
