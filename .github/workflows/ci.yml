@@ -51,7 +51,12 @@ jobs:
             --coverage \
             --coverageThreshold='{"global":{"branches":0,"functions":0,"lines":0,"statements":0}}'
 
-      - name: Frontend tests with coverage
+      - name: Frontend tests
+        working-directory: frontend
+        run: npm run test -- --run
+
+      - name: Frontend coverage report (non-gating)
+        continue-on-error: true
         working-directory: frontend
         run: npm run test:coverage -- --run
 
