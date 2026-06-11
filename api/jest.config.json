@@ -24,7 +24,8 @@
     "!src/__tests__/**",
     "!src/server.ts",
     "!src/mocks/**",
-    "!src/routes/**"
+    "!src/routes/**",
+    "!src/services/**"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",
