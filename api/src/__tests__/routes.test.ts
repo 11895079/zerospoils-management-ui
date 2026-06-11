@@ -3,15 +3,8 @@
  * Tests metrics, feedback, and telemetry endpoint handlers
  */
 
-import { Router } from 'express';
-import axios from 'axios';
-
-// Mock axios for unit tests
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
-
 describe('Routes - Metrics Endpoints', () => {
-  it('GET /metrics/current should return current metrics snapshot', async () => {
+  it('GET /metrics/current should return current metrics snapshot', () => {
     const mockMetrics = {
       timestamp: new Date().toISOString(),
       newInstalls: 150,
@@ -32,7 +25,7 @@ describe('Routes - Metrics Endpoints', () => {
     expect(mockMetrics.crashFreeRate).toBeLessThanOrEqual(1);
   });
 
-  it('GET /metrics/history should return time-series data', async () => {
+  it('GET /metrics/history should return time-series data', () => {
     const mockHistory = [
       {
         timestamp: new Date(Date.now() - 3600000).toISOString(),
@@ -55,7 +48,7 @@ describe('Routes - Metrics Endpoints', () => {
     });
   });
 
-  it('GET /metrics/summary should aggregate key metrics', async () => {
+  it('GET /metrics/summary should aggregate key metrics', () => {
     const mockSummary = {
       period: '24h',
       totalInstalls: 3600,
@@ -78,7 +71,7 @@ describe('Routes - Metrics Endpoints', () => {
 });
 
 describe('Routes - Feedback Endpoints', () => {
-  it('GET /feedback should return list of feedback items', async () => {
+  it('GET /feedback should return list of feedback items', () => {
     const mockFeedback = [
       {
         id: 'fb-001',
@@ -109,7 +102,7 @@ describe('Routes - Feedback Endpoints', () => {
     });
   });
 
-  it('POST /feedback/:id/triage should update feedback status', async () => {
+  it('POST /feedback/:id/triage should update feedback status', () => {
     const triageResult = {
       id: 'fb-001',
       status: 'triaged',
@@ -124,7 +117,7 @@ describe('Routes - Feedback Endpoints', () => {
 });
 
 describe('Routes - Telemetry Endpoints', () => {
-  it('GET /telemetry/events should return recent telemetry events', async () => {
+  it('GET /telemetry/events should return recent telemetry events', () => {
     const mockEvents = [
       {
         eventId: 'evt-001',
@@ -149,7 +142,7 @@ describe('Routes - Telemetry Endpoints', () => {
     });
   });
 
-  it('GET /telemetry/summary should aggregate telemetry metrics', async () => {
+  it('GET /telemetry/summary should aggregate telemetry metrics', () => {
     const mockSummary = {
       period: '24h',
       totalEvents: 45000,

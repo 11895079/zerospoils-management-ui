@@ -59,7 +59,7 @@ cd api
 # All tests
 npm test
 
-# Smoke tests only (no API dependency)
+# Smoke tests only (requires API running on 3001)
 npm test:smoke
 
 # Unit tests only (middleware, routes)
@@ -245,7 +245,7 @@ test:
 | Issue | Solution |
 |-------|----------|
 | "Cannot find module axios" | Run `npm install` in api/frontend |
-| E2E tests fail with "Connection refused" | Ensure frontend running on 3001, API on 3001 |
+| E2E tests fail with "Connection refused" | Ensure frontend running on 3000, API on 3001 |
 | Coverage below threshold | Check `.ts` file exclusions in config |
 | Tests timeout | Increase `testTimeout` in jest/vitest config |
 | Module resolution errors | Verify `moduleResolution: bundler` in tsconfig |

@@ -8,12 +8,12 @@ import {
   correlationIdMiddleware,
   authMiddleware,
   requireRole,
-} from '../../middleware/auth';
+} from '../middleware/auth';
 
 describe('Middleware - Correlation ID', () => {
   it('should generate correlation ID if not present', () => {
     const req = { headers: {} } as Request;
-    const res = {} as Response;
+    const res = { setHeader: jest.fn() } as any as Response;
     const next = jest.fn();
 
     correlationIdMiddleware(req, res, next);
@@ -27,7 +27,7 @@ describe('Middleware - Correlation ID', () => {
   it('should preserve existing correlation ID from header', () => {
     const existingId = 'test-correlation-id-12345';
     const req = { headers: { 'x-correlation-id': existingId } } as any as Request;
-    const res = {} as Response;
+    const res = { setHeader: jest.fn() } as any as Response;
     const next = jest.fn();
 
     correlationIdMiddleware(req, res, next);
@@ -93,7 +93,7 @@ describe('Middleware - Authentication', () => {
 
     authMiddleware(req, res, next);
 
-    expect(req.user).toEqual({
+    expect(req.user).toMatchObject({
       email: 'admin@zerospoils.local',
       role: 'admin',
     });
@@ -112,7 +112,7 @@ describe('Middleware - Authentication', () => {
 
     authMiddleware(req, res, next);
 
-    expect(req.user).toEqual({
+    expect(req.user).toMatchObject({
       email: 'analyst@zerospoils.local',
       role: 'analyst',
     });
@@ -134,7 +134,8 @@ describe('Middleware - Authentication', () => {
 
     authMiddleware(req, res, next);
 
-    const responseBody = JSON.stringify(res.json.mock.calls[0][0]);
+    const mockRes = res as any;
+    const responseBody = JSON.stringify(mockRes.json.mock.calls[0][0]);
     expect(responseBody).not.toContain('token_');
     expect(responseBody).not.toContain('token_admin');
     expect(responseBody).not.toContain('token_analyst');

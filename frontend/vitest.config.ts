@@ -8,8 +8,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: [],
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
-    exclude: ['node_modules', 'dist'],
+    include: ['src/**/*.test.{ts,tsx}', 'src/**/*.smoke.test.{ts,tsx}'],
+    exclude: ['node_modules', 'dist', 'src/**/e2e.spec.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'html', 'lcov', 'json'],

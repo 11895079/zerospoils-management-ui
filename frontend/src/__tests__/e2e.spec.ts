@@ -3,23 +3,39 @@
  * Uses Playwright for browser automation and validation
  */
 
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 test.describe('Frontend E2E - Login & Navigation', () => {
-  let page: Page;
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('mgmt_token', 'token_admin_abc123');
+    });
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage();
+    await page.route('**/health', async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'healthy',
+          uptime: 3600,
+          services: {
+            api: { status: 'up' },
+            worker: { status: 'up' },
+            duckdb: { status: 'up' },
+          },
+        }),
+      });
+    });
   });
 
   test('should load login page', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3000/login');
     
     // Wait for page to load
     await page.waitForLoadState('networkidle');
     
     // Check for login form or redirect to dashboard
-    const loginForm = await page.locator('input[type="password"]').isVisible().catch(() => false);
+    const loginForm = await page.locator('button[type="submit"]').isVisible().catch(() => false);
     const dashboard = await page.locator('[class*="layout"]').isVisible().catch(() => false);
     
     expect(loginForm || dashboard).toBe(true);
@@ -33,9 +49,8 @@ test.describe('Frontend E2E - Login & Navigation', () => {
     
     // Look for health status indicator (popover or badge)
     const healthIndicator = await page.locator('[class*="health"], [title*="Status"]').first().isVisible().catch(() => false);
-    
-    // Should have some UI element present
-    expect(await page.locator('body').isVisible()).toBe(true);
+
+    expect(healthIndicator).toBe(true);
   });
 });
 
@@ -76,8 +91,6 @@ test.describe('Frontend E2E - Authentication', () => {
 
 test.describe('Frontend E2E - Component Rendering', () => {
   test('should render main layout without errors', async ({ page }) => {
-    await page.goto('http://localhost:3000');
-    
     // Check for console errors
     const errors: string[] = [];
     page.on('console', msg => {
@@ -85,11 +98,14 @@ test.describe('Frontend E2E - Component Rendering', () => {
         errors.push(msg.text());
       }
     });
+
+    await page.goto('http://localhost:3000');
     
     // Wait for page to settle
     await page.waitForLoadState('networkidle');
     
     // Verify page is still visible (hasn't crashed)
     expect(await page.locator('body').isVisible()).toBe(true);
+    expect(errors).toEqual([]);
   });
 });
