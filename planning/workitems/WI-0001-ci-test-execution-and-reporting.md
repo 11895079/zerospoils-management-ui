@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: `todo`
+- Status: `in-progress`
 - Milestone: `M1`
 - Owner: `unassigned`
 - Priority: `P1`
@@ -34,3 +34,7 @@ Local tests exist; Issue 690 delivery needs reliable CI execution, artifact publ
 - [ ] Tests added/updated
 - [ ] Docs updated
 - [ ] Merged to main
+
+## Notes
+
+- Initial CI workflow scaffold added in `.github/workflows/ci.yml` with build, unit/coverage, and e2e smoke jobs.
