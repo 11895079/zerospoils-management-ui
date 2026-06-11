@@ -7,9 +7,9 @@ Last Updated: 2026-06-10
 - Total milestones: 4
 - Total workitems: 7
 - Completed: 1
-- In progress: 0
+- In progress: 1
 - Blocked: 0
-- Todo: 6
+- Todo: 5
 - Overall progress: 14%
 
 ## Milestone Progress
@@ -17,7 +17,7 @@ Last Updated: 2026-06-10
 | Milestone | Total | Done | In Progress | Blocked | Progress |
 |---|---:|---:|---:|---:|---:|
 | M0 | 1 | 1 | 0 | 0 | 100% |
-| M1 | 3 | 0 | 0 | 0 | 0% |
+| M1 | 3 | 0 | 1 | 0 | 33% |
 | M2 | 1 | 0 | 0 | 0 | 0% |
 | M3 | 2 | 0 | 0 | 0 | 0% |
 
@@ -25,7 +25,7 @@ Last Updated: 2026-06-10
 
 | Workitem | Status | Owner | Next Checkpoint |
 |---|---|---|---|
-| [WI-0001](./workitems/WI-0001-ci-test-execution-and-reporting.md) | todo | unassigned | Define CI gates for Issue 690/700/710 delivery |
+| [WI-0001](./workitems/WI-0001-ci-test-execution-and-reporting.md) | in-progress | unassigned | Validate workflow on PR and refine failing stages |
 | [WI-0002](./workitems/WI-0002-duckdb-analytics-marts.md) | todo | unassigned | Draft DuckDB schema and API contract mapping |
 | [WI-0003](./workitems/WI-0003-worker-bullmq-etl-pipeline.md) | todo | unassigned | Queue/process design and retry policy |
 | [WI-0004](./workitems/WI-0004-feature-flags-control-plane.md) | todo | unassigned | Flag model and update endpoint contract |
@@ -40,3 +40,7 @@ Last Updated: 2026-06-10
 - Captured completed Phase 0 baseline as WI-0000.
 - Seeded next work for M1 and M2.
 - Retuned milestone plan to match repo roadmap issues 690, 700, and 710.
+
+### 2026-06-11
+
+- Started WI-0001 implementation by adding GitHub Actions workflow for build, unit/coverage, and e2e smoke.
