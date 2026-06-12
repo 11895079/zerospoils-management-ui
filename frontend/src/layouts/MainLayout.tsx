@@ -132,14 +132,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             background: '#001529',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: collapsed ? 'center' : 'flex-start',
             color: '#fff',
             fontSize: '18px',
             fontWeight: 'bold',
+            gap: '10px',
             paddingLeft: collapsed ? '0' : '16px',
           }}
         >
-          {!collapsed && '🍽️ ZeroSpoils Ops'}
+          <img
+            src="/icons/Icon-192.png"
+            alt="ZeroSpoils"
+            width={28}
+            height={28}
+            style={{ borderRadius: '6px' }}
+          />
+          {!collapsed && <span>ZeroSpoils Ops</span>}
         </div>
         <Menu
           theme="dark"

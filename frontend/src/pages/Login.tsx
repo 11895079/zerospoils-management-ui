@@ -59,7 +59,18 @@ export const Login: React.FC = () => {
     >
       <Col xs={22} sm={20} md={8} lg={6}>
         <Card
-          title={<div style={{ textAlign: 'center' }}>🍽️ ZeroSpoils Ops</div>}
+          title={
+            <div style={{ textAlign: 'center', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+              <img
+                src="/icons/Icon-192.png"
+                alt="ZeroSpoils"
+                width={24}
+                height={24}
+                style={{ borderRadius: '6px' }}
+              />
+              <span>ZeroSpoils Ops</span>
+            </div>
+          }
           bordered={false}
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
         >
