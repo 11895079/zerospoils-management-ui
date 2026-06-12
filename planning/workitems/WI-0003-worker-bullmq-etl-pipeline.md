@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: `todo`
+- Status: `in-progress`
 - Milestone: `M1`
 - Owner: `unassigned`
 - Priority: `P1`
@@ -25,13 +25,13 @@ Worker service currently exposes stub endpoints without real queue processing.
 
 ## Acceptance Criteria
 
-- [ ] Jobs can be enqueued, processed, retried, and observed
-- [ ] Worker health endpoint reflects real queue state
-- [ ] Failed jobs are recoverable with clear diagnostics
+- [x] Jobs can be enqueued, processed, retried, and observed
+- [x] Worker health endpoint reflects real queue state
+- [x] Failed jobs are recoverable with clear diagnostics
 
 ## Definition of Done
 
-- [ ] Code implemented
-- [ ] Tests added/updated
-- [ ] Docs updated
+- [x] Code implemented
+- [x] Tests added/updated
+- [x] Docs updated
 - [ ] Merged to main

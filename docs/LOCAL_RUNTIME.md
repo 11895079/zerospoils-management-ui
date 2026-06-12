@@ -184,6 +184,27 @@ GET /api/telemetry/platforms
 → { data: [{ platform, count, percentage }, ...] }
 ```
 
+### Worker Queue Operations (No Auth in local profile)
+
+```bash
+# Queue depth/status by queue name
+GET /queues
+→ { queues: { telemetry_etl, feedback_processor, telemetry_batch }, timestamp }
+
+# Job history with filters
+GET /jobs?queue=telemetry_etl&status=failed&limit=20
+→ { data: [...], count, etlAudit: [...], timestamp }
+
+# Enqueue manual processing job
+POST /jobs/enqueue
+Body: { "queue": "telemetry_etl", "payload": { "source": "mock", "records": 500 } }
+→ { queue, jobId, status: "queued" }
+
+# Retry failed job by queue and job id
+POST /jobs/:queue/:jobId/retry
+→ { queue, jobId, retried: true }
+```
+
 ## Correlation IDs
 
 All requests and responses include a `X-Correlation-ID` header for request tracing:
