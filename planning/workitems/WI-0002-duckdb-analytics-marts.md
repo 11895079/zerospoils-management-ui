@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: `todo`
+- Status: `in-progress`
 - Milestone: `M1`
 - Owner: `unassigned`
 - Priority: `P1`
@@ -25,13 +25,13 @@ Current dashboard APIs use random mock generators. Replace with deterministic Du
 
 ## Acceptance Criteria
 
-- [ ] `/api/metrics/*` uses DuckDB-backed queries
-- [ ] Summary and history payload formats remain compatible
-- [ ] Error handling and fallback behavior documented
+- [x] `/api/metrics/*` uses DuckDB-backed queries
+- [x] Summary and history payload formats remain compatible
+- [x] Error handling and fallback behavior documented
 
 ## Definition of Done
 
-- [ ] Code implemented
-- [ ] Tests added/updated
-- [ ] Docs updated
+- [x] Code implemented
+- [x] Tests added/updated
+- [x] Docs updated
 - [ ] Merged to main

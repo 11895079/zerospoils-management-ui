@@ -1,6 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import {
+  closeDuckDBMarts,
+  getCurrentMetrics,
+  getHistoricalMetrics,
+  initializeDuckDBMarts,
+  isDuckDBReady,
+} from './services/duckdbMarts.js';
 
 dotenv.config({ path: '../api/.env.local' });
 
@@ -15,6 +22,7 @@ for (const envVar of requiredEnvVars) {
 const app = express();
 const port = parseInt(process.env.WORKER_PORT || '3002');
 const startTime = Date.now();
+const duckdbPath = process.env.DUCKDB_PATH || '/tmp/zerospoils_analytics.duckdb';
 
 // Middleware
 app.use(express.json());
@@ -24,9 +32,14 @@ app.use(cors());
 app.get('/health', (req, res) => {
   res.json({
     service: 'zerospoils-mgmt-worker',
-    status: 'healthy',
+    status: isDuckDBReady() ? 'healthy' : 'degraded',
     uptime: Math.floor((Date.now() - startTime) / 1000),
     timestamp: new Date().toISOString(),
+    services: {
+      duckdb: {
+        status: isDuckDBReady() ? 'up' : 'down',
+      },
+    },
     jobs: {
       telemetry_etl: {
         status: 'idle',
@@ -42,6 +55,38 @@ app.get('/health', (req, res) => {
       },
     },
   });
+});
+
+// DuckDB-backed marts for dashboard metrics
+app.get('/metrics/current', async (_req, res) => {
+  try {
+    if (!isDuckDBReady()) {
+      return res.status(503).json({ error: 'DuckDB marts not initialized' });
+    }
+
+    const data = await getCurrentMetrics();
+    if (!data) {
+      return res.status(404).json({ error: 'No metrics data available' });
+    }
+
+    return res.json({ data });
+  } catch (error) {
+    return res.status(500).json({ error: String(error) });
+  }
+});
+
+app.get('/metrics/history', async (req, res) => {
+  try {
+    if (!isDuckDBReady()) {
+      return res.status(503).json({ error: 'DuckDB marts not initialized' });
+    }
+
+    const hoursParam = req.query.hours ? parseInt(req.query.hours as string, 10) : 24;
+    const data = await getHistoricalMetrics(hoursParam);
+    return res.json({ data, count: data.length });
+  } catch (error) {
+    return res.status(500).json({ error: String(error) });
+  }
 });
 
 // Queue status
@@ -120,15 +165,36 @@ app.get('/jobs', (req, res) => {
   });
 });
 
-// Start worker
-app.listen(port, () => {
-  console.log(`\n✅ Background Worker initialized`);
-  console.log(`   Port: ${port}`);
-  console.log(`   Profile: ${process.env.APP_PROFILE || 'local'}`);
-  console.log(`\n📚 Available endpoints:`);
-  console.log(`   GET /health  - Worker health status`);
-  console.log(`   GET /queues  - Job queue status`);
-  console.log(`   GET /jobs    - Job history\n`);
+async function startWorker() {
+  await initializeDuckDBMarts(duckdbPath);
+
+  app.listen(port, () => {
+    console.log(`\n✅ Background Worker initialized`);
+    console.log(`   Port: ${port}`);
+    console.log(`   Profile: ${process.env.APP_PROFILE || 'local'}`);
+    console.log(`   DuckDB: ${duckdbPath}`);
+    console.log(`\n📚 Available endpoints:`);
+    console.log(`   GET /health           - Worker health status`);
+    console.log(`   GET /queues           - Job queue status`);
+    console.log(`   GET /jobs             - Job history`);
+    console.log(`   GET /metrics/current  - DuckDB current metrics mart`);
+    console.log(`   GET /metrics/history  - DuckDB historical metrics mart\n`);
+  });
+}
+
+startWorker().catch((error) => {
+  console.error('Failed to initialize worker services:', error);
+  process.exit(1);
+});
+
+process.on('SIGINT', async () => {
+  await closeDuckDBMarts();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await closeDuckDBMarts();
+  process.exit(0);
 });
 
 export default app;

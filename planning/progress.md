@@ -1,23 +1,23 @@
 # Progress Dashboard
 
-Last Updated: 2026-06-10
+Last Updated: 2026-06-11
 
 ## Overall Snapshot
 
 - Total milestones: 4
 - Total workitems: 7
-- Completed: 1
+- Completed: 2
 - In progress: 1
 - Blocked: 0
 - Todo: 5
-- Overall progress: 14%
+- Overall progress: 28%
 
 ## Milestone Progress
 
 | Milestone | Total | Done | In Progress | Blocked | Progress |
 |---|---:|---:|---:|---:|---:|
 | M0 | 1 | 1 | 0 | 0 | 100% |
-| M1 | 3 | 0 | 1 | 0 | 33% |
+| M1 | 3 | 1 | 1 | 0 | 66% |
 | M2 | 1 | 0 | 0 | 0 | 0% |
 | M3 | 2 | 0 | 0 | 0 | 0% |
 
@@ -25,8 +25,8 @@ Last Updated: 2026-06-10
 
 | Workitem | Status | Owner | Next Checkpoint |
 |---|---|---|---|
-| [WI-0001](./workitems/WI-0001-ci-test-execution-and-reporting.md) | in-progress | unassigned | Validate workflow on PR and refine failing stages |
-| [WI-0002](./workitems/WI-0002-duckdb-analytics-marts.md) | todo | unassigned | Draft DuckDB schema and API contract mapping |
+| [WI-0001](./workitems/WI-0001-ci-test-execution-and-reporting.md) | done | unassigned | Merged and CI stabilized |
+| [WI-0002](./workitems/WI-0002-duckdb-analytics-marts.md) | in-progress | unassigned | Implement worker DuckDB marts and API integration |
 | [WI-0003](./workitems/WI-0003-worker-bullmq-etl-pipeline.md) | todo | unassigned | Queue/process design and retry policy |
 | [WI-0004](./workitems/WI-0004-feature-flags-control-plane.md) | todo | unassigned | Flag model and update endpoint contract |
 | [WI-0005](./workitems/WI-0005-audit-policy-rbac-enforcement.md) | todo | unassigned | Policy decision matrix and audit payload shape |
@@ -44,3 +44,5 @@ Last Updated: 2026-06-10
 ### 2026-06-11
 
 - Started WI-0001 implementation by adding GitHub Actions workflow for build, unit/coverage, and e2e smoke.
+- Completed WI-0001 by merging CI workflow improvements and stabilizing frontend test runtime compatibility.
+- Started WI-0002 by wiring `/api/metrics/*` to DuckDB-backed worker marts with documented fallback behavior.

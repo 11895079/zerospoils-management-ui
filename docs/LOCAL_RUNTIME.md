@@ -144,6 +144,9 @@ GET /api/metrics/history?hours=24
 # Metrics summary
 GET /api/metrics/summary
 → { current, trends: { installs24h, retention7d, ... } }
+
+Note: Metrics endpoints expose `source` (`duckdb` or `mock-fallback`) and
+`fallbackReason` when DuckDB marts are unavailable from the worker.
 ```
 
 ### Feedback (Requires Auth)
