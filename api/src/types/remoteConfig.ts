@@ -60,11 +60,7 @@ export interface PublishResponse {
   newVersion?: RemoteConfigVersion;
 }
 
-export interface ValidationRequest {
-  parameter: RemoteConfigParameterDef;
-  key?: string;
-  valueType?: string;
-}
+export type ValidationRequest = PublishRequest;
 
 export interface ValidationResponse {
   valid: boolean;

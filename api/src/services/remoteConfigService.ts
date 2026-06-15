@@ -6,11 +6,9 @@
 import {
   RemoteConfigTemplate,
   RemoteConfigParameterDef,
-  RemoteConfigCondition,
   RemoteConfigChangeAudit,
   PublishRequest,
   PublishResponse,
-  ValidationRequest,
   ValidationResponse,
 } from '../types/remoteConfig.js';
 
@@ -115,7 +113,7 @@ function validateParameter(
   // Validate conditional values if present
   if (param.conditionalValues) {
     Object.entries(param.conditionalValues).forEach(([condName, condVal]) => {
-      if (valueType === 'BOOLEAN' && ![' true', 'false'].includes(condVal.value?.toLowerCase() || '')) {
+      if (valueType === 'BOOLEAN' && !['true', 'false'].includes(condVal.value?.toLowerCase() || '')) {
         errors.push({
           field: `${key}.conditionalValues.${condName}`,
           message: `Expected boolean, got "${condVal.value}"`,

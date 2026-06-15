@@ -78,43 +78,16 @@ export interface TelemetryEvent {
   properties: Record<string, unknown>;
 }
 
-// Firebase Remote Config
-export interface RemoteConfigValue {
-  value: string;
-}
-
-export interface RemoteConfigParameterDef {
-  defaultValue: RemoteConfigValue;
-  conditionalValues?: Record<string, RemoteConfigValue>;
-  description?: string;
-  valueType?: 'STRING' | 'BOOLEAN' | 'NUMBER' | 'JSON';
-}
-
-export interface RemoteConfigCondition {
-  name: string;
-  expression: string;
-  tagColor?: string;
-}
-
-export interface RemoteConfigVersion {
-  versionNumber: string;
-  updateUser: string;
-  updateTime: string;
-}
-
-export interface RemoteConfigTemplate {
-  etag: string;
-  parameters: Record<string, RemoteConfigParameterDef>;
-  conditions?: RemoteConfigCondition[];
-  version?: RemoteConfigVersion;
-}
-
-export interface RemoteConfigChangeAudit {
-  id: string;
-  timestamp: string;
-  user: string;
-  action: 'publish' | 'rollback';
-  before: RemoteConfigTemplate;
-  after: RemoteConfigTemplate;
-  correlationId: string;
-}
+export type {
+  RemoteConfigValue,
+  RemoteConfigParameterDef,
+  RemoteConfigCondition,
+  RemoteConfigVersion,
+  RemoteConfigTemplate,
+  RemoteConfigChangeAudit,
+  PublishRequest,
+  PublishResponse,
+  ValidationRequest,
+  ValidationResponse,
+  RollbackRequest,
+} from './remoteConfig.js';

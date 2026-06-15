@@ -98,8 +98,12 @@ router.put('/publish', async (req: Request, res: Response) => {
     // In real app, would get user from auth middleware
     const user = req.headers['x-user'] || 'anonymous';
     const correlationId = req.headers['x-correlation-id'] || `corr-${Date.now()}`;
+    const publishRequest = {
+      ...req.body,
+      correlationId: req.body?.correlationId ?? String(correlationId),
+    };
 
-    const result = await publishTemplate(req.body, String(user));
+    const result = await publishTemplate(publishRequest, String(user));
 
     if (!result.success) {
       const statusCode = result.error?.code === 'ETAG_MISMATCH' ? 409 : 400;

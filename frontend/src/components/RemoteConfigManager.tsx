@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Table, Tag, Space, Modal, Input, Select, message } from 'antd';
 import { EditOutlined, RollbackOutlined } from '@ant-design/icons';
-import type { RemoteConfigTemplate, RemoteConfigParameterDef } from '../types/index.js';
+import type { RemoteConfigTemplate, RemoteConfigParameterDef } from '../types';
 
 interface RemoteConfigManagerProps {
   onSave?: (template: RemoteConfigTemplate) => void;
@@ -94,8 +94,14 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       }
 
       const result = await publishResponse.json();
-      const updatedTemplate = { ...template, etag: result.newEtag };
-      updatedTemplate.parameters[editingKey] = editingValue;
+      const updatedTemplate = {
+        ...template,
+        etag: result.newEtag,
+        parameters: {
+          ...template.parameters,
+          [editingKey]: editingValue,
+        },
+      };
       setTemplate(updatedTemplate);
       setEditingKey(null);
       setEditingValue(null);
