@@ -5,6 +5,7 @@ import enUS from 'antd/locale/en_US';
 import { MainLayout } from './layouts/MainLayout';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { RemoteConfig } from './pages/RemoteConfig';
 import { api } from './utils/api';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -38,6 +39,16 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <Dashboard />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/remote-config"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <RemoteConfig />
                 </MainLayout>
               </ProtectedRoute>
             }

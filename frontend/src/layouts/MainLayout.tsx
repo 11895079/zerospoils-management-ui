@@ -6,6 +6,7 @@ import {
   MessageOutlined,
   LineChartOutlined,
   SettingOutlined,
+  SlidersOutlined,
   LogoutOutlined,
   HeartOutlined,
   MenuFoldOutlined,
@@ -106,6 +107,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       icon: <LineChartOutlined />,
       label: 'Telemetry',
       onClick: () => navigate('/telemetry'),
+    },
+    {
+      key: '/remote-config',
+      icon: <SlidersOutlined />,
+      label: 'Remote Config',
+      onClick: () => navigate('/remote-config'),
     },
     {
       key: '/settings',
