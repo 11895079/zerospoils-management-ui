@@ -28,6 +28,37 @@ export interface ServiceHealth {
   version: string;
 }
 
+// Remote Config types
+export interface RemoteConfigValue {
+  value: string;
+}
+
+export interface RemoteConfigParameterDef {
+  defaultValue: RemoteConfigValue;
+  conditionalValues?: Record<string, RemoteConfigValue>;
+  description?: string;
+  valueType?: 'STRING' | 'BOOLEAN' | 'NUMBER' | 'JSON';
+}
+
+export interface RemoteConfigCondition {
+  name: string;
+  expression: string;
+  tagColor?: string;
+}
+
+export interface RemoteConfigVersion {
+  versionNumber: string;
+  updateUser: string;
+  updateTime: string;
+}
+
+export interface RemoteConfigTemplate {
+  etag: string;
+  parameters: Record<string, RemoteConfigParameterDef>;
+  conditions?: RemoteConfigCondition[];
+  version?: RemoteConfigVersion;
+}
+
 export interface Feedback {
   id: string;
   userId: string;
