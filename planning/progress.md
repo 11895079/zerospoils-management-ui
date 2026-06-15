@@ -6,18 +6,18 @@ Last Updated: 2026-06-15 (ongoing)
 
 - Total milestones: 4
 - Total workitems: 7
-- Completed: 3
-- In progress: 2
+- Completed: 4
+- In progress: 1
 - Blocked: 0
-- Todo: 3
-- Overall progress: 57%
+- Todo: 2
+- Overall progress: 64%
 
 ## Milestone Progress
 
 | Milestone | Total | Done | In Progress | Blocked | Progress |
 |---|---:|---:|---:|---:|---:|
 | M0 | 1 | 1 | 0 | 0 | 100% |
-| M1 | 3 | 2 | 1 | 0 | 100% |
+| M1 | 3 | 3 | 0 | 0 | 100% |
 | M2 | 1 | 0 | 1 | 0 | 50% |
 | M3 | 2 | 0 | 0 | 0 | 0% |
 
@@ -26,7 +26,7 @@ Last Updated: 2026-06-15 (ongoing)
 | Workitem | Status | Owner | Next Checkpoint |
 |---|---|---|---|
 | [WI-0001](./workitems/WI-0001-ci-test-execution-and-reporting.md) | done | unassigned | Merged and CI stabilized |
-| [WI-0002](./workitems/WI-0002-duckdb-analytics-marts.md) | in-progress | unassigned | Implement worker DuckDB marts and API integration |
+| [WI-0002](./workitems/WI-0002-duckdb-analytics-marts.md) | done | unassigned | DuckDB-backed metrics routes implemented and merged |
 | [WI-0003](./workitems/WI-0003-worker-bullmq-etl-pipeline.md) | done | unassigned | BullMQ queues + worker health/retry endpoints merged |
 | [WI-0004](./workitems/WI-0004-feature-flags-control-plane.md) | in-progress | unassigned | Firebase Remote Config API + admin UI foundation complete |
 | [WI-0005](./workitems/WI-0005-audit-policy-rbac-enforcement.md) | todo | unassigned | Policy decision matrix and audit payload shape |
@@ -67,3 +67,4 @@ Last Updated: 2026-06-15 (ongoing)
   * Added 9 comprehensive tests covering validation, conflicts, and rollback scenarios
   * All API tests passing (29/29 including 9 new remote config tests)
   * Frontend builds successfully with Remote Config types integrated
+- Closed WI-0002 as merged: DuckDB-backed `/api/metrics/*` implementation and documented fallback behavior are on main.
