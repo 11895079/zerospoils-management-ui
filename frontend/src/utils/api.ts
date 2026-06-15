@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance } from 'axios';
+import type { RemoteConfigCondition, RemoteConfigParameterDef } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -107,6 +108,34 @@ class ApiClient {
 
   async getTelemetryPlatforms() {
     return this.client.get('/api/telemetry/platforms');
+  }
+
+  // Remote Config
+  async getRemoteConfigTemplate() {
+    return this.client.get('/api/remote-config/template');
+  }
+
+  async getRemoteConfigHistory(limit: number = 20) {
+    return this.client.get('/api/remote-config/history', {
+      params: { limit },
+    });
+  }
+
+  async validateRemoteConfig(payload: {
+    parameters: Record<string, RemoteConfigParameterDef>;
+    etag: string;
+    correlationId: string;
+  }) {
+    return this.client.post('/api/remote-config/validate', payload);
+  }
+
+  async publishRemoteConfig(payload: {
+    parameters: Record<string, RemoteConfigParameterDef>;
+    conditions?: RemoteConfigCondition[];
+    etag: string;
+    correlationId: string;
+  }) {
+    return this.client.put('/api/remote-config/publish', payload);
   }
 }
 

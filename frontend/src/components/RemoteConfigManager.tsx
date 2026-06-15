@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, Table, Tag, Space, Modal, Input, Select, message } from 'antd';
 import { EditOutlined, RollbackOutlined } from '@ant-design/icons';
 import type { RemoteConfigTemplate, RemoteConfigParameterDef } from '../types';
+import { api } from '../utils/api';
 
 interface RemoteConfigManagerProps {
   onSave?: (template: RemoteConfigTemplate) => void;
@@ -22,9 +23,8 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
-        const response = await fetch('/api/remote-config/template');
-        if (!response.ok) throw new Error('Failed to fetch template');
-        const data = await response.json();
+        const response = await api.getRemoteConfigTemplate();
+        const data = response.data;
         setTemplate(data.template);
         setLoading(false);
       } catch (error) {
@@ -47,17 +47,13 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
     setSaving(true);
     try {
       // Validate the parameter change
-      const validationResponse = await fetch('/api/remote-config/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parameters: { [editingKey]: editingValue },
-          etag: template.etag,
-          correlationId: `edit-${Date.now()}`,
-        }),
+      const validationResponse = await api.validateRemoteConfig({
+        parameters: { [editingKey]: editingValue },
+        etag: template.etag,
+        correlationId: `edit-${Date.now()}`,
       });
 
-      const validation = await validationResponse.json();
+      const validation = validationResponse.data;
       if (!validation.valid) {
         message.error(`Validation error: ${validation.errors[0]?.message}`);
         setSaving(false);
@@ -65,35 +61,17 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       }
 
       // Publish the change
-      const publishResponse = await fetch('/api/remote-config/publish', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parameters: {
-            ...template.parameters,
-            [editingKey]: editingValue,
-          },
-          conditions: template.conditions,
-          etag: template.etag,
-          correlationId: `publish-${Date.now()}`,
-        }),
+      const publishResponse = await api.publishRemoteConfig({
+        parameters: {
+          ...template.parameters,
+          [editingKey]: editingValue,
+        },
+        conditions: template.conditions,
+        etag: template.etag,
+        correlationId: `publish-${Date.now()}`,
       });
 
-      if (publishResponse.status === 409) {
-        message.error('Template was modified by another user. Please refresh.');
-        setEditingKey(null);
-        setSaving(false);
-        return;
-      }
-
-      if (!publishResponse.ok) {
-        const error = await publishResponse.json();
-        message.error(`Publish failed: ${error.error?.message}`);
-        setSaving(false);
-        return;
-      }
-
-      const result = await publishResponse.json();
+      const result = publishResponse.data;
       const updatedTemplate = {
         ...template,
         etag: result.newEtag,
@@ -108,7 +86,16 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       message.success('Parameter updated successfully');
       onSave?.(updatedTemplate);
     } catch (error) {
-      message.error(`Failed to save: ${error}`);
+      const axiosError = error as {
+        response?: { status?: number; data?: { error?: { message?: string } } };
+      };
+      if (axiosError.response?.status === 409) {
+        message.error('Template was modified by another user. Please refresh.');
+      } else {
+        message.error(
+          `Failed to save: ${axiosError.response?.data?.error?.message || String(error)}`
+        );
+      }
     } finally {
       setSaving(false);
     }
