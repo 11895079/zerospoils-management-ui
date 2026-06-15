@@ -9,8 +9,19 @@ export interface MartCurrentMetrics {
   notification_opt_in_rate_pct: number;
 }
 
+export interface ETLRunAudit {
+  jobId: string;
+  queue: string;
+  source: 'mock' | 'zerospoils';
+  status: 'success' | 'failure';
+  processedRecords: number;
+  error?: string;
+  completedAt: string;
+}
+
 let initialized = false;
 let martRows: MartCurrentMetrics[] = [];
+let etlRuns: ETLRunAudit[] = [];
 
 function seedRowsSQL(): string {
   const now = new Date();
@@ -83,4 +94,40 @@ export async function getHistoricalMetrics(hours: number): Promise<MartCurrentMe
 export async function closeDuckDBMarts(): Promise<void> {
   initialized = false;
   martRows = [];
+  etlRuns = [];
+}
+
+export async function recordEtlRun(run: Omit<ETLRunAudit, 'completedAt'>): Promise<void> {
+  const completedAt = new Date().toISOString();
+  etlRuns.unshift({
+    ...run,
+    completedAt,
+  });
+  etlRuns = etlRuns.slice(0, 200);
+
+  if (!initialized || run.status !== 'success' || martRows.length === 0) {
+    return;
+  }
+
+  const latest = await getCurrentMetrics();
+  if (!latest) {
+    return;
+  }
+
+  // Keep metric updates deterministic while allowing ETL runs to influence marts.
+  const processedDelta = Math.max(Math.floor(run.processedRecords / 20), 1);
+  const updated: MartCurrentMetrics = {
+    ...latest,
+    summary_timestamp: completedAt,
+    new_installs_24h: latest.new_installs_24h + processedDelta,
+    active_users_24h: latest.active_users_24h + processedDelta * 4,
+    items_added_24h: latest.items_added_24h + processedDelta * 8,
+  };
+
+  martRows.push(updated);
+}
+
+export function getEtlRuns(limit: number = 20): ETLRunAudit[] {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(limit, 200)) : 20;
+  return etlRuns.slice(0, safeLimit);
 }
