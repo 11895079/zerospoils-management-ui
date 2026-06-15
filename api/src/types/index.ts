@@ -77,3 +77,17 @@ export interface TelemetryEvent {
   timestamp: string;
   properties: Record<string, unknown>;
 }
+
+export type {
+  RemoteConfigValue,
+  RemoteConfigParameterDef,
+  RemoteConfigCondition,
+  RemoteConfigVersion,
+  RemoteConfigTemplate,
+  RemoteConfigChangeAudit,
+  PublishRequest,
+  PublishResponse,
+  ValidationRequest,
+  ValidationResponse,
+  RollbackRequest,
+} from './remoteConfig.js';

@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: `in-progress`
+- Status: `done`
 - Milestone: `M1`
 - Owner: `unassigned`
 - Priority: `P1`
@@ -34,4 +34,4 @@ Current dashboard APIs use random mock generators. Replace with deterministic Du
 - [x] Code implemented
 - [x] Tests added/updated
 - [x] Docs updated
-- [ ] Merged to main
+- [x] Merged to main

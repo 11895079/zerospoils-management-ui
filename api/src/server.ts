@@ -11,6 +11,7 @@ import healthRoutes from './routes/health.js';
 import metricsRoutes from './routes/metrics.js';
 import feedbackRoutes from './routes/feedback.js';
 import telemetryRoutes from './routes/telemetry.js';
+import remoteConfigRoutes from './routes/remoteConfig.js';
 
 // Load environment variables
 dotenv.config();
@@ -43,6 +44,7 @@ app.use(authMiddleware);
 app.use('/api', metricsRoutes);
 app.use('/api', feedbackRoutes);
 app.use('/api', telemetryRoutes);
+app.use('/api/remote-config', remoteConfigRoutes);
 
 // 404 handler
 app.use((req, res) => {
