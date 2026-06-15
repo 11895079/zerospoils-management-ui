@@ -128,5 +128,6 @@ export async function recordEtlRun(run: Omit<ETLRunAudit, 'completedAt'>): Promi
 }
 
 export function getEtlRuns(limit: number = 20): ETLRunAudit[] {
-  return etlRuns.slice(0, Math.max(1, Math.min(limit, 200)));
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(limit, 200)) : 20;
+  return etlRuns.slice(0, safeLimit);
 }

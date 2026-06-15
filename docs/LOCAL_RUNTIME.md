@@ -184,7 +184,9 @@ GET /api/telemetry/platforms
 → { data: [{ platform, count, percentage }, ...] }
 ```
 
-### Worker Queue Operations (No Auth in local profile)
+### Worker Queue Operations
+
+Note: In local profile, queue endpoints have no authentication. In production profiles, authorization middleware will be applied.
 
 ```bash
 # Queue depth/status by queue name

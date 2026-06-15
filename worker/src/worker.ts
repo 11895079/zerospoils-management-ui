@@ -43,8 +43,9 @@ app.use(cors());
 
 // Health check
 app.get('/health', async (_req, res) => {
-  const queueStatus = await getQueueHealthStatus();
-  const queueSnapshot = await getQueueSnapshot();
+  try {
+    const queueStatus = await getQueueHealthStatus();
+    const queueSnapshot = await getQueueSnapshot();
 
   res.json({
     service: 'zerospoils-mgmt-worker',
@@ -71,6 +72,13 @@ app.get('/health', async (_req, res) => {
       telemetry_batch: queueSnapshot.telemetry_batch,
     },
   });
+  } catch (error) {
+    return res.status(503).json({
+      service: 'zerospoils-mgmt-worker',
+      status: 'unhealthy',
+      error: String(error),
+    });
+  }
 });
 
 // DuckDB-backed marts for dashboard metrics
@@ -107,80 +115,101 @@ app.get('/metrics/history', async (req, res) => {
 
 // Queue status
 app.get('/queues', async (_req, res) => {
-  const queues = await getQueueSnapshot();
-  res.json({ queues, timestamp: new Date().toISOString() });
+  try {
+    const queues = await getQueueSnapshot();
+    return res.json({ queues, timestamp: new Date().toISOString() });
+  } catch (error) {
+    return res.status(503).json({ error: String(error) });
+  }
 });
 
 // Job history
 app.get('/jobs', async (req, res) => {
-  const status = req.query.status as
-    | 'completed'
-    | 'failed'
-    | 'active'
-    | 'wait'
-    | 'delayed'
-    | 'paused'
-    | undefined;
-  const queue = req.query.queue as QueueName | undefined;
-  const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
-  const jobs = await getJobHistory({ status, queue, limit });
+  try {
+    const status = req.query.status as
+      | 'completed'
+      | 'failed'
+      | 'active'
+      | 'wait'
+      | 'delayed'
+      | 'paused'
+      | undefined;
+    const queueCandidate = req.query.queue as string | undefined;
+    if (queueCandidate && !isQueueName(queueCandidate)) {
+      return res.status(400).json({ error: 'invalid queue name' });
+    }
+    const queue = queueCandidate as QueueName | undefined;
+    const limitParam = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
+    const limit = Number.isFinite(limitParam) ? limitParam : 20;
+    const jobs = await getJobHistory({ status, queue, limit });
 
-  res.json({
-    data: jobs,
-    count: jobs.length,
-    etlAudit: getEtlRuns(limit),
-    timestamp: new Date().toISOString(),
-  });
+    return res.json({
+      data: jobs,
+      count: jobs.length,
+      etlAudit: getEtlRuns(limit),
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    return res.status(500).json({ error: String(error) });
+  }
 });
 
 app.post('/jobs/enqueue', async (req, res) => {
-  const queueCandidate = req.body?.queue as string | undefined;
-  if (!queueCandidate || !isQueueName(queueCandidate)) {
-    return res.status(400).json({ error: 'queue is required' });
+  try {
+    const queueCandidate = req.body?.queue as string | undefined;
+    if (!queueCandidate || !isQueueName(queueCandidate)) {
+      return res.status(400).json({ error: 'queue is required' });
+    }
+    const queue = queueCandidate as QueueName;
+
+    const jobId = await enqueueJob({
+      queue,
+      payload: req.body?.payload,
+    });
+
+    return res.status(202).json({
+      queue,
+      jobId,
+      status: 'queued',
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    return res.status(503).json({ error: String(error) });
   }
-  const queue = queueCandidate as QueueName;
-
-  const jobId = await enqueueJob({
-    queue,
-    payload: req.body?.payload,
-  });
-
-  return res.status(202).json({
-    queue,
-    jobId,
-    status: 'queued',
-    timestamp: new Date().toISOString(),
-  });
 });
 
 app.post('/jobs/:queue/:jobId/retry', async (req, res) => {
-  const queueCandidate = req.params.queue;
-  if (!isQueueName(queueCandidate)) {
-    return res.status(400).json({
-      retried: false,
-      reason: 'invalid queue name',
-    });
-  }
+  try {
+    const queueCandidate = req.params.queue;
+    if (!isQueueName(queueCandidate)) {
+      return res.status(400).json({
+        retried: false,
+        reason: 'invalid queue name',
+      });
+    }
 
-  const queue = queueCandidate as QueueName;
-  const jobId = req.params.jobId;
+    const queue = queueCandidate as QueueName;
+    const jobId = req.params.jobId;
 
-  const retried = await retryFailedJob(queue, jobId);
-  if (!retried.retried) {
-    return res.status(409).json({
+    const retried = await retryFailedJob(queue, jobId);
+    if (!retried.retried) {
+      return res.status(409).json({
+        queue,
+        jobId,
+        retried: false,
+        reason: retried.reason,
+      });
+    }
+
+    return res.json({
       queue,
       jobId,
-      retried: false,
-      reason: retried.reason,
+      retried: true,
+      timestamp: new Date().toISOString(),
     });
+  } catch (error) {
+    return res.status(503).json({ error: String(error) });
   }
-
-  return res.json({
-    queue,
-    jobId,
-    retried: true,
-    timestamp: new Date().toISOString(),
-  });
 });
 
 async function startWorker() {

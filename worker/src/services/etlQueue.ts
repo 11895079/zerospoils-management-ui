@@ -125,10 +125,12 @@ async function makeQueueStore(queueName: QueueName): Promise<QueueStore> {
 
   events.on('failed', async ({ jobId, failedReason }) => {
     if (queueName === 'telemetry_etl') {
+      const job = await queue.getJob(String(jobId));
+      const source = job?.data?.source === 'zerospoils' ? 'zerospoils' : 'mock';
       await recordEtlRun({
         jobId: String(jobId),
         queue: 'telemetry_etl',
-        source: 'mock',
+        source,
         status: 'failure',
         processedRecords: 0,
         error: failedReason,
@@ -273,7 +275,8 @@ export async function getJobHistory(options?: {
   status?: 'completed' | 'failed' | 'active' | 'wait' | 'delayed' | 'paused';
   limit?: number;
 }): Promise<QueueJobSummary[]> {
-  const limit = Math.max(1, Math.min(options?.limit ?? 20, 100));
+  const limitParam = options?.limit ?? 20;
+  const limit = Number.isFinite(limitParam) ? Math.max(1, Math.min(limitParam, 100)) : 20;
   const statuses = options?.status ? [options.status] : ['completed', 'failed', 'active', 'wait', 'delayed'];
   const queues: QueueName[] = options?.queue
     ? [options.queue]
