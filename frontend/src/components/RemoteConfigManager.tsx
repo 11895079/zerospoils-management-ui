@@ -50,13 +50,11 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       const validationResponse = await api.validateRemoteConfig({
         parameters: { [editingKey]: editingValue },
         etag: template.etag,
-        correlationId: `edit-${Date.now()}`,
       });
 
       const validation = validationResponse.data;
       if (!validation.valid) {
         message.error(`Validation error: ${validation.errors[0]?.message}`);
-        setSaving(false);
         return;
       }
 
@@ -68,7 +66,6 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
         },
         conditions: template.conditions,
         etag: template.etag,
-        correlationId: `publish-${Date.now()}`,
       });
 
       const result = publishResponse.data;
@@ -87,14 +84,17 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       onSave?.(updatedTemplate);
     } catch (error) {
       const axiosError = error as {
-        response?: { status?: number; data?: { error?: { message?: string } } };
+        response?: { status?: number; data?: { error?: string | { message?: string } } };
       };
       if (axiosError.response?.status === 409) {
         message.error('Template was modified by another user. Please refresh.');
       } else {
-        message.error(
-          `Failed to save: ${axiosError.response?.data?.error?.message || String(error)}`
-        );
+        const serverError = axiosError.response?.data?.error;
+        const serverMsg =
+          typeof serverError === 'string'
+            ? serverError
+            : serverError?.message;
+        message.error(`Failed to save: ${serverMsg ?? String(error)}`);
       }
     } finally {
       setSaving(false);

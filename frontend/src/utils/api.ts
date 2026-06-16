@@ -124,7 +124,6 @@ class ApiClient {
   async validateRemoteConfig(payload: {
     parameters: Record<string, RemoteConfigParameterDef>;
     etag: string;
-    correlationId: string;
   }) {
     return this.client.post('/api/remote-config/validate', payload);
   }
@@ -133,7 +132,6 @@ class ApiClient {
     parameters: Record<string, RemoteConfigParameterDef>;
     conditions?: RemoteConfigCondition[];
     etag: string;
-    correlationId: string;
   }) {
     return this.client.put('/api/remote-config/publish', payload);
   }
