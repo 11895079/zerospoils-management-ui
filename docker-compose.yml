@@ -30,6 +30,9 @@ services:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-secret-key-do-not-use-in-production
+      # Firebase Remote Config (optional — omit to use local mock)
+      # FIREBASE_PROJECT_ID: your-firebase-project-id
+      # FIREBASE_SERVICE_ACCOUNT: '{"type":"service_account","project_id":"...","private_key":"...",...}'
     depends_on:
       redis:
         condition: service_healthy

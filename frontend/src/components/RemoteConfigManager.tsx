@@ -3,9 +3,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Form, Button, Table, Tag, Space, Modal, Input, Select, message } from 'antd';
-import { EditOutlined, RollbackOutlined } from '@ant-design/icons';
+import { Form, Button, Table, Tag, Space, Modal, Input, InputNumber, Select, message, Alert } from 'antd';
+import { EditOutlined, RollbackOutlined, FormatPainterOutlined } from '@ant-design/icons';
 import type { RemoteConfigTemplate, RemoteConfigParameterDef } from '../types';
+import { api } from '../utils/api';
 
 interface RemoteConfigManagerProps {
   onSave?: (template: RemoteConfigTemplate) => void;
@@ -18,13 +19,13 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
   const [editingValue, setEditingValue] = useState<RemoteConfigParameterDef | null>(null);
   const [saving, setSaving] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [jsonError, setJsonError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTemplate = async () => {
       try {
-        const response = await fetch('/api/remote-config/template');
-        if (!response.ok) throw new Error('Failed to fetch template');
-        const data = await response.json();
+        const response = await api.getRemoteConfigTemplate();
+        const data = response.data;
         setTemplate(data.template);
         setLoading(false);
       } catch (error) {
@@ -39,6 +40,7 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
   const handleEditParameter = (key: string, param: RemoteConfigParameterDef) => {
     setEditingKey(key);
     setEditingValue({ ...param });
+    setJsonError(null);
   };
 
   const handleSaveParameter = async () => {
@@ -47,53 +49,28 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
     setSaving(true);
     try {
       // Validate the parameter change
-      const validationResponse = await fetch('/api/remote-config/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parameters: { [editingKey]: editingValue },
-          etag: template.etag,
-          correlationId: `edit-${Date.now()}`,
-        }),
+      const validationResponse = await api.validateRemoteConfig({
+        parameters: { [editingKey]: editingValue },
+        etag: template.etag,
       });
 
-      const validation = await validationResponse.json();
+      const validation = validationResponse.data;
       if (!validation.valid) {
         message.error(`Validation error: ${validation.errors[0]?.message}`);
-        setSaving(false);
         return;
       }
 
       // Publish the change
-      const publishResponse = await fetch('/api/remote-config/publish', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parameters: {
-            ...template.parameters,
-            [editingKey]: editingValue,
-          },
-          conditions: template.conditions,
-          etag: template.etag,
-          correlationId: `publish-${Date.now()}`,
-        }),
+      const publishResponse = await api.publishRemoteConfig({
+        parameters: {
+          ...template.parameters,
+          [editingKey]: editingValue,
+        },
+        conditions: template.conditions,
+        etag: template.etag,
       });
 
-      if (publishResponse.status === 409) {
-        message.error('Template was modified by another user. Please refresh.');
-        setEditingKey(null);
-        setSaving(false);
-        return;
-      }
-
-      if (!publishResponse.ok) {
-        const error = await publishResponse.json();
-        message.error(`Publish failed: ${error.error?.message}`);
-        setSaving(false);
-        return;
-      }
-
-      const result = await publishResponse.json();
+      const result = publishResponse.data;
       const updatedTemplate = {
         ...template,
         etag: result.newEtag,
@@ -108,7 +85,19 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
       message.success('Parameter updated successfully');
       onSave?.(updatedTemplate);
     } catch (error) {
-      message.error(`Failed to save: ${error}`);
+      const axiosError = error as {
+        response?: { status?: number; data?: { error?: string | { message?: string } } };
+      };
+      if (axiosError.response?.status === 409) {
+        message.error('Template was modified by another user. Please refresh.');
+      } else {
+        const serverError = axiosError.response?.data?.error;
+        const serverMsg =
+          typeof serverError === 'string'
+            ? serverError
+            : serverError?.message;
+        message.error(`Failed to save: ${serverMsg ?? String(error)}`);
+      }
     } finally {
       setSaving(false);
     }
@@ -117,6 +106,102 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
   const handleCancel = () => {
     setEditingKey(null);
     setEditingValue(null);
+    setJsonError(null);
+  };
+
+  /** Update the default value string and clear/set JSON validation error */
+  const setDefaultValue = (raw: string) => {
+    if (!editingValue) return;
+    setEditingValue({ ...editingValue, defaultValue: { value: raw } });
+    if (editingValue.valueType === 'JSON') {
+      try {
+        JSON.parse(raw);
+        setJsonError(null);
+      } catch {
+        setJsonError('Invalid JSON');
+      }
+    }
+  };
+
+  /** Pretty-print the JSON value in place */
+  const handleFormatJson = () => {
+    if (!editingValue) return;
+    try {
+      const formatted = JSON.stringify(JSON.parse(editingValue.defaultValue.value || ''), null, 2);
+      setEditingValue({ ...editingValue, defaultValue: { value: formatted } });
+      setJsonError(null);
+    } catch {
+      setJsonError('Cannot format — invalid JSON');
+    }
+  };
+
+  /** Render the type-appropriate value editor */
+  const renderValueEditor = () => {
+    if (!editingValue) return null;
+    const valueType = editingValue.valueType || 'STRING';
+    const currentValue = editingValue.defaultValue?.value ?? '';
+
+    if (valueType === 'BOOLEAN') {
+      return (
+        <Select
+          value={currentValue === 'true' ? 'true' : 'false'}
+          onChange={(v) => setDefaultValue(v)}
+          options={[
+            { label: 'true', value: 'true' },
+            { label: 'false', value: 'false' },
+          ]}
+          style={{ width: '100%' }}
+        />
+      );
+    }
+
+    if (valueType === 'NUMBER') {
+      return (
+        <InputNumber
+          value={currentValue === '' ? undefined : Number(currentValue)}
+          onChange={(v) => setDefaultValue(v == null ? '' : String(v))}
+          style={{ width: '100%' }}
+          controls
+          precision={10}
+          stringMode
+        />
+      );
+    }
+
+    if (valueType === 'JSON') {
+      return (
+        <>
+          <Input.TextArea
+            value={currentValue}
+            onChange={(e) => setDefaultValue(e.target.value)}
+            rows={8}
+            style={{ fontFamily: 'monospace', fontSize: 12 }}
+            spellCheck={false}
+          />
+          <div style={{ marginTop: 6, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Button
+              size="small"
+              icon={<FormatPainterOutlined />}
+              onClick={handleFormatJson}
+            >
+              Format JSON
+            </Button>
+            {jsonError && (
+              <Alert message={jsonError} type="error" showIcon style={{ flex: 1, padding: '2px 8px' }} />
+            )}
+          </div>
+        </>
+      );
+    }
+
+    // STRING (default)
+    return (
+      <Input.TextArea
+        value={currentValue}
+        onChange={(e) => setDefaultValue(e.target.value)}
+        rows={3}
+      />
+    );
   };
 
   const columns = [
@@ -201,18 +286,22 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
         onOk={handleSaveParameter}
         onCancel={handleCancel}
         confirmLoading={saving}
+        okButtonProps={{ disabled: !!jsonError }}
+        width={560}
       >
         {editingValue && (
           <Form layout="vertical">
             <Form.Item label="Value Type">
               <Select
                 value={editingValue.valueType || 'STRING'}
-                onChange={(value) =>
+                onChange={(value) => {
+                  setJsonError(null);
                   setEditingValue({
                     ...editingValue,
-                    valueType: value as any,
-                  })
-                }
+                    valueType: value as RemoteConfigParameterDef['valueType'],
+                    defaultValue: { value: '' },
+                  });
+                }}
                 options={[
                   { label: 'String', value: 'STRING' },
                   { label: 'Boolean', value: 'BOOLEAN' },
@@ -223,16 +312,7 @@ export const RemoteConfigManager: React.FC<RemoteConfigManagerProps> = ({ onSave
             </Form.Item>
 
             <Form.Item label="Default Value">
-              <Input.TextArea
-                value={editingValue.defaultValue?.value}
-                onChange={(e) =>
-                  setEditingValue({
-                    ...editingValue,
-                    defaultValue: { value: e.target.value },
-                  })
-                }
-                rows={3}
-              />
+              {renderValueEditor()}
             </Form.Item>
 
             <Form.Item label="Description">
